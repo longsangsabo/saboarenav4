@@ -10,44 +10,40 @@ class PlayerCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 600;
-    
     return Card(
-      margin: EdgeInsets.symmetric(
-        horizontal: isTablet ? 24 : 16, 
-        vertical: 8
-      ),
+      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: EdgeInsets.all(isTablet ? 20 : 16),
+        padding: EdgeInsets.all(16.w),
         child: Column(
           children: [
             Row(
               children: [
                 // Player Avatar
                 Container(
-                  width: isTablet ? 60 : 50,
-                  height: isTablet ? 60 : 50,
+                  width: 50.w,
+                  height: 50.h,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: Colors.grey[200],
                   ),
-                  child: player.avatarUrl != null
-                      ? ClipOval(
-                          child: Image.network(
-                            player.avatarUrl!,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Icon(
-                              Icons.person,
-                              color: Colors.grey[400],
+                  child:
+                      player.avatarUrl != null
+                          ? ClipOval(
+                            child: Image.network(
+                              player.avatarUrl!,
+                              fit: BoxFit.cover,
+                              errorBuilder:
+                                  (context, error, stackTrace) => Icon(
+                                    Icons.person,
+                                    color: Colors.grey[400],
+                                  ),
                             ),
-                          ),
-                        )
-                      : Icon(Icons.person, color: Colors.grey[400]),
+                          )
+                          : Icon(Icons.person, color: Colors.grey[400]),
                 ),
-                SizedBox(width: isTablet ? 16 : 12),
+                SizedBox(width: 12.w),
 
                 // Player Info
                 Expanded(
@@ -57,27 +53,27 @@ class PlayerCardWidget extends StatelessWidget {
                       Text(
                         player.fullName,
                         style: TextStyle(
-                          fontSize: isTablet ? 18 : 16,
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       if (player.username != null) ...[
-                        const SizedBox(height: 2),
+                        SizedBox(height: 2.h),
                         Text(
                           '@${player.username}',
                           style: TextStyle(
-                            fontSize: isTablet ? 14 : 12,
+                            fontSize: 12.sp,
                             color: Colors.grey[600],
                           ),
                         ),
                       ],
-                      const SizedBox(height: 4),
+                      SizedBox(height: 4.h),
 
                       // Skill Level Badge
                       Container(
                         padding: EdgeInsets.symmetric(
-                          horizontal: isTablet ? 10 : 8,
-                          vertical: isTablet ? 3 : 2,
+                          horizontal: 8.w,
+                          vertical: 2.h,
                         ),
                         decoration: BoxDecoration(
                           color: _getSkillLevelColor(player.skillLevel),
@@ -86,7 +82,7 @@ class PlayerCardWidget extends StatelessWidget {
                         child: Text(
                           player.skillLevelDisplay,
                           style: TextStyle(
-                            fontSize: isTablet ? 12 : 10,
+                            fontSize: 10.sp,
                             color: Colors.white,
                             fontWeight: FontWeight.w500,
                           ),
@@ -102,8 +98,8 @@ class PlayerCardWidget extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).primaryColor,
                     padding: EdgeInsets.symmetric(
-                      horizontal: isTablet ? 20 : 16,
-                      vertical: isTablet ? 12 : 8,
+                      horizontal: 16.w,
+                      vertical: 8.h,
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -112,7 +108,7 @@ class PlayerCardWidget extends StatelessWidget {
                   child: Text(
                     'Thách đấu',
                     style: TextStyle(
-                      fontSize: isTablet ? 14 : 12,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -120,7 +116,7 @@ class PlayerCardWidget extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
 
             // Player Stats
             Row(
@@ -157,16 +153,16 @@ class PlayerCardWidget extends StatelessWidget {
             ),
 
             if (player.location != null) ...[
-              const SizedBox(height: 8),
+              SizedBox(height: 8.h),
               Row(
                 children: [
-                  Icon(Icons.location_on, size: 14, color: Colors.grey[500]),
-                  const SizedBox(width: 4),
+                  Icon(Icons.location_on, size: 14.sp, color: Colors.grey[500]),
+                  SizedBox(width: 4.w),
                   Expanded(
                     child: Text(
                       player.location!,
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: 11.sp,
                         color: Colors.grey[600],
                       ),
                       overflow: TextOverflow.ellipsis,
@@ -187,13 +183,13 @@ class PlayerCardWidget extends StatelessWidget {
         Text(
           value,
           style: TextStyle(
-            fontSize: 14,
+            fontSize: 14.sp,
             fontWeight: FontWeight.w600,
             color: color,
           ),
         ),
-        const SizedBox(height: 2),
-        Text(label, style: TextStyle(fontSize: 10, color: Colors.grey[600])),
+        SizedBox(height: 2.h),
+        Text(label, style: TextStyle(fontSize: 10.sp, color: Colors.grey[600])),
       ],
     );
   }
@@ -217,17 +213,18 @@ class PlayerCardWidget extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => ChallengeModalWidget(
-        player: {
-          'name': player.fullName,
-          'username': player.username,
-          'skillLevel': player.skillLevel,
-        },
-        challengeType: 'thach_dau',
-      ),
+      builder:
+          (context) => ChallengeModalWidget(
+            player: {
+              'name': player.fullName,
+              'username': player.username,
+              'skillLevel': player.skillLevel,
+            },
+            challengeType: 'thach_dau',
+          ),
     );
   }
 }

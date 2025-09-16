@@ -13,7 +13,8 @@ class TournamentService {
     String? status,
     String? clubId,
     String? skillLevel,
-    int limit = 50,
+    int page = 1,
+    int pageSize = 15,
   }) async {
     try {
       var query = _supabase.from('tournaments').select();
@@ -28,10 +29,13 @@ class TournamentService {
         query = query.eq('skill_level_required', skillLevel);
       }
 
+      final from = (page - 1) * pageSize;
+      final to = from + pageSize - 1;
+
       final response = await query
           .eq('is_public', true)
           .order('start_date', ascending: true)
-          .limit(limit);
+          .range(from, to);
 
       return response
           .map<Tournament>((json) => Tournament.fromJson(json))

@@ -1492,7 +1492,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                 SnackBar(content: Text('✅ Đã chuyển sang ${lang['name']}')),
               );
             },
-          )).toList(),
+          )),
           SizedBox(height: 10),
         ],
       ),

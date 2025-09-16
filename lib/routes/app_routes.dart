@@ -5,7 +5,7 @@ import '../presentation/onboarding_screen/onboarding_screen.dart';
 import '../presentation/home_feed_screen/home_feed_screen.dart';
 import '../presentation/tournament_list_screen/tournament_list_screen.dart';
 import '../presentation/find_opponents_screen/find_opponents_screen.dart';
-import '../presentation/club_profile_screen/club_profile_screen.dart';
+import '../presentation/club_main_screen/club_main_screen.dart';
 import 'package:sabo_arena/presentation/user_profile_screen/user_profile_screen.dart';
 import '../presentation/tournament_detail_screen/tournament_detail_screen.dart';
 import '../presentation/login_screen.dart';
@@ -33,7 +33,7 @@ class AppRoutes {
         homeFeedScreen: (context) => const HomeFeedScreen(),
         tournamentListScreen: (context) => const TournamentListScreen(),
         findOpponentsScreen: (context) => const FindOpponentsScreen(),
-        clubProfileScreen: (context) => const ClubProfileScreen(),
+        clubProfileScreen: (context) => const ClubMainScreen(),
         userProfileScreen: (context) => const UserProfileScreen(),
         tournamentDetailScreen: (context) => const TournamentDetailScreen(),
         loginScreen: (context) => const LoginScreen(),

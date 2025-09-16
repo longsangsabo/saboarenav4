@@ -43,6 +43,15 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+
+	<!-- Location Permissions -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Ứng dụng này cần vị trí của bạn để tìm các đối thủ và câu lạc bộ ở gần.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Ứng dụng này cần vị trí của bạn trong nền để thông báo về các sự kiện ở gần.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Ứng dụng này cần vị trí của bạn để tìm đối thủ, câu lạc bộ và thông báo về các sự kiện ở gần.</string>
+
 	<key>NSAppTransportSecurity</key>
     <dict>
         <key>NSAllowsArbitraryLoads</key>

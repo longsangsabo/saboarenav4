@@ -323,4 +323,33 @@ class UserService {
       throw Exception('Failed to check follow status: $error');
     }
   }
+
+  Future<List<UserProfile>> findOpponentsNearby({
+    required double latitude,
+    required double longitude,
+    required double radiusInKm,
+  }) async {
+    try {
+      final response = await _supabase.rpc(
+        'find_nearby_users',
+        params: {
+          'current_user_id': _supabase.auth.currentUser!.id,
+          'user_lat': latitude,
+          'user_lon': longitude,
+          'radius_km': radiusInKm,
+        },
+      );
+
+      if (response is List) {
+        return response
+            .map<UserProfile>((json) => UserProfile.fromJson(json))
+            .toList();
+      }
+      return [];
+    } catch (error) {
+      // It's good practice to log the error for debugging
+      print('Error finding nearby opponents: $error');
+      throw Exception('Failed to find nearby opponents: $error');
+    }
+  }
 }
