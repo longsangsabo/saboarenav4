@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:typed_data';
 import '../models/user_profile.dart';
+import 'preferences_service.dart';
 
 class AuthService {
   static AuthService? _instance;
@@ -54,6 +55,8 @@ class AuthService {
   Future<void> signOut() async {
     try {
       await _supabase.auth.signOut();
+      // Clear remembered login info when signing out
+      await PreferencesService.instance.clearLoginInfo();
     } catch (error) {
       throw Exception('Sign out failed: $error');
     }

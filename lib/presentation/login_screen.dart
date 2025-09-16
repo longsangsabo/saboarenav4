@@ -4,6 +4,7 @@ import 'package:sizer/sizer.dart';
 import '../../core/app_export.dart';
 import '../../routes/app_routes.dart';
 import '../../services/auth_service.dart';
+import '../../services/preferences_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -18,12 +19,31 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _isPasswordVisible = false;
+  bool _rememberLogin = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedLoginInfo();
+  }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadSavedLoginInfo() async {
+    final loginInfo = await PreferencesService.instance.getValidLoginInfo();
+    if (mounted) {
+      setState(() {
+        _rememberLogin = loginInfo['remember'] ?? false;
+        if (loginInfo['isValid'] == true && loginInfo['email'] != null) {
+          _emailController.text = loginInfo['email'];
+        }
+      });
+    }
   }
 
   Future<void> _signIn() async {
@@ -35,6 +55,12 @@ class _LoginScreenState extends State<LoginScreen> {
       await AuthService.instance.signInWithEmail(
         email: _emailController.text.trim(),
         password: _passwordController.text,
+      );
+
+      // Save login info if user chose to remember
+      await PreferencesService.instance.saveLoginInfo(
+        email: _emailController.text.trim(),
+        rememberLogin: _rememberLogin,
       );
 
       if (mounted) {
@@ -169,15 +195,34 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     SizedBox(height: 2.h),
 
-                    // Forgot password
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, AppRoutes.forgotPasswordScreen);
-                        },
-                        child: Text('Quên mật khẩu?'),
-                      ),
+                    // Remember login checkbox
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: _rememberLogin,
+                          onChanged: (value) {
+                            setState(() {
+                              _rememberLogin = value ?? false;
+                            });
+                          },
+                          activeColor: theme.primaryColor,
+                        ),
+                        Expanded(
+                          child: Text(
+                            'Ghi nhớ đăng nhập',
+                            style: TextStyle(
+                              color: Colors.grey[700],
+                              fontSize: 14.sp,
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, AppRoutes.forgotPasswordScreen);
+                          },
+                          child: Text('Quên mật khẩu?'),
+                        ),
+                      ],
                     ),
 
                     SizedBox(height: 4.h),

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'dart:io';
 
 import '../../../models/user_profile.dart';
+import '../../../services/user_service.dart';
 
 class EditProfileModal extends StatefulWidget {
   final UserProfile userProfile;
@@ -29,6 +33,7 @@ class _EditProfileModalState extends State<EditProfileModal> {
 
   bool _isLoading = false;
   String? _selectedAvatarPath;
+  final ImagePicker _imagePicker = ImagePicker();
 
   @override
   void initState() {
@@ -62,13 +67,30 @@ class _EditProfileModalState extends State<EditProfileModal> {
     HapticFeedback.lightImpact();
 
     try {
+      String? avatarUrl = widget.userProfile.avatarUrl;
+      
+      // Xử lý upload ảnh nếu có ảnh mới được chọn
+      if (_selectedAvatarPath != null && _selectedAvatarPath != 'REMOVE_AVATAR') {
+        final file = File(_selectedAvatarPath!);
+        final bytes = await file.readAsBytes();
+        final fileName = file.path.split('/').last;
+        
+        // Upload ảnh lên Supabase storage
+        final uploadedUrl = await _uploadAvatar(bytes, fileName);
+        if (uploadedUrl != null) {
+          avatarUrl = uploadedUrl;
+        }
+      } else if (_selectedAvatarPath == 'REMOVE_AVATAR') {
+        avatarUrl = null;
+      }
+
       // Sử dụng copyWith để cập nhật thông tin
       final updatedProfile = widget.userProfile.copyWith(
         fullName: _displayNameController.text.trim().isEmpty ? widget.userProfile.fullName : _displayNameController.text.trim(),
         bio: _bioController.text.trim().isEmpty ? null : _bioController.text.trim(),
         phone: _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
         location: _locationController.text.trim().isEmpty ? null : _locationController.text.trim(),
-        avatarUrl: _selectedAvatarPath ?? widget.userProfile.avatarUrl,
+        avatarUrl: avatarUrl,
       );
 
       await widget.onSave(updatedProfile);
@@ -90,37 +112,226 @@ class _EditProfileModalState extends State<EditProfileModal> {
     }
   }
 
-
-
-
+  Future<String?> _uploadAvatar(List<int> bytes, String fileName) async {
+    try {
+      // Import UserService để sử dụng upload method
+      final userService = UserService.instance;
+      return await userService.uploadAvatar(bytes, fileName);
+    } catch (e) {
+      _showErrorMessage('Lỗi upload ảnh: $e');
+      return null;
+    }
+  }
 
   void _changeAvatar() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            SizedBox(height: 20),
+            Text(
+              'Thay đổi ảnh đại diện',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 30),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildImageSourceOption(
+                  icon: Icons.camera_alt,
+                  label: 'Chụp ảnh',
+                  onTap: () => _pickImageFromCamera(),
+                ),
+                _buildImageSourceOption(
+                  icon: Icons.photo_library,
+                  label: 'Chọn ảnh',
+                  onTap: () => _pickImageFromGallery(),
+                ),
+                if (widget.userProfile.avatarUrl != null)
+                  _buildImageSourceOption(
+                    icon: Icons.delete,
+                    label: 'Xóa ảnh',
+                    onTap: () => _removeAvatar(),
+                    color: Colors.red,
+                  ),
+              ],
+            ),
+            SizedBox(height: 30),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Hủy',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ),
+            SizedBox(height: 10),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImageSourceOption({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    Color? color,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: (color ?? Colors.green).withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: color ?? Colors.green, size: 30),
+          ),
+          SizedBox(height: 8),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              color: color ?? Colors.black87,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _pickImageFromCamera() async {
+    Navigator.pop(context); // Đóng bottom sheet
+    
+    try {
+      // Kiểm tra quyền camera
+      final cameraStatus = await Permission.camera.status;
+      if (cameraStatus.isDenied) {
+        final result = await Permission.camera.request();
+        if (result.isDenied) {
+          _showErrorMessage('Cần cấp quyền truy cập camera để chụp ảnh');
+          return;
+        }
+      }
+
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+
+      if (image != null) {
+        setState(() {
+          _selectedAvatarPath = image.path;
+        });
+        _showSuccessMessage('✅ Đã chọn ảnh từ camera');
+      }
+    } catch (e) {
+      _showErrorMessage('Lỗi khi chụp ảnh: $e');
+    }
+  }
+
+  Future<void> _pickImageFromGallery() async {
+    Navigator.pop(context); // Đóng bottom sheet
+    
+    try {
+      // Kiểm tra quyền truy cập thư viện ảnh
+      final photoStatus = await Permission.photos.status;
+      if (photoStatus.isDenied) {
+        final result = await Permission.photos.request();
+        if (result.isDenied) {
+          _showErrorMessage('Cần cấp quyền truy cập thư viện ảnh để chọn ảnh');
+          return;
+        }
+      }
+
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+
+      if (image != null) {
+        setState(() {
+          _selectedAvatarPath = image.path;
+        });
+        _showSuccessMessage('✅ Đã chọn ảnh từ thư viện');
+      }
+    } catch (e) {
+      _showErrorMessage('Lỗi khi chọn ảnh: $e');
+    }
+  }
+
+  void _removeAvatar() {
+    Navigator.pop(context); // Đóng bottom sheet
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Thay đổi ảnh đại diện'),
-        content: Text('Chức năng thay đổi avatar sẽ được cập nhật sớm'),
+        title: Text('Xóa ảnh đại diện'),
+        content: Text('Bạn có chắc chắn muốn xóa ảnh đại diện không?'),
         actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Hủy'),
+          ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               setState(() {
-                _selectedAvatarPath = 'mock_new_avatar_path';
+                _selectedAvatarPath = 'REMOVE_AVATAR';
               });
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('� Đã cập nhật ảnh đại diện'),
-                  backgroundColor: Colors.green,
-                ),
-              );
+              _showSuccessMessage('✅ Đã xóa ảnh đại diện');
             },
-            child: Text('Cập nhật demo'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Đóng'),
+            child: Text(
+              'Xóa',
+              style: TextStyle(color: Colors.red),
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showSuccessMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+
+  void _showErrorMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
       ),
     );
   }
@@ -194,10 +405,12 @@ class _EditProfileModalState extends State<EditProfileModal> {
                         children: [
                           CircleAvatar(
                             radius: 50,
-                            backgroundImage: widget.userProfile.avatarUrl != null
-                                ? NetworkImage(widget.userProfile.avatarUrl!)
-                                : null,
-                            child: widget.userProfile.avatarUrl == null
+                            backgroundImage: _selectedAvatarPath != null && _selectedAvatarPath != 'REMOVE_AVATAR'
+                                ? FileImage(File(_selectedAvatarPath!))
+                                : widget.userProfile.avatarUrl != null && _selectedAvatarPath != 'REMOVE_AVATAR'
+                                    ? NetworkImage(widget.userProfile.avatarUrl!)
+                                    : null,
+                            child: (_selectedAvatarPath == 'REMOVE_AVATAR' || (widget.userProfile.avatarUrl == null && _selectedAvatarPath == null))
                                 ? Icon(Icons.person, size: 50, color: Colors.grey)
                                 : null,
                           ),
@@ -389,6 +602,4 @@ class _EditProfileModalState extends State<EditProfileModal> {
       ],
     );
   }
-
-
 }

@@ -18,7 +18,7 @@ class SocialService {
           .from('posts')
           .select('''
             *,
-            user_profiles!posts_user_id_fkey (
+            users!posts_user_id_fkey (
               full_name,
               username,
               avatar_url,
@@ -30,7 +30,7 @@ class SocialService {
           .range(offset, offset + limit - 1);
 
       return response.map<Post>((json) {
-        final userProfile = json['user_profiles'];
+        final userProfile = json['users'];
         return Post(
           id: json['id'],
           userId: json['user_id'],
@@ -87,7 +87,7 @@ class SocialService {
 
       final response = await _supabase.from('posts').insert(postData).select('''
             *,
-            user_profiles!posts_user_id_fkey (
+            users!posts_user_id_fkey (
               full_name,
               username,
               avatar_url,
@@ -95,7 +95,7 @@ class SocialService {
             )
           ''').single();
 
-      final userProfile = response['user_profiles'];
+      final userProfile = response['users'];
       return Post(
         id: response['id'],
         userId: response['user_id'],
@@ -223,7 +223,7 @@ class SocialService {
           .from('posts')
           .select('''
             *,
-            user_profiles!posts_user_id_fkey (
+            users!posts_user_id_fkey (
               full_name,
               username,
               avatar_url,
@@ -236,7 +236,7 @@ class SocialService {
           .limit(limit);
 
       return response.map<Post>((json) {
-        final userProfile = json['user_profiles'];
+        final userProfile = json['users'];
         return Post(
           id: json['id'],
           userId: json['user_id'],

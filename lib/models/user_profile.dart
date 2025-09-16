@@ -5,6 +5,7 @@ class UserProfile {
   final String? username;
   final String? bio;
   final String? avatarUrl;
+  final String? coverPhotoUrl;
   final String? phone;
   final DateTime? dateOfBirth;
   final String role;
@@ -26,6 +27,7 @@ class UserProfile {
     this.username,
     this.bio,
     this.avatarUrl,
+    this.coverPhotoUrl,
     this.phone,
     this.dateOfBirth,
     required this.role,
@@ -49,6 +51,7 @@ class UserProfile {
       username: json['username'],
       bio: json['bio'],
       avatarUrl: json['avatar_url'],
+      coverPhotoUrl: json['cover_photo_url'],
       phone: json['phone'],
       dateOfBirth: json['date_of_birth'] != null
           ? DateTime.parse(json['date_of_birth'])
@@ -96,6 +99,7 @@ class UserProfile {
     String? username,
     String? bio,
     String? avatarUrl,
+    String? coverPhotoUrl,
     String? phone,
     DateTime? dateOfBirth,
     String? skillLevel,
@@ -108,6 +112,7 @@ class UserProfile {
       username: username ?? this.username,
       bio: bio ?? this.bio,
       avatarUrl: avatarUrl ?? this.avatarUrl,
+      coverPhotoUrl: coverPhotoUrl ?? this.coverPhotoUrl,
       phone: phone ?? this.phone,
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       role: role,

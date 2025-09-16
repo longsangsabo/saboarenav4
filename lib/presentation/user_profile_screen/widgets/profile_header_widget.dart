@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'dart:io';
 
 import '../../../core/app_export.dart';
+import '../../../core/utils/sabo_rank_system.dart';
 
 class ProfileHeaderWidget extends StatelessWidget {
   final Map<String, dynamic> userData;
@@ -73,7 +75,7 @@ class ProfileHeaderWidget extends StatelessWidget {
                   topLeft: Radius.circular(20),
                   topRight: Radius.circular(20),
                 ),
-                child: CustomImageWidget(
+                child: _buildImageWidget(
                   imageUrl: userData["coverPhoto"] as String? ??
                       "https://images.pexels.com/photos/1040473/pexels-photo-1040473.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
                   width: double.infinity,
@@ -88,17 +90,20 @@ class ProfileHeaderWidget extends StatelessWidget {
           Positioned(
             top: 2.h,
             right: 4.w,
-            child: Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppTheme.lightTheme.colorScheme.surface
-                    .withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: CustomIconWidget(
-                iconName: 'camera_alt',
-                color: AppTheme.lightTheme.colorScheme.primary,
-                size: 20,
+            child: GestureDetector(
+              onTap: onCoverPhotoTap,
+              child: Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppTheme.lightTheme.colorScheme.surface
+                      .withValues(alpha: 0.9),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: CustomIconWidget(
+                  iconName: 'camera_alt',
+                  color: AppTheme.lightTheme.colorScheme.primary,
+                  size: 20,
+                ),
               ),
             ),
           ),
@@ -145,7 +150,7 @@ class ProfileHeaderWidget extends StatelessWidget {
         child: Stack(
           children: [
             ClipOval(
-              child: CustomImageWidget(
+              child: _buildImageWidget(
                 imageUrl: userData["avatar"] as String? ??
                     "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png",
                 width: 20.w,
@@ -269,8 +274,11 @@ class ProfileHeaderWidget extends StatelessWidget {
   }
 
   Widget _buildRankBadge(BuildContext context) {
-    final rank = userData["rank"] as String? ?? "B";
-    final rankColor = _getRankColor(rank);
+    // Lấy ELO từ userData (ranking_points)
+    final currentElo = userData["ranking_points"] as int? ?? 1000;
+    final rank = SaboRankSystem.getRankFromElo(currentElo);
+    final rankColor = SaboRankSystem.getRankColor(rank);
+    final skillDescription = SaboRankSystem.getRankSkillDescription(rank);
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
@@ -302,9 +310,12 @@ class ProfileHeaderWidget extends StatelessWidget {
   }
 
   Widget _buildEloSection(BuildContext context) {
-    final currentElo = userData["eloRating"] as int? ?? 1450;
-    final nextRankElo = _getNextRankElo(userData["rank"] as String? ?? "B");
-    final progress = (currentElo / nextRankElo).clamp(0.0, 1.0);
+    // Lấy ELO từ ranking_points
+    final currentElo = userData["ranking_points"] as int? ?? 1000;
+    final nextRankInfo = SaboRankSystem.getNextRankInfo(currentElo);
+    final progress = SaboRankSystem.getRankProgress(currentElo);
+    final currentRank = SaboRankSystem.getRankFromElo(currentElo);
+    final skillDescription = SaboRankSystem.getRankSkillDescription(currentRank);
 
     return Container(
       padding: EdgeInsets.all(4.w),
@@ -330,13 +341,26 @@ class ProfileHeaderWidget extends StatelessWidget {
                 ),
               ),
               Text(
-                '$currentElo',
+                SaboRankSystem.formatElo(currentElo),
                 style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
                   color: AppTheme.lightTheme.colorScheme.primary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ],
+          ),
+
+          SizedBox(height: 0.5.h),
+
+          // Skill description
+          Text(
+            skillDescription,
+            style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
+              color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+              fontStyle: FontStyle.italic,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
 
           SizedBox(height: 1.h),
@@ -364,7 +388,9 @@ class ProfileHeaderWidget extends StatelessWidget {
           SizedBox(height: 0.5.h),
 
           Text(
-            'Next rank: ${nextRankElo - currentElo} points to go',
+            nextRankInfo['pointsNeeded'] > 0 
+              ? 'Next rank ${nextRankInfo['nextRank']}: ${nextRankInfo['pointsNeeded']} points to go'
+              : 'Đã đạt rank cao nhất!',
             style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
               color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
             ),
@@ -374,59 +400,40 @@ class ProfileHeaderWidget extends StatelessWidget {
     );
   }
 
-  Color _getRankColor(String rank) {
-    switch (rank.toUpperCase()) {
-      case 'A':
-        return Colors.red;
-      case 'B':
-        return Colors.orange;
-      case 'C':
-        return Colors.yellow[700]!;
-      case 'D':
-        return Colors.green;
-      case 'E':
-        return Colors.blue;
-      case 'F':
-        return Colors.indigo;
-      case 'G':
-        return Colors.purple;
-      case 'H':
-        return Colors.pink;
-      case 'I':
-        return Colors.brown;
-      case 'J':
-        return Colors.grey;
-      default:
-        return Colors.grey;
-    }
-  }
 
-  int _getNextRankElo(String rank) {
-    switch (rank.toUpperCase()) {
-      case 'K':
-        return 1200;
-      case 'J':
-        return 1300;
-      case 'I':
-        return 1400;
-      case 'H':
-        return 1500;
-      case 'G':
-        return 1600;
-      case 'F':
-        return 1700;
-      case 'E':
-        return 1800;
-      case 'D':
-        return 1900;
-      case 'C':
-        return 2000;
-      case 'B':
-        return 2200;
-      case 'A':
-        return 2500;
-      default:
-        return 1500;
+
+  Widget _buildImageWidget({
+    required String imageUrl,
+    required double width,
+    required double height,
+    BoxFit fit = BoxFit.cover,
+  }) {
+    // Check if it's a local file path
+    if (imageUrl.startsWith('/') || imageUrl.contains('\\')) {
+      // Local file path
+      return Image.file(
+        File(imageUrl),
+        width: width,
+        height: height,
+        fit: fit,
+        errorBuilder: (context, error, stackTrace) {
+          // Fallback to network image if file doesn't exist
+          return CustomImageWidget(
+            imageUrl: "https://images.pexels.com/photos/1040473/pexels-photo-1040473.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+            width: width,
+            height: height,
+            fit: fit,
+          );
+        },
+      );
+    } else {
+      // Network URL
+      return CustomImageWidget(
+        imageUrl: imageUrl,
+        width: width,
+        height: height,
+        fit: fit,
+      );
     }
   }
 }
