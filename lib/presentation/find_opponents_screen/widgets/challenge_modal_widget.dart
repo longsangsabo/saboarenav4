@@ -26,8 +26,9 @@ class _ChallengeModalWidgetState extends State<ChallengeModalWidget> {
   DateTime _selectedDate = DateTime.now().add(const Duration(hours: 1));
   TimeOfDay _selectedTime = TimeOfDay.now();
   String _selectedLocation = '';
-  String _notes = '';
+  
 
+  
   final List<String> _gameTypes = ['8-ball', '9-ball', '10-ball'];
   final List<String> _locations = [
     'Billiards Club Sài Gòn',
@@ -343,7 +344,7 @@ class _ChallengeModalWidgetState extends State<ChallengeModalWidget> {
         ),
         SizedBox(height: 1.h),
         DropdownButtonFormField<String>(
-          value: _selectedLocation,
+          initialValue: _selectedLocation,
           decoration: InputDecoration(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
@@ -391,9 +392,7 @@ class _ChallengeModalWidgetState extends State<ChallengeModalWidget> {
             ),
             contentPadding: EdgeInsets.all(3.w),
           ),
-          onChanged: (value) {
-            _notes = value;
-          },
+          
         ),
       ],
     );

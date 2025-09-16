@@ -260,8 +260,8 @@ class UserService {
           .count(CountOption.exact);
 
       return {
-        'followers': followersCount.count ?? 0,
-        'following': followingCount.count ?? 0,
+        'followers': followersCount.count,
+        'following': followingCount.count,
       };
     } catch (error) {
       throw Exception('Failed to get user follow counts: $error');

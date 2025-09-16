@@ -48,7 +48,7 @@ class _TournamentFilterBottomSheetState
             width: 10.w,
             height: 4,
             decoration: BoxDecoration(
-              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+              color: colorScheme.onSurfaceVariant.withAlpha(102),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -78,7 +78,7 @@ class _TournamentFilterBottomSheetState
             ),
           ),
 
-          Divider(height: 1, color: colorScheme.outline.withValues(alpha: 0.2)),
+          Divider(height: 1, color: colorScheme.outline.withAlpha(51)),
 
           // Filter content
           Flexible(
@@ -88,27 +88,27 @@ class _TournamentFilterBottomSheetState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Location radius
-                  _buildLocationRadiusSection(context),
+                  _buildLocationRadiusSection(context, theme, colorScheme),
 
                   SizedBox(height: 3.h),
 
                   // Entry fee range
-                  _buildEntryFeeSection(context),
+                  _buildEntryFeeSection(context, theme, colorScheme),
 
                   SizedBox(height: 3.h),
 
                   // Tournament format
-                  _buildFormatSection(context),
+                  _buildFormatSection(context, theme, colorScheme),
 
                   SizedBox(height: 3.h),
 
                   // Skill level
-                  _buildSkillLevelSection(context),
+                  _buildSkillLevelSection(context, theme, colorScheme),
 
                   SizedBox(height: 3.h),
 
                   // Additional filters
-                  _buildAdditionalFiltersSection(context),
+                  _buildAdditionalFiltersSection(context, theme),
                 ],
               ),
             ),
@@ -121,7 +121,7 @@ class _TournamentFilterBottomSheetState
               color: colorScheme.surface,
               border: Border(
                 top: BorderSide(
-                  color: colorScheme.outline.withValues(alpha: 0.2),
+                  color: colorScheme.outline.withAlpha(51),
                   width: 1,
                 ),
               ),
@@ -149,10 +149,8 @@ class _TournamentFilterBottomSheetState
     );
   }
 
-  Widget _buildLocationRadiusSection(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
+  Widget _buildLocationRadiusSection(
+      BuildContext context, ThemeData theme, ColorScheme colorScheme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -194,10 +192,8 @@ class _TournamentFilterBottomSheetState
     );
   }
 
-  Widget _buildEntryFeeSection(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
+  Widget _buildEntryFeeSection(
+      BuildContext context, ThemeData theme, ColorScheme colorScheme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -222,21 +218,21 @@ class _TournamentFilterBottomSheetState
           spacing: 2.w,
           runSpacing: 1.h,
           children: [
-            _buildFeeChip(context, 'Miễn phí', 'free'),
-            _buildFeeChip(context, 'Dưới 100k', 'under_100k'),
-            _buildFeeChip(context, '100k - 500k', '100k_500k'),
-            _buildFeeChip(context, '500k - 1M', '500k_1m'),
-            _buildFeeChip(context, 'Trên 1M', 'over_1m'),
+            _buildFeeChip(context, theme, colorScheme, 'Miễn phí', 'free'),
+            _buildFeeChip(
+                context, theme, colorScheme, 'Dưới 100k', 'under_100k'),
+            _buildFeeChip(
+                context, theme, colorScheme, '100k - 500k', '100k_500k'),
+            _buildFeeChip(context, theme, colorScheme, '500k - 1M', '500k_1m'),
+            _buildFeeChip(context, theme, colorScheme, 'Trên 1M', 'over_1m'),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildFormatSection(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
+  Widget _buildFormatSection(
+      BuildContext context, ThemeData theme, ColorScheme colorScheme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -261,19 +257,18 @@ class _TournamentFilterBottomSheetState
           spacing: 2.w,
           runSpacing: 1.h,
           children: [
-            _buildFormatChip(context, '8-Ball', '8-ball'),
-            _buildFormatChip(context, '9-Ball', '9-ball'),
-            _buildFormatChip(context, '10-Ball', '10-ball'),
+            _buildFormatChip(context, theme, colorScheme, '8-Ball', '8-ball'),
+            _buildFormatChip(context, theme, colorScheme, '9-Ball', '9-ball'),
+            _buildFormatChip(
+                context, theme, colorScheme, '10-Ball', '10-ball'),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildSkillLevelSection(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
+  Widget _buildSkillLevelSection(
+      BuildContext context, ThemeData theme, ColorScheme colorScheme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -298,20 +293,21 @@ class _TournamentFilterBottomSheetState
           spacing: 2.w,
           runSpacing: 1.h,
           children: [
-            _buildSkillChip(context, 'Mới bắt đầu', 'beginner'),
-            _buildSkillChip(context, 'Trung bình', 'intermediate'),
-            _buildSkillChip(context, 'Cao cấp', 'advanced'),
-            _buildSkillChip(context, 'Chuyên nghiệp', 'professional'),
+            _buildSkillChip(
+                context, theme, colorScheme, 'Mới bắt đầu', 'beginner'),
+            _buildSkillChip(
+                context, theme, colorScheme, 'Trung bình', 'intermediate'),
+            _buildSkillChip(
+                context, theme, colorScheme, 'Cao cấp', 'advanced'),
+            _buildSkillChip(
+                context, theme, colorScheme, 'Chuyên nghiệp', 'professional'),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildAdditionalFiltersSection(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
+  Widget _buildAdditionalFiltersSection(BuildContext context, ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -368,9 +364,8 @@ class _TournamentFilterBottomSheetState
     );
   }
 
-  Widget _buildFeeChip(BuildContext context, String label, String value) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+  Widget _buildFeeChip(BuildContext context, ThemeData theme,
+      ColorScheme colorScheme, String label, String value) {
     final isSelected =
         (_filters['entryFeeRange'] as List<String>? ?? []).contains(value);
 
@@ -390,7 +385,7 @@ class _TournamentFilterBottomSheetState
           _filters['entryFeeRange'] = feeRanges;
         });
       },
-      selectedColor: colorScheme.primary.withValues(alpha: 0.2),
+      selectedColor: colorScheme.primary.withAlpha(51),
       checkmarkColor: colorScheme.primary,
       labelStyle: theme.textTheme.labelMedium?.copyWith(
         color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
@@ -398,9 +393,8 @@ class _TournamentFilterBottomSheetState
     );
   }
 
-  Widget _buildFormatChip(BuildContext context, String label, String value) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+  Widget _buildFormatChip(BuildContext context, ThemeData theme,
+      ColorScheme colorScheme, String label, String value) {
     final isSelected =
         (_filters['formats'] as List<String>? ?? []).contains(value);
 
@@ -419,7 +413,7 @@ class _TournamentFilterBottomSheetState
           _filters['formats'] = formats;
         });
       },
-      selectedColor: colorScheme.primary.withValues(alpha: 0.2),
+      selectedColor: colorScheme.primary.withAlpha(51),
       checkmarkColor: colorScheme.primary,
       labelStyle: theme.textTheme.labelMedium?.copyWith(
         color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
@@ -427,9 +421,8 @@ class _TournamentFilterBottomSheetState
     );
   }
 
-  Widget _buildSkillChip(BuildContext context, String label, String value) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+  Widget _buildSkillChip(BuildContext context, ThemeData theme,
+      ColorScheme colorScheme, String label, String value) {
     final isSelected =
         (_filters['skillLevels'] as List<String>? ?? []).contains(value);
 
@@ -448,7 +441,7 @@ class _TournamentFilterBottomSheetState
           _filters['skillLevels'] = skillLevels;
         });
       },
-      selectedColor: colorScheme.primary.withValues(alpha: 0.2),
+      selectedColor: colorScheme.primary.withAlpha(51),
       checkmarkColor: colorScheme.primary,
       labelStyle: theme.textTheme.labelMedium?.copyWith(
         color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
@@ -472,6 +465,6 @@ class _TournamentFilterBottomSheetState
 
   void _applyFilters() {
     widget.onFiltersApplied(_filters);
-    Navigator.of(context).pop();
+    Navigator.pop(context);
   }
 }

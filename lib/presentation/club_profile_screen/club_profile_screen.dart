@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
-import '../../widgets/custom_bottom_bar.dart';
-import '../../widgets/custom_icon_widget.dart';
+
 import './widgets/club_header_widget.dart';
 import './widgets/club_info_section_widget.dart';
 import './widgets/club_members_widget.dart';
@@ -278,9 +277,72 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
           ),
         ],
       ),
-      bottomNavigationBar: CustomBottomBar(
-        currentRoute: '/club-profile-screen',
-        onTap: _handleBottomNavTap,
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border(
+              top: BorderSide(
+                color: Colors.grey.withOpacity(0.2),
+                width: 1,
+              ),
+            ),
+          ),
+          child: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            currentIndex: 3, // Club tab
+            selectedItemColor: Colors.green,
+            unselectedItemColor: Colors.grey,
+            backgroundColor: Colors.white,
+            elevation: 0,
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              _handleBottomNavTap(AppRoutes.homeFeedScreen);
+              break;
+            case 1:
+              _handleBottomNavTap(AppRoutes.findOpponentsScreen);
+              break;
+            case 2:
+              _handleBottomNavTap(AppRoutes.tournamentListScreen);
+              break;
+            case 3:
+              // Already on club
+              break;
+            case 4:
+              _handleBottomNavTap(AppRoutes.userProfileScreen);
+              break;
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined),
+            activeIcon: Icon(Icons.home),
+            label: 'Trang chủ',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.people_outline),
+            activeIcon: Icon(Icons.people),
+            label: 'Đối thủ',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.emoji_events_outlined),
+            activeIcon: Icon(Icons.emoji_events),
+            label: 'Giải đấu',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.business_outlined),
+            activeIcon: Icon(Icons.business),
+            label: 'Câu lạc bộ',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            activeIcon: Icon(Icons.person),
+            label: 'Cá nhân',
+          ),
+        ],
+          ),
+        ),
       ),
     );
   }
@@ -522,12 +584,8 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
   }
 
   void _handleBottomNavTap(String route) {
-    if (route != '/club-profile-screen') {
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        route,
-        (route) => false,
-      );
+    if (route != AppRoutes.clubProfileScreen) {
+      Navigator.pushReplacementNamed(context, route);
     }
   }
 }

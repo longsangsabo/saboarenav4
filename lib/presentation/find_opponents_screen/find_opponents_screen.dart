@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:sizer/sizer.dart';
 
-import '../../core/app_export.dart';
 import '../../models/user_profile.dart';
 import '../../services/user_service.dart';
-import '../../theme/app_theme.dart';
+import '../../routes/app_routes.dart';
+
 import './widgets/filter_bottom_sheet.dart';
 import './widgets/map_view_widget.dart';
 import './widgets/player_card_widget.dart';
@@ -79,64 +78,10 @@ class _FindOpponentsScreenState extends State<FindOpponentsScreen> {
     );
   }
 
-  void _showQRScanner() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => Scaffold(
-          appBar: AppBar(
-            title: Text('Quét mã QR'),
-            backgroundColor: Colors.black,
-            foregroundColor: Colors.white,
-          ),
-          body: MobileScanner(
-            onDetect: (capture) {
-              final List<Barcode> barcodes = capture.barcodes;
-              for (final barcode in barcodes) {
-                if (barcode.rawValue != null) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Đã quét: ${barcode.rawValue}'),
-                    ),
-                  );
-                  break;
-                }
-              }
-            },
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _viewProfile(Map<String, dynamic> player) {
-    Navigator.pushNamed(context, '/user-profile-screen');
-  }
-
-  void _sendMessage(Map<String, dynamic> player) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Đã mở cuộc trò chuyện với ${player["name"]}'),
-        backgroundColor: AppTheme.successLight,
-      ),
-    );
-  }
-
-  void _addFriend(Map<String, dynamic> player) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Đã gửi lời mời kết bạn đến ${player["name"]}'),
-        backgroundColor: AppTheme.successLight,
-      ),
-    );
-  }
-
-  Future<void> _refreshPlayers() async {
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() {
-      // Simulate refreshing data
-    });
+  void _handleNavigation(String route) {
+    if (route != AppRoutes.findOpponentsScreen) {
+      Navigator.pushReplacementNamed(context, route);
+    }
   }
 
   @override
@@ -178,6 +123,75 @@ class _FindOpponentsScreenState extends State<FindOpponentsScreen> {
                           );
                         },
                       ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.3),
+                spreadRadius: 1,
+                blurRadius: 5,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
+          child: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            currentIndex: 1, // Find opponents tab
+            selectedItemColor: Colors.green,
+            unselectedItemColor: Colors.grey,
+            backgroundColor: Colors.white,
+            elevation: 0,
+            onTap: (index) {
+              switch (index) {
+                case 0:
+                  _handleNavigation(AppRoutes.homeFeedScreen);
+                  break;
+                case 1:
+                  // Already on find opponents
+                  break;
+                case 2:
+                  _handleNavigation(AppRoutes.tournamentListScreen);
+                  break;
+                case 3:
+                  _handleNavigation(AppRoutes.clubProfileScreen);
+                  break;
+                case 4:
+                  _handleNavigation(AppRoutes.userProfileScreen);
+                  break;
+              }
+            },
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home_outlined),
+                activeIcon: Icon(Icons.home),
+                label: 'Trang chủ',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.people_outline),
+                activeIcon: Icon(Icons.people),
+                label: 'Đối thủ',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.emoji_events_outlined),
+                activeIcon: Icon(Icons.emoji_events),
+                label: 'Giải đấu',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.business_outlined),
+                activeIcon: Icon(Icons.business),
+                label: 'Câu lạc bộ',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person_outline),
+                activeIcon: Icon(Icons.person),
+                label: 'Cá nhân',
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

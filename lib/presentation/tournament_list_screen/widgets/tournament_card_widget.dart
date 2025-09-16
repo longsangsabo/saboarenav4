@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:sizer/sizer.dart';
 
 import '../../../core/app_export.dart';
 import '../../../models/tournament.dart';
@@ -17,7 +16,7 @@ class TournamentCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
@@ -28,7 +27,7 @@ class TournamentCardWidget extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: EdgeInsets.all(16.w),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -37,8 +36,8 @@ class TournamentCardWidget extends StatelessWidget {
                 children: [
                   // Tournament Cover Image
                   Container(
-                    width: 80.w,
-                    height: 60.h,
+                    width: 80,
+                    height: 60,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
                       color: Colors.grey[200],
@@ -55,7 +54,7 @@ class TournamentCardWidget extends StatelessWidget {
                           )
                         : Icon(Icons.emoji_events, color: Colors.grey[400]),
                   ),
-                  SizedBox(width: 12.w),
+                  const SizedBox(width: 12),
 
                   // Tournament Info
                   Expanded(
@@ -64,30 +63,30 @@ class TournamentCardWidget extends StatelessWidget {
                       children: [
                         Text(
                           tournament.title,
-                          style: TextStyle(
-                            fontSize: 16.sp,
+                          style: const TextStyle(
+                            fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        SizedBox(height: 4.h),
+                        const SizedBox(height: 4),
                         Text(
                           tournament.description,
                           style: TextStyle(
-                            fontSize: 12.sp,
+                            fontSize: 12,
                             color: Colors.grey[600],
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        SizedBox(height: 8.h),
+                        const SizedBox(height: 8),
 
                         // Status Badge
                         Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 8.w,
-                            vertical: 4.h,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
                           ),
                           decoration: BoxDecoration(
                             color: _getStatusColor(tournament.status),
@@ -95,8 +94,8 @@ class TournamentCardWidget extends StatelessWidget {
                           ),
                           child: Text(
                             _getStatusText(tournament.status),
-                            style: TextStyle(
-                              fontSize: 10.sp,
+                            style: const TextStyle(
+                              fontSize: 10,
                               color: Colors.white,
                               fontWeight: FontWeight.w500,
                             ),
@@ -108,7 +107,7 @@ class TournamentCardWidget extends StatelessWidget {
                 ],
               ),
 
-              SizedBox(height: 12.h),
+              const SizedBox(height: 12),
 
               // Tournament Details
               Row(
@@ -128,7 +127,7 @@ class TournamentCardWidget extends StatelessWidget {
                 ],
               ),
 
-              SizedBox(height: 8.h),
+              const SizedBox(height: 8),
 
               Row(
                 children: [
@@ -152,10 +151,10 @@ class TournamentCardWidget extends StatelessWidget {
               ),
 
               if (tournament.prizePool > 0) ...[
-                SizedBox(height: 8.h),
+                const SizedBox(height: 8),
                 Container(
                   width: double.infinity,
-                  padding: EdgeInsets.symmetric(vertical: 6.h),
+                  padding: const EdgeInsets.symmetric(vertical: 6),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [Colors.amber[100]!, Colors.amber[50]!],
@@ -166,7 +165,7 @@ class TournamentCardWidget extends StatelessWidget {
                     '🏆 Giải thưởng: ${tournament.prizePool.toStringAsFixed(0)}đ',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 12.sp,
+                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: Colors.amber[800],
                     ),
@@ -184,13 +183,13 @@ class TournamentCardWidget extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 14.sp, color: Colors.grey[600]),
-        SizedBox(width: 4.w),
+        Icon(icon, size: 14, color: Colors.grey[600]),
+        const SizedBox(width: 4),
         Flexible(
           child: Text(
             text,
             style: TextStyle(
-              fontSize: 11.sp,
+              fontSize: 11,
               color: Colors.grey[700],
             ),
             overflow: TextOverflow.ellipsis,

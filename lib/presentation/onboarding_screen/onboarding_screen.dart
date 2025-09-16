@@ -308,12 +308,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.purple.withOpacity(0.3),
+                  color: Colors.purple.withAlpha(77),
                   blurRadius: 20,
                   spreadRadius: 5,
                 ),
                 BoxShadow(
-                  color: Colors.blue.withOpacity(0.2),
+                  color: Colors.blue.withAlpha(51),
                   blurRadius: 15,
                   spreadRadius: 3,
                 ),
@@ -348,7 +348,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: Colors.cyan.withOpacity(0.5),
+                        color: Colors.cyan.withAlpha(128),
                         width: 1,
                       ),
                     ),

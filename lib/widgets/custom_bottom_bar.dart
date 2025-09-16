@@ -77,15 +77,19 @@ class CustomBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.bottomNavigationBarTheme.backgroundColor ?? colorScheme.surface,
+        color: Colors.white,
+        border: Border(
+          top: BorderSide(
+            color: Colors.grey.withOpacity(0.2),
+            width: 1,
+          ),
+        ),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: 0.1),
+            color: Colors.black.withOpacity(0.1),
             blurRadius: 8,
             offset: const Offset(0, -2),
           ),
@@ -93,8 +97,8 @@ class CustomBottomBar extends StatelessWidget {
       ),
       child: SafeArea(
         child: Container(
-          height: 60,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
+          height: 80,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: _defaultItems.map((item) {

@@ -174,7 +174,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       alignment: Alignment.centerRight,
                       child: TextButton(
                         onPressed: () {
-                          Navigator.pushNamed(context, '/forgot-password');
+                          Navigator.pushNamed(context, AppRoutes.loginScreen);
                         },
                         child: Text('Quên mật khẩu?'),
                       ),
@@ -217,7 +217,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         Text('Chưa có tài khoản? '),
                         TextButton(
                           onPressed: () {
-                            Navigator.pushNamed(context, '/signup');
+                            Navigator.pushNamed(context, AppRoutes.registerScreen);
                           },
                           child: Text('Đăng ký ngay'),
                         ),

@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import '../../routes/app_routes.dart';
 import '../../services/auth_service.dart';
 
-class SignupScreen extends StatefulWidget {
-  const SignupScreen({super.key});
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -47,7 +48,7 @@ class _SignupScreenState extends State<SignupScreen> {
         if (response.session != null && response.user != null) {
           // User is logged in immediately, go to home
           Navigator.of(context).pushNamedAndRemoveUntil(
-            '/home_feed_screen',
+            AppRoutes.homeFeedScreen,
             (route) => false,
           );
         } else {
@@ -279,7 +280,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                     // Role selection
                     DropdownButtonFormField<String>(
-                      value: _selectedRole,
+                      initialValue: _selectedRole,
                       decoration: InputDecoration(
                         labelText: 'Vai trò',
                         prefixIcon: const Icon(Icons.assignment_ind_outlined),

@@ -274,7 +274,6 @@ class CustomTabBar extends StatelessWidget {
     bool showIcon = false,
   }) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     final children = <Widget>[];
 
@@ -364,7 +363,7 @@ class CustomTabBar extends StatelessWidget {
     final displayCount = count > 99 ? '99+' : count.toString();
 
     return Container(
-      min: 16,
+      constraints: const BoxConstraints(minWidth: 16),
       height: 16,
       padding: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(

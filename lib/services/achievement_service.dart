@@ -126,8 +126,8 @@ class AchievementService {
           .count(CountOption.exact);
 
       return {
-        'unlocked': earnedResponse.count ?? 0,
-        'total': totalResponse.count ?? 0,
+        'unlocked_count': earnedResponse.count,
+        'total_count': totalResponse.count,
       };
     } catch (error) {
       throw Exception('Failed to get achievement stats: $error');

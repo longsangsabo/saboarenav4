@@ -20,7 +20,7 @@ class OnboardingTestScreen extends StatelessWidget {
         );
         
         // Navigate to splash to restart flow
-        Navigator.of(context).pushReplacementNamed(AppRoutes.splash);
+        Navigator.of(context).pushReplacementNamed(AppRoutes.splashScreen);
       }
     } catch (e) {
       if (context.mounted) {
