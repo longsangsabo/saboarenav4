@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
+// Removed Sizer dependency
+import '../../../core/layout/responsive.dart';
 
 import '../../../core/app_export.dart';
 
@@ -14,8 +15,8 @@ class TournamentRulesWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 4.w),
-      padding: EdgeInsets.all(4.w),
+      margin: const EdgeInsets.symmetric(horizontal: Gaps.xl),
+      padding: const EdgeInsets.all(Gaps.xl),
       decoration: BoxDecoration(
         color: AppTheme.lightTheme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
@@ -38,7 +39,7 @@ class TournamentRulesWidget extends StatelessWidget {
                 color: AppTheme.lightTheme.colorScheme.primary,
                 size: 24,
               ),
-              SizedBox(width: 2.w),
+              const SizedBox(width: Gaps.md),
               Text(
                 'Luật thi đấu',
                 style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
@@ -47,22 +48,22 @@ class TournamentRulesWidget extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 2.h),
+          const SizedBox(height: Gaps.lg),
           ...rules.asMap().entries.map((entry) {
             final index = entry.key;
             final rule = entry.value;
 
             return Container(
-              margin: EdgeInsets.only(bottom: 1.5.h),
+              margin: const EdgeInsets.only(bottom: Gaps.md),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    width: 6.w,
-                    height: 6.w,
+                    width: 36,
+                    height: 36,
                     decoration: BoxDecoration(
                       color: AppTheme.lightTheme.colorScheme.primary,
-                      borderRadius: BorderRadius.circular(3.w),
+                      borderRadius: BorderRadius.circular(18),
                     ),
                     child: Center(
                       child: Text(
@@ -75,7 +76,7 @@ class TournamentRulesWidget extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(width: 3.w),
+                  const SizedBox(width: Gaps.md),
                   Expanded(
                     child: Text(
                       rule,

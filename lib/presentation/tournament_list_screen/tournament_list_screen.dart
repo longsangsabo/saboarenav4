@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
+// Removed Sizer; using custom responsive & spacing utilities
+import '../../core/layout/responsive.dart';
 
 import '../../services/tournament_service.dart';
 import '../../models/tournament.dart';
@@ -79,7 +80,10 @@ class _TournamentListScreenState extends State<TournamentListScreen>
       appBar: AppBar(
         title: Text(
           'Giải đấu',
-          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            fontSize: scaledFont(context, 18),
+            fontWeight: FontWeight.w600,
+          ),
         ),
         actions: [
           IconButton(
@@ -92,8 +96,8 @@ class _TournamentListScreenState extends State<TournamentListScreen>
                             .map(
                               (t) => {
                                 'title': t.title,
-                                'clubName': t.clubName ?? '',
-                                'format': t.format ?? '',
+                                'clubName': t.clubName,
+                                'format': t.format,
                                 'coverImage': t.coverImage ?? '',
                                 'entryFee': t.entryFee.toString(),
                               },
@@ -120,14 +124,14 @@ class _TournamentListScreenState extends State<TournamentListScreen>
                 : _tournaments.isEmpty
                 ? _buildEmptyState()
                 : ListView.builder(
-                  padding: EdgeInsets.only(top: 8.h, bottom: 80.h),
-                  itemCount: _tournaments.length,
-                  itemBuilder: (context, index) {
-                    return TournamentCardWidget(
-                      tournament: _tournaments[index],
-                    );
-                  },
-                ),
+                    padding: const EdgeInsets.only(top: Gaps.lg, bottom: 120),
+                    itemCount: _tournaments.length,
+                    itemBuilder: (context, index) {
+                      return TournamentCardWidget(
+                        tournament: _tournaments[index],
+                      );
+                    },
+                  ),
       ),
     );
   }
@@ -135,32 +139,39 @@ class _TournamentListScreenState extends State<TournamentListScreen>
   Widget _buildEmptyState() {
     return Center(
       child: Padding(
-        padding: EdgeInsets.all(32.w),
+        padding: const EdgeInsets.all(Gaps.xxl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               Icons.emoji_events_outlined,
-              size: 64.sp,
+              size: 72,
               color: Colors.grey[400],
             ),
-            SizedBox(height: 16.h),
+            const SizedBox(height: Gaps.xl),
             Text(
               'Không tìm thấy giải đấu',
               style: TextStyle(
-                fontSize: 16.sp,
+                fontSize: scaledFont(context, 16),
                 fontWeight: FontWeight.w500,
                 color: Colors.grey[600],
               ),
             ),
-            SizedBox(height: 8.h),
+            const SizedBox(height: Gaps.md),
             Text(
               'Thử thay đổi bộ lọc hoặc tìm kiếm với từ khóa khác',
-              style: TextStyle(fontSize: 14.sp, color: Colors.grey[500]),
+              style: TextStyle(
+                fontSize: scaledFont(context, 14),
+                color: Colors.grey[500],
+              ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 24.h),
-            ElevatedButton(onPressed: _loadTournaments, child: Text('Tải lại')),
+            const SizedBox(height: Gaps.xxl),
+            ElevatedButton(
+              onPressed: _loadTournaments,
+              child: const Text('Tải lại'),
+            ),
           ],
         ),
       ),

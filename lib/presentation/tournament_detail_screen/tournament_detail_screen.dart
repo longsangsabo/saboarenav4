@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
+// Removed Sizer dependency
+import '../../core/layout/responsive.dart';
 
 import '../../core/app_export.dart';
 import '../../widgets/custom_bottom_bar.dart';
@@ -305,14 +306,14 @@ Giải đấu được tổ chức tại Câu lạc bộ Billiards Sài Gòn v�
 
   Widget _buildOverviewTab() {
     return SingleChildScrollView(
-      padding: EdgeInsets.only(bottom: 2.h),
+  padding: const EdgeInsets.only(bottom: Gaps.lg),
       child: Column(
         children: [
-          SizedBox(height: 2.h),
+          const SizedBox(height: Gaps.lg),
           TournamentInfoWidget(tournament: _tournamentData),
-          SizedBox(height: 2.h),
+          const SizedBox(height: Gaps.lg),
           PrizePoolWidget(tournament: _tournamentData),
-          SizedBox(height: 2.h),
+          const SizedBox(height: Gaps.lg),
           RegistrationWidget(
             tournament: _tournamentData,
             isRegistered: _isRegistered,
@@ -326,10 +327,10 @@ Giải đấu được tổ chức tại Câu lạc bộ Billiards Sài Gòn v�
 
   Widget _buildBracketTab() {
     return SingleChildScrollView(
-      padding: EdgeInsets.only(bottom: 2.h),
+  padding: const EdgeInsets.only(bottom: Gaps.lg),
       child: Column(
         children: [
-          SizedBox(height: 2.h),
+          const SizedBox(height: Gaps.lg),
           TournamentBracketWidget(
             tournament: _tournamentData,
             bracketData: _bracketData,
@@ -341,10 +342,10 @@ Giải đấu được tổ chức tại Câu lạc bộ Billiards Sài Gòn v�
 
   Widget _buildParticipantsTab() {
     return SingleChildScrollView(
-      padding: EdgeInsets.only(bottom: 2.h),
+  padding: const EdgeInsets.only(bottom: Gaps.lg),
       child: Column(
         children: [
-          SizedBox(height: 2.h),
+          const SizedBox(height: Gaps.lg),
           ParticipantsListWidget(
             participants: _participantsData,
             onViewAllTap: _handleViewAllParticipants,
@@ -356,10 +357,10 @@ Giải đấu được tổ chức tại Câu lạc bộ Billiards Sài Gòn v�
 
   Widget _buildRulesTab() {
     return SingleChildScrollView(
-      padding: EdgeInsets.only(bottom: 2.h),
+  padding: const EdgeInsets.only(bottom: Gaps.lg),
       child: Column(
         children: [
-          SizedBox(height: 2.h),
+          const SizedBox(height: Gaps.lg),
           TournamentRulesWidget(rules: _tournamentRules),
         ],
       ),
@@ -458,29 +459,29 @@ Giải đấu được tổ chức tại Câu lạc bộ Billiards Sài Gòn v�
         color: AppTheme.lightTheme.colorScheme.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      padding: EdgeInsets.all(4.w),
+  padding: const EdgeInsets.all(Gaps.xl),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 12.w,
-            height: 0.5.h,
+            width: 70,
+            height: 4,
             decoration: BoxDecoration(
               color: AppTheme.lightTheme.colorScheme.outline
                   .withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          SizedBox(height: 2.h),
+          const SizedBox(height: Gaps.lg),
           Text(
             'Xác nhận đăng ký',
             style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 2.h),
+          const SizedBox(height: Gaps.lg),
           Container(
-            padding: EdgeInsets.all(4.w),
+            padding: const EdgeInsets.all(Gaps.lg),
             decoration: BoxDecoration(
               color: AppTheme.lightTheme.colorScheme.primary
                   .withValues(alpha: 0.1),
@@ -505,7 +506,7 @@ Giải đấu được tổ chức tại Câu lạc bộ Billiards Sài Gòn v�
                     ),
                   ],
                 ),
-                SizedBox(height: 1.h),
+                const SizedBox(height: Gaps.sm),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -519,7 +520,7 @@ Giải đấu được tổ chức tại Câu lạc bộ Billiards Sài Gòn v�
                     ),
                   ],
                 ),
-                Divider(height: 2.h),
+                const Divider(height: Gaps.lg),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -543,7 +544,7 @@ Giải đấu được tổ chức tại Câu lạc bộ Billiards Sài Gòn v�
               ],
             ),
           ),
-          SizedBox(height: 2.h),
+          const SizedBox(height: Gaps.lg),
           Row(
             children: [
               Expanded(
@@ -552,7 +553,7 @@ Giải đấu được tổ chức tại Câu lạc bộ Billiards Sài Gòn v�
                   child: Text('Hủy'),
                 ),
               ),
-              SizedBox(width: 4.w),
+              const SizedBox(width: Gaps.lg),
               Expanded(
                 flex: 2,
                 child: ElevatedButton(
@@ -593,7 +594,7 @@ Giải đấu được tổ chức tại Câu lạc bộ Billiards Sài Gòn v�
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        height: 80.h,
+  height: 600,
         decoration: BoxDecoration(
           color: AppTheme.lightTheme.colorScheme.surface,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
@@ -601,19 +602,19 @@ Giải đấu được tổ chức tại Câu lạc bộ Billiards Sài Gòn v�
         child: Column(
           children: [
             Container(
-              padding: EdgeInsets.all(4.w),
+              padding: const EdgeInsets.all(Gaps.xl),
               child: Column(
                 children: [
                   Container(
-                    width: 12.w,
-                    height: 0.5.h,
+                    width: 70,
+                    height: 4,
                     decoration: BoxDecoration(
                       color: AppTheme.lightTheme.colorScheme.outline
                           .withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                  SizedBox(height: 2.h),
+                  const SizedBox(height: Gaps.lg),
                   Text(
                     'Danh sách tham gia (${_participantsData.length})',
                     style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
@@ -625,13 +626,13 @@ Giải đấu được tổ chức tại Câu lạc bộ Billiards Sài Gòn v�
             ),
             Expanded(
               child: ListView.builder(
-                padding: EdgeInsets.symmetric(horizontal: 4.w),
+                padding: const EdgeInsets.symmetric(horizontal: Gaps.xl),
                 itemCount: _participantsData.length,
                 itemBuilder: (context, index) {
                   final participant = _participantsData[index];
                   return Container(
-                    margin: EdgeInsets.only(bottom: 1.h),
-                    padding: EdgeInsets.all(3.w),
+                    margin: const EdgeInsets.only(bottom: Gaps.sm),
+                    padding: const EdgeInsets.all(Gaps.lg),
                     decoration: BoxDecoration(
                       color: AppTheme.lightTheme.colorScheme.surface,
                       borderRadius: BorderRadius.circular(8),
@@ -651,24 +652,24 @@ Giải đấu được tổ chức tại Câu lạc bộ Billiards Sài Gòn v�
                             color: AppTheme.lightTheme.colorScheme.primary,
                           ),
                         ),
-                        SizedBox(width: 3.w),
+                        const SizedBox(width: Gaps.md),
                         Container(
-                          width: 12.w,
-                          height: 12.w,
+                          width: 54,
+                          height: 54,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(6.w),
+                            borderRadius: BorderRadius.circular(27),
                           ),
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(6.w),
+                            borderRadius: BorderRadius.circular(27),
                             child: CustomImageWidget(
                               imageUrl: participant["avatar"] as String,
-                              width: 12.w,
-                              height: 12.w,
+                              width: 54,
+                              height: 54,
                               fit: BoxFit.cover,
                             ),
                           ),
                         ),
-                        SizedBox(width: 3.w),
+                        const SizedBox(width: Gaps.md),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,

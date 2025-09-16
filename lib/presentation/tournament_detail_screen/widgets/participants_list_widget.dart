@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
+// Removed Sizer dependency
+import '../../../core/layout/responsive.dart';
 
 import '../../../core/app_export.dart';
 
@@ -18,8 +19,8 @@ class ParticipantsListWidget extends StatelessWidget {
     final displayParticipants = participants.take(6).toList();
 
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 4.w),
-      padding: EdgeInsets.all(4.w),
+      margin: const EdgeInsets.symmetric(horizontal: Gaps.xl),
+      padding: const EdgeInsets.all(Gaps.xl),
       decoration: BoxDecoration(
         color: AppTheme.lightTheme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
@@ -45,7 +46,7 @@ class ParticipantsListWidget extends StatelessWidget {
                     color: AppTheme.lightTheme.colorScheme.primary,
                     size: 24,
                   ),
-                  SizedBox(width: 2.w),
+                  const SizedBox(width: Gaps.md),
                   Text(
                     'Danh sách tham gia',
                     style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
@@ -66,13 +67,13 @@ class ParticipantsListWidget extends StatelessWidget {
                 ),
             ],
           ),
-          SizedBox(height: 2.h),
+          const SizedBox(height: Gaps.lg),
           ...displayParticipants
               .map((participant) => _buildParticipantItem(participant)),
           if (participants.length > 6)
             Container(
-              margin: EdgeInsets.only(top: 1.h),
-              padding: EdgeInsets.all(3.w),
+              margin: const EdgeInsets.only(top: Gaps.sm),
+              padding: const EdgeInsets.all(Gaps.lg),
               decoration: BoxDecoration(
                 color: AppTheme.lightTheme.colorScheme.primary
                     .withValues(alpha: 0.1),
@@ -98,8 +99,8 @@ class ParticipantsListWidget extends StatelessWidget {
 
   Widget _buildParticipantItem(Map<String, dynamic> participant) {
     return Container(
-      margin: EdgeInsets.only(bottom: 1.5.h),
-      padding: EdgeInsets.all(3.w),
+      margin: const EdgeInsets.only(bottom: Gaps.md),
+      padding: const EdgeInsets.all(Gaps.lg),
       decoration: BoxDecoration(
         color: AppTheme.lightTheme.colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
@@ -111,26 +112,26 @@ class ParticipantsListWidget extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 12.w,
-            height: 12.w,
+            width: 54,
+            height: 54,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(6.w),
+              borderRadius: BorderRadius.circular(27),
               border: Border.all(
                 color: _getRankColor(participant["rank"] as String),
                 width: 2,
               ),
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(6.w),
+              borderRadius: BorderRadius.circular(27),
               child: CustomImageWidget(
                 imageUrl: participant["avatar"] as String,
-                width: 12.w,
-                height: 12.w,
+                width: 54,
+                height: 54,
                 fit: BoxFit.cover,
               ),
             ),
           ),
-          SizedBox(width: 3.w),
+          const SizedBox(width: Gaps.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -143,12 +144,12 @@ class ParticipantsListWidget extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(height: 0.5.h),
+                const SizedBox(height: 2),
                 Row(
                   children: [
                     Container(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 2.w, vertical: 0.5.h),
+            padding: const EdgeInsets.symmetric(
+              horizontal: Gaps.md, vertical: 2),
                       decoration: BoxDecoration(
                         color: _getRankColor(participant["rank"] as String),
                         borderRadius: BorderRadius.circular(4),
@@ -162,7 +163,7 @@ class ParticipantsListWidget extends StatelessWidget {
                         ),
                       ),
                     ),
-                    SizedBox(width: 2.w),
+                    const SizedBox(width: Gaps.md),
                     Text(
                       '${participant["elo"]} ELO',
                       style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(

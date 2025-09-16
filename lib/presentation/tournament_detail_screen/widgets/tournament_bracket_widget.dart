@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
+// Removed Sizer dependency
+import '../../../core/layout/responsive.dart';
 
 import '../../../core/app_export.dart';
 
@@ -18,8 +19,8 @@ class TournamentBracketWidget extends StatelessWidget {
     final eliminationType = tournament["eliminationType"] as String;
 
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 4.w),
-      padding: EdgeInsets.all(4.w),
+      margin: const EdgeInsets.symmetric(horizontal: Gaps.xl),
+      padding: const EdgeInsets.all(Gaps.xl),
       decoration: BoxDecoration(
         color: AppTheme.lightTheme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
@@ -42,7 +43,7 @@ class TournamentBracketWidget extends StatelessWidget {
                 color: AppTheme.lightTheme.colorScheme.primary,
                 size: 24,
               ),
-              SizedBox(width: 2.w),
+              const SizedBox(width: Gaps.md),
               Text(
                 'Bảng đấu',
                 style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
@@ -51,7 +52,10 @@ class TournamentBracketWidget extends StatelessWidget {
               ),
               const Spacer(),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: Gaps.lg,
+                  vertical: Gaps.sm,
+                ),
                 decoration: BoxDecoration(
                   color: AppTheme.lightTheme.colorScheme.primary
                       .withValues(alpha: 0.1),
@@ -67,7 +71,7 @@ class TournamentBracketWidget extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 2.h),
+          const SizedBox(height: Gaps.lg),
           if (bracketData.isNotEmpty)
             _buildBracketTree()
           else
@@ -81,11 +85,11 @@ class TournamentBracketWidget extends StatelessWidget {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Container(
-        padding: EdgeInsets.all(2.w),
+        padding: const EdgeInsets.all(Gaps.md),
         child: Column(
           children: [
             _buildRoundHeader(),
-            SizedBox(height: 2.h),
+            const SizedBox(height: Gaps.lg),
             _buildBracketRounds(),
           ],
         ),
@@ -99,8 +103,8 @@ class TournamentBracketWidget extends StatelessWidget {
     return Row(
       children: rounds
           .map((round) => Container(
-                width: 45.w,
-                margin: EdgeInsets.only(right: 4.w),
+                width: 260,
+                margin: const EdgeInsets.only(right: Gaps.xl),
                 child: Text(
                   round,
                   textAlign: TextAlign.center,
@@ -128,8 +132,8 @@ class TournamentBracketWidget extends StatelessWidget {
 
   Widget _buildRound(List<Map<String, dynamic>> matches, int roundIndex) {
     return Container(
-      width: 45.w,
-      margin: EdgeInsets.only(right: 4.w),
+      width: 260,
+      margin: const EdgeInsets.only(right: Gaps.xl),
       child: Column(
         children:
             matches.map((match) => _buildMatchCard(match, roundIndex)).toList(),
@@ -144,7 +148,7 @@ class TournamentBracketWidget extends StatelessWidget {
     final status = match["status"] as String;
 
     return Container(
-      margin: EdgeInsets.only(bottom: 2.h),
+  margin: const EdgeInsets.only(bottom: Gaps.lg),
       decoration: BoxDecoration(
         color: AppTheme.lightTheme.colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
@@ -157,18 +161,18 @@ class TournamentBracketWidget extends StatelessWidget {
         children: [
           if (player1 != null)
             _buildPlayerRow(player1, winner == "player1", true),
-          Container(
-            height: 1,
-            color:
-                AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.3),
-          ),
+            Container(
+              height: 1,
+              color: AppTheme.lightTheme.colorScheme.outline
+                  .withValues(alpha: 0.3),
+            ),
           if (player2 != null)
             _buildPlayerRow(player2, winner == "player2", false)
           else
             _buildEmptyPlayerRow(),
           if (status == "live")
             Container(
-              padding: EdgeInsets.symmetric(vertical: 1.h),
+              padding: const EdgeInsets.symmetric(vertical: Gaps.sm),
               decoration: BoxDecoration(
                 color: AppTheme.lightTheme.colorScheme.error
                     .withValues(alpha: 0.1),
@@ -181,14 +185,15 @@ class TournamentBracketWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    width: 2.w,
-                    height: 2.w,
+                    width: 12,
+                    height: 12,
                     decoration: BoxDecoration(
                       color: AppTheme.lightTheme.colorScheme.error,
-                      borderRadius: BorderRadius.circular(1.w),
+                      borderRadius: BorderRadius.circular(6),
                     ),
                   ),
-                  SizedBox(width: 2.w),
+                  const SizedBox(width: Gaps.md),
+                  const SizedBox(width: Gaps.md),
                   Text(
                     'ĐANG DIỄN RA',
                     style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
@@ -207,7 +212,7 @@ class TournamentBracketWidget extends StatelessWidget {
   Widget _buildPlayerRow(
       Map<String, dynamic> player, bool isWinner, bool isTop) {
     return Container(
-      padding: EdgeInsets.all(3.w),
+  padding: const EdgeInsets.all(Gaps.lg),
       decoration: BoxDecoration(
         color: isWinner
             ? AppTheme.lightTheme.colorScheme.primary.withValues(alpha: 0.1)
@@ -225,10 +230,10 @@ class TournamentBracketWidget extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 8.w,
-            height: 8.w,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(4.w),
+              borderRadius: BorderRadius.circular(24),
               border: Border.all(
                 color: isWinner
                     ? AppTheme.lightTheme.colorScheme.primary
@@ -238,16 +243,16 @@ class TournamentBracketWidget extends StatelessWidget {
               ),
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(4.w),
+              borderRadius: BorderRadius.circular(24),
               child: CustomImageWidget(
                 imageUrl: player["avatar"] as String,
-                width: 8.w,
-                height: 8.w,
+                width: 48,
+                height: 48,
                 fit: BoxFit.cover,
               ),
             ),
           ),
-          SizedBox(width: 2.w),
+          const SizedBox(width: Gaps.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -284,7 +289,7 @@ class TournamentBracketWidget extends StatelessWidget {
             ),
           if (isWinner)
             Container(
-              margin: EdgeInsets.only(left: 2.w),
+              margin: const EdgeInsets.only(left: Gaps.md),
               child: CustomIconWidget(
                 iconName: 'emoji_events',
                 color: AppTheme.lightTheme.colorScheme.primary,
@@ -298,16 +303,16 @@ class TournamentBracketWidget extends StatelessWidget {
 
   Widget _buildEmptyPlayerRow() {
     return Container(
-      padding: EdgeInsets.all(3.w),
+      padding: const EdgeInsets.all(Gaps.lg),
       child: Row(
         children: [
           Container(
-            width: 8.w,
-            height: 8.w,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
               color: AppTheme.lightTheme.colorScheme.outline
                   .withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(4.w),
+              borderRadius: BorderRadius.circular(24),
             ),
             child: CustomIconWidget(
               iconName: 'person',
@@ -315,7 +320,8 @@ class TournamentBracketWidget extends StatelessWidget {
               size: 16,
             ),
           ),
-          SizedBox(width: 2.w),
+          const SizedBox(width: Gaps.md),
+          const SizedBox(width: Gaps.md),
           Expanded(
             child: Text(
               'Chờ đối thủ',
@@ -332,7 +338,7 @@ class TournamentBracketWidget extends StatelessWidget {
 
   Widget _buildEmptyBracket() {
     return Container(
-      padding: EdgeInsets.all(8.w),
+      padding: const EdgeInsets.all(Gaps.xxl),
       child: Column(
         children: [
           CustomIconWidget(
@@ -340,14 +346,14 @@ class TournamentBracketWidget extends StatelessWidget {
             color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
             size: 48,
           ),
-          SizedBox(height: 2.h),
+          const SizedBox(height: Gaps.lg),
           Text(
             'Bảng đấu chưa được tạo',
             style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
               color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
             ),
           ),
-          SizedBox(height: 1.h),
+          const SizedBox(height: Gaps.sm),
           Text(
             'Bảng đấu sẽ được tạo sau khi hết hạn đăng ký',
             style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(

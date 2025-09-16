@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
+// Removed Sizer dependency
+import '../../../core/layout/responsive.dart';
 
 import '../../../core/app_export.dart';
 import '../../../widgets/custom_icon_widget.dart';
@@ -43,9 +44,9 @@ class _TournamentFilterBottomSheetState
         mainAxisSize: MainAxisSize.min,
         children: [
           // Handle bar
+          const SizedBox(height: Gaps.sm),
           Container(
-            margin: EdgeInsets.only(top: 1.h),
-            width: 10.w,
+            width: 60,
             height: 4,
             decoration: BoxDecoration(
               color: colorScheme.onSurfaceVariant.withAlpha(102),
@@ -55,7 +56,7 @@ class _TournamentFilterBottomSheetState
 
           // Header
           Padding(
-            padding: EdgeInsets.all(4.w),
+            padding: const EdgeInsets.all(Gaps.xl),
             child: Row(
               children: [
                 Text(
@@ -83,29 +84,29 @@ class _TournamentFilterBottomSheetState
           // Filter content
           Flexible(
             child: SingleChildScrollView(
-              padding: EdgeInsets.all(4.w),
+              padding: const EdgeInsets.all(Gaps.xl),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Location radius
                   _buildLocationRadiusSection(context, theme, colorScheme),
 
-                  SizedBox(height: 3.h),
+                  const SizedBox(height: Gaps.xl),
 
                   // Entry fee range
                   _buildEntryFeeSection(context, theme, colorScheme),
 
-                  SizedBox(height: 3.h),
+                  const SizedBox(height: Gaps.xl),
 
                   // Tournament format
                   _buildFormatSection(context, theme, colorScheme),
 
-                  SizedBox(height: 3.h),
+                  const SizedBox(height: Gaps.xl),
 
                   // Skill level
                   _buildSkillLevelSection(context, theme, colorScheme),
 
-                  SizedBox(height: 3.h),
+                  const SizedBox(height: Gaps.xl),
 
                   // Additional filters
                   _buildAdditionalFiltersSection(context, theme),
@@ -116,7 +117,7 @@ class _TournamentFilterBottomSheetState
 
           // Apply button
           Container(
-            padding: EdgeInsets.all(4.w),
+            padding: const EdgeInsets.all(Gaps.xl),
             decoration: BoxDecoration(
               color: colorScheme.surface,
               border: Border(
@@ -132,7 +133,7 @@ class _TournamentFilterBottomSheetState
                 child: ElevatedButton(
                   onPressed: _applyFilters,
                   style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 2.h),
+                    padding: const EdgeInsets.symmetric(vertical: Gaps.md),
                   ),
                   child: Text(
                     'Áp dụng bộ lọc',
@@ -161,7 +162,7 @@ class _TournamentFilterBottomSheetState
               color: colorScheme.primary,
               size: 20,
             ),
-            SizedBox(width: 2.w),
+            const SizedBox(width: Gaps.md),
             Text(
               'Khoảng cách',
               style: theme.textTheme.titleMedium?.copyWith(
@@ -170,7 +171,7 @@ class _TournamentFilterBottomSheetState
             ),
           ],
         ),
-        SizedBox(height: 2.h),
+  const SizedBox(height: Gaps.md),
         Text(
           'Trong vòng ${(_filters['locationRadius'] as double).toInt()} km',
           style: theme.textTheme.bodyMedium?.copyWith(
@@ -204,7 +205,7 @@ class _TournamentFilterBottomSheetState
               color: colorScheme.primary,
               size: 20,
             ),
-            SizedBox(width: 2.w),
+            const SizedBox(width: Gaps.md),
             Text(
               'Phí tham gia',
               style: theme.textTheme.titleMedium?.copyWith(
@@ -213,10 +214,10 @@ class _TournamentFilterBottomSheetState
             ),
           ],
         ),
-        SizedBox(height: 2.h),
+  const SizedBox(height: Gaps.md),
         Wrap(
-          spacing: 2.w,
-          runSpacing: 1.h,
+          spacing: Gaps.md,
+          runSpacing: Gaps.sm,
           children: [
             _buildFeeChip(context, theme, colorScheme, 'Miễn phí', 'free'),
             _buildFeeChip(
@@ -243,7 +244,7 @@ class _TournamentFilterBottomSheetState
               color: colorScheme.primary,
               size: 20,
             ),
-            SizedBox(width: 2.w),
+            const SizedBox(width: Gaps.md),
             Text(
               'Thể thức',
               style: theme.textTheme.titleMedium?.copyWith(
@@ -252,10 +253,10 @@ class _TournamentFilterBottomSheetState
             ),
           ],
         ),
-        SizedBox(height: 2.h),
+  const SizedBox(height: Gaps.md),
         Wrap(
-          spacing: 2.w,
-          runSpacing: 1.h,
+          spacing: Gaps.md,
+          runSpacing: Gaps.sm,
           children: [
             _buildFormatChip(context, theme, colorScheme, '8-Ball', '8-ball'),
             _buildFormatChip(context, theme, colorScheme, '9-Ball', '9-ball'),
@@ -279,7 +280,7 @@ class _TournamentFilterBottomSheetState
               color: colorScheme.primary,
               size: 20,
             ),
-            SizedBox(width: 2.w),
+            const SizedBox(width: Gaps.md),
             Text(
               'Trình độ',
               style: theme.textTheme.titleMedium?.copyWith(
@@ -288,10 +289,10 @@ class _TournamentFilterBottomSheetState
             ),
           ],
         ),
-        SizedBox(height: 2.h),
+  const SizedBox(height: Gaps.md),
         Wrap(
-          spacing: 2.w,
-          runSpacing: 1.h,
+          spacing: Gaps.md,
+          runSpacing: Gaps.sm,
           children: [
             _buildSkillChip(
                 context, theme, colorScheme, 'Mới bắt đầu', 'beginner'),
@@ -317,7 +318,7 @@ class _TournamentFilterBottomSheetState
             fontWeight: FontWeight.w600,
           ),
         ),
-        SizedBox(height: 2.h),
+  const SizedBox(height: Gaps.md),
         CheckboxListTile(
           title: Text(
             'Chỉ giải đấu có live stream',

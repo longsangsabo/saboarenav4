@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
+// Removed Sizer dependency
+import '../../../core/layout/responsive.dart';
 
 import '../../../core/app_export.dart';
 
@@ -18,7 +19,7 @@ class TournamentHeaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliverAppBar(
-      expandedHeight: 35.h,
+  expandedHeight: 300,
       floating: false,
       pinned: true,
       backgroundColor: AppTheme.lightTheme.colorScheme.surface,
@@ -39,7 +40,7 @@ class TournamentHeaderWidget extends StatelessWidget {
           ),
           onPressed: onShareTap,
         ),
-        SizedBox(width: 2.w),
+  const SizedBox(width: Gaps.md),
       ],
       flexibleSpace: FlexibleSpaceBar(
         background: Stack(
@@ -48,7 +49,7 @@ class TournamentHeaderWidget extends StatelessWidget {
             CustomImageWidget(
               imageUrl: tournament["coverImage"] as String,
               width: double.infinity,
-              height: 35.h,
+              height: 300,
               fit: BoxFit.cover,
             ),
             Container(
@@ -64,15 +65,17 @@ class TournamentHeaderWidget extends StatelessWidget {
               ),
             ),
             Positioned(
-              bottom: 3.h,
-              left: 4.w,
-              right: 4.w,
+              bottom: Gaps.xl,
+              left: Gaps.xl,
+              right: Gaps.xl,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: Gaps.lg,
+                      vertical: Gaps.sm,
+                    ),
                     decoration: BoxDecoration(
                       color: _getFormatColor(tournament["format"] as String),
                       borderRadius: BorderRadius.circular(20),
@@ -86,7 +89,7 @@ class TournamentHeaderWidget extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(height: 1.h),
+                  const SizedBox(height: Gaps.sm),
                   Text(
                     tournament["title"] as String,
                     style:
@@ -97,7 +100,7 @@ class TournamentHeaderWidget extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: 0.5.h),
+                  const SizedBox(height: 2),
                   Row(
                     children: [
                       CustomIconWidget(
@@ -105,7 +108,7 @@ class TournamentHeaderWidget extends StatelessWidget {
                         color: Colors.white.withValues(alpha: 0.8),
                         size: 16,
                       ),
-                      SizedBox(width: 1.w),
+                      const SizedBox(width: Gaps.sm),
                       Expanded(
                         child: Text(
                           tournament["location"] as String,

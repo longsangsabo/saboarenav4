@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
+// Removed Sizer dependency
+import '../../../core/layout/responsive.dart';
 
 import '../../../core/app_export.dart';
 
@@ -101,15 +102,15 @@ class TournamentSearchDelegate extends SearchDelegate<String> {
     final colorScheme = theme.colorScheme;
 
     return Card(
-      margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+      margin: const EdgeInsets.symmetric(horizontal: Gaps.xl, vertical: Gaps.sm),
       child: ListTile(
-        contentPadding: EdgeInsets.all(3.w),
+        contentPadding: const EdgeInsets.all(Gaps.lg),
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(8),
           child: CustomImageWidget(
             imageUrl: tournament['coverImage'] as String,
-            width: 15.w,
-            height: 15.w,
+            width: 80,
+            height: 80,
             fit: BoxFit.cover,
           ),
         ),
@@ -124,7 +125,7 @@ class TournamentSearchDelegate extends SearchDelegate<String> {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 0.5.h),
+            const SizedBox(height: Gaps.xs),
             Row(
               children: [
                 CustomIconWidget(
@@ -132,7 +133,7 @@ class TournamentSearchDelegate extends SearchDelegate<String> {
                   color: colorScheme.onSurfaceVariant,
                   size: 14,
                 ),
-                SizedBox(width: 1.w),
+                const SizedBox(width: Gaps.xs),
                 Expanded(
                   child: Text(
                     tournament['clubName'] as String,
@@ -145,7 +146,7 @@ class TournamentSearchDelegate extends SearchDelegate<String> {
                 ),
               ],
             ),
-            SizedBox(height: 0.5.h),
+            const SizedBox(height: Gaps.xs),
             Row(
               children: [
                 _buildFormatBadge(context, tournament['format'] as String),
@@ -228,7 +229,7 @@ class TournamentSearchDelegate extends SearchDelegate<String> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.all(4.w),
+      padding: const EdgeInsets.all(Gaps.xl),
           child: Text(
             'Tìm kiếm gần đây',
             style: theme.textTheme.titleSmall?.copyWith(
@@ -273,14 +274,14 @@ class TournamentSearchDelegate extends SearchDelegate<String> {
             color: colorScheme.onSurfaceVariant,
             size: 64,
           ),
-          SizedBox(height: 2.h),
+          const SizedBox(height: Gaps.lg),
           Text(
             'Không tìm thấy giải đấu',
             style: theme.textTheme.titleMedium?.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),
           ),
-          SizedBox(height: 1.h),
+          const SizedBox(height: Gaps.sm),
           Text(
             'Thử tìm kiếm với từ khóa khác',
             style: theme.textTheme.bodyMedium?.copyWith(
@@ -311,7 +312,7 @@ class TournamentSearchDelegate extends SearchDelegate<String> {
     }
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
+  padding: const EdgeInsets.symmetric(horizontal: Gaps.md, vertical: 2),
       decoration: BoxDecoration(
         color: badgeColor,
         borderRadius: BorderRadius.circular(12),

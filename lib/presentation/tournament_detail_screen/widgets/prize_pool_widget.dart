@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
+// Removed Sizer dependency
+import '../../../core/layout/responsive.dart';
 
 import '../../../core/app_export.dart';
 
@@ -17,8 +18,8 @@ class PrizePoolWidget extends StatelessWidget {
     final entryFee = tournament["entryFee"] as String;
 
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 4.w),
-      padding: EdgeInsets.all(4.w),
+      margin: const EdgeInsets.symmetric(horizontal: Gaps.xl),
+      padding: const EdgeInsets.all(Gaps.xl),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -44,7 +45,7 @@ class PrizePoolWidget extends StatelessWidget {
                 color: AppTheme.lightTheme.colorScheme.primary,
                 size: 24,
               ),
-              SizedBox(width: 2.w),
+              const SizedBox(width: Gaps.md),
               Text(
                 'Giải thưởng & Lệ phí',
                 style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
@@ -54,9 +55,9 @@ class PrizePoolWidget extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 2.h),
+          const SizedBox(height: Gaps.lg),
           Container(
-            padding: EdgeInsets.all(3.w),
+            padding: const EdgeInsets.all(Gaps.lg),
             decoration: BoxDecoration(
               color: AppTheme.lightTheme.colorScheme.surface,
               borderRadius: BorderRadius.circular(8),
@@ -80,14 +81,14 @@ class PrizePoolWidget extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(height: 2.h),
+          const SizedBox(height: Gaps.lg),
           Text(
             'Cơ cấu giải thưởng',
             style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
           ),
-          SizedBox(height: 1.h),
+          const SizedBox(height: Gaps.sm),
           ..._buildPrizeList(prizePool),
         ],
       ),
@@ -117,9 +118,9 @@ class PrizePoolWidget extends StatelessWidget {
     ];
 
     return prizes
-        .map((prize) => Container(
-              margin: EdgeInsets.only(bottom: 1.h),
-              padding: EdgeInsets.all(3.w),
+    .map((prize) => Container(
+      margin: const EdgeInsets.only(bottom: Gaps.sm),
+      padding: const EdgeInsets.all(Gaps.lg),
               decoration: BoxDecoration(
                 color: AppTheme.lightTheme.colorScheme.surface,
                 borderRadius: BorderRadius.circular(8),
@@ -131,7 +132,7 @@ class PrizePoolWidget extends StatelessWidget {
               child: Row(
                 children: [
                   Container(
-                    padding: EdgeInsets.all(2.w),
+                    padding: const EdgeInsets.all(Gaps.md),
                     decoration: BoxDecoration(
                       color: (prize['color'] as Color).withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(6),
@@ -142,7 +143,7 @@ class PrizePoolWidget extends StatelessWidget {
                       size: 20,
                     ),
                   ),
-                  SizedBox(width: 3.w),
+                  const SizedBox(width: Gaps.md),
                   Expanded(
                     child: Text(
                       'Giải ${prize['position']}',

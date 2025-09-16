@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
+// Removed Sizer dependency
+import '../../../core/layout/responsive.dart';
 
 import '../../../core/app_export.dart';
 
@@ -26,8 +27,8 @@ class RegistrationWidget extends StatelessWidget {
             (tournament["maxParticipants"] as int);
 
     return Container(
-      margin: EdgeInsets.all(4.w),
-      padding: EdgeInsets.all(4.w),
+      margin: const EdgeInsets.all(Gaps.xl),
+      padding: const EdgeInsets.all(Gaps.xl),
       decoration: BoxDecoration(
         color: AppTheme.lightTheme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
@@ -50,7 +51,7 @@ class RegistrationWidget extends StatelessWidget {
                 color: AppTheme.lightTheme.colorScheme.primary,
                 size: 24,
               ),
-              SizedBox(width: 2.w),
+              const SizedBox(width: Gaps.md),
               Text(
                 'Đăng ký tham gia',
                 style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
@@ -59,19 +60,16 @@ class RegistrationWidget extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 2.h),
-          _buildRequirementItem(
-              'Hạn đăng ký', registrationDeadline, 'schedule'),
-          SizedBox(height: 1.h),
-          _buildRequirementItem('Yêu cầu rank',
-              tournament["rankRequirement"] as String, 'military_tech'),
-          SizedBox(height: 1.h),
-          _buildRequirementItem(
-              'Lệ phí', tournament["entryFee"] as String, 'payments'),
-          SizedBox(height: 2.h),
+          const SizedBox(height: Gaps.lg),
+      _buildRequirementItem('Hạn đăng ký', registrationDeadline, 'schedule'),
+      const SizedBox(height: Gaps.sm),
+      _buildRequirementItem('Yêu cầu rank', tournament["rankRequirement"] as String, 'military_tech'),
+      const SizedBox(height: Gaps.sm),
+      _buildRequirementItem('Lệ phí', tournament["entryFee"] as String, 'payments'),
+      const SizedBox(height: Gaps.lg),
           if (!isDeadlinePassed)
             Container(
-              padding: EdgeInsets.all(3.w),
+              padding: const EdgeInsets.all(Gaps.lg),
               decoration: BoxDecoration(
                 color: AppTheme.lightTheme.colorScheme.primary
                     .withValues(alpha: 0.1),
@@ -89,7 +87,7 @@ class RegistrationWidget extends StatelessWidget {
                     color: AppTheme.lightTheme.colorScheme.primary,
                     size: 20,
                   ),
-                  SizedBox(width: 2.w),
+                  const SizedBox(width: Gaps.md),
                   Expanded(
                     child: Text(
                       _getTimeRemaining(registrationDeadline),
@@ -102,10 +100,10 @@ class RegistrationWidget extends StatelessWidget {
                 ],
               ),
             ),
-          SizedBox(height: 2.h),
+          const SizedBox(height: Gaps.lg),
           SizedBox(
             width: double.infinity,
-            height: 6.h,
+            height: 56,
             child: _buildActionButton(canRegister, isDeadlinePassed),
           ),
         ],
@@ -121,7 +119,7 @@ class RegistrationWidget extends StatelessWidget {
           color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
           size: 18,
         ),
-        SizedBox(width: 3.w),
+  const SizedBox(width: Gaps.md),
         Expanded(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -183,7 +181,7 @@ class RegistrationWidget extends StatelessWidget {
               color: AppTheme.lightTheme.colorScheme.error,
               size: 20,
             ),
-            SizedBox(width: 2.w),
+            const SizedBox(width: Gaps.md),
             Text(
               'Đã đăng ký - Rút lui',
               style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
@@ -231,7 +229,7 @@ class RegistrationWidget extends StatelessWidget {
             color: AppTheme.lightTheme.colorScheme.onPrimary,
             size: 20,
           ),
-          SizedBox(width: 2.w),
+          const SizedBox(width: Gaps.md),
           Text(
             'Đăng ký ngay',
             style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(

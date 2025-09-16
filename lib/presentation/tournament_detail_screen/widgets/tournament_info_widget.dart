@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
+// Removed Sizer dependency
+import '../../../core/layout/responsive.dart';
 
 import '../../../core/app_export.dart';
 
@@ -14,8 +15,8 @@ class TournamentInfoWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.all(4.w),
-      padding: EdgeInsets.all(4.w),
+      margin: const EdgeInsets.all(Gaps.xl),
+      padding: const EdgeInsets.all(Gaps.xl),
       decoration: BoxDecoration(
         color: AppTheme.lightTheme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
@@ -37,38 +38,38 @@ class TournamentInfoWidget extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 2.h),
+          const SizedBox(height: Gaps.lg),
           _buildInfoRow(
             'Thời gian',
             '${tournament["startDate"]} - ${tournament["endDate"]}',
             'schedule',
           ),
-          SizedBox(height: 1.5.h),
+          const SizedBox(height: Gaps.md),
           _buildInfoRow(
             'Số lượng tham gia',
             '${tournament["currentParticipants"]}/${tournament["maxParticipants"]} người',
             'people',
           ),
-          SizedBox(height: 1.5.h),
+          const SizedBox(height: Gaps.md),
           _buildInfoRow(
             'Hình thức',
             tournament["eliminationType"] as String,
             'emoji_events',
           ),
-          SizedBox(height: 1.5.h),
+          const SizedBox(height: Gaps.md),
           _buildInfoRow(
             'Trạng thái',
             tournament["status"] as String,
             'info',
           ),
-          SizedBox(height: 2.h),
+          const SizedBox(height: Gaps.lg),
           Text(
             'Mô tả',
             style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
           ),
-          SizedBox(height: 1.h),
+          const SizedBox(height: Gaps.sm),
           Text(
             tournament["description"] as String,
             style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
@@ -89,7 +90,7 @@ class TournamentInfoWidget extends StatelessWidget {
           color: AppTheme.lightTheme.colorScheme.primary,
           size: 20,
         ),
-        SizedBox(width: 3.w),
+          const SizedBox(width: Gaps.md),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,7 +101,7 @@ class TournamentInfoWidget extends StatelessWidget {
                   color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
                 ),
               ),
-              SizedBox(height: 0.5.h),
+                const SizedBox(height: 2),
               Text(
                 value,
                 style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
