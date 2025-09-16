@@ -110,8 +110,9 @@ class UserService {
       if (username != null) updateData['username'] = username;
       if (bio != null) updateData['bio'] = bio;
       if (phone != null) updateData['phone'] = phone;
-      if (dateOfBirth != null)
+      if (dateOfBirth != null) {
         updateData['date_of_birth'] = dateOfBirth.toIso8601String();
+      }
       if (skillLevel != null) updateData['skill_level'] = skillLevel;
       if (location != null) updateData['location'] = location;
 

@@ -92,6 +92,7 @@ class UserProfile {
   }
 
   UserProfile copyWith({
+    String? fullName,
     String? username,
     String? bio,
     String? avatarUrl,
@@ -103,7 +104,7 @@ class UserProfile {
     return UserProfile(
       id: id,
       email: email,
-      fullName: fullName,
+      fullName: fullName ?? this.fullName,
       username: username ?? this.username,
       bio: bio ?? this.bio,
       avatarUrl: avatarUrl ?? this.avatarUrl,

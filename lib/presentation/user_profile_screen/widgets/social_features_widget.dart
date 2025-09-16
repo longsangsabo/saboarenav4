@@ -181,7 +181,7 @@ class SocialFeaturesWidget extends StatelessWidget {
           ),
         ),
         SizedBox(height: 1.h),
-        Container(
+        SizedBox(
           height: 12.h,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,

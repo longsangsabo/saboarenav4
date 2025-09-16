@@ -375,7 +375,7 @@ class AppTheme {
       onSurface: onSurfaceDark,
       onSurfaceVariant: textSecondaryDark,
       outline: dividerDark,
-      outlineVariant: Color(0x1FB3FFFFFF),
+      outlineVariant: Color(0x1fb3ffffff),
       shadow: shadowDark,
       scrim: shadowDark,
       inverseSurface: surfaceLight,

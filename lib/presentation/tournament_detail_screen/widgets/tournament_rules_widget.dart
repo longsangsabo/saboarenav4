@@ -87,7 +87,7 @@ class TournamentRulesWidget extends StatelessWidget {
                 ],
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );

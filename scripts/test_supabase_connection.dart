@@ -48,7 +48,7 @@ Future<void> main() async {
     try {
       final publicUsers = await supabaseService.from('users').select('id').limit(1);
       print('✅ public.users table exists and accessible');
-      print('   Sample data: ${publicUsers.length > 0 ? publicUsers[0] : 'No data'}');
+      print('   Sample data: ${publicUsers.isNotEmpty ? publicUsers[0] : 'No data'}');
     } catch (e) {
       print('❌ public.users table issue: $e');
     }

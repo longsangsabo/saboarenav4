@@ -51,7 +51,7 @@ class ProfileHeaderWidget extends StatelessWidget {
   }
 
   Widget _buildCoverPhotoSection(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: 25.h,
       width: double.infinity,
       child: Stack(

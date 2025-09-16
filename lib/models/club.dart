@@ -115,7 +115,7 @@ class Club {
 
   String get ratingDisplay {
     if (totalReviews == 0) return 'Chưa có đánh giá';
-    return '${rating.toStringAsFixed(1)} (${totalReviews} đánh giá)';
+    return '${rating.toStringAsFixed(1)} ($totalReviews đánh giá)';
   }
 
   String get priceDisplay {

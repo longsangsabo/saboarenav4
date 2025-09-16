@@ -101,8 +101,9 @@ class AuthService {
       if (username != null) updates['username'] = username;
       if (bio != null) updates['bio'] = bio;
       if (phone != null) updates['phone'] = phone;
-      if (dateOfBirth != null)
+      if (dateOfBirth != null) {
         updates['date_of_birth'] = dateOfBirth.toIso8601String();
+      }
       if (skillLevel != null) updates['skill_level'] = skillLevel;
       if (location != null) updates['location'] = location;
 

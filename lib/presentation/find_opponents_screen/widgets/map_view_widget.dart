@@ -104,7 +104,7 @@ class _MapViewWidgetState extends State<MapViewWidget> {
           icon: BitmapDescriptor.defaultMarkerWithHue(_getRankHue(rank)),
           infoWindow: InfoWindow(
             title: player["name"] as String,
-            snippet: 'Rank ${rank} • ${player["distance"]} km',
+            snippet: 'Rank $rank • ${player["distance"]} km',
           ),
           onTap: () {
             if (widget.onPlayerTap != null) {
@@ -152,7 +152,7 @@ class _MapViewWidgetState extends State<MapViewWidget> {
     final theme = Theme.of(context);
 
     if (_isLoading) {
-      return Container(
+      return SizedBox(
         height: 100.h - 20.h,
         child: Center(
           child: Column(
@@ -173,7 +173,7 @@ class _MapViewWidgetState extends State<MapViewWidget> {
     }
 
     if (_currentPosition == null) {
-      return Container(
+      return SizedBox(
         height: 100.h - 20.h,
         child: Center(
           child: Column(
@@ -208,7 +208,7 @@ class _MapViewWidgetState extends State<MapViewWidget> {
       );
     }
 
-    return Container(
+    return SizedBox(
       height: 100.h - 20.h,
       child: GoogleMap(
         onMapCreated: (GoogleMapController controller) {

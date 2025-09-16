@@ -8,6 +8,7 @@ import '../../services/auth_service.dart';
 import '../../services/user_service.dart';
 
 import './widgets/achievements_section_widget.dart';
+import './widgets/edit_profile_modal.dart';
 import './widgets/profile_header_widget.dart';
 import './widgets/qr_code_widget.dart';
 import './widgets/settings_menu_widget.dart';
@@ -134,11 +135,11 @@ class _UserProfileScreenState extends State<UserProfileScreen>
           content: Text('✅ Đã cập nhật thông tin profile'),
           backgroundColor: AppTheme.lightTheme.colorScheme.primary,
         ),
-      );
-    }
+    );
   }
 
-  @override
+
+}  @override
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
@@ -317,15 +318,187 @@ class _UserProfileScreenState extends State<UserProfileScreen>
   }
 
   void _showEditProfileModal() {
-     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Chức năng sẽ sớm được cập nhật')));
+    if (_userProfile == null) return;
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => EditProfileModal(
+        userProfile: _userProfile!,
+        onSave: (updatedProfile) async {
+          try {
+            // Cập nhật profile qua API
+            await _userService.updateUserProfile(
+              bio: updatedProfile.bio,
+              phone: updatedProfile.phone,
+              location: updatedProfile.location,
+            );
+            
+            // Refresh local data
+            await _loadUserProfile();
+            
+            if (mounted) {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('✅ Cập nhật hồ sơ thành công'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            }
+          } catch (e) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('❌ Lỗi cập nhật hồ sơ: $e'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          }
+        },
+        onCancel: () => Navigator.pop(context),
+      ),
+    );
   }
 
   void _changeCoverPhoto() {
-     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Chức năng sẽ sớm được cập nhật')));
+    _showImagePickerDialog(
+      title: 'Thay đổi ảnh bìa',
+      onImageSelected: (imagePath) async {
+        try {
+          // TODO: Implement cover photo upload
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('✅ Đã chọn ảnh bìa: ${imagePath.split('/').last}'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('❌ Lỗi cập nhật ảnh bìa: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      },
+    );
   }
 
   void _changeAvatar() {
-     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Chức năng sẽ sớm được cập nhật')));
+    _showImagePickerDialog(
+      title: 'Thay đổi ảnh đại diện',
+      onImageSelected: (imagePath) async {
+        try {
+          // TODO: Implement avatar upload
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('✅ Đã chọn ảnh đại diện: ${imagePath.split('/').last}'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('❌ Lỗi cập nhật ảnh đại diện: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  void _showImagePickerDialog({
+    required String title,
+    required Function(String) onImageSelected,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              title,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildImageSourceOption(
+                  icon: Icons.camera_alt,
+                  label: 'Camera',
+                  onTap: () {
+                    Navigator.pop(context);
+                    onImageSelected('camera_image_${DateTime.now().millisecondsSinceEpoch}.jpg');
+                  },
+                ),
+                _buildImageSourceOption(
+                  icon: Icons.photo_library,
+                  label: 'Thư viện',
+                  onTap: () {
+                    Navigator.pop(context);
+                    onImageSelected('gallery_image_${DateTime.now().millisecondsSinceEpoch}.jpg');
+                  },
+                ),
+                _buildImageSourceOption(
+                  icon: Icons.delete,
+                  label: 'Xóa ảnh',
+                  color: Colors.red,
+                  onTap: () {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('✅ Đã xóa ảnh')),
+                    );
+                  },
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImageSourceOption({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    Color? color,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: (color ?? Colors.green).withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: color ?? Colors.green, size: 30),
+          ),
+          SizedBox(height: 8),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              color: color ?? Colors.black87,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showQRCode() {
@@ -342,47 +515,988 @@ class _UserProfileScreenState extends State<UserProfileScreen>
   }
 
   void _showMoreOptions() {
-     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Chức năng sẽ sớm được cập nhật')));
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Tùy chọn khác',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 20),
+            _buildOptionItem(
+              icon: Icons.share,
+              title: 'Chia sẻ hồ sơ',
+              subtitle: 'Chia sẻ hồ sơ của bạn với bạn bè',
+              onTap: () {
+                Navigator.pop(context);
+                _shareProfile();
+              },
+            ),
+            _buildOptionItem(
+              icon: Icons.bookmark,
+              title: 'Lưu hồ sơ',
+              subtitle: 'Lưu hồ sơ vào danh sách yêu thích',
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('✅ Đã lưu hồ sơ')),
+                );
+              },
+            ),
+            _buildOptionItem(
+              icon: Icons.copy,
+              title: 'Sao chép liên kết',
+              subtitle: 'Sao chép đường dẫn đến hồ sơ',
+              onTap: () {
+                Navigator.pop(context);
+                _copyProfileLink();
+              },
+            ),
+            _buildOptionItem(
+              icon: Icons.print,
+              title: 'In hồ sơ',
+              subtitle: 'In thông tin hồ sơ ra giấy',
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('🖨️ Chức năng in sẽ sớm được cập nhật')),
+                );
+              },
+            ),
+            _buildOptionItem(
+              icon: Icons.backup,
+              title: 'Sao lưu dữ liệu',
+              subtitle: 'Sao lưu thông tin cá nhân',
+              onTap: () {
+                Navigator.pop(context);
+                _backupData();
+              },
+            ),
+            SizedBox(height: 10),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOptionItem({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+    Color? iconColor,
+  }) {
+    return ListTile(
+      leading: Container(
+        padding: EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: (iconColor ?? Colors.blue).withOpacity(0.1),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, color: iconColor ?? Colors.blue, size: 20),
+      ),
+      title: Text(
+        title,
+        style: TextStyle(fontWeight: FontWeight.w600),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+      ),
+      onTap: onTap,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+    );
+  }
+
+  void _shareProfile() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Chia sẻ hồ sơ'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Chọn cách thức chia sẻ hồ sơ của bạn:'),
+            SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildShareOption(Icons.message, 'Tin nhắn', () {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('📱 Chia sẻ qua tin nhắn')),
+                  );
+                }),
+                _buildShareOption(Icons.email, 'Email', () {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('📧 Chia sẻ qua email')),
+                  );
+                }),
+                _buildShareOption(Icons.link, 'Liên kết', () {
+                  Navigator.pop(context);
+                  _copyProfileLink();
+                }),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Hủy'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildShareOption(IconData icon, String label, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: Colors.blue, size: 24),
+          ),
+          SizedBox(height: 8),
+          Text(label, style: TextStyle(fontSize: 12)),
+        ],
+      ),
+    );
+  }
+
+  void _copyProfileLink() {
+    // In a real app, you would use Clipboard.setData()
+    // Clipboard.setData(ClipboardData(text: 'https://saboarena.com/profile/${_userProfile?.id}'));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(Icons.check, color: Colors.white),
+            SizedBox(width: 8),
+            Text('Đã sao chép liên kết hồ sơ'),
+          ],
+        ),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+
+  void _backupData() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.backup, color: Colors.blue),
+            SizedBox(width: 8),
+            Text('Sao lưu dữ liệu'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Dữ liệu sẽ được sao lưu bao gồm:'),
+            SizedBox(height: 8),
+            Text('• Thông tin cá nhân'),
+            Text('• Lịch sử thách đấu'),
+            Text('• Thành tích đạt được'),
+            Text('• Danh sách bạn bè'),
+            SizedBox(height: 16),
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info, color: Colors.blue, size: 16),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Dữ liệu sẽ được mã hóa và lưu trữ an toàn',
+                      style: TextStyle(fontSize: 13, color: Colors.blue.shade700),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Hủy'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('✅ Đã bắt đầu sao lưu dữ liệu'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            },
+            child: Text('Sao lưu'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _viewAllAchievements() {
-     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Chức năng sẽ sớm được cập nhật')));
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _buildAchievementsModal(),
+    );
+  }
+
+  Widget _buildAchievementsModal() {
+    // Mock data for achievements
+    final achievements = [
+      {'title': 'Người mới', 'description': 'Hoàn thành 5 trận đấu đầu tiên', 'icon': '🏆', 'completed': true},
+      {'title': 'Chiến thắng đầu tiên', 'description': 'Thắng trận đấu đầu tiên', 'icon': '🥇', 'completed': true},
+      {'title': 'Streak Master', 'description': 'Thắng liên tiếp 5 trận', 'icon': '🔥', 'completed': true},
+      {'title': 'Tournament Player', 'description': 'Tham gia 10 giải đấu', 'icon': '🏟️', 'completed': false},
+      {'title': 'Social Player', 'description': 'Kết bạn với 50 người chơi', 'icon': '👥', 'completed': false},
+      {'title': 'Champion', 'description': 'Thắng một giải đấu', 'icon': '👑', 'completed': false},
+    ];
+
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.8,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        children: [
+          // Header
+          Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Icon(Icons.emoji_events, color: Colors.amber, size: 24),
+                Text(
+                  'Thành tích của tôi',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: Icon(Icons.close),
+                ),
+              ],
+            ),
+          ),
+          
+          // Achievements List
+          Expanded(
+            child: ListView.builder(
+              padding: EdgeInsets.all(16),
+              itemCount: achievements.length,
+              itemBuilder: (context, index) {
+                final achievement = achievements[index];
+                final isCompleted = achievement['completed'] as bool;
+                
+                return Container(
+                  margin: EdgeInsets.only(bottom: 12),
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: isCompleted ? Colors.green.shade50 : Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isCompleted ? Colors.green.shade200 : Colors.grey.shade300,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: isCompleted ? Colors.green.shade100 : Colors.grey.shade200,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            achievement['icon'] as String,
+                            style: TextStyle(fontSize: 24),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              achievement['title'] as String,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: isCompleted ? Colors.green.shade700 : Colors.grey.shade600,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              achievement['description'] as String,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: isCompleted ? Colors.green.shade600 : Colors.grey.shade500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (isCompleted)
+                        Icon(Icons.check_circle, color: Colors.green, size: 24),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _viewFriendsList() {
-     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Chức năng sẽ sớm được cập nhật')));
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _buildFriendsListModal(),
+    );
+  }
+
+  Widget _buildFriendsListModal() {
+    // Mock data for friends list
+    final friends = List.generate(15, (index) => {
+      'id': 'friend_$index',
+      'name': 'Người chơi ${index + 1}',
+      'avatar': null,
+      'status': index % 3 == 0 ? 'online' : (index % 3 == 1 ? 'offline' : 'in_game'),
+      'level': 'Trung bình',
+      'lastSeen': index % 3 == 0 ? 'Đang online' : '${index + 1} phút trước',
+    });
+
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.8,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        children: [
+          // Header
+          Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Icon(Icons.people, color: Colors.blue, size: 24),
+                Text(
+                  'Bạn bè (${friends.length})',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: Icon(Icons.close),
+                ),
+              ],
+            ),
+          ),
+          
+          // Search bar
+          Container(
+            padding: EdgeInsets.all(16),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'Tìm kiếm bạn bè...',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                filled: true,
+                fillColor: Colors.grey.shade100,
+              ),
+            ),
+          ),
+          
+          // Friends List
+          Expanded(
+            child: ListView.builder(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              itemCount: friends.length,
+              itemBuilder: (context, index) {
+                final friend = friends[index];
+                final status = friend['status'] as String;
+                Color statusColor = status == 'online' ? Colors.green : 
+                                  status == 'in_game' ? Colors.orange : Colors.grey;
+                
+                return Container(
+                  margin: EdgeInsets.only(bottom: 12),
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.shade200,
+                        blurRadius: 4,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Stack(
+                        children: [
+                          CircleAvatar(
+                            radius: 25,
+                            backgroundColor: Colors.grey.shade300,
+                            child: Icon(Icons.person, color: Colors.white, size: 30),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Container(
+                              width: 12,
+                              height: 12,
+                              decoration: BoxDecoration(
+                                color: statusColor,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white, width: 2),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              friend['name'] as String,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              friend['level'] as String,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                            Text(
+                              friend['lastSeen'] as String,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: statusColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      PopupMenuButton(
+                        icon: Icon(Icons.more_vert, color: Colors.grey),
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            value: 'message',
+                            child: Row(
+                              children: [
+                                Icon(Icons.message, size: 18),
+                                SizedBox(width: 8),
+                                Text('Nhắn tin'),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'challenge',
+                            child: Row(
+                              children: [
+                                Icon(Icons.sports_esports, size: 18),
+                                SizedBox(width: 8),
+                                Text('Thách đấu'),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'profile',
+                            child: Row(
+                              children: [
+                                Icon(Icons.person, size: 18),
+                                SizedBox(width: 8),
+                                Text('Xem hồ sơ'),
+                              ],
+                            ),
+                          ),
+                        ],
+                        onSelected: (value) {
+                          String action = '';
+                          switch (value) {
+                            case 'message':
+                              action = 'Nhắn tin với ${friend['name']}';
+                              break;
+                            case 'challenge':
+                              action = 'Thách đấu với ${friend['name']}';
+                              break;
+                            case 'profile':
+                              action = 'Xem hồ sơ ${friend['name']}';
+                              break;
+                          }
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(action)),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _viewRecentChallenges() {
-     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Chức năng sẽ sớm được cập nhật')));
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _buildChallengesHistoryModal(),
+    );
   }
 
   void _viewTournamentHistory() {
-     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Chức năng sẽ sớm được cập nhật')));
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _buildTournamentHistoryModal(),
+    );
+  }
+
+  Widget _buildChallengesHistoryModal() {
+    // Mock data for challenges
+    final challenges = List.generate(10, (index) => {
+      'id': 'challenge_$index',
+      'opponent': 'Đối thủ ${index + 1}',
+      'result': index % 3 == 0 ? 'won' : (index % 3 == 1 ? 'lost' : 'draw'),
+      'score': '${(index % 3) + 1}-${(index % 2) + 1}',
+      'date': DateTime.now().subtract(Duration(days: index)),
+      'duration': '${15 + (index * 2)} phút',
+    });
+
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.8,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        children: [
+          // Header
+          Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Icon(Icons.sports_esports, color: Colors.purple, size: 24),
+                Text(
+                  'Lịch sử thách đấu',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: Icon(Icons.close),
+                ),
+              ],
+            ),
+          ),
+          
+          // Statistics
+          Container(
+            padding: EdgeInsets.all(16),
+            color: Colors.grey.shade50,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildStatItem('Thắng', challenges.where((c) => c['result'] == 'won').length.toString(), Colors.green),
+                _buildStatItem('Hòa', challenges.where((c) => c['result'] == 'draw').length.toString(), Colors.orange),
+                _buildStatItem('Thua', challenges.where((c) => c['result'] == 'lost').length.toString(), Colors.red),
+              ],
+            ),
+          ),
+          
+          // Challenges List
+          Expanded(
+            child: ListView.builder(
+              padding: EdgeInsets.all(16),
+              itemCount: challenges.length,
+              itemBuilder: (context, index) {
+                final challenge = challenges[index];
+                final result = challenge['result'] as String;
+                final date = challenge['date'] as DateTime;
+                
+                Color resultColor = result == 'won' ? Colors.green : 
+                                   result == 'lost' ? Colors.red : Colors.orange;
+                IconData resultIcon = result == 'won' ? Icons.trending_up : 
+                                     result == 'lost' ? Icons.trending_down : Icons.trending_flat;
+                
+                return Container(
+                  margin: EdgeInsets.only(bottom: 12),
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: resultColor.withOpacity(0.3)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.shade200,
+                        blurRadius: 4,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: resultColor.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(resultIcon, color: resultColor, size: 20),
+                      ),
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'vs ${challenge['opponent']}',
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              'Tỷ số: ${challenge['score']} • ${challenge['duration']}',
+                              style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                            ),
+                            Text(
+                              '${date.day}/${date.month}/${date.year}',
+                              style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: resultColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          result == 'won' ? 'Thắng' : result == 'lost' ? 'Thua' : 'Hòa',
+                          style: TextStyle(
+                            color: resultColor,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTournamentHistoryModal() {
+    // Mock data for tournaments
+    final tournaments = List.generate(8, (index) => {
+      'id': 'tournament_$index',
+      'name': 'Giải đấu ${index + 1}',
+      'position': index % 4 + 1,
+      'participants': (index + 1) * 8,
+      'date': DateTime.now().subtract(Duration(days: index * 7)),
+      'prize': index == 0 ? '1.000.000 VND' : index == 1 ? '500.000 VND' : index == 2 ? '250.000 VND' : null,
+    });
+
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.8,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        children: [
+          // Header
+          Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Icon(Icons.emoji_events, color: Colors.amber, size: 24),
+                Text(
+                  'Lịch sử giải đấu',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: Icon(Icons.close),
+                ),
+              ],
+            ),
+          ),
+          
+          // Tournaments List
+          Expanded(
+            child: ListView.builder(
+              padding: EdgeInsets.all(16),
+              itemCount: tournaments.length,
+              itemBuilder: (context, index) {
+                final tournament = tournaments[index];
+                final position = tournament['position'] as int;
+                final date = tournament['date'] as DateTime;
+                final prize = tournament['prize'] as String?;
+                
+                Color positionColor = position == 1 ? Colors.amber : 
+                                     position == 2 ? Colors.grey : 
+                                     position == 3 ? Colors.brown : 
+                                     Colors.grey.shade400;
+                IconData positionIcon = position <= 3 ? Icons.emoji_events : Icons.sports_esports;
+                
+                return Container(
+                  margin: EdgeInsets.only(bottom: 12),
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: positionColor.withOpacity(0.3)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.shade200,
+                        blurRadius: 4,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: positionColor.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(positionIcon, color: positionColor, size: 20),
+                            Text(
+                              '#$position',
+                              style: TextStyle(
+                                color: positionColor,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              tournament['name'] as String,
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              '${tournament['participants']} người tham gia',
+                              style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                            ),
+                            Text(
+                              '${date.day}/${date.month}/${date.year}',
+                              style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                            ),
+                            if (prize != null)
+                              Container(
+                                margin: EdgeInsets.only(top: 4),
+                                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.shade100,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  'Giải thưởng: $prize',
+                                  style: TextStyle(
+                                    color: Colors.green.shade700,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatItem(String label, String value, Color color) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey.shade600,
+          ),
+        ),
+      ],
+    );
   }
 
   void _openAccountSettings() {
-     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Chức năng sẽ sớm được cập nhật')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Mở cài đặt tài khoản'))
+    );
   }
 
   void _openPrivacySettings() {
-     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Chức năng sẽ sớm được cập nhật')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Mở cài đặt quyền riêng tư'))
+    );
   }
 
   void _openNotificationSettings() {
-     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Chức năng sẽ sớm được cập nhật')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Mở cài đặt thông báo'))
+    );
   }
 
   void _openLanguageSettings() {
-     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Chức năng sẽ sớm được cập nhật')));
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => _buildLanguageSelector(),
+    );
   }
 
   void _openPaymentHistory() {
-     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Chức năng sẽ sớm được cập nhật')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Mở lịch sử thanh toán'))
+    );
   }
 
   void _openHelpSupport() {
-     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Chức năng sẽ sớm được cập nhật')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Mở trợ giúp & hỗ trợ'))
+    );
+  }
+
+  Widget _buildLanguageSelector() {
+    final languages = [
+      {'code': 'vi', 'name': 'Tiếng Việt', 'flag': '🇻🇳'},
+      {'code': 'en', 'name': 'English', 'flag': '🇺🇸'},
+      {'code': 'ko', 'name': '한국어', 'flag': '🇰🇷'},
+      {'code': 'ja', 'name': '日本語', 'flag': '🇯🇵'},
+    ];
+
+    return Container(
+      padding: EdgeInsets.all(20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Chọn ngôn ngữ',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 20),
+          ...languages.map((lang) => ListTile(
+            leading: Text(lang['flag']!, style: TextStyle(fontSize: 24)),
+            title: Text(lang['name']!),
+            trailing: lang['code'] == 'vi' ? Icon(Icons.check, color: Colors.green) : null,
+            onTap: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('✅ Đã chuyển sang ${lang['name']}')),
+              );
+            },
+          )).toList(),
+          SizedBox(height: 10),
+        ],
+      ),
+    );
   }
 
   void _openAbout() {

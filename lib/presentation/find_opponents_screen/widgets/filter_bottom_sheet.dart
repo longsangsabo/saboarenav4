@@ -282,7 +282,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             contentPadding: EdgeInsets.zero,
             controlAffinity: ListTileControlAffinity.leading,
           );
-        }).toList(),
+        }),
       ],
     );
   }
