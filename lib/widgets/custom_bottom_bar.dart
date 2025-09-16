@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../routes/app_routes.dart';
 
 /// Navigation item data for bottom bar
 class BottomNavItem {
@@ -41,36 +42,36 @@ class CustomBottomBar extends StatelessWidget {
   });
 
   /// Default navigation items for the app
-  static const List<BottomNavItem> _defaultItems = [
+  static final List<BottomNavItem> _defaultItems = [
     BottomNavItem(
       icon: Icons.home_outlined,
       activeIcon: Icons.home,
       label: 'Trang chủ',
-      route: '/home-feed-screen',
+      route: AppRoutes.homeFeedScreen,
     ),
     BottomNavItem(
       icon: Icons.people_outline,
       activeIcon: Icons.people,
       label: 'Đối thủ',
-      route: '/find-opponents-screen',
+      route: AppRoutes.findOpponentsScreen,
     ),
     BottomNavItem(
       icon: Icons.emoji_events_outlined,
       activeIcon: Icons.emoji_events,
       label: 'Giải đấu',
-      route: '/tournament-list-screen',
+      route: AppRoutes.tournamentListScreen,
     ),
     BottomNavItem(
       icon: Icons.business_outlined,
       activeIcon: Icons.business,
       label: 'Câu lạc bộ',
-      route: '/club-profile-screen',
+      route: AppRoutes.clubProfileScreen,
     ),
     BottomNavItem(
       icon: Icons.person_outline,
       activeIcon: Icons.person,
       label: 'Cá nhân',
-      route: '/user-profile-screen',
+      route: AppRoutes.userProfileScreen,
     ),
   ];
 
@@ -81,7 +82,7 @@ class CustomBottomBar extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.bottomNavigationBarTheme.backgroundColor,
+        color: theme.bottomNavigationBarTheme.backgroundColor ?? colorScheme.surface,
         boxShadow: [
           BoxShadow(
             color: colorScheme.shadow.withValues(alpha: 0.1),

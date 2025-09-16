@@ -35,7 +35,7 @@ class _SignupScreenState extends State<SignupScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await AuthService.instance.signUp(
+      final response = await AuthService.instance.signUp(
         email: _emailController.text.trim(),
         password: _passwordController.text,
         fullName: _nameController.text.trim(),
@@ -43,13 +43,17 @@ class _SignupScreenState extends State<SignupScreen> {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Đăng ký thành công! Vui lòng đăng nhập.'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        Navigator.of(context).pop();
+        // Check if user is immediately confirmed (no email confirmation needed)
+        if (response.session != null && response.user != null) {
+          // User is logged in immediately, go to home
+          Navigator.of(context).pushNamedAndRemoveUntil(
+            '/home_feed_screen',
+            (route) => false,
+          );
+        } else {
+          // Email confirmation required
+          _showEmailConfirmationDialog();
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -65,6 +69,118 @@ class _SignupScreenState extends State<SignupScreen> {
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  void _showEmailConfirmationDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(
+                Icons.mark_email_unread,
+                color: Theme.of(context).primaryColor,
+                size: 24,
+              ),
+              SizedBox(width: 12),
+              Text(
+                'Xác nhận Email',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Đăng ký thành công! 🎉',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.green,
+                ),
+              ),
+              SizedBox(height: 12),
+              Text(
+                'Chúng tôi đã gửi email xác nhận đến:',
+                style: TextStyle(fontSize: 14),
+              ),
+              SizedBox(height: 8),
+              Container(
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey[300]!),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.email, size: 20, color: Colors.grey[600]),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _emailController.text.trim(),
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 16),
+              Text(
+                '📧 Vui lòng kiểm tra hộp thư và nhấn vào liên kết xác nhận để hoàn tất quá trình đăng ký.',
+                style: TextStyle(
+                  fontSize: 14,
+                  height: 1.4,
+                ),
+              ),
+              SizedBox(height: 12),
+              Container(
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue[50],
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.blue[200]!),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info, size: 20, color: Colors.blue[600]),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Không thấy email? Hãy kiểm tra thư mục Spam/Junk.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.blue[700],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+                Navigator.of(context).pop(); // Go back to login
+              },
+              child: Text('OK, đã hiểu'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
