@@ -256,16 +256,15 @@ class _FeedPostCardWidgetState extends State<FeedPostCardWidget>
   Widget _buildPostMedia(BuildContext context) {
     return Container(
       width: double.infinity,
-      constraints: BoxConstraints(
-        maxHeight: 50.h,
-      ),
+      margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.w),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          margin: EdgeInsets.symmetric(horizontal: 4.w),
+        borderRadius: BorderRadius.circular(12),
+        child: AspectRatio(
+          aspectRatio: 16 / 9, // Flexible aspect ratio
           child: CustomImageWidget(
             imageUrl: widget.post['imageUrl'].toString(),
             width: double.infinity,
+            height: double.infinity,
             fit: BoxFit.cover,
           ),
         ),

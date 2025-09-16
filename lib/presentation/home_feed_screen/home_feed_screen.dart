@@ -6,6 +6,8 @@ import '../../widgets/custom_app_bar.dart';
 
 import '../../models/post_model.dart';
 import '../../services/post_repository.dart';
+import '../../widgets/comments_modal.dart';
+import '../../widgets/share_bottom_sheet.dart';
 import './widgets/create_post_modal_widget.dart';
 import './widgets/empty_feed_widget.dart';
 import './widgets/feed_tab_widget.dart';
@@ -174,26 +176,88 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
     );
   }
 
-  void _handlePostAction(String action, Map<String, dynamic> post) {
+  Future<void> _handlePostAction(String action, Map<String, dynamic> post) async {
     switch (action) {
       case 'like':
-        setState(() {
-          post['isLiked'] = !(post['isLiked'] ?? false);
-          post['likeCount'] =
-              (post['likeCount'] ?? 0) + (post['isLiked'] ? 1 : -1);
-        });
+        await _handleLikeToggle(post);
         break;
       case 'comment':
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Mở trang bình luận')),
-        );
+        _showCommentsModal(post);
         break;
       case 'share':
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Đã chia sẻ bài viết')),
-        );
+        await _handleSharePost(post);
         break;
     }
+  }
+
+  Future<void> _handleLikeToggle(Map<String, dynamic> post) async {
+    try {
+      final postId = post['id'];
+      final currentlyLiked = post['isLiked'] ?? false;
+      
+      // Optimistic update
+      setState(() {
+        post['isLiked'] = !currentlyLiked;
+        post['likeCount'] = (post['likeCount'] ?? 0) + (!currentlyLiked ? 1 : -1);
+      });
+
+      // Call backend
+      if (!currentlyLiked) {
+        await _postRepository.likePost(postId);
+      } else {
+        await _postRepository.unlikePost(postId);
+      }
+      
+    } catch (e) {
+      // Revert optimistic update on error
+      setState(() {
+        post['isLiked'] = !post['isLiked'];
+        post['likeCount'] = (post['likeCount'] ?? 0) + (post['isLiked'] ? -1 : 1);
+      });
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi: $e')),
+        );
+      }
+    }
+  }
+
+  void _showCommentsModal(Map<String, dynamic> post) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => CommentsModal(
+        postId: post['id'],
+        postTitle: post['content'] ?? 'Bài viết',
+        onCommentAdded: () {
+          // Update comment count when new comment is added
+          setState(() {
+            post['commentCount'] = (post['commentCount'] ?? 0) + 1;
+          });
+        },
+        onCommentDeleted: () {
+          // Update comment count when comment is deleted
+          setState(() {
+            post['commentCount'] = ((post['commentCount'] ?? 0) - 1).clamp(0, double.infinity).toInt();
+          });
+        },
+      ),
+    );
+  }
+
+  Future<void> _handleSharePost(Map<String, dynamic> post) async {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => ShareBottomSheet(
+        postId: post['id'],
+        postTitle: post['content'] ?? 'Bài viết',
+        postContent: post['content'],
+        postImageUrl: post['imageUrl'],
+      ),
+    );
   }
 
   void _handleUserTap(Map<String, dynamic> post) {

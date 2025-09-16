@@ -31,6 +31,9 @@ class PostRepository {
         final imageUrls = item['image_urls'] as List?;
         final hashtags = item['hashtags'] as List?;
         
+        // Check if current user has liked this post
+        final isLiked = await hasUserLikedPost(item['id']);
+        
         posts.add(PostModel(
           id: item['id'],
           title: '', // No title in schema
@@ -44,6 +47,7 @@ class PostRepository {
           commentCount: item['comment_count'] ?? 0,
           shareCount: item['share_count'] ?? 0,
           tags: hashtags?.cast<String>(),
+          isLiked: isLiked,
         ));
       }
 
@@ -274,6 +278,116 @@ class PostRepository {
     } catch (e) {
       print('Error searching posts: $e');
       return [];
+    }
+  }
+
+  // Like a post
+  Future<void> likePost(String postId) async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) throw Exception('User not authenticated');
+
+      print('🧪 Attempting to like post: $postId');
+
+      // Insert like record using post_interactions table
+      await _supabase.from('post_interactions').insert({
+        'post_id': postId,
+        'user_id': user.id,
+        'interaction_type': 'like',
+      });
+
+      print('✅ Like record created successfully');
+
+      // The database trigger should automatically increment like_count
+      // But let's also do manual update as fallback
+      try {
+        final currentPost = await _supabase
+            .from('posts')
+            .select('like_count')
+            .eq('id', postId)
+            .single();
+        
+        final newCount = (currentPost['like_count'] as int? ?? 0) + 1;
+        
+        await _supabase
+            .from('posts')
+            .update({'like_count': newCount})
+            .eq('id', postId);
+            
+        print('✅ Like count updated manually to: $newCount');
+      } catch (updateError) {
+        print('⚠️ Manual like count update failed: $updateError');
+        // Don't rethrow - the trigger should handle it
+      }
+    } catch (e) {
+      print('❌ Error liking post: $e');
+      rethrow;
+    }
+  }
+
+  // Unlike a post
+  Future<void> unlikePost(String postId) async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) throw Exception('User not authenticated');
+
+      print('🧪 Attempting to unlike post: $postId');
+
+      // Delete like record from post_interactions table
+      await _supabase
+          .from('post_interactions')
+          .delete()
+          .eq('post_id', postId)
+          .eq('user_id', user.id)
+          .eq('interaction_type', 'like');
+
+      print('✅ Like record deleted successfully');
+
+      // The database trigger should automatically decrement like_count
+      // But let's also do manual update as fallback
+      try {
+        final currentPost = await _supabase
+            .from('posts')
+            .select('like_count')
+            .eq('id', postId)
+            .single();
+        
+        final newCount = ((currentPost['like_count'] as int? ?? 1) - 1).clamp(0, double.infinity).toInt();
+        
+        await _supabase
+            .from('posts')
+            .update({'like_count': newCount})
+            .eq('id', postId);
+            
+        print('✅ Like count updated manually to: $newCount');
+      } catch (updateError) {
+        print('⚠️ Manual like count update failed: $updateError');
+        // Don't rethrow - the trigger should handle it
+      }
+    } catch (e) {
+      print('❌ Error unliking post: $e');
+      rethrow;
+    }
+  }
+
+  // Check if user has liked a post
+  Future<bool> hasUserLikedPost(String postId) async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) return false;
+
+      final response = await _supabase
+          .from('post_interactions')
+          .select('id')
+          .eq('post_id', postId)
+          .eq('user_id', user.id)
+          .eq('interaction_type', 'like')
+          .maybeSingle();
+
+      return response != null;
+    } catch (e) {
+      print('Error checking if user liked post: $e');
+      return false;
     }
   }
 }
