@@ -1,11 +1,16 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../core/app_export.dart';
 import '../../models/user_profile.dart';
 import '../../services/auth_service.dart';
 import '../../services/user_service.dart';
+import '../../services/storage_service.dart';
+import '../../services/permission_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import './widgets/achievements_section_widget.dart';
 import './widgets/edit_profile_modal.dart';
@@ -31,10 +36,15 @@ class _UserProfileScreenState extends State<UserProfileScreen>
   // Services
   final UserService _userService = UserService.instance;
   final AuthService _authService = AuthService.instance;
+  final ImagePicker _imagePicker = ImagePicker();
 
   // Dynamic data from backend
   UserProfile? _userProfile;
   Map<String, dynamic> _socialData = {};
+  
+  // Temporary image states for immediate UI update
+  String? _tempCoverPhotoPath;
+  String? _tempAvatarPath;
 
   @override
   void initState() {
@@ -177,6 +187,14 @@ class _UserProfileScreenState extends State<UserProfileScreen>
     }
 
     final userDataMap = _userProfile!.toJson();
+    
+    // Merge with temporary images for immediate UI update
+    final displayUserData = Map<String, dynamic>.from(userDataMap);
+    
+    // Map database fields to widget expected keys
+    displayUserData['avatar'] = _tempAvatarPath ?? _userProfile!.avatarUrl;
+    displayUserData['coverPhoto'] = _tempCoverPhotoPath ?? _userProfile!.coverPhotoUrl;
+    displayUserData['displayName'] = _userProfile!.fullName;
 
     return Scaffold(
       backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
@@ -192,7 +210,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ProfileHeaderWidget(
-                    userData: userDataMap,
+                    userData: displayUserData,
                     onEditProfile: _showEditProfileModal,
                     onCoverPhotoTap: _changeCoverPhoto,
                     onAvatarTap: _changeAvatar,
@@ -330,9 +348,11 @@ class _UserProfileScreenState extends State<UserProfileScreen>
           try {
             // Cập nhật profile qua API
             await _userService.updateUserProfile(
+              fullName: updatedProfile.fullName,
               bio: updatedProfile.bio,
               phone: updatedProfile.phone,
               location: updatedProfile.location,
+              avatarUrl: updatedProfile.avatarUrl,
             );
             
             // Refresh local data
@@ -364,57 +384,6 @@ class _UserProfileScreenState extends State<UserProfileScreen>
   }
 
   void _changeCoverPhoto() {
-    _showImagePickerDialog(
-      title: 'Thay đổi ảnh bìa',
-      onImageSelected: (imagePath) async {
-        try {
-          // TODO: Implement cover photo upload
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('✅ Đã chọn ảnh bìa: ${imagePath.split('/').last}'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        } catch (e) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('❌ Lỗi cập nhật ảnh bìa: $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      },
-    );
-  }
-
-  void _changeAvatar() {
-    _showImagePickerDialog(
-      title: 'Thay đổi ảnh đại diện',
-      onImageSelected: (imagePath) async {
-        try {
-          // TODO: Implement avatar upload
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('✅ Đã chọn ảnh đại diện: ${imagePath.split('/').last}'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        } catch (e) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('❌ Lỗi cập nhật ảnh đại diện: $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      },
-    );
-  }
-
-  void _showImagePickerDialog({
-    required String title,
-    required Function(String) onImageSelected,
-  }) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
@@ -426,49 +395,437 @@ class _UserProfileScreenState extends State<UserProfileScreen>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              title,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
             SizedBox(height: 20),
+            Text(
+              'Thay đổi ảnh bìa',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 30),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _buildImageSourceOption(
                   icon: Icons.camera_alt,
-                  label: 'Camera',
-                  onTap: () {
-                    Navigator.pop(context);
-                    onImageSelected('camera_image_${DateTime.now().millisecondsSinceEpoch}.jpg');
-                  },
+                  label: 'Chụp ảnh',
+                  onTap: () => _pickCoverPhotoFromCamera(),
                 ),
                 _buildImageSourceOption(
                   icon: Icons.photo_library,
-                  label: 'Thư viện',
-                  onTap: () {
-                    Navigator.pop(context);
-                    onImageSelected('gallery_image_${DateTime.now().millisecondsSinceEpoch}.jpg');
-                  },
-                ),
-                _buildImageSourceOption(
-                  icon: Icons.delete,
-                  label: 'Xóa ảnh',
-                  color: Colors.red,
-                  onTap: () {
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('✅ Đã xóa ảnh')),
-                    );
-                  },
+                  label: 'Chọn ảnh',
+                  onTap: () => _pickCoverPhotoFromGallery(),
                 ),
               ],
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 30),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Hủy',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ),
+            SizedBox(height: 10),
           ],
         ),
       ),
     );
   }
+
+  void _changeAvatar() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            SizedBox(height: 20),
+            Text(
+              'Thay đổi ảnh đại diện',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 30),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildImageSourceOption(
+                  icon: Icons.camera_alt,
+                  label: 'Chụp ảnh',
+                  onTap: () => _pickAvatarFromCamera(),
+                ),
+                _buildImageSourceOption(
+                  icon: Icons.photo_library,
+                  label: 'Chọn ảnh',
+                  onTap: () => _pickAvatarFromGallery(),
+                ),
+                if (_userProfile?.avatarUrl != null)
+                  _buildImageSourceOption(
+                    icon: Icons.delete,
+                    label: 'Xóa ảnh',
+                    onTap: () => _removeAvatar(),
+                    color: Colors.red,
+                  ),
+              ],
+            ),
+            SizedBox(height: 30),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Hủy',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ),
+            SizedBox(height: 10),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Cover Photo Functions
+  Future<void> _pickCoverPhotoFromCamera() async {
+    Navigator.pop(context); // Đóng bottom sheet
+    
+    try {
+      // Kiểm tra quyền camera
+      final cameraGranted = await PermissionService.checkCameraPermission();
+      if (!cameraGranted) {
+        _showErrorMessage('Cần cấp quyền truy cập camera để chụp ảnh');
+        return;
+      }
+
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+        maxWidth: 1200,
+        maxHeight: 800,
+        imageQuality: 85,
+      );
+
+      if (image != null) {
+        setState(() {
+          _tempCoverPhotoPath = image.path;
+        });
+        _showSuccessMessage('✅ Đã chọn ảnh bìa từ camera');
+        // TODO: Upload to Supabase and update user profile
+        _uploadCoverPhoto(image.path);
+      }
+    } catch (e) {
+      _showErrorMessage('Lỗi khi chụp ảnh: $e');
+    }
+  }
+
+  Future<void> _pickCoverPhotoFromGallery() async {
+    Navigator.pop(context); // Đóng bottom sheet
+    
+    try {
+      // Kiểm tra quyền truy cập thư viện ảnh
+      final photosGranted = await PermissionService.checkPhotosPermission();
+      if (!photosGranted) {
+        _showPermissionDialog();
+        return;
+      }
+
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1200,
+        maxHeight: 800,
+        imageQuality: 85,
+      );
+
+      if (image != null) {
+        setState(() {
+          _tempCoverPhotoPath = image.path;
+        });
+        _showSuccessMessage('✅ Đã chọn ảnh bìa từ thư viện');
+        // TODO: Upload to Supabase and update user profile
+        _uploadCoverPhoto(image.path);
+      }
+    } catch (e) {
+      _showErrorMessage('Lỗi khi chọn ảnh: $e');
+    }
+  }
+
+  // Avatar Functions
+  Future<void> _pickAvatarFromCamera() async {
+    Navigator.pop(context); // Đóng bottom sheet
+    
+    try {
+      // Kiểm tra quyền camera
+      final cameraGranted = await PermissionService.checkCameraPermission();
+      if (!cameraGranted) {
+        _showErrorMessage('Cần cấp quyền truy cập camera để chụp ảnh');
+        return;
+      }
+
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+
+      if (image != null) {
+        setState(() {
+          _tempAvatarPath = image.path;
+        });
+        _showSuccessMessage('✅ Đã chọn ảnh đại diện từ camera');
+        // TODO: Upload to Supabase and update user profile
+        _uploadAvatar(image.path);
+      }
+    } catch (e) {
+      _showErrorMessage('Lỗi khi chụp ảnh: $e');
+    }
+  }
+
+  Future<void> _pickAvatarFromGallery() async {
+    Navigator.pop(context); // Đóng bottom sheet
+    
+    try {
+      // Kiểm tra quyền truy cập thư viện ảnh
+      final photosGranted = await PermissionService.checkPhotosPermission();
+      if (!photosGranted) {
+        _showPermissionDialog();
+        return;
+      }
+
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+
+      if (image != null) {
+        setState(() {
+          _tempAvatarPath = image.path;
+        });
+        _showSuccessMessage('✅ Đã chọn ảnh đại diện từ thư viện');
+        // TODO: Upload to Supabase and update user profile
+        _uploadAvatar(image.path);
+      }
+    } catch (e) {
+      _showErrorMessage('Lỗi khi chọn ảnh: $e');
+    }
+  }
+
+  void _removeAvatar() {
+    Navigator.pop(context); // Đóng bottom sheet
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Xóa ảnh đại diện'),
+        content: Text('Bạn có chắc chắn muốn xóa ảnh đại diện không?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Hủy'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              setState(() {
+                _tempAvatarPath = null;
+              });
+              _showSuccessMessage('✅ Đã xóa ảnh đại diện');
+              // TODO: Remove from Supabase and update user profile
+              _removeAvatarFromServer();
+            },
+            child: Text(
+              'Xóa',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Upload functions
+  Future<void> _uploadCoverPhoto(String imagePath) async {
+    try {
+      print('🚀 Uploading cover photo: $imagePath');
+      
+      // Get old cover photo URL to delete later
+      final oldCoverUrl = _userProfile?.coverPhotoUrl ?? '';
+      
+      // Upload to Supabase Storage and update database
+      final newCoverUrl = await StorageService.uploadCoverPhoto(File(imagePath));
+      
+      if (newCoverUrl != null) {
+        // Delete old cover photo if exists
+        if (oldCoverUrl.isNotEmpty) {
+          StorageService.deleteOldCoverPhoto(oldCoverUrl);
+        }
+        
+        // Update local state with new URL
+        setState(() {
+          _tempCoverPhotoPath = null; // Clear temp path
+          if (_userProfile != null) {
+            _userProfile = _userProfile!.copyWith(coverPhotoUrl: newCoverUrl);
+          }
+        });
+        
+        _showSuccessMessage('✅ Ảnh bìa đã được lưu thành công!');
+      } else {
+        _showErrorMessage('❌ Không thể tải lên ảnh bìa. Vui lòng thử lại.');
+      }
+    } catch (e) {
+      print('❌ Cover photo upload error: $e');
+      _showErrorMessage('Lỗi khi tải ảnh bìa: $e');
+    }
+  }
+
+  Future<void> _uploadAvatar(String imagePath) async {
+    try {
+      print('🚀 Uploading avatar: $imagePath');
+      
+      // Get old avatar URL to delete later
+      final oldAvatarUrl = _userProfile?.avatarUrl ?? '';
+      
+      // Upload to Supabase Storage and update database
+      final newAvatarUrl = await StorageService.uploadAvatar(File(imagePath));
+      
+      if (newAvatarUrl != null) {
+        // Delete old avatar if exists
+        if (oldAvatarUrl.isNotEmpty) {
+          StorageService.deleteOldAvatar(oldAvatarUrl);
+        }
+        
+        // Update local state with new URL
+        setState(() {
+          _tempAvatarPath = null; // Clear temp path
+          if (_userProfile != null) {
+            _userProfile = _userProfile!.copyWith(avatarUrl: newAvatarUrl);
+          }
+        });
+        
+        _showSuccessMessage('✅ Ảnh đại diện đã được lưu thành công!');
+      } else {
+        _showErrorMessage('❌ Không thể tải lên ảnh đại diện. Vui lòng thử lại.');
+      }
+    } catch (e) {
+      print('❌ Avatar upload error: $e');
+      _showErrorMessage('Lỗi khi tải ảnh đại diện: $e');
+    }
+  }
+
+  Future<void> _removeAvatarFromServer() async {
+    try {
+      print('🚀 Removing avatar from server');
+      
+      final oldAvatarUrl = _userProfile?.avatarUrl ?? '';
+      
+      if (oldAvatarUrl.isNotEmpty) {
+        // Delete from storage
+        await StorageService.deleteOldAvatar(oldAvatarUrl);
+        
+        // Update user profile in database to remove avatar URL
+        final user = Supabase.instance.client.auth.currentUser;
+        if (user != null) {
+          await Supabase.instance.client
+              .from('users')
+              .update({'avatar_url': null, 'updated_at': DateTime.now().toIso8601String()})
+              .eq('id', user.id);
+        }
+        
+        // Update local state
+        setState(() {
+          _tempAvatarPath = null;
+          if (_userProfile != null) {
+            _userProfile = _userProfile!.copyWith(avatarUrl: null);
+          }
+        });
+        
+        _showSuccessMessage('✅ Đã xóa ảnh đại diện');
+      }
+    } catch (e) {
+      print('❌ Avatar removal error: $e');
+      _showErrorMessage('Lỗi khi xóa ảnh đại diện: $e');
+    }
+  }
+
+  void _showSuccessMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+
+  void _showPermissionDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Cần cấp quyền truy cập'),
+          content: const Text(
+            'Ứng dụng cần quyền truy cập thư viện ảnh để bạn có thể chọn ảnh.\n\n'
+            'Vui lòng vào:\n'
+            'Cài đặt > Ứng dụng > SABO Arena > Quyền\n'
+            'và bật quyền "Ảnh và phương tiện"',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Hủy'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                PermissionService.openDeviceAppSettings(); // Mở cài đặt ứng dụng
+              },
+              child: const Text('Mở cài đặt'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showErrorMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+
+
 
   Widget _buildImageSourceOption({
     required IconData icon,

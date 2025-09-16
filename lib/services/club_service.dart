@@ -55,12 +55,12 @@ class ClubService {
     try {
       final response = await _supabase.from('club_members').select('''
             *,
-            user_profiles (*)
+            users (*)
           ''').eq('club_id', clubId).order('joined_at');
 
       return response
           .map<UserProfile>(
-              (json) => UserProfile.fromJson(json['user_profiles']))
+              (json) => UserProfile.fromJson(json['users']))
           .toList();
     } catch (error) {
       throw Exception('Failed to get club members: $error');

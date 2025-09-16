@@ -91,9 +91,9 @@ class MatchService {
           .from('matches')
           .select('''
             *,
-            player1:user_profiles!matches_player1_id_fkey (full_name),
-            player2:user_profiles!matches_player2_id_fkey (full_name),
-            winner:user_profiles!matches_winner_id_fkey (full_name),
+            player1:users!matches_player1_id_fkey (full_name),
+            player2:users!matches_player2_id_fkey (full_name),
+            winner:users!matches_winner_id_fkey (full_name),
             tournament:tournaments (title)
           ''')
           .eq('tournament_id', tournamentId)
@@ -112,9 +112,9 @@ class MatchService {
           .from('matches')
           .select('''
             *,
-            player1:user_profiles!matches_player1_id_fkey (full_name),
-            player2:user_profiles!matches_player2_id_fkey (full_name),
-            winner:user_profiles!matches_winner_id_fkey (full_name),
+            player1:users!matches_player1_id_fkey (full_name),
+            player2:users!matches_player2_id_fkey (full_name),
+            winner:users!matches_winner_id_fkey (full_name),
             tournament:tournaments (title)
           ''')
           .or('player1_id.eq.$userId,player2_id.eq.$userId')
@@ -133,9 +133,9 @@ class MatchService {
           .from('matches')
           .select('''
             *,
-            player1:user_profiles!matches_player1_id_fkey (full_name),
-            player2:user_profiles!matches_player2_id_fkey (full_name),
-            winner:user_profiles!matches_winner_id_fkey (full_name),
+            player1:users!matches_player1_id_fkey (full_name),
+            player2:users!matches_player2_id_fkey (full_name),
+            winner:users!matches_winner_id_fkey (full_name),
             tournament:tournaments (title)
           ''')
           .eq('status', 'in_progress')
@@ -154,9 +154,9 @@ class MatchService {
           .from('matches')
           .select('''
             *,
-            player1:user_profiles!matches_player1_id_fkey (full_name),
-            player2:user_profiles!matches_player2_id_fkey (full_name),
-            winner:user_profiles!matches_winner_id_fkey (full_name),
+            player1:users!matches_player1_id_fkey (full_name),
+            player2:users!matches_player2_id_fkey (full_name),
+            winner:users!matches_winner_id_fkey (full_name),
             tournament:tournaments (title)
           ''')
           .eq('status', 'pending')
@@ -198,9 +198,9 @@ class MatchService {
           .eq('id', matchId)
           .select('''
             *,
-            player1:user_profiles!matches_player1_id_fkey (full_name),
-            player2:user_profiles!matches_player2_id_fkey (full_name),
-            winner:user_profiles!matches_winner_id_fkey (full_name),
+            player1:users!matches_player1_id_fkey (full_name),
+            player2:users!matches_player2_id_fkey (full_name),
+            winner:users!matches_winner_id_fkey (full_name),
             tournament:tournaments (title)
           ''').single();
 
@@ -225,9 +225,9 @@ class MatchService {
           .eq('id', matchId)
           .select('''
             *,
-            player1:user_profiles!matches_player1_id_fkey (full_name),
-            player2:user_profiles!matches_player2_id_fkey (full_name),
-            winner:user_profiles!matches_winner_id_fkey (full_name),
+            player1:users!matches_player1_id_fkey (full_name),
+            player2:users!matches_player2_id_fkey (full_name),
+            winner:users!matches_winner_id_fkey (full_name),
             tournament:tournaments (title)
           ''')
           .single();

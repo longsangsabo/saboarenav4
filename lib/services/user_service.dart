@@ -96,11 +96,13 @@ class UserService {
 
   Future<UserProfile> updateUserProfile({
     String? username,
+    String? fullName,
     String? bio,
     String? phone,
     DateTime? dateOfBirth,
     String? skillLevel,
     String? location,
+    String? avatarUrl,
   }) async {
     try {
       final user = _supabase.auth.currentUser;
@@ -108,6 +110,7 @@ class UserService {
 
       final updateData = <String, dynamic>{};
       if (username != null) updateData['username'] = username;
+      if (fullName != null) updateData['full_name'] = fullName;
       if (bio != null) updateData['bio'] = bio;
       if (phone != null) updateData['phone'] = phone;
       if (dateOfBirth != null) {
@@ -115,6 +118,13 @@ class UserService {
       }
       if (skillLevel != null) updateData['skill_level'] = skillLevel;
       if (location != null) updateData['location'] = location;
+      if (avatarUrl != null) {
+        if (avatarUrl == 'REMOVE_AVATAR') {
+          updateData['avatar_url'] = null;
+        } else {
+          updateData['avatar_url'] = avatarUrl;
+        }
+      }
 
       updateData['updated_at'] = DateTime.now().toIso8601String();
 
@@ -140,11 +150,11 @@ class UserService {
           'avatars/${user.id}/${DateTime.now().millisecondsSinceEpoch}_$fileName';
 
       await _supabase.storage
-          .from('user-content')
+          .from('user-images')
           .uploadBinary(filePath, Uint8List.fromList(imageBytes));
 
       final publicUrl =
-          _supabase.storage.from('user-content').getPublicUrl(filePath);
+          _supabase.storage.from('user-images').getPublicUrl(filePath);
 
       // Update user profile with new avatar URL
       await _supabase
@@ -154,6 +164,32 @@ class UserService {
       return publicUrl;
     } catch (error) {
       throw Exception('Failed to upload avatar: $error');
+    }
+  }
+
+  Future<String?> uploadCoverPhoto(List<int> imageBytes, String fileName) async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) throw Exception('User not authenticated');
+
+      final filePath =
+          'covers/${user.id}/${DateTime.now().millisecondsSinceEpoch}_$fileName';
+
+      await _supabase.storage
+          .from('user-images')
+          .uploadBinary(filePath, Uint8List.fromList(imageBytes));
+
+      final publicUrl =
+          _supabase.storage.from('user-images').getPublicUrl(filePath);
+
+      // Update user profile with new cover photo URL
+      await _supabase
+          .from('users')
+          .update({'cover_photo_url': publicUrl}).eq('id', user.id);
+
+      return publicUrl;
+    } catch (error) {
+      throw Exception('Failed to upload cover photo: $error');
     }
   }
 
