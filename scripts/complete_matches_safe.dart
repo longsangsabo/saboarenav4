@@ -53,9 +53,9 @@ Future<void> main() async {
         final isPlayer1 = match['player1_id'] == longsangId;
         
         // longsang063 wins 70% of time
-        final longsangWins_thisMatch = random.nextDouble() < 0.7;
+        final longsangwinsThismatch = random.nextDouble() < 0.7;
         
-        if (longsangWins_thisMatch) {
+        if (longsangwinsThismatch) {
           longsangWins++;
           if (isPlayer1) {
             player1Score = 7;

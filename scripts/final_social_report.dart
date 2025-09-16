@@ -28,7 +28,7 @@ Future<void> main() async {
     print('   🎖️  Rank: ${targetUser['rank']}');
     
     // 2. Social Network Stats
-    print('\n' + '=' * 70);
+    print('\n${'=' * 70}');
     print('👥 SOCIAL NETWORK:');
     
     final followingUsers = await supabase
@@ -52,7 +52,7 @@ Future<void> main() async {
     }
     
     // 3. Posts & Content
-    print('\n' + '=' * 70);
+    print('\n${'=' * 70}');
     print('📝 POSTS & CONTENT:');
     
     final userPosts = await supabase
@@ -73,7 +73,7 @@ Future<void> main() async {
     }
     
     // 4. Comments Activity
-    print('\n' + '=' * 70);
+    print('\n${'=' * 70}');
     print('💬 COMMENTS ACTIVITY:');
     
     final userComments = await supabase
@@ -86,13 +86,13 @@ Future<void> main() async {
     for (int i = 0; i < userComments.length && i < 5; i++) {
       final comment = userComments[i];
       final postAuthor = comment['posts']['users']['display_name'];
-      final postContent = comment['posts']['content'].toString().substring(0, 30) + '...';
-      print('   ${i + 1}. On ${postAuthor}\'s post: "$postContent"');
+      final postContent = '${comment['posts']['content'].toString().substring(0, 30)}...';
+      print('   ${i + 1}. On $postAuthor\'s post: "$postContent"');
       print('      💬 "${comment['content']}"');
     }
     
     // 5. Community Mentions
-    print('\n' + '=' * 70);
+    print('\n${'=' * 70}');
     print('📢 COMMUNITY MENTIONS:');
     
     final mentionPosts = await supabase
@@ -107,12 +107,12 @@ Future<void> main() async {
       final content = mention['content'].toString().length > 50
           ? '${mention['content'].toString().substring(0, 50)}...'
           : mention['content'].toString();
-      print('   📝 ${author}: "$content"');
+      print('   📝 $author: "$content"');
       print('      👍 ${mention['like_count']} likes | 💬 ${mention['comment_count']} comments');
     }
     
     // 6. Tournament & Match Activity
-    print('\n' + '=' * 70);
+    print('\n${'=' * 70}');
     print('🏆 TOURNAMENT & MATCH ACTIVITY:');
     
     final tournaments = await supabase
@@ -139,7 +139,7 @@ Future<void> main() async {
     }
     
     // 7. Club Activity
-    print('\n' + '=' * 70);
+    print('\n${'=' * 70}');
     print('🏛️  CLUB ACTIVITY:');
     
     final clubMemberships = await supabase
@@ -165,7 +165,7 @@ Future<void> main() async {
     }
     
     // 8. Final Summary
-    print('\n' + '=' * 70);
+    print('\n${'=' * 70}');
     print('🎉 FINAL SOCIAL ENGAGEMENT SUMMARY:');
     print('=' * 70);
     

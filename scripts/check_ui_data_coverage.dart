@@ -105,13 +105,13 @@ Future<void> main() async {
     }
     
     print('\n📊 UI SCREEN COVERAGE ANALYSIS:');
-    print('   🏠 Home Screen: ${posts.length > 0 ? '✅ GOOD' : '❌ NEED POSTS'}');
+    print('   🏠 Home Screen: ${posts.isNotEmpty ? '✅ GOOD' : '❌ NEED POSTS'}');
     print('   👤 Profile Screen: ${user['bio'] != null ? '✅ GOOD' : '⚠️ BASIC'}');
-    print('   🏆 Matches Screen: ${matches.length > 0 ? '✅ GOOD' : '❌ NO MATCHES'}');
+    print('   🏆 Matches Screen: ${matches.isNotEmpty ? '✅ GOOD' : '❌ NO MATCHES'}');
     print('   🤝 Social Screen: ${followers.count > 0 ? '✅ GOOD' : '❌ NO FOLLOWERS'}');
-    print('   🏆 Tournament Screen: ${tournamentParticipations.length > 0 ? '✅ GOOD' : '❌ NOT JOINED'}');
-    print('   🏛️ Club Screen: ${clubMemberships.length > 0 ? '✅ GOOD' : '❌ NOT MEMBER'}');
-    print('   🏅 Achievement Screen: ${achievements.length > 0 ? '✅ GOOD' : '❌ NO ACHIEVEMENTS'}');
+    print('   🏆 Tournament Screen: ${tournamentParticipations.isNotEmpty ? '✅ GOOD' : '❌ NOT JOINED'}');
+    print('   🏛️ Club Screen: ${clubMemberships.isNotEmpty ? '✅ GOOD' : '❌ NOT MEMBER'}');
+    print('   🏅 Achievement Screen: ${achievements.isNotEmpty ? '✅ GOOD' : '❌ NO ACHIEVEMENTS'}');
     
     print('\n🎯 MISSING DATA FOR UI TESTING:');
     if (user['bio'] == null) print('   • User bio and detailed profile info');

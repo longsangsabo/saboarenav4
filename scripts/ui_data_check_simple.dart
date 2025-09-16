@@ -34,8 +34,8 @@ Future<void> main() async {
         .or('player1_id.eq.$userId,player2_id.eq.$userId')
         .order('created_at', ascending: false);
     
-    print('   ${matches.length > 0 ? '✅' : '❌'} Total matches: ${matches.length}');
-    if (matches.length > 0) {
+    print('   ${matches.isNotEmpty ? '✅' : '❌'} Total matches: ${matches.length}');
+    if (matches.isNotEmpty) {
       print('   ✅ Recent matches for scrolling test:');
       for (var match in matches.take(3)) {
         final score = '${match['player1_score'] ?? '?'}-${match['player2_score'] ?? '?'}';
@@ -74,7 +74,7 @@ Future<void> main() async {
         .select('*')
         .eq('user_id', userId);
     
-    print('   ${tournamentParticipations.length > 0 ? '✅' : '❌'} Participations: ${tournamentParticipations.length}');
+    print('   ${tournamentParticipations.isNotEmpty ? '✅' : '❌'} Participations: ${tournamentParticipations.length}');
     if (tournamentParticipations.isEmpty) {
       print('   ❌ MISSING: Not joined any tournaments');
     }
@@ -85,7 +85,7 @@ Future<void> main() async {
         .select('*')
         .eq('user_id', userId);
     
-    print('   ${clubMemberships.length > 0 ? '✅' : '❌'} Memberships: ${clubMemberships.length}');
+    print('   ${clubMemberships.isNotEmpty ? '✅' : '❌'} Memberships: ${clubMemberships.length}');
     if (clubMemberships.isEmpty) {
       print('   ❌ MISSING: Not member of any clubs');
     }
@@ -96,7 +96,7 @@ Future<void> main() async {
         .select('*')
         .eq('user_id', userId);
     
-    print('   ${achievements.length > 0 ? '✅' : '❌'} Unlocked: ${achievements.length}');
+    print('   ${achievements.isNotEmpty ? '✅' : '❌'} Unlocked: ${achievements.length}');
     if (achievements.isEmpty) {
       print('   ❌ MISSING: No achievements unlocked');
     }
@@ -105,23 +105,41 @@ Future<void> main() async {
     final readyScreens = [];
     final missingScreens = [];
     
-    if (user['bio'] != null) readyScreens.add('Profile (complete)');
-    else missingScreens.add('Profile (missing bio)');
+    if (user['bio'] != null) {
+      readyScreens.add('Profile (complete)');
+    } else {
+      missingScreens.add('Profile (missing bio)');
+    }
     
-    if (matches.length > 0) readyScreens.add('Matches');
-    else missingScreens.add('Matches');
+    if (matches.isNotEmpty) {
+      readyScreens.add('Matches');
+    } else {
+      missingScreens.add('Matches');
+    }
     
-    if (followers.count > 0 && posts.length > 0) readyScreens.add('Social');
-    else missingScreens.add('Social');
+    if (followers.count > 0 && posts.isNotEmpty) {
+      readyScreens.add('Social');
+    } else {
+      missingScreens.add('Social');
+    }
     
-    if (tournamentParticipations.length > 0) readyScreens.add('Tournaments');
-    else missingScreens.add('Tournaments');
+    if (tournamentParticipations.isNotEmpty) {
+      readyScreens.add('Tournaments');
+    } else {
+      missingScreens.add('Tournaments');
+    }
     
-    if (clubMemberships.length > 0) readyScreens.add('Clubs');
-    else missingScreens.add('Clubs');
+    if (clubMemberships.isNotEmpty) {
+      readyScreens.add('Clubs');
+    } else {
+      missingScreens.add('Clubs');
+    }
     
-    if (achievements.length > 0) readyScreens.add('Achievements');
-    else missingScreens.add('Achievements');
+    if (achievements.isNotEmpty) {
+      readyScreens.add('Achievements');
+    } else {
+      missingScreens.add('Achievements');
+    }
     
     print('\n✅ READY FOR TESTING: ${readyScreens.join(', ')}');
     print('❌ NEED DATA FOR: ${missingScreens.join(', ')}');

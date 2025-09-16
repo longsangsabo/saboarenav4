@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 
 import '../../models/user_profile.dart';
 import '../../services/user_service.dart';

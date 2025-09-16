@@ -93,7 +93,7 @@ Future<void> main() async {
     
     // Tạo thêm comments cho mỗi post
     for (var post in userPosts) {
-      final postContent = post['content'].toString().substring(0, 30) + '...';
+      final postContent = '${post['content'].toString().substring(0, 30)}...';
       print('   📝 Adding comments to: "$postContent"');
       
       final newComments = [

@@ -241,7 +241,7 @@ Future<void> main() async {
         .select('count')
         .count();
     
-    final longsangPosts_count = await supabase
+    final longsangpostsCount = await supabase
         .from('posts')
         .select('count')
         .eq('user_id', longsang['id'])
@@ -250,7 +250,7 @@ Future<void> main() async {
     print('📱 HOME TAB CONTENT:');
     print('   📝 Total posts: ${totalPosts.count}');
     print('   💬 Total comments: ${totalComments.count}');
-    print('   👤 longsang063 posts: ${longsangPosts_count.count}');
+    print('   👤 longsang063 posts: ${longsangpostsCount.count}');
     print('   🎯 Posts created this session: $postsCreated');
     
     print('\n🎮 HOME FEED FEATURES:');

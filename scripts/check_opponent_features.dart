@@ -18,7 +18,7 @@ Future<void> main() async {
           .from('matches')
           .select('id, status, match_type')
           .limit(1);
-      print('   ✅ matches table: Có (${matches.length > 0 ? 'có data' : 'empty'})');
+      print('   ✅ matches table: Có (${matches.isNotEmpty ? 'có data' : 'empty'})');
     } catch (e) {
       print('   ❌ matches table: Error - $e');
     }

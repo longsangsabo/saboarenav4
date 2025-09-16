@@ -41,7 +41,7 @@ Future<void> main() async {
     for (var post in otherPosts) {
       final authorName = post['users']['display_name'];
       final postContent = post['content'].toString().length > 40 
-          ? post['content'].toString().substring(0, 40) + '...'
+          ? '${post['content'].toString().substring(0, 40)}...'
           : post['content'].toString();
       
       final supportiveComments = [
@@ -60,8 +60,8 @@ Future<void> main() async {
         'content': randomComment,
       }]);
       
-      print('   ✅ Commented on ${authorName}\'s post: "$postContent"');
-      print('      💬 "${randomComment}"');
+      print('   ✅ Commented on $authorName\'s post: "$postContent"');
+      print('      💬 "$randomComment"');
       commentCount++;
     }
     

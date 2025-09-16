@@ -97,7 +97,7 @@ Future<void> main() async {
     print('   • Join tournaments');
     print('   • Explore clubs');
     
-    print('\n' + '=' * 50);
+    print('\n${'=' * 50}');
     print('🏆 MISSION ACCOMPLISHED!');
     print('Database has realistic data for comprehensive app testing.');
     

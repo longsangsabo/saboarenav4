@@ -21,9 +21,9 @@ Future<void> main() async {
     if (existingMatches.isNotEmpty) {
       final match = existingMatches.first;
       print('   Current columns:');
-      match.keys.forEach((key) {
+      for (var key in match.keys) {
         print('   • $key: ${match[key]?.runtimeType ?? 'null'}');
-      });
+      }
     }
     
     print('\n🚀 2. ENHANCED MATCHES TABLE DESIGN:');

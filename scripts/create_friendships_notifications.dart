@@ -162,18 +162,18 @@ Future<void> main() async {
     
     for (var post in friendPosts) {
       final authorName = post['users']['display_name'];
-      final postContent = post['content'].toString().substring(0, 30) + '...';
+      final postContent = '${post['content'].toString().substring(0, 30)}...';
       
       final friendlyComments = [
         {
           'post_id': post['id'],
           'user_id': userId,
-          'content': 'Great post ${authorName}! Keep it up! 💪',
+          'content': 'Great post $authorName! Keep it up! 💪',
         }
       ];
       
       await supabase.from('comments').insert(friendlyComments);
-      print('   ✅ Commented on ${authorName}\'s post: "$postContent"');
+      print('   ✅ Commented on $authorName\'s post: "$postContent"');
     }
     
     print('\n🎉 4. TỔNG KẾT FRIENDSHIPS & SOCIAL:');

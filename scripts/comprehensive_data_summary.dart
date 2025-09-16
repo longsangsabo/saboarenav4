@@ -31,7 +31,7 @@ Future<void> main() async {
     print('   💬 Total Comments: ${overviewData[5].count}');
     
     // 2. CHI TIẾT USER longsang063@gmail.com
-    print('\n' + '=' * 60);
+    print('\n${'=' * 60}');
     print('🎯 TEST USER: longsang063@gmail.com');
     print('=' * 60);
     
@@ -164,7 +164,7 @@ Future<void> main() async {
     }
     
     // 4. TỔNG KẾT
-    print('\n' + '=' * 60);
+    print('\n${'=' * 60}');
     print('🎉 TEST DATA SETUP COMPLETE!');
     print('=' * 60);
     

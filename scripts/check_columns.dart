@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:supabase/supabase.dart';
 
 Future<void> main() async {
