@@ -366,22 +366,50 @@ class UserService {
     required double radiusInKm,
   }) async {
     try {
-      final response = await _supabase.rpc(
-        'find_nearby_users',
-        params: {
-          'current_user_id': _supabase.auth.currentUser!.id,
-          'user_lat': latitude,
-          'user_lon': longitude,
-          'radius_km': radiusInKm,
-        },
-      );
+      // First try using the get_nearby_players function if it exists
+      try {
+        final response = await _supabase.rpc(
+          'get_nearby_players',
+          params: {
+            'center_lat': latitude,
+            'center_lng': longitude,
+            'radius_km': radiusInKm.round(),
+          },
+        );
 
-      if (response is List) {
-        return response
-            .map<UserProfile>((json) => UserProfile.fromJson(json))
-            .toList();
+        if (response is List && response.isNotEmpty) {
+          // The response from get_nearby_players function doesn't return full user profile
+          // We need to get full user profiles by user_ids
+          List<String> userIds = response.map((item) => item['user_id'].toString()).toList();
+          
+          final usersResponse = await _supabase
+              .from('users')
+              .select()
+              .filter('id', 'in', userIds);
+              
+          return usersResponse
+              .map<UserProfile>((json) => UserProfile.fromJson(json))
+              .toList();
+        }
+      } catch (rpcError) {
+        print('RPC function get_nearby_players not available, using fallback: $rpcError');
       }
-      return [];
+      
+      // Fallback: Get active users (simplified approach without location filtering)
+      final currentUser = _supabase.auth.currentUser;
+      if (currentUser == null) return [];
+      
+      final response = await _supabase
+          .from('users')
+          .select()
+          .neq('id', currentUser.id)
+          .order('elo_rating', ascending: false)
+          .limit(20);
+
+      return response
+          .map<UserProfile>((json) => UserProfile.fromJson(json))
+          .toList();
+          
     } catch (error) {
       // It's good practice to log the error for debugging
       print('Error finding nearby opponents: $error');

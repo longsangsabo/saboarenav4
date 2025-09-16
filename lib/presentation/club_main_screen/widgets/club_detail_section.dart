@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../models/club.dart';
 import '../../../models/club_member.dart';
 import '../../../models/club_tournament.dart';
+import '../../../services/supabase_service.dart';
 
 class ClubDetailSection extends StatefulWidget {
   final Club club;
@@ -830,6 +831,20 @@ class _ClubDetailSectionState extends State<ClubDetailSection>
       'Điều hòa',
       'Camera an ninh',
     ];
+  }
+
+  Future<Map<String, dynamic>?> _getCurrentUser() async {
+    try {
+      final response = await SupabaseService.instance.client
+          .from('users')
+          .select('id, display_name, username, avatar_url')
+          .eq('id', SupabaseService.instance.client.auth.currentUser?.id ?? '')
+          .single();
+      return response;
+    } catch (e) {
+      print('Error getting current user: $e');
+      return null;
+    }
   }
 
   List<ClubMember> _getMockMembers() {

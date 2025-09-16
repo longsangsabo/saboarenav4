@@ -4,8 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sizer/sizer.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/app_export.dart';
+import '../../../services/post_repository.dart';
+import '../../../services/user_service.dart';
 
 class CreatePostModalWidget extends StatefulWidget {
   final VoidCallback? onPostCreated;
@@ -23,12 +26,31 @@ class _CreatePostModalWidgetState extends State<CreatePostModalWidget> {
   final TextEditingController _textController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
   final ImagePicker _imagePicker = ImagePicker();
+  final PostRepository _postRepository = PostRepository();
 
   List<CameraDescription> _cameras = [];
   CameraController? _cameraController;
   XFile? _selectedImage;
   bool _isLoading = false;
   bool _showCamera = false;
+
+  Future<Map<String, dynamic>?> _getUserData() async {
+    try {
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user == null) return null;
+      
+      final response = await Supabase.instance.client
+          .from('users')
+          .select('display_name, username')
+          .eq('id', user.id)
+          .maybeSingle();
+      
+      return response;
+    } catch (e) {
+      print('Error fetching user data: $e');
+      return null;
+    }
+  }
 
   @override
   void initState() {
@@ -190,17 +212,47 @@ class _CreatePostModalWidgetState extends State<CreatePostModalWidget> {
 
     setState(() => _isLoading = true);
 
-    // Simulate post creation
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      // Extract hashtags from content
+      final content = _textController.text.trim();
+      final hashtags = RegExp(r'#\w+')
+          .allMatches(content)
+          .map((match) => match.group(0)!)
+          .toList();
 
-    setState(() => _isLoading = false);
-
-    if (mounted) {
-      Navigator.pop(context);
-      widget.onPostCreated?.call();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Đã đăng bài viết thành công!')),
+      // Create the post
+      final post = await _postRepository.createPost(
+        content: content,
+        imageUrl: _selectedImage?.path,
+        hashtags: hashtags.isNotEmpty ? hashtags : null,
+        locationName: _locationController.text.trim().isNotEmpty 
+            ? _locationController.text.trim() 
+            : null,
       );
+
+      setState(() => _isLoading = false);
+
+      if (mounted) {
+        if (post != null) {
+          Navigator.pop(context);
+          widget.onPostCreated?.call();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Đã đăng bài viết thành công!')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Lỗi đăng bài viết. Vui lòng thử lại!')),
+          );
+        }
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi đăng bài viết: $e')),
+        );
+      }
     }
   }
 
@@ -354,11 +406,26 @@ class _CreatePostModalWidgetState extends State<CreatePostModalWidget> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Nguyễn Văn A',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                  FutureBuilder<Map<String, dynamic>?>(
+                    future: _getUserData(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData && snapshot.data != null) {
+                        final userData = snapshot.data!;
+                        return Text(
+                          userData['display_name'] as String? ?? 
+                          userData['username'] as String? ?? 'Anonymous',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        );
+                      }
+                      return Text(
+                        'Loading...',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      );
+                    },
                   ),
                   Container(
                     padding:
