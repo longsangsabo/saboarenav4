@@ -9,13 +9,13 @@ class EnvironmentConfig {
     switch (environment) {
       case 'production':
         return const String.fromEnvironment('SUPABASE_URL', 
-               defaultValue: 'https://your-production-project.supabase.co');
+               defaultValue: 'https://mogjjvscxjwvhtpkrlqr.supabase.co');
       case 'staging':
         return const String.fromEnvironment('SUPABASE_URL_STAGING', 
-               defaultValue: 'https://your-staging-project.supabase.co');
+               defaultValue: 'https://mogjjvscxjwvhtpkrlqr.supabase.co');
       default:
         return const String.fromEnvironment('SUPABASE_URL_DEV', 
-               defaultValue: 'https://demo-project.supabase.co');
+               defaultValue: 'https://mogjjvscxjwvhtpkrlqr.supabase.co');
     }
   }
   
@@ -23,13 +23,13 @@ class EnvironmentConfig {
     switch (environment) {
       case 'production':
         return const String.fromEnvironment('SUPABASE_ANON_KEY', 
-               defaultValue: 'your-production-anon-key');
+               defaultValue: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vZ2pqdnNjeGp3dmh0cGtybHFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc5MTk1ODAsImV4cCI6MjA3MzQ5NTU4MH0.u1urXd3uiT0fuqWlJ1Nhp7uJhgdiyOdLSdSWJWczHoQ');
       case 'staging':
         return const String.fromEnvironment('SUPABASE_ANON_KEY_STAGING', 
-               defaultValue: 'your-staging-anon-key');
+               defaultValue: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vZ2pqdnNjeGp3dmh0cGtybHFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc5MTk1ODAsImV4cCI6MjA3MzQ5NTU4MH0.u1urXd3uiT0fuqWlJ1Nhp7uJhgdiyOdLSdSWJWczHoQ');
       default:
         return const String.fromEnvironment('SUPABASE_ANON_KEY_DEV', 
-               defaultValue: 'demo-anon-key-for-development');
+               defaultValue: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vZ2pqdnNjeGp3dmh0cGtybHFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc5MTk1ODAsImV4cCI6MjA3MzQ5NTU4MH0.u1urXd3uiT0fuqWlJ1Nhp7uJhgdiyOdLSdSWJWczHoQ');
     }
   }
   
