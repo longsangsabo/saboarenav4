@@ -8,7 +8,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/app_export.dart';
 import '../../../services/post_repository.dart';
-import '../../../services/user_service.dart';
 
 class CreatePostModalWidget extends StatefulWidget {
   final VoidCallback? onPostCreated;

@@ -2,7 +2,13 @@ import 'package:flutter/material.dart';
 // Removed Sizer dependency
 import '../../core/layout/responsive.dart';
 
-import '../../core/app_export.dart';
+import 'package:sabo_arena/core/app_export.dart';
+
+import 'widgets/tournament_management_panel.dart';
+import 'widgets/tournament_bracket_view.dart';
+import 'widgets/participant_management_view.dart';
+import 'widgets/match_management_view.dart';
+import 'widgets/tournament_stats_view.dart';
 import '../../widgets/custom_bottom_bar.dart';
 import './widgets/participants_list_widget.dart';
 import './widgets/prize_pool_widget.dart';
@@ -262,6 +268,7 @@ Giải đấu được tổ chức tại Câu lạc bộ Billiards Sài Gòn v�
               tournament: _tournamentData,
               scrollController: _scrollController,
               onShareTap: _handleShareTournament,
+              onMenuAction: _handleMenuAction,
             ),
           ];
         },
@@ -712,5 +719,115 @@ Giải đấu được tổ chức tại Câu lạc bộ Billiards Sài Gòn v�
         (route) => false,
       );
     }
+  }
+
+  void _showBracketView() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => TournamentBracketView(
+        tournamentId: _tournamentData['id'] as String,
+        format: _tournamentData['format'] as String,
+        totalParticipants: _tournamentData['currentParticipants'] as int,
+        isEditable: _canManageTournament(),
+      ),
+    );
+  }
+
+  void _showParticipantManagement() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => ParticipantManagementView(
+        tournamentId: _tournamentData['id'] as String,
+        tournamentStatus: _tournamentData['status'] as String,
+        maxParticipants: _tournamentData['maxParticipants'] as int,
+        canManage: _canManageTournament(),
+      ),
+    );
+  }
+
+  void _showManagementPanel() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => TournamentManagementPanel(
+        tournamentId: _tournamentData['id'] as String,
+        tournamentStatus: _tournamentData['status'] as String,
+        onStatusChanged: () {
+          // Reload tournament data if needed
+          setState(() {});
+        },
+      ),
+    );
+  }
+
+  void _showMatchManagement() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => MatchManagementView(
+        tournamentId: _tournamentData['id'] as String,
+        tournamentStatus: _tournamentData['status'] as String,
+        canManage: _canManageTournament(),
+      ),
+    );
+  }
+
+  void _showTournamentStats() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => TournamentStatsView(
+        tournamentId: _tournamentData['id'] as String,
+        tournamentStatus: _tournamentData['status'] as String,
+      ),
+    );
+  }
+
+  void _handleMenuAction(String action) {
+    switch (action) {
+      case 'participants':
+        _showParticipantManagement();
+        break;
+      case 'bracket':
+        _showBracketView();
+        break;
+      case 'matches':
+        _showMatchManagement();
+        break;
+      case 'stats':
+        _showTournamentStats();
+        break;
+      case 'manage':
+        if (_canManageTournament()) {
+          _showManagementPanel();
+        }
+        break;
+      case 'share':
+        _shareTournament();
+        break;
+    }
+  }
+
+  bool _canManageTournament() {
+    // Add logic to check if current user can manage this tournament
+    // For now, return true for demo
+    return true;
+  }
+
+  void _shareTournament() {
+    // Implementation for sharing tournament
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Tính năng chia sẻ đang được phát triển"),
+        backgroundColor: AppTheme.lightTheme.colorScheme.primary,
+      ),
+    );
   }
 }

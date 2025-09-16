@@ -13,6 +13,9 @@ import '../presentation/tournament_detail_screen/tournament_detail_screen.dart';
 import '../presentation/login_screen.dart';
 import '../presentation/register_screen.dart';
 import '../presentation/forgot_password_screen.dart';
+import '../presentation/admin_dashboard_screen/admin_dashboard_screen.dart';
+import '../presentation/admin_dashboard_screen/club_approval_screen.dart';
+import '../presentation/my_clubs_screen/my_clubs_screen.dart';
 
 class AppRoutes {
   static const String splashScreen = '/splash';
@@ -28,6 +31,9 @@ class AppRoutes {
   static const String loginScreen = '/login';
   static const String registerScreen = '/register';
   static const String forgotPasswordScreen = '/forgot-password';
+  static const String adminDashboardScreen = '/admin_dashboard';
+  static const String clubApprovalScreen = '/admin_club_approval';
+  static const String myClubsScreen = '/my_clubs';
 
   static const String initial = splashScreen;
 
@@ -45,5 +51,8 @@ class AppRoutes {
         loginScreen: (context) => const LoginScreen(),
         registerScreen: (context) => const RegisterScreen(),
         forgotPasswordScreen: (context) => const ForgotPasswordScreen(),
+        adminDashboardScreen: (context) => const AdminDashboardScreen(),
+        clubApprovalScreen: (context) => const ClubApprovalScreen(),
+        myClubsScreen: (context) => const MyClubsScreen(),
       };
 }

@@ -1,6 +1,6 @@
 import 'dart:io';
-import '../lib/services/supabase_service.dart';
-import '../lib/services/post_repository.dart';
+import 'package:sabo_arena/services/supabase_service.dart';
+import 'package:sabo_arena/services/post_repository.dart';
 
 void main() async {
   try {

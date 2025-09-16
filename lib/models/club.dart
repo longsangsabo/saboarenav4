@@ -16,6 +16,10 @@ class Club {
   final double? pricePerHour;
   final bool isVerified;
   final bool isActive;
+  final String approvalStatus; // 'pending', 'approved', 'rejected'
+  final String? rejectionReason;
+  final DateTime? approvedAt;
+  final String? approvedBy;
   final double rating;
   final int totalReviews;
   final double? latitude;
@@ -41,6 +45,10 @@ class Club {
     this.pricePerHour,
     required this.isVerified,
     required this.isActive,
+    required this.approvalStatus,
+    this.rejectionReason,
+    this.approvedAt,
+    this.approvedBy,
     required this.rating,
     required this.totalReviews,
     this.latitude,
@@ -72,6 +80,12 @@ class Club {
           : null,
       isVerified: json['is_verified'] ?? false,
       isActive: json['is_active'] ?? true,
+      approvalStatus: json['approval_status'] ?? 'pending',
+      rejectionReason: json['rejection_reason'],
+      approvedAt: json['approved_at'] != null 
+          ? DateTime.parse(json['approved_at']) 
+          : null,
+      approvedBy: json['approved_by'],
       rating: (json['rating'] ?? 0.0).toDouble(),
       totalReviews: json['total_reviews'] ?? 0,
       latitude: json['latitude'] != null
@@ -104,6 +118,10 @@ class Club {
       'price_per_hour': pricePerHour,
       'is_verified': isVerified,
       'is_active': isActive,
+      'approval_status': approvalStatus,
+      'rejection_reason': rejectionReason,
+      'approved_at': approvedAt?.toIso8601String(),
+      'approved_by': approvedBy,
       'rating': rating,
       'total_reviews': totalReviews,
       'latitude': latitude,

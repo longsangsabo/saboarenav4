@@ -121,7 +121,7 @@ class UserProfile {
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       role: role,
       skillLevel: skillLevel ?? this.skillLevel,
-      rank: rank ?? this.rank,
+      rank: rank ?? rank,
       totalWins: totalWins,
       totalLosses: totalLosses,
       totalTournaments: totalTournaments,

@@ -95,7 +95,7 @@ class ClubInfoSectionWidget extends StatelessWidget {
             Container(
               padding: EdgeInsets.all(3.w),
               decoration: BoxDecoration(
-                color: AppTheme.lightTheme.colorScheme.surfaceVariant,
+                color: AppTheme.lightTheme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(

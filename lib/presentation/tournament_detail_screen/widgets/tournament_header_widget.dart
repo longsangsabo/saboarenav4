@@ -8,12 +8,14 @@ class TournamentHeaderWidget extends StatelessWidget {
   final Map<String, dynamic> tournament;
   final VoidCallback? onShareTap;
   final ScrollController scrollController;
+  final Function(String)? onMenuAction;
 
   const TournamentHeaderWidget({
     super.key,
     required this.tournament,
     this.onShareTap,
     required this.scrollController,
+    this.onMenuAction,
   });
 
   @override
@@ -32,15 +34,76 @@ class TournamentHeaderWidget extends StatelessWidget {
         onPressed: () => Navigator.pop(context),
       ),
       actions: [
-        IconButton(
-          icon: CustomIconWidget(
-            iconName: 'share',
+        PopupMenuButton<String>(
+          icon: Icon(
+            Icons.more_vert,
             color: AppTheme.lightTheme.colorScheme.onSurface,
-            size: 24,
           ),
-          onPressed: onShareTap,
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              value: 'participants',
+              child: Row(
+                children: [
+                  Icon(Icons.people, size: 16),
+                  SizedBox(width: 8),
+                  Text('Người chơi'),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: 'bracket',
+              child: Row(
+                children: [
+                  Icon(Icons.account_tree, size: 16),
+                  SizedBox(width: 8),
+                  Text('Bảng đấu'),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: 'matches',
+              child: Row(
+                children: [
+                  Icon(Icons.sports_tennis, size: 16),
+                  SizedBox(width: 8),
+                  Text('Trận đấu'),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: 'stats',
+              child: Row(
+                children: [
+                  Icon(Icons.analytics, size: 16),
+                  SizedBox(width: 8),
+                  Text('Thống kê'),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: 'manage',
+              child: Row(
+                children: [
+                  Icon(Icons.settings, size: 16),
+                  SizedBox(width: 8),
+                  Text('Quản lý'),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: 'share',
+              child: Row(
+                children: [
+                  Icon(Icons.share, size: 16),
+                  SizedBox(width: 8),
+                  Text('Chia sẻ'),
+                ],
+              ),
+            ),
+          ],
+          onSelected: onMenuAction,
         ),
-  const SizedBox(width: Gaps.md),
+        const SizedBox(width: Gaps.md),
       ],
       flexibleSpace: FlexibleSpaceBar(
         background: Stack(

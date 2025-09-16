@@ -31,6 +31,42 @@ class AuthService {
     }
   }
 
+  /// Check if current user is admin
+  Future<bool> isCurrentUserAdmin() async {
+    try {
+      final user = currentUser;
+      if (user == null) return false;
+
+      final response = await _supabase
+          .from('users')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+
+      return response['role'] == 'admin';
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /// Get current user role
+  Future<String?> getCurrentUserRole() async {
+    try {
+      final user = currentUser;
+      if (user == null) return null;
+
+      final response = await _supabase
+          .from('users')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+
+      return response['role'];
+    } catch (error) {
+      return null;
+    }
+  }
+
   Future<AuthResponse> signUp({
     required String email,
     required String password,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../services/club_service.dart';
 
 class ClubRegistrationScreen extends StatefulWidget {
   const ClubRegistrationScreen({super.key});
@@ -24,8 +25,8 @@ class _ClubRegistrationScreenState extends State<ClubRegistrationScreen> {
   bool _isLoading = false;
   String? _selectedCity;
   String? _selectedDistrict;
-  List<String> _selectedAmenities = [];
-  Map<String, String> _operatingHours = {
+  final List<String> _selectedAmenities = [];
+  final Map<String, String> _operatingHours = {
     'Thứ 2 - Thứ 6': '08:00 - 22:00',
     'Thứ 7 - Chủ nhật': '07:00 - 23:00',
   };
@@ -460,7 +461,7 @@ class _ClubRegistrationScreenState extends State<ClubRegistrationScreen> {
     String? Function(String?)? validator,
   }) {
     return DropdownButtonFormField<String>(
-      value: value,
+      initialValue: value,
       onChanged: onChanged,
       validator: validator,
       decoration: InputDecoration(
@@ -618,18 +619,24 @@ class _ClubRegistrationScreenState extends State<ClubRegistrationScreen> {
     });
 
     try {
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
-
-      // TODO: Implement actual club registration API call
-      // ClubService.registerClub(clubData);
+      // Call ClubService to create club
+      final clubService = ClubService();
+      
+      await clubService.createClub(
+        name: _clubNameController.text.trim(),
+        description: _descriptionController.text.trim(),
+        address: _addressController.text.trim(),
+        phone: _phoneController.text.trim().isNotEmpty ? _phoneController.text.trim() : null,
+        email: _emailController.text.trim().isNotEmpty ? _emailController.text.trim() : null,
+        totalTables: 1, // Default value, can be made configurable
+      );
 
       if (mounted) {
         _showSuccessDialog();
       }
     } catch (error) {
       if (mounted) {
-        _showErrorSnackBar('Có lỗi xảy ra. Vui lòng thử lại.');
+        _showErrorSnackBar('Có lỗi xảy ra: ${error.toString()}');
       }
     } finally {
       if (mounted) {

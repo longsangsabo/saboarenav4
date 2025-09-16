@@ -10,78 +10,50 @@ void main() async {
     
     final client = HttpClient();
     
-    // 1. Check posts table structure
-    print('\n📋 Checking posts table structure:');
-    var request = await client.getUrl(Uri.parse('$supabaseUrl/rest/v1/posts?select=*&limit=1'));
-    request.headers.set('apikey', anonKey);
-    request.headers.set('Authorization', 'Bearer $anonKey');
+    // Check all tables including social features
+    final tables = [
+      'users', 'profiles', 'user_profiles', 'clubs', 'tournaments', 
+      'posts', 'post_comments', 'post_interactions', 'achievements', 'matches', 'user_follows'
+    ];
     
-    var response = await request.close();
-    var responseBody = await response.transform(utf8.decoder).join();
+    print('\n📊 Database Tables Status:');
+    print('=' * 50);
     
-    if (response.statusCode == 200) {
-      var posts = jsonDecode(responseBody) as List;
-      if (posts.isNotEmpty) {
-        print('   Posts table columns: ${posts[0].keys.toList()}');
-      } else {
-        print('   No posts found to check structure');
+    for (final table in tables) {
+      try {
+        var request = await client.getUrl(Uri.parse('$supabaseUrl/rest/v1/$table?select=*&limit=1'));
+        request.headers.set('apikey', anonKey);
+        request.headers.set('Authorization', 'Bearer $anonKey');
+        
+        var response = await request.close();
+        var responseBody = await response.transform(utf8.decoder).join();
+        
+        if (response.statusCode == 200) {
+          var data = jsonDecode(responseBody) as List;
+          print('✅ $table: EXISTS (${data.length} sample records)');
+          if (data.isNotEmpty) {
+            print('   Columns: ${data.first.keys.join(', ')}');
+          }
+        } else {
+          print('❌ $table: ERROR ${response.statusCode}');
+        }
+      } catch (e) {
+        print('❌ $table: NOT EXISTS or NO ACCESS');
       }
-    } else {
-      print('   Error: ${response.statusCode} - $responseBody');
     }
     
-    // 2. Check post_comments table structure
-    print('\n💬 Checking post_comments table structure:');
-    request = await client.getUrl(Uri.parse('$supabaseUrl/rest/v1/post_comments?select=*&limit=1'));
-    request.headers.set('apikey', anonKey);
-    request.headers.set('Authorization', 'Bearer $anonKey');
-    
-    response = await request.close();
-    responseBody = await response.transform(utf8.decoder).join();
-    
-    if (response.statusCode == 200) {
-      var comments = jsonDecode(responseBody) as List;
-      if (comments.isNotEmpty) {
-        print('   Comments table columns: ${comments[0].keys.toList()}');
-      } else {
-        print('   No comments found to check structure');
-      }
-    } else {
-      print('   Error: ${response.statusCode} - $responseBody');
-    }
-    
-    // 3. Check users table structure
-    print('\n👤 Checking users table structure:');
-    request = await client.getUrl(Uri.parse('$supabaseUrl/rest/v1/users?select=*&limit=1'));
-    request.headers.set('apikey', anonKey);
-    request.headers.set('Authorization', 'Bearer $anonKey');
-    
-    response = await request.close();
-    responseBody = await response.transform(utf8.decoder).join();
-    
-    if (response.statusCode == 200) {
-      var users = jsonDecode(responseBody) as List;
-      if (users.isNotEmpty) {
-        print('   Users table columns: ${users[0].keys.toList()}');
-      } else {
-        print('   No users found to check structure');
-      }
-    } else {
-      print('   Error: ${response.statusCode} - $responseBody');
-    }
-    
-    // 4. Count total records
-    print('\n📊 Record counts:');
+    // Count total records for social features
+    print('\n📊 Social Platform Record Counts:');
     
     // Count posts
-    request = await client.getUrl(Uri.parse('$supabaseUrl/rest/v1/posts?select=*'));
+    var request = await client.getUrl(Uri.parse('$supabaseUrl/rest/v1/posts?select=*'));
     request.headers.set('apikey', anonKey);
     request.headers.set('Authorization', 'Bearer $anonKey');
-    response = await request.close();
-    responseBody = await response.transform(utf8.decoder).join();
+    var response = await request.close();
+    var responseBody = await response.transform(utf8.decoder).join();
     if (response.statusCode == 200) {
       var posts = jsonDecode(responseBody) as List;
-      print('   Total posts: ${posts.length}');
+      print('   📝 Total posts: ${posts.length}');
     }
     
     // Count comments
@@ -92,16 +64,27 @@ void main() async {
     responseBody = await response.transform(utf8.decoder).join();
     if (response.statusCode == 200) {
       var comments = jsonDecode(responseBody) as List;
-      print('   Total comments: ${comments.length}');
+      print('   💬 Total comments: ${comments.length}');
       
       // Show some recent comments
       if (comments.isNotEmpty) {
         print('\n🕒 Recent comments:');
-        for (var i = 0; i < 5 && i < comments.length; i++) {
+        for (var i = 0; i < 3 && i < comments.length; i++) {
           var comment = comments[i];
           print('   - "${comment['content']}" (Post: ${comment['post_id']})');
         }
       }
+    }
+    
+    // Count likes/interactions
+    request = await client.getUrl(Uri.parse('$supabaseUrl/rest/v1/post_interactions?select=*'));
+    request.headers.set('apikey', anonKey);
+    request.headers.set('Authorization', 'Bearer $anonKey');
+    response = await request.close();
+    responseBody = await response.transform(utf8.decoder).join();
+    if (response.statusCode == 200) {
+      var likes = jsonDecode(responseBody) as List;
+      print('   ❤️  Total likes: ${likes.length}');
     }
     
     // Count users
@@ -112,10 +95,10 @@ void main() async {
     responseBody = await response.transform(utf8.decoder).join();
     if (response.statusCode == 200) {
       var users = jsonDecode(responseBody) as List;
-      print('   Total users: ${users.length}');
+      print('   👤 Total users: ${users.length}');
     }
     
-    print('\n✅ Structure check complete!');
+    print('\n✅ Complete social platform structure check finished!');
     client.close();
     
   } catch (e, stackTrace) {
