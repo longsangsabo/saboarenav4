@@ -59,6 +59,119 @@ class _ClubMainScreenState extends State<ClubMainScreen> {
     Navigator.pushReplacementNamed(context, route);
   }
 
+  void _showRegisterClubDialog() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              Icons.business,
+              color: colorScheme.primary,
+              size: 24,
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'Đăng ký câu lạc bộ',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Bạn có muốn đăng ký câu lạc bộ của mình lên ứng dụng không?',
+              style: TextStyle(
+                fontSize: 16,
+                color: colorScheme.onSurface,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: colorScheme.primaryContainer.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: colorScheme.primary.withOpacity(0.3),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Lợi ích khi đăng ký:',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildBenefitItem('🎯', 'Tiếp cận nhiều khách hàng hơn'),
+                  _buildBenefitItem('📊', 'Quản lý giải đấu và sự kiện'),
+                  _buildBenefitItem('💰', 'Tăng doanh thu và lượng khách'),
+                  _buildBenefitItem('📱', 'Công cụ quản lý hiện đại'),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Hủy',
+              style: TextStyle(color: colorScheme.onSurface.withOpacity(0.6)),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _navigateToRegisterClubForm();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
+            ),
+            child: const Text('Đăng ký ngay'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBenefitItem(String icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          Text(icon, style: const TextStyle(fontSize: 14)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 13),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _navigateToRegisterClubForm() {
+    Navigator.pushNamed(context, '/club_registration_screen');
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -78,6 +191,20 @@ class _ClubMainScreenState extends State<ClubMainScreen> {
             color: colorScheme.onSurface,
           ),
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: IconButton(
+              onPressed: _showRegisterClubDialog,
+              icon: Icon(
+                Icons.add_business,
+                color: colorScheme.primary,
+                size: 24,
+              ),
+              tooltip: 'Đăng ký câu lạc bộ',
+            ),
+          ),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
