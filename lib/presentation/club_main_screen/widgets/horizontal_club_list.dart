@@ -211,61 +211,66 @@ class HorizontalClubList extends StatelessWidget {
             flex: 2,
             child: Padding(
               padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Club name
-                  Text(
-                    club.name,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: colorScheme.onSurface,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    // Club name
+                    Text(
+                      club.name,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: colorScheme.onSurface,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-
-                  // Club stats
-                  Semantics(
-                    label: 'Rating ${club.rating.toStringAsFixed(1)} stars, ${club.totalTables} tables available',
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.star,
-                          size: 16,
-                          color: Colors.amber,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          club.rating.toStringAsFixed(1),
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: colorScheme.onSurface,
-                            height: 1.2,
+                    const SizedBox(height: 8), // Add some space
+                    // Club stats
+                    Semantics(
+                      label:
+                          'Rating ${club.rating.toStringAsFixed(1)} stars, ${club.totalTables} tables available',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.star,
+                            size: 16,
+                            color: Colors.amber,
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Icon(
-                          Icons.sports_bar,
-                          size: 16,
-                          color: colorScheme.onSurface.withOpacity(0.6),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${club.totalTables} bàn',
-                          style: TextStyle(
-                            fontSize: 14,
+                          const SizedBox(width: 4),
+                          Text(
+                            club.rating.toStringAsFixed(1),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: colorScheme.onSurface,
+                              height: 1.2,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Icon(
+                            Icons.sports_bar,
+                            size: 16,
                             color: colorScheme.onSurface.withOpacity(0.6),
-                            height: 1.2,
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 4),
+                          Text(
+                            '${club.totalTables} bàn',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: colorScheme.onSurface.withOpacity(0.6),
+                              height: 1.2,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
