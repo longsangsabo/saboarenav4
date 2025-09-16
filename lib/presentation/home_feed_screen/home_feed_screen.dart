@@ -380,7 +380,7 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
                   _handleNavigation(AppRoutes.tournamentListScreen);
                   break;
                 case 3:
-                  _handleNavigation(AppRoutes.clubProfileScreen);
+                  _handleNavigation(AppRoutes.clubMainScreen);
                   break;
                 case 4:
                   _handleNavigation(AppRoutes.userProfileScreen);

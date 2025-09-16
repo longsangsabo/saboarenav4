@@ -209,7 +209,7 @@ class _TournamentListScreenState extends State<TournamentListScreen>
                   // Already on tournaments
                   break;
                 case 3:
-                  _handleNavigation(AppRoutes.clubProfileScreen);
+                  _handleNavigation(AppRoutes.clubMainScreen);
                   break;
                 case 4:
                   _handleNavigation(AppRoutes.userProfileScreen);

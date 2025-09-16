@@ -65,7 +65,7 @@ class CustomBottomBar extends StatelessWidget {
       icon: Icons.business_outlined,
       activeIcon: Icons.business,
       label: 'Câu lạc bộ',
-      route: AppRoutes.clubProfileScreen,
+      route: AppRoutes.clubMainScreen,
     ),
     BottomNavItem(
       icon: Icons.person_outline,

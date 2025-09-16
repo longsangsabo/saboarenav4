@@ -274,7 +274,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                   Navigator.pushReplacementNamed(context, AppRoutes.tournamentListScreen);
                   break;
                 case 3:
-                  Navigator.pushReplacementNamed(context, AppRoutes.clubProfileScreen);
+                  Navigator.pushReplacementNamed(context, AppRoutes.clubMainScreen);
                   break;
                 case 4:
                   // Already on profile

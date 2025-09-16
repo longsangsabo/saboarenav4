@@ -65,17 +65,18 @@ class _ClubMainScreenState extends State<ClubMainScreen> {
     
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: Row(
           children: [
             Icon(
-              Icons.business,
+              Icons.verified_outlined,
               color: colorScheme.primary,
               size: 24,
             ),
             const SizedBox(width: 8),
             const Text(
-              'Đăng ký câu lạc bộ',
+              'Xác thực quyền sở hữu',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -83,48 +84,139 @@ class _ClubMainScreenState extends State<ClubMainScreen> {
             ),
           ],
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Bạn có muốn đăng ký câu lạc bộ của mình lên ứng dụng không?',
-              style: TextStyle(
-                fontSize: 16,
-                color: colorScheme.onSurface,
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: colorScheme.primaryContainer.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: colorScheme.primary.withOpacity(0.3),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Colors.orange.withOpacity(0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.warning_amber_rounded,
+                      color: Colors.orange.shade700,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Chỉ chủ sở hữu hoặc quản lý câu lạc bộ mới có thể đăng ký',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.orange.shade700,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Lợi ích khi đăng ký:',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  _buildBenefitItem('🎯', 'Tiếp cận nhiều khách hàng hơn'),
-                  _buildBenefitItem('📊', 'Quản lý giải đấu và sự kiện'),
-                  _buildBenefitItem('💰', 'Tăng doanh thu và lượng khách'),
-                  _buildBenefitItem('📱', 'Công cụ quản lý hiện đại'),
-                ],
+              
+              const SizedBox(height: 16),
+              
+              Text(
+                'Để đảm bảo tính xác thực, bạn cần cung cấp:',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurface,
+                ),
               ),
-            ),
-          ],
+              
+              const SizedBox(height: 12),
+              
+              _buildVerificationRequirement(
+                '📋', 
+                'Giấy phép kinh doanh',
+                'Giấy phép kinh doanh có tên bạn hoặc câu lạc bộ'
+              ),
+              _buildVerificationRequirement(
+                '🏢', 
+                'Địa chỉ cụ thể',
+                'Địa chỉ thực tế của câu lạc bộ (có thể xác minh)'
+              ),
+              _buildVerificationRequirement(
+                '📞', 
+                'Số điện thoại liên hệ',
+                'SĐT chính thức của câu lạc bộ để xác minh'
+              ),
+              _buildVerificationRequirement(
+                '🆔', 
+                'CCCD/CMND',
+                'Chứng minh nhân dân của người đại diện'
+              ),
+              
+              const SizedBox(height: 16),
+              
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: colorScheme.primary.withOpacity(0.3),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '✅ Quy trình xác thực:',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    _buildProcessStep('1', 'Gửi thông tin và tài liệu'),
+                    _buildProcessStep('2', 'Admin sẽ xác minh trong 1-2 ngày'),
+                    _buildProcessStep('3', 'Thông báo kết quả qua email/SMS'),
+                    _buildProcessStep('4', 'Kích hoạt câu lạc bộ nếu hợp lệ'),
+                  ],
+                ),
+              ),
+              
+              const SizedBox(height: 16),
+              
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Colors.green.withOpacity(0.3),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '🎯 Lợi ích sau khi xác thực:',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.green.shade700,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    _buildBenefitItem('⭐', 'Huy hiệu "Đã xác thực" tin cậy'),
+                    _buildBenefitItem('�', 'Ưu tiên hiển thị trong tìm kiếm'),
+                    _buildBenefitItem('�', 'Công cụ quản lý chuyên nghiệp'),
+                    _buildBenefitItem('💰', 'Tăng khả năng thu hút khách hàng'),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -137,13 +229,13 @@ class _ClubMainScreenState extends State<ClubMainScreen> {
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
-              _navigateToRegisterClubForm();
+              _showVerificationAgreement();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: colorScheme.primary,
               foregroundColor: colorScheme.onPrimary,
             ),
-            child: const Text('Đăng ký ngay'),
+            child: const Text('Tôi hiểu và đồng ý'),
           ),
         ],
       ),
@@ -331,6 +423,219 @@ class _ClubMainScreenState extends State<ClubMainScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  // Helper methods for verification dialog
+  Widget _buildVerificationRequirement(String icon, String title, String description) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            icon,
+            style: const TextStyle(fontSize: 16),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                    height: 1.3,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProcessStep(String number, String description) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        children: [
+          Container(
+            width: 20,
+            height: 20,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary,
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Text(
+                number,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              description,
+              style: const TextStyle(
+                fontSize: 12,
+                height: 1.3,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showVerificationAgreement() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              Icons.assignment_outlined,
+              color: colorScheme.primary,
+              size: 24,
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'Cam kết xác thực',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Tôi cam kết rằng:',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+              
+              const SizedBox(height: 12),
+              
+              _buildCommitmentItem('✓', 'Tôi là chủ sở hữu hoặc người được ủy quyền đại diện cho câu lạc bộ này'),
+              _buildCommitmentItem('✓', 'Tất cả thông tin tôi cung cấp là chính xác và có thể xác minh'),
+              _buildCommitmentItem('✓', 'Tôi có đủ tài liệu chứng minh quyền sở hữu/quản lý câu lạc bộ'),
+              _buildCommitmentItem('✓', 'Tôi đồng ý với quy trình xác minh của Sabo Arena'),
+              _buildCommitmentItem('✓', 'Tôi hiểu rằng thông tin sai lệch sẽ dẫn đến từ chối đăng ký'),
+              
+              const SizedBox(height: 16),
+              
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Colors.red.withOpacity(0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.gavel,
+                      color: Colors.red.shade700,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Lưu ý: Việc cung cấp thông tin sai lệch hoặc giả mạo có thể dẫn đến khóa tài khoản vĩnh viễn.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.red.shade700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Quay lại',
+              style: TextStyle(color: colorScheme.onSurface.withOpacity(0.6)),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _navigateToRegisterClubForm();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
+            ),
+            child: const Text('Tôi cam kết và tiếp tục'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCommitmentItem(String checkmark, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            checkmark,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.green.shade600,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontSize: 13,
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
