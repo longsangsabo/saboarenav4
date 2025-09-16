@@ -30,7 +30,9 @@ dependencies:
   flutter_slidable: ^4.0.1
   mobile_scanner: ^7.0.0-beta.8
   geolocator: ^13.0.4
+  supabase_flutter: ^2.8.0
 
+  intl: any
 dev_dependencies:
   flutter_test:    # CRITICAL: Required for Flutter project testing - DO NOT REMOVE
     sdk: flutter   # CRITICAL: Required for Flutter project testing - DO NOT REMOVE

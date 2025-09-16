@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../core/app_export.dart';
+import '../../../models/post.dart';
+import '../../../services/social_service.dart';
 
 class PostCardWidget extends StatefulWidget {
-  final Map<String, dynamic> post;
+  final Post post;
   final VoidCallback? onLike;
   final VoidCallback? onComment;
   final VoidCallback? onShare;
@@ -28,6 +30,7 @@ class _PostCardWidgetState extends State<PostCardWidget>
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   bool _isLiked = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -39,7 +42,8 @@ class _PostCardWidgetState extends State<PostCardWidget>
     _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
-    _isLiked = widget.post['isLiked'] ?? false;
+
+    _checkIfLiked();
   }
 
   @override
@@ -48,14 +52,64 @@ class _PostCardWidgetState extends State<PostCardWidget>
     super.dispose();
   }
 
-  void _handleLike() {
-    setState(() {
-      _isLiked = !_isLiked;
-    });
-    _animationController.forward().then((_) {
-      _animationController.reverse();
-    });
-    widget.onLike?.call();
+  Future<void> _checkIfLiked() async {
+    try {
+      final isLiked = await SocialService.instance.isPostLiked(widget.post.id);
+      if (mounted) {
+        setState(() => _isLiked = isLiked);
+      }
+    } catch (e) {
+      // Handle error silently
+    }
+  }
+
+  void _handleLike() async {
+    if (_isLoading) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      final newLikeStatus =
+          await SocialService.instance.likePost(widget.post.id);
+
+      if (mounted) {
+        setState(() {
+          _isLiked = newLikeStatus;
+          _isLoading = false;
+        });
+
+        _animationController.forward().then((_) {
+          _animationController.reverse();
+        });
+
+        widget.onLike?.call();
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
+  void _handleShare() async {
+    try {
+      await SocialService.instance.sharePost(widget.post.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Đã chia sẻ bài viết')),
+        );
+        widget.onShare?.call();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi chia sẻ: ${e.toString()}')),
+        );
+      }
+    }
   }
 
   @override
@@ -74,14 +128,15 @@ class _PostCardWidgetState extends State<PostCardWidget>
           _buildUserHeader(context, theme, colorScheme),
 
           // Post content
-          if (widget.post['content'] != null) _buildPostContent(context, theme),
+          if (widget.post.content != null) _buildPostContent(context, theme),
 
-          // Post image/video
-          if (widget.post['imageUrl'] != null) _buildPostMedia(context),
+          // Post image
+          if (widget.post.imageUrls?.isNotEmpty == true)
+            _buildPostMedia(context),
 
           // Location and hashtags
-          if (widget.post['location'] != null ||
-              (widget.post['hashtags'] as List?)?.isNotEmpty == true)
+          if (widget.post.location != null ||
+              widget.post.hashtags?.isNotEmpty == true)
             _buildLocationAndHashtags(context, theme),
 
           // Engagement section
@@ -104,7 +159,7 @@ class _PostCardWidgetState extends State<PostCardWidget>
                 CircleAvatar(
                   radius: 6.w,
                   child: CustomImageWidget(
-                    imageUrl: widget.post['userAvatar'] ??
+                    imageUrl: widget.post.userAvatar ??
                         'https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png',
                     width: 12.w,
                     height: 12.w,
@@ -112,7 +167,7 @@ class _PostCardWidgetState extends State<PostCardWidget>
                   ),
                 ),
                 // Rank badge
-                if (widget.post['userRank'] != null)
+                if (widget.post.userRank != null)
                   Positioned(
                     bottom: 0,
                     right: 0,
@@ -120,14 +175,14 @@ class _PostCardWidgetState extends State<PostCardWidget>
                       width: 4.w,
                       height: 4.w,
                       decoration: BoxDecoration(
-                        color: _getRankColor(widget.post['userRank']),
+                        color: _getRankColor(widget.post.userRank!),
                         shape: BoxShape.circle,
                         border:
                             Border.all(color: colorScheme.surface, width: 1),
                       ),
                       child: Center(
                         child: Text(
-                          widget.post['userRank'],
+                          widget.post.userRank!.substring(0, 1).toUpperCase(),
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 8.sp,
@@ -148,7 +203,7 @@ class _PostCardWidgetState extends State<PostCardWidget>
                 GestureDetector(
                   onTap: widget.onUserTap,
                   child: Text(
-                    widget.post['userName'] ?? 'Unknown User',
+                    widget.post.userName ?? 'Unknown User',
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -157,7 +212,7 @@ class _PostCardWidgetState extends State<PostCardWidget>
                   ),
                 ),
                 Text(
-                  _formatTimestamp(widget.post['timestamp']),
+                  _formatTimestamp(widget.post.createdAt),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
@@ -187,7 +242,7 @@ class _PostCardWidgetState extends State<PostCardWidget>
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 4.w),
       child: Text(
-        widget.post['content'],
+        widget.post.content!,
         style: theme.textTheme.bodyMedium,
         maxLines: 10,
         overflow: TextOverflow.ellipsis,
@@ -201,7 +256,7 @@ class _PostCardWidgetState extends State<PostCardWidget>
       width: double.infinity,
       constraints: BoxConstraints(maxHeight: 50.h),
       child: CustomImageWidget(
-        imageUrl: widget.post['imageUrl'],
+        imageUrl: widget.post.imageUrls!.first,
         width: double.infinity,
         height: 40.h,
         fit: BoxFit.cover,
@@ -215,7 +270,7 @@ class _PostCardWidgetState extends State<PostCardWidget>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (widget.post['location'] != null)
+          if (widget.post.location != null)
             Row(
               children: [
                 CustomIconWidget(
@@ -226,7 +281,7 @@ class _PostCardWidgetState extends State<PostCardWidget>
                 SizedBox(width: 1.w),
                 Expanded(
                   child: Text(
-                    widget.post['location'],
+                    widget.post.location!,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.primary,
                     ),
@@ -236,13 +291,13 @@ class _PostCardWidgetState extends State<PostCardWidget>
                 ),
               ],
             ),
-          if ((widget.post['hashtags'] as List?)?.isNotEmpty == true)
+          if (widget.post.hashtags?.isNotEmpty == true)
             Padding(
               padding: EdgeInsets.only(top: 1.h),
               child: Wrap(
                 spacing: 2.w,
                 runSpacing: 0.5.h,
-                children: (widget.post['hashtags'] as List).map((hashtag) {
+                children: widget.post.hashtags!.map((hashtag) {
                   return Text(
                     '#$hashtag',
                     style: theme.textTheme.bodySmall?.copyWith(
@@ -268,21 +323,21 @@ class _PostCardWidgetState extends State<PostCardWidget>
           Row(
             children: [
               Text(
-                '${widget.post['likeCount'] ?? 0} lượt thích',
+                '${widget.post.likeCount} lượt thích',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
               const Spacer(),
               Text(
-                '${widget.post['commentCount'] ?? 0} bình luận',
+                '${widget.post.commentCount} bình luận',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
               SizedBox(width: 4.w),
               Text(
-                '${widget.post['shareCount'] ?? 0} chia sẻ',
+                '${widget.post.shareCount} chia sẻ',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -301,7 +356,7 @@ class _PostCardWidgetState extends State<PostCardWidget>
                 icon: _isLiked ? 'favorite' : 'favorite_border',
                 label: 'Thích',
                 color: _isLiked ? Colors.red : colorScheme.onSurfaceVariant,
-                onTap: _handleLike,
+                onTap: _isLoading ? null : _handleLike,
               ),
               _buildActionButton(
                 context,
@@ -315,7 +370,7 @@ class _PostCardWidgetState extends State<PostCardWidget>
                 icon: 'share',
                 label: 'Chia sẻ',
                 color: colorScheme.onSurfaceVariant,
-                onTap: widget.onShare,
+                onTap: _handleShare,
               ),
             ],
           ),
@@ -367,40 +422,23 @@ class _PostCardWidgetState extends State<PostCardWidget>
   }
 
   Color _getRankColor(String rank) {
-    switch (rank.toUpperCase()) {
-      case 'A':
-        return Colors.red;
-      case 'B':
-        return Colors.orange;
-      case 'C':
-        return Colors.yellow[700]!;
-      case 'D':
+    switch (rank.toLowerCase()) {
+      case 'beginner':
         return Colors.green;
-      case 'E':
-        return Colors.blue;
-      case 'F':
-        return Colors.indigo;
-      case 'G':
+      case 'intermediate':
+        return Colors.orange;
+      case 'advanced':
+        return Colors.red;
+      case 'professional':
         return Colors.purple;
       default:
         return Colors.grey;
     }
   }
 
-  String _formatTimestamp(dynamic timestamp) {
-    if (timestamp == null) return 'Vừa xong';
-
-    DateTime dateTime;
-    if (timestamp is DateTime) {
-      dateTime = timestamp;
-    } else if (timestamp is String) {
-      dateTime = DateTime.tryParse(timestamp) ?? DateTime.now();
-    } else {
-      return 'Vừa xong';
-    }
-
+  String _formatTimestamp(DateTime timestamp) {
     final now = DateTime.now();
-    final difference = now.difference(dateTime);
+    final difference = now.difference(timestamp);
 
     if (difference.inMinutes < 1) {
       return 'Vừa xong';
@@ -411,7 +449,7 @@ class _PostCardWidgetState extends State<PostCardWidget>
     } else if (difference.inDays < 7) {
       return '${difference.inDays} ngày trước';
     } else {
-      return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+      return '${timestamp.day}/${timestamp.month}/${timestamp.year}';
     }
   }
 

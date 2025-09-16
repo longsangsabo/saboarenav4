@@ -1,372 +1,247 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../core/app_export.dart';
+import '../../../models/tournament.dart';
+import '../../../routes/app_routes.dart';
 
 class TournamentCardWidget extends StatelessWidget {
-  final Map<String, dynamic> tournament;
-  final VoidCallback? onTap;
-  final VoidCallback? onBookmark;
+  final Tournament tournament;
 
   const TournamentCardWidget({
     super.key,
     required this.tournament,
-    this.onTap,
-    this.onBookmark,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    final status = tournament['status'] as String;
-    final isLive = status == 'live';
-    final isCompleted = status == 'completed';
-    final isRegistered = tournament['isRegistered'] as bool? ?? false;
-    final isFull = (tournament['currentParticipants'] as int) >=
-        (tournament['maxParticipants'] as int);
-    final isBookmarked = tournament['isBookmarked'] as bool? ?? false;
-
     return Card(
-      margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
-        onTap: onTap,
+        onTap: () => Navigator.pushNamed(
+          context,
+          AppRoutes.tournamentDetailScreen,
+          arguments: tournament.id,
+        ),
         borderRadius: BorderRadius.circular(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Tournament Image with Status Badge
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(12)),
-                  child: CustomImageWidget(
-                    imageUrl: tournament['coverImage'] as String,
-                    width: double.infinity,
-                    height: 20.h,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-
-                // Live indicator
-                if (isLive)
-                  Positioned(
-                    top: 2.h,
-                    left: 3.w,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 2.w, vertical: 0.5.h),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          SizedBox(width: 1.w),
-                          Text(
-                            'LIVE',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                // Bookmark button
-                Positioned(
-                  top: 2.h,
-                  right: 3.w,
-                  child: GestureDetector(
-                    onTap: onBookmark,
-                    child: Container(
-                      padding: EdgeInsets.all(1.w),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.5),
-                        shape: BoxShape.circle,
-                      ),
-                      child: CustomIconWidget(
-                        iconName: isBookmarked ? 'bookmark' : 'bookmark_border',
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Prize pool badge
-                if (tournament['prizePool'] != null)
-                  Positioned(
-                    bottom: 1.h,
-                    right: 3.w,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 2.w, vertical: 0.5.h),
-                      decoration: BoxDecoration(
-                        color: AppTheme.lightTheme.colorScheme.tertiary,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        'Giải thưởng: ${tournament['prizePool']}',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-
-            // Tournament Details
-            Padding(
-              padding: EdgeInsets.all(3.w),
-              child: Column(
+        child: Padding(
+          padding: EdgeInsets.all(16.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Title and Format
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          tournament['title'] as String,
-                          style: theme.textTheme.titleMedium?.copyWith(
+                  // Tournament Cover Image
+                  Container(
+                    width: 80.w,
+                    height: 60.h,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.grey[200],
+                    ),
+                    child: tournament.coverImageUrl != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              tournament.coverImageUrl!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Icon(Icons.image, color: Colors.grey[400]),
+                            ),
+                          )
+                        : Icon(Icons.emoji_events, color: Colors.grey[400]),
+                  ),
+                  SizedBox(width: 12.w),
+
+                  // Tournament Info
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          tournament.title,
+                          style: TextStyle(
+                            fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                      SizedBox(width: 2.w),
-                      _buildFormatBadge(
-                          context, tournament['format'] as String),
-                    ],
-                  ),
-
-                  SizedBox(height: 1.h),
-
-                  // Club info
-                  Row(
-                    children: [
-                      CustomIconWidget(
-                        iconName: 'business',
-                        color: colorScheme.onSurfaceVariant,
-                        size: 16,
-                      ),
-                      SizedBox(width: 1.w),
-                      Expanded(
-                        child: Text(
-                          tournament['clubName'] as String,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
+                        SizedBox(height: 4.h),
+                        Text(
+                          tournament.description,
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: Colors.grey[600],
                           ),
-                          maxLines: 1,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                    ],
-                  ),
+                        SizedBox(height: 8.h),
 
-                  SizedBox(height: 1.h),
-
-                  // Date and time
-                  Row(
-                    children: [
-                      CustomIconWidget(
-                        iconName: 'schedule',
-                        color: colorScheme.onSurfaceVariant,
-                        size: 16,
-                      ),
-                      SizedBox(width: 1.w),
-                      Text(
-                        tournament['startDate'] as String,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      SizedBox(width: 2.w),
-                      CustomIconWidget(
-                        iconName: 'access_time',
-                        color: colorScheme.onSurfaceVariant,
-                        size: 16,
-                      ),
-                      SizedBox(width: 1.w),
-                      Text(
-                        tournament['startTime'] as String,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: 1.h),
-
-                  // Participants and Entry Fee
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Row(
-                          children: [
-                            CustomIconWidget(
-                              iconName: 'people',
-                              color: colorScheme.onSurfaceVariant,
-                              size: 16,
+                        // Status Badge
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8.w,
+                            vertical: 4.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: _getStatusColor(tournament.status),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            _getStatusText(tournament.status),
+                            style: TextStyle(
+                              fontSize: 10.sp,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
                             ),
-                            SizedBox(width: 1.w),
-                            Text(
-                              '${tournament['currentParticipants']}/${tournament['maxParticipants']}',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                            if (isLive) ...[
-                              SizedBox(width: 2.w),
-                              CustomIconWidget(
-                                iconName: 'videocam',
-                                color: Colors.red,
-                                size: 16,
-                              ),
-                            ],
-                          ],
+                          ),
                         ),
-                      ),
-                      Text(
-                        tournament['entryFee'] as String,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          color: AppTheme.lightTheme.colorScheme.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: 2.h),
-
-                  // Registration button
-                  SizedBox(
-                    width: double.infinity,
-                    child: _buildRegistrationButton(
-                        context, status, isRegistered, isFull),
+                      ],
+                    ),
                   ),
                 ],
               ),
+
+              SizedBox(height: 12.h),
+
+              // Tournament Details
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildInfoItem(
+                      Icons.calendar_today,
+                      DateFormat('dd/MM/yyyy').format(tournament.startDate),
+                    ),
+                  ),
+                  Expanded(
+                    child: _buildInfoItem(
+                      Icons.people,
+                      '${tournament.currentParticipants}/${tournament.maxParticipants}',
+                    ),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: 8.h),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildInfoItem(
+                      Icons.star,
+                      tournament.skillLevelRequired != null
+                          ? _getSkillLevelText(tournament.skillLevelRequired!)
+                          : 'Tất cả',
+                    ),
+                  ),
+                  Expanded(
+                    child: _buildInfoItem(
+                      Icons.monetization_on,
+                      tournament.entryFee > 0
+                          ? '${tournament.entryFee.toStringAsFixed(0)}đ'
+                          : 'Miễn phí',
+                    ),
+                  ),
+                ],
+              ),
+
+              if (tournament.prizePool > 0) ...[
+                SizedBox(height: 8.h),
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(vertical: 6.h),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.amber[100]!, Colors.amber[50]!],
+                    ),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    '🏆 Giải thưởng: ${tournament.prizePool.toStringAsFixed(0)}đ',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.amber[800],
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoItem(IconData icon, String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14.sp, color: Colors.grey[600]),
+        SizedBox(width: 4.w),
+        Flexible(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 11.sp,
+              color: Colors.grey[700],
             ),
-          ],
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
-      ),
+      ],
     );
   }
 
-  Widget _buildFormatBadge(BuildContext context, String format) {
-    final theme = Theme.of(context);
-    Color badgeColor;
-
-    switch (format.toLowerCase()) {
-      case '8-ball':
-        badgeColor = Colors.blue;
-        break;
-      case '9-ball':
-        badgeColor = Colors.orange;
-        break;
-      case '10-ball':
-        badgeColor = Colors.purple;
-        break;
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'upcoming':
+        return Colors.blue;
+      case 'ongoing':
+        return Colors.green;
+      case 'completed':
+        return Colors.grey;
+      case 'cancelled':
+        return Colors.red;
       default:
-        badgeColor = Colors.grey;
+        return Colors.blue;
     }
-
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
-      decoration: BoxDecoration(
-        color: badgeColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        format,
-        style: theme.textTheme.labelSmall?.copyWith(
-          color: Colors.white,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
   }
 
-  Widget _buildRegistrationButton(
-      BuildContext context, String status, bool isRegistered, bool isFull) {
-    final theme = Theme.of(context);
-
-    String buttonText;
-    Color buttonColor;
-    Color textColor;
-    bool isEnabled = true;
-
-    if (status == 'completed') {
-      buttonText = 'Đã kết thúc';
-      buttonColor = Colors.grey;
-      textColor = Colors.white;
-      isEnabled = false;
-    } else if (isRegistered) {
-      buttonText = 'Đã đăng ký';
-      buttonColor = Colors.blue;
-      textColor = Colors.white;
-      isEnabled = true;
-    } else if (isFull) {
-      buttonText = 'Đã đầy';
-      buttonColor = Colors.grey;
-      textColor = Colors.white;
-      isEnabled = false;
-    } else if (status == 'live') {
-      buttonText = 'Đang diễn ra';
-      buttonColor = Colors.red;
-      textColor = Colors.white;
-      isEnabled = false;
-    } else {
-      buttonText = 'Đăng ký';
-      buttonColor = AppTheme.lightTheme.colorScheme.primary;
-      textColor = Colors.white;
-      isEnabled = true;
+  String _getStatusText(String status) {
+    switch (status) {
+      case 'upcoming':
+        return 'Sắp diễn ra';
+      case 'ongoing':
+        return 'Đang diễn ra';
+      case 'completed':
+        return 'Đã kết thúc';
+      case 'cancelled':
+        return 'Đã hủy';
+      default:
+        return 'Sắp diễn ra';
     }
+  }
 
-    return ElevatedButton(
-      onPressed: isEnabled
-          ? () {
-              // Handle registration logic
-            }
-          : null,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: buttonColor,
-        foregroundColor: textColor,
-        padding: EdgeInsets.symmetric(vertical: 1.5.h),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        elevation: isEnabled ? 2 : 0,
-      ),
-      child: Text(
-        buttonText,
-        style: theme.textTheme.labelLarge?.copyWith(
-          color: textColor,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
+  String _getSkillLevelText(String skillLevel) {
+    switch (skillLevel) {
+      case 'beginner':
+        return 'Người mới';
+      case 'intermediate':
+        return 'Trung bình';
+      case 'advanced':
+        return 'Nâng cao';
+      case 'professional':
+        return 'Chuyên nghiệp';
+      default:
+        return 'Tất cả';
+    }
   }
 }

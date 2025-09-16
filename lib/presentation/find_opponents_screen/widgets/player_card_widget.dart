@@ -1,289 +1,231 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
-import '../../../core/app_export.dart';
+import '../../../models/user_profile.dart';
+import './challenge_modal_widget.dart';
 
 class PlayerCardWidget extends StatelessWidget {
-  final Map<String, dynamic> player;
-  final VoidCallback? onThachDau;
-  final VoidCallback? onGiaoLuu;
-  final VoidCallback? onViewProfile;
-  final VoidCallback? onSendMessage;
-  final VoidCallback? onAddFriend;
+  final UserProfile player;
 
-  const PlayerCardWidget({
-    super.key,
-    required this.player,
-    this.onThachDau,
-    this.onGiaoLuu,
-    this.onViewProfile,
-    this.onSendMessage,
-    this.onAddFriend,
-  });
+  const PlayerCardWidget({super.key, required this.player});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return Card(
+      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: EdgeInsets.all(4.w),
+        padding: EdgeInsets.all(16.w),
         child: Column(
           children: [
             Row(
               children: [
-                // Avatar with online status
-                Stack(
-                  children: [
-                    Container(
-                      width: 15.w,
-                      height: 15.w,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: _getRankColor(player["rank"] as String),
-                          width: 2,
-                        ),
-                      ),
-                      child: ClipOval(
-                        child: CustomImageWidget(
-                          imageUrl: player["avatar"] as String,
-                          width: 15.w,
-                          height: 15.w,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    // Online status indicator
-                    if (player["isOnline"] as bool)
-                      Positioned(
-                        right: 0,
-                        bottom: 0,
-                        child: Container(
-                          width: 4.w,
-                          height: 4.w,
-                          decoration: BoxDecoration(
-                            color: AppTheme.successLight,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: theme.cardColor,
-                              width: 2,
+                // Player Avatar
+                Container(
+                  width: 50.w,
+                  height: 50.h,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.grey[200],
+                  ),
+                  child:
+                      player.avatarUrl != null
+                          ? ClipOval(
+                            child: Image.network(
+                              player.avatarUrl!,
+                              fit: BoxFit.cover,
+                              errorBuilder:
+                                  (context, error, stackTrace) => Icon(
+                                    Icons.person,
+                                    color: Colors.grey[400],
+                                  ),
                             ),
-                          ),
-                        ),
-                      ),
-                  ],
+                          )
+                          : Icon(Icons.person, color: Colors.grey[400]),
                 ),
+                SizedBox(width: 12.w),
 
-                SizedBox(width: 3.w),
-
-                // Player info
+                // Player Info
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              player["name"] as String,
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          _buildRankBadge(player["rank"] as String),
-                        ],
+                      Text(
+                        player.fullName,
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-
-                      SizedBox(height: 0.5.h),
-
-                      Row(
-                        children: [
-                          CustomIconWidget(
-                            iconName: 'location_on',
-                            color: colorScheme.onSurfaceVariant,
-                            size: 16,
+                      if (player.username != null) ...[
+                        SizedBox(height: 2.h),
+                        Text(
+                          '@${player.username}',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: Colors.grey[600],
                           ),
-                          SizedBox(width: 1.w),
-                          Text(
-                            "${player["distance"]} km",
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                          SizedBox(width: 4.w),
-                          CustomIconWidget(
-                            iconName: 'business',
-                            color: colorScheme.onSurfaceVariant,
-                            size: 16,
-                          ),
-                          SizedBox(width: 1.w),
-                          Expanded(
-                            child: Text(
-                              player["club"] as String,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
+                      SizedBox(height: 4.h),
 
-                      SizedBox(height: 0.5.h),
-
-                      // Game preferences
-                      Wrap(
-                        spacing: 2.w,
-                        children: (player["gameTypes"] as List<String>)
-                            .map((gameType) {
-                          return Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 2.w, vertical: 0.5.h),
-                            decoration: BoxDecoration(
-                              color: colorScheme.primary.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              gameType,
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: colorScheme.primary,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          );
-                        }).toList(),
+                      // Skill Level Badge
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8.w,
+                          vertical: 2.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _getSkillLevelColor(player.skillLevel),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          player.skillLevelDisplay,
+                          style: TextStyle(
+                            fontSize: 10.sp,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
+
+                // Challenge Button
+                ElevatedButton(
+                  onPressed: () => _showChallengeModal(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 8.h,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    'Thách đấu',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
               ],
             ),
 
-            SizedBox(height: 2.h),
+            SizedBox(height: 12.h),
 
-            // Action buttons
+            // Player Stats
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton(
-                    onPressed: onGiaoLuu,
-                    style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 1.5.h),
-                      side: BorderSide(color: colorScheme.primary),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CustomIconWidget(
-                          iconName: 'handshake',
-                          color: colorScheme.primary,
-                          size: 18,
-                        ),
-                        SizedBox(width: 2.w),
-                        Text(
-                          'Giao lưu',
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            color: colorScheme.primary,
-                          ),
-                        ),
-                      ],
-                    ),
+                  child: _buildStatItem(
+                    'Thắng',
+                    '${player.totalWins}',
+                    Colors.green,
                   ),
                 ),
-                SizedBox(width: 3.w),
                 Expanded(
-                  child: ElevatedButton(
-                    onPressed: onThachDau,
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 1.5.h),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CustomIconWidget(
-                          iconName: 'sports_bar',
-                          color: colorScheme.onPrimary,
-                          size: 18,
-                        ),
-                        SizedBox(width: 2.w),
-                        Text(
-                          'Thách đấu',
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            color: colorScheme.onPrimary,
-                          ),
-                        ),
-                      ],
-                    ),
+                  child: _buildStatItem(
+                    'Thua',
+                    '${player.totalLosses}',
+                    Colors.red,
+                  ),
+                ),
+                Expanded(
+                  child: _buildStatItem(
+                    'Tỷ lệ',
+                    '${player.winRate.toStringAsFixed(1)}%',
+                    Colors.blue,
+                  ),
+                ),
+                Expanded(
+                  child: _buildStatItem(
+                    'Điểm',
+                    '${player.rankingPoints}',
+                    Colors.purple,
                   ),
                 ),
               ],
             ),
+
+            if (player.location != null) ...[
+              SizedBox(height: 8.h),
+              Row(
+                children: [
+                  Icon(Icons.location_on, size: 14.sp, color: Colors.grey[500]),
+                  SizedBox(width: 4.w),
+                  Expanded(
+                    child: Text(
+                      player.location!,
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        color: Colors.grey[600],
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
       ),
     );
   }
 
-  Widget _buildRankBadge(String rank) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
-      decoration: BoxDecoration(
-        color: _getRankColor(rank),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        rank,
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 10.sp,
-          fontWeight: FontWeight.bold,
+  Widget _buildStatItem(String label, String value, Color color) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: color,
+          ),
         ),
-      ),
+        SizedBox(height: 2.h),
+        Text(label, style: TextStyle(fontSize: 10.sp, color: Colors.grey[600])),
+      ],
     );
   }
 
-  Color _getRankColor(String rank) {
-    switch (rank.toUpperCase()) {
-      case 'A':
-        return const Color(0xFFD4AF37); // Gold
-      case 'B':
-        return const Color(0xFFC0C0C0); // Silver
-      case 'C':
-        return const Color(0xFFCD7F32); // Bronze
-      case 'D':
-        return const Color(0xFF4CAF50); // Green
-      case 'E':
-        return const Color(0xFF2196F3); // Blue
-      case 'F':
-        return const Color(0xFF9C27B0); // Purple
-      case 'G':
-        return const Color(0xFFFF9800); // Orange
-      case 'H':
-        return const Color(0xFFE91E63); // Pink
-      case 'I':
-        return const Color(0xFF795548); // Brown
-      case 'J':
-        return const Color(0xFF607D8B); // Blue Grey
-      default: // K
-        return const Color(0xFF9E9E9E); // Grey
+  Color _getSkillLevelColor(String skillLevel) {
+    switch (skillLevel) {
+      case 'beginner':
+        return Colors.green;
+      case 'intermediate':
+        return Colors.blue;
+      case 'advanced':
+        return Colors.orange;
+      case 'professional':
+        return Colors.red;
+      default:
+        return Colors.grey;
     }
+  }
+
+  void _showChallengeModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder:
+          (context) => ChallengeModalWidget(
+            player: {
+              'name': player.fullName,
+              'username': player.username,
+              'skillLevel': player.skillLevel,
+            },
+            challengeType: 'thach_dau',
+          ),
+    );
   }
 }

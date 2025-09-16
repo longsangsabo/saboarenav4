@@ -1,29 +1,34 @@
 import 'package:flutter/material.dart';
-import '../presentation/tournament_detail_screen/tournament_detail_screen.dart';
+
+import '../presentation/home_feed_screen/home_feed_screen.dart';
 import '../presentation/tournament_list_screen/tournament_list_screen.dart';
 import '../presentation/find_opponents_screen/find_opponents_screen.dart';
 import '../presentation/club_profile_screen/club_profile_screen.dart';
 import '../presentation/user_profile_screen/user_profile_screen.dart';
-import '../presentation/home_feed_screen/home_feed_screen.dart';
+import '../presentation/tournament_detail_screen/tournament_detail_screen.dart';
+import '../presentation/auth/login_screen.dart';
+import '../presentation/auth/signup_screen.dart';
 
 class AppRoutes {
-  // TODO: Add your routes here
-  static const String initial = '/';
-  static const String tournamentDetail = '/tournament-detail-screen';
-  static const String tournamentList = '/tournament-list-screen';
-  static const String findOpponents = '/find-opponents-screen';
-  static const String clubProfile = '/club-profile-screen';
-  static const String userProfile = '/user-profile-screen';
-  static const String homeFeed = '/home-feed-screen';
+  static const String homeFeedScreen = '/home_feed_screen';
+  static const String tournamentListScreen = '/tournament_list_screen';
+  static const String findOpponentsScreen = '/find_opponents_screen';
+  static const String clubProfileScreen = '/club_profile_screen';
+  static const String userProfileScreen = '/user_profile_screen';
+  static const String tournamentDetailScreen = '/tournament_detail_screen';
+  static const String loginScreen = '/login';
+  static const String signupScreen = '/signup';
 
-  static Map<String, WidgetBuilder> routes = {
-    initial: (context) => const TournamentDetailScreen(),
-    tournamentDetail: (context) => const TournamentDetailScreen(),
-    tournamentList: (context) => const TournamentListScreen(),
-    findOpponents: (context) => const FindOpponentsScreen(),
-    clubProfile: (context) => const ClubProfileScreen(),
-    userProfile: (context) => const UserProfileScreen(),
-    homeFeed: (context) => const HomeFeedScreen(),
-    // TODO: Add your other routes here
-  };
+  static const String initial = homeFeedScreen;
+
+  static Map<String, WidgetBuilder> get routes => {
+        homeFeedScreen: (context) => const HomeFeedScreen(),
+        tournamentListScreen: (context) => const TournamentListScreen(),
+        findOpponentsScreen: (context) => const FindOpponentsScreen(),
+        clubProfileScreen: (context) => const ClubProfileScreen(),
+        userProfileScreen: (context) => const UserProfileScreen(),
+        tournamentDetailScreen: (context) => const TournamentDetailScreen(),
+        loginScreen: (context) => const LoginScreen(),
+        signupScreen: (context) => const SignupScreen(),
+      };
 }
