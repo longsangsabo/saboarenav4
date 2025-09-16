@@ -31,6 +31,7 @@ class ClubService {
 
       final response = await query
           .eq('is_active', true)
+          .eq('approval_status', 'approved')
           .order('rating', ascending: false)
           .limit(limit);
 
@@ -216,6 +217,9 @@ class ClubService {
         'price_per_hour': pricePerHour,
         'latitude': latitude,
         'longitude': longitude,
+        'approval_status': 'pending', // New clubs need admin approval
+        'is_verified': false,
+        'is_active': false, // Inactive until approved
       };
 
       final response =
@@ -224,6 +228,24 @@ class ClubService {
       return Club.fromJson(response);
     } catch (error) {
       throw Exception('Failed to create club: $error');
+    }
+  }
+
+  /// Get clubs owned by current user
+  Future<List<Club>> getMyClubs() async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) throw Exception('User not authenticated');
+
+      final response = await _supabase
+          .from('clubs')
+          .select('*')
+          .eq('owner_id', user.id)
+          .order('created_at', ascending: false);
+
+      return response.map<Club>((json) => Club.fromJson(json)).toList();
+    } catch (error) {
+      throw Exception('Failed to get user clubs: $error');
     }
   }
 }

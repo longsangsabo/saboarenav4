@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../routes/app_routes.dart';
+import '../../services/auth_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -41,14 +42,31 @@ class _SplashScreenState extends State<SplashScreen>
 
   _navigateToHome() async {
     await Future.delayed(const Duration(milliseconds: 3000), () {});
-    final prefs = await SharedPreferences.getInstance();
-    final hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
+    
+    // Check if user is already logged in
+    final isAuthenticated = AuthService.instance.isAuthenticated;
+    
+    if (isAuthenticated) {
+      // User is logged in, check if admin and redirect accordingly
+      final isAdmin = await AuthService.instance.isCurrentUserAdmin();
+      if (mounted) {
+        if (isAdmin) {
+          Navigator.pushReplacementNamed(context, AppRoutes.adminDashboardScreen);
+        } else {
+          Navigator.pushReplacementNamed(context, AppRoutes.userProfileScreen);
+        }
+      }
+    } else {
+      // User not logged in, check onboarding
+      final prefs = await SharedPreferences.getInstance();
+      final hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
 
-    if (mounted) {
-      if (hasSeenOnboarding) {
-        Navigator.pushReplacementNamed(context, AppRoutes.loginScreen);
-      } else {
-        Navigator.pushReplacementNamed(context, AppRoutes.onboardingScreen);
+      if (mounted) {
+        if (hasSeenOnboarding) {
+          Navigator.pushReplacementNamed(context, AppRoutes.loginScreen);
+        } else {
+          Navigator.pushReplacementNamed(context, AppRoutes.onboardingScreen);
+        }
       }
     }
   }

@@ -63,8 +63,14 @@ class _LoginScreenState extends State<LoginScreen> {
         rememberLogin: _rememberLogin,
       );
 
+      // Check if user is admin and redirect accordingly
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed(AppRoutes.userProfileScreen);
+        final isAdmin = await AuthService.instance.isCurrentUserAdmin();
+        if (isAdmin) {
+          Navigator.of(context).pushReplacementNamed(AppRoutes.adminDashboardScreen);
+        } else {
+          Navigator.of(context).pushReplacementNamed(AppRoutes.userProfileScreen);
+        }
       }
     } catch (e) {
       if (mounted) {

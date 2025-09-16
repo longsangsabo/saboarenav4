@@ -285,6 +285,20 @@ class _ClubMainScreenState extends State<ClubMainScreen> {
         ),
         actions: [
           Padding(
+            padding: const EdgeInsets.only(right: 4.0),
+            child: IconButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/my_clubs');
+              },
+              icon: Icon(
+                Icons.store,
+                color: colorScheme.primary,
+                size: 24,
+              ),
+              tooltip: 'CLB của tôi',
+            ),
+          ),
+          Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: IconButton(
               onPressed: _showRegisterClubDialog,
