@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/app_export.dart';
+import '../../core/utils/sabo_rank_system.dart';
 
 import './widgets/club_header_widget.dart';
 import './widgets/club_info_section_widget.dart';
@@ -20,6 +22,10 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
     with TickerProviderStateMixin {
   late ScrollController _scrollController;
   late TabController _tabController;
+  
+  // User profile data for rank checking
+  Map<String, dynamic>? _userData;
+  bool _isLoadingUser = false;
 
   // Mock data for club profile
   final Map<String, dynamic> _clubData = {
@@ -198,6 +204,35 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
     super.initState();
     _scrollController = ScrollController();
     _tabController = TabController(length: 4, vsync: this);
+    _loadUserData();
+  }
+  
+  Future<void> _loadUserData() async {
+    setState(() {
+      _isLoadingUser = true;
+    });
+    
+    try {
+      // Load current user data from Supabase
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user != null) {
+        final response = await Supabase.instance.client
+            .from('users')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+        
+        setState(() {
+          _userData = response;
+        });
+      }
+    } catch (error) {
+      print('Error loading user data: $error');
+    } finally {
+      setState(() {
+        _isLoadingUser = false;
+      });
+    }
   }
 
   @override
@@ -236,6 +271,11 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
                 ClubInfoSectionWidget(
                   clubData: _clubData,
                 ),
+
+                SizedBox(height: 3.h),
+
+                // User Rank Status Section
+                _buildUserRankSection(context),
 
                 SizedBox(height: 3.h),
 
@@ -546,6 +586,349 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
 
   void _handleTournamentTap(Map<String, dynamic> tournament) {
     Navigator.pushNamed(context, '/tournament-detail-screen');
+  }
+
+  Widget _buildUserRankSection(BuildContext context) {
+    if (_isLoadingUser) {
+      return Container(
+        padding: EdgeInsets.all(4.w),
+        child: Center(
+          child: CircularProgressIndicator(
+            color: AppTheme.lightTheme.colorScheme.primary,
+          ),
+        ),
+      );
+    }
+
+    if (_userData == null) {
+      return SizedBox.shrink();
+    }
+
+    // Kiểm tra xem user có rank từ database hay không
+    final userRank = _userData!["rank"] as String?;
+    final hasRank = userRank != null && userRank.isNotEmpty && userRank != 'unranked';
+    final currentElo = _userData!["elo_rating"] as int? ?? 1200;
+
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 4.w),
+      padding: EdgeInsets.all(4.w),
+      decoration: BoxDecoration(
+        color: AppTheme.lightTheme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.lightTheme.shadowColor.withOpacity(0.1),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+        border: Border.all(
+          color: hasRank 
+              ? SaboRankSystem.getRankColor(SaboRankSystem.getRankFromElo(currentElo)).withOpacity(0.3)
+              : Colors.orange.withOpacity(0.3),
+          width: 2,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.military_tech,
+                color: hasRank 
+                    ? SaboRankSystem.getRankColor(SaboRankSystem.getRankFromElo(currentElo))
+                    : Colors.orange,
+                size: 6.w,
+              ),
+              SizedBox(width: 3.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Trạng thái Rank',
+                      style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.lightTheme.colorScheme.onSurface,
+                      ),
+                    ),
+                    SizedBox(height: 0.5.h),
+                    Text(
+                      hasRank 
+                          ? 'Bạn đã có rank chính thức'
+                          : 'Bạn chưa đăng ký rank chính thức',
+                      style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (!hasRank)
+                Container(
+                  padding: EdgeInsets.all(1.w),
+                  decoration: BoxDecoration(
+                    color: Colors.orange,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.priority_high,
+                    color: Colors.white,
+                    size: 4.w,
+                  ),
+                ),
+            ],
+          ),
+          
+          SizedBox(height: 3.h),
+          
+          // Rank info or registration prompt
+          if (hasRank) ...[
+            _buildRankInfo(userRank, currentElo),
+          ] else ...[
+            _buildRankRegistrationPrompt(),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRankInfo(String rank, int elo) {
+    final rankColor = SaboRankSystem.getRankColor(SaboRankSystem.getRankFromElo(elo));
+    final skillDescription = SaboRankSystem.getRankSkillDescription(SaboRankSystem.getRankFromElo(elo));
+    
+    return Container(
+      padding: EdgeInsets.all(3.w),
+      decoration: BoxDecoration(
+        color: rankColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: rankColor.withOpacity(0.3)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Rank hiện tại: $rank',
+                  style: AppTheme.lightTheme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: rankColor,
+                  ),
+                ),
+                SizedBox(height: 1.h),
+                Text(
+                  'ELO: $elo',
+                  style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                SizedBox(height: 0.5.h),
+                Text(
+                  skillDescription,
+                  style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
+                    color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRankRegistrationPrompt() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: EdgeInsets.all(3.w),
+          decoration: BoxDecoration(
+            color: Colors.orange.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.orange.withOpacity(0.3)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.info_outline, color: Colors.orange, size: 5.w),
+                  SizedBox(width: 2.w),
+                  Expanded(
+                    child: Text(
+                      'Để tham gia các trận đấu ranked tại club này, bạn cần đăng ký rank chính thức.',
+                      style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.orange.shade700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 2.h),
+              Text(
+                'Lợi ích khi có rank:',
+                style: AppTheme.lightTheme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.orange.shade800,
+                ),
+              ),
+              SizedBox(height: 1.h),
+              ...[
+                '• Tham gia các trận đấu ranked',
+                '• Theo dõi ELO rating chính xác',
+                '• Tham gia giải đấu chính thức',
+                '• Xem thống kê chi tiết',
+              ].map((benefit) => Padding(
+                padding: EdgeInsets.only(bottom: 0.5.h),
+                child: Text(
+                  benefit,
+                  style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
+                    color: Colors.orange.shade700,
+                  ),
+                ),
+              )).toList(),
+            ],
+          ),
+        ),
+        
+        SizedBox(height: 2.h),
+        
+        // Registration button
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: _showRankRegistrationDialog,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(vertical: 2.h),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.how_to_reg, size: 5.w),
+                SizedBox(width: 2.w),
+                Text(
+                  'Đăng ký Rank ngay',
+                  style: AppTheme.lightTheme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showRankRegistrationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: Text(
+          'Đăng ký Rank Chính thức',
+          style: AppTheme.lightTheme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Việc đăng ký rank sẽ giúp bạn:',
+              style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            SizedBox(height: 2.h),
+            Container(
+              padding: EdgeInsets.all(3.w),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.blue.withOpacity(0.3)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildDialogBenefit('🏆', 'Tham gia các trận đấu ranked'),
+                  _buildDialogBenefit('📊', 'Theo dõi ELO rating chính xác'),
+                  _buildDialogBenefit('🎯', 'Tham gia giải đấu chính thức'),
+                  _buildDialogBenefit('📈', 'Xem thống kê chi tiết'),
+                  _buildDialogBenefit('🏅', 'Cạnh tranh với players khác'),
+                ],
+              ),
+            ),
+            SizedBox(height: 2.h),
+            Text(
+              'Bạn có muốn đăng ký rank ngay bây giờ không?',
+              style: AppTheme.lightTheme.textTheme.bodyMedium,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Để sau',
+              style: TextStyle(color: Colors.grey.shade600),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _navigateToRankRegistration();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.lightTheme.colorScheme.primary,
+              foregroundColor: Colors.white,
+            ),
+            child: Text('Đăng ký ngay'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDialogBenefit(String emoji, String text) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 1.h),
+      child: Row(
+        children: [
+          Text(emoji, style: TextStyle(fontSize: 4.w)),
+          SizedBox(width: 2.w),
+          Expanded(
+            child: Text(
+              text,
+              style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
+                color: Colors.blue.shade700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _navigateToRankRegistration() {
+    // TODO: Implement navigation to rank registration screen
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Chức năng đăng ký rank sẽ được triển khai sớm!'),
+        backgroundColor: AppTheme.lightTheme.colorScheme.primary,
+      ),
+    );
   }
 
   void _handleViewAllReviews() {

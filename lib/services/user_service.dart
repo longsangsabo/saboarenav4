@@ -40,7 +40,7 @@ class UserService {
           .from('users')
           .select()
           .eq('is_active', true)
-          .order('ranking_points', ascending: false)
+          .order('elo_rating', ascending: false)
           .limit(limit);
 
       return response
@@ -58,7 +58,7 @@ class UserService {
           .select()
           .or('full_name.ilike.%$query%,username.ilike.%$query%')
           .eq('is_active', true)
-          .order('ranking_points', ascending: false)
+          .order('elo_rating', ascending: false)
           .limit(limit);
 
       return response
@@ -83,7 +83,7 @@ class UserService {
           .select()
           .not('location', 'is', null)
           .eq('is_active', true)
-          .order('ranking_points', ascending: false)
+          .order('elo_rating', ascending: false)
           .limit(limit);
 
       return response
@@ -217,7 +217,7 @@ class UserService {
         'total_losses': userProfile.totalLosses,
         'total_tournaments': userProfile.totalTournaments,
         'total_matches': totalMatches,
-        'ranking_points': userProfile.rankingPoints,
+        'elo_rating': userProfile.rankingPoints,
       };
     } catch (error) {
       throw Exception('Failed to get user stats: $error');
@@ -236,9 +236,9 @@ class UserService {
       try {
         final allUsers = await _supabase
             .from('users')
-            .select('id, ranking_points')
+            .select('id, elo_rating')
             .eq('is_active', true)
-            .order('ranking_points', ascending: false);
+            .order('elo_rating', ascending: false);
 
         for (int i = 0; i < allUsers.length; i++) {
           if (allUsers[i]['id'] == userId) {

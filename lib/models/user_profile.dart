@@ -10,6 +10,7 @@ class UserProfile {
   final DateTime? dateOfBirth;
   final String role;
   final String skillLevel;
+  final String? rank; // Rank from database, null if not registered
   final int totalWins;
   final int totalLosses;
   final int totalTournaments;
@@ -32,6 +33,7 @@ class UserProfile {
     this.dateOfBirth,
     required this.role,
     required this.skillLevel,
+    this.rank,
     required this.totalWins,
     required this.totalLosses,
     required this.totalTournaments,
@@ -58,10 +60,11 @@ class UserProfile {
           : null,
       role: json['role'] ?? 'player',
       skillLevel: json['skill_level'] ?? 'beginner',
+      rank: json['rank'], // Can be null if user hasn't registered rank
       totalWins: json['total_wins'] ?? 0,
       totalLosses: json['total_losses'] ?? 0,
       totalTournaments: json['total_tournaments'] ?? 0,
-      rankingPoints: json['ranking_points'] ?? 0,
+      rankingPoints: json['elo_rating'] ?? 1200,
       isVerified: json['is_verified'] ?? false,
       isActive: json['is_active'] ?? true,
       location: json['location'],
@@ -82,10 +85,11 @@ class UserProfile {
       'date_of_birth': dateOfBirth?.toIso8601String(),
       'role': role,
       'skill_level': skillLevel,
+      'rank': rank,
       'total_wins': totalWins,
       'total_losses': totalLosses,
       'total_tournaments': totalTournaments,
-      'ranking_points': rankingPoints,
+      'elo_rating': rankingPoints,
       'is_verified': isVerified,
       'is_active': isActive,
       'location': location,
@@ -117,6 +121,7 @@ class UserProfile {
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       role: role,
       skillLevel: skillLevel ?? this.skillLevel,
+      rank: rank ?? this.rank,
       totalWins: totalWins,
       totalLosses: totalLosses,
       totalTournaments: totalTournaments,

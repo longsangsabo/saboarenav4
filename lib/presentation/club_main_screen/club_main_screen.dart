@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/club.dart';
 import '../../services/club_service.dart';
+import '../../routes/app_routes.dart';
 import 'widgets/horizontal_club_list.dart';
 import 'widgets/club_detail_section.dart';
 
@@ -158,19 +159,19 @@ class _ClubMainScreenState extends State<ClubMainScreen> {
             onTap: (index) {
               switch (index) {
                 case 0:
-                  _handleBottomNavTap('/home');
+                  _handleBottomNavTap(AppRoutes.homeFeedScreen);
                   break;
                 case 1:
-                  _handleBottomNavTap('/find-opponents');
+                  _handleBottomNavTap(AppRoutes.findOpponentsScreen);
                   break;
                 case 2:
-                  _handleBottomNavTap('/tournaments');
+                  _handleBottomNavTap(AppRoutes.tournamentListScreen);
                   break;
                 case 3:
                   // Already on club
                   break;
                 case 4:
-                  _handleBottomNavTap('/profile');
+                  _handleBottomNavTap(AppRoutes.userProfileScreen);
                   break;
               }
             },
