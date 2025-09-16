@@ -25,8 +25,8 @@ class _ClubRegistrationScreenState extends State<ClubRegistrationScreen> {
   bool _isLoading = false;
   String? _selectedCity;
   String? _selectedDistrict;
-  List<String> _selectedAmenities = [];
-  Map<String, String> _operatingHours = {
+  final List<String> _selectedAmenities = [];
+  final Map<String, String> _operatingHours = {
     'Thứ 2 - Thứ 6': '08:00 - 22:00',
     'Thứ 7 - Chủ nhật': '07:00 - 23:00',
   };
@@ -461,7 +461,7 @@ class _ClubRegistrationScreenState extends State<ClubRegistrationScreen> {
     String? Function(String?)? validator,
   }) {
     return DropdownButtonFormField<String>(
-      value: value,
+      initialValue: value,
       onChanged: onChanged,
       validator: validator,
       decoration: InputDecoration(

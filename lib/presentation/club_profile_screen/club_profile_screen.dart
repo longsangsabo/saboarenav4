@@ -791,7 +791,7 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
                     color: Colors.orange.shade700,
                   ),
                 ),
-              )).toList(),
+              )),
             ],
           ),
         ),
