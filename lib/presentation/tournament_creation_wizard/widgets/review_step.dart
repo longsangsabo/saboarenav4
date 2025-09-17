@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sabo_arena/core/app_export.dart';
+// import 'package:sabo_arena/core/app_export.dart';
+
 
 class ReviewStep extends StatefulWidget {
   final Map<String, dynamic> data;
@@ -76,41 +77,41 @@ class _ReviewStepState extends State<ReviewStep>
         return Opacity(
           opacity: _fadeAnimation.value,
           child: SingleChildScrollView(
-            padding: EdgeInsets.all(20.h),
+            padding: EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildTournamentSummary(),
                 
-                SizedBox(height: 24.v),
+                SizedBox(height: 24),
                 _buildSectionTitle("Thông tin cơ bản", Icons.info_outline),
-                SizedBox(height: 16.v),
+                SizedBox(height: 16),
                 _buildBasicInfoSummary(),
                 
-                SizedBox(height: 24.v),
+                SizedBox(height: 24),
                 _buildSectionTitle("Lịch trình", Icons.schedule_outlined),
-                SizedBox(height: 16.v),
+                SizedBox(height: 16),
                 _buildScheduleSummary(),
                 
-                SizedBox(height: 24.v),
+                SizedBox(height: 24),
                 _buildSectionTitle("Yêu cầu tham gia", Icons.rule_outlined),
-                SizedBox(height: 16.v),
+                SizedBox(height: 16),
                 _buildRequirementsSummary(),
                 
-                SizedBox(height: 24.v),
+                SizedBox(height: 24),
                 _buildSectionTitle("Giải thưởng", Icons.emoji_events_outlined),
-                SizedBox(height: 16.v),
+                SizedBox(height: 16),
                 _buildPrizesSummary(),
                 
-                SizedBox(height: 24.v),
+                SizedBox(height: 24),
                 _buildSectionTitle("Tùy chọn xuất bản", Icons.publish_outlined),
-                SizedBox(height: 16.v),
+                SizedBox(height: 16),
                 _buildPublishOptions(),
                 
-                SizedBox(height: 32.v),
+                SizedBox(height: 32),
                 _buildPublishButton(),
                 
-                SizedBox(height: 100.v), // Space for navigation buttons
+                SizedBox(height: 100), // Space for navigation buttons
               ],
             ),
           ),
@@ -123,24 +124,24 @@ class _ReviewStepState extends State<ReviewStep>
     return Row(
       children: [
         Container(
-          padding: EdgeInsets.all(8.h),
+          padding: EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: appTheme.blue50,
-            borderRadius: BorderRadius.circular(8.h),
+            color: Colors.blue[50] ?? Colors.blue,
+            borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
             icon,
-            color: appTheme.blue600,
-            size: 20.adaptSize,
+            color: Colors.blue[600] ?? Colors.blue,
+            size: 20,
           ),
         ),
-        SizedBox(width: 12.h),
+        SizedBox(width: 12),
         Text(
           title,
           style: TextStyle(
-            fontSize: 18.fSize,
+            fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: appTheme.gray900,
+            color: Colors.grey[900] ?? Colors.black,
           ),
         ),
       ],
@@ -149,17 +150,17 @@ class _ReviewStepState extends State<ReviewStep>
 
   Widget _buildTournamentSummary() {
     return Container(
-      padding: EdgeInsets.all(20.h),
+      padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [appTheme.green600, appTheme.green800],
+          colors: [Colors.green[600] ?? Colors.green, Colors.green[800] ?? Colors.green],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(16.h),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: appTheme.green600.withOpacity(0.3),
+            color: Colors.green[600] ?? Colors.green.withOpacity(0.3),
             blurRadius: 20,
             offset: Offset(0, 8),
           ),
@@ -173,9 +174,9 @@ class _ReviewStepState extends State<ReviewStep>
               Icon(
                 Icons.emoji_events,
                 color: Colors.white,
-                size: 32.adaptSize,
+                size: 32,
               ),
-              SizedBox(width: 16.h),
+              SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,14 +184,14 @@ class _ReviewStepState extends State<ReviewStep>
                     Text(
                       "Giải đấu sẵn sàng!",
                       style: TextStyle(
-                        fontSize: 16.fSize,
+                        fontSize: 16,
                         color: Colors.white.withOpacity(0.9),
                       ),
                     ),
                     Text(
                       widget.data['tournamentName'] ?? 'Tên giải đấu',
                       style: TextStyle(
-                        fontSize: 24.fSize,
+                        fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -201,13 +202,13 @@ class _ReviewStepState extends State<ReviewStep>
             ],
           ),
           
-          SizedBox(height: 16.v),
+          SizedBox(height: 16),
           
           Container(
-            padding: EdgeInsets.all(12.h),
+            padding: EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(8.h),
+              borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
               children: [
@@ -243,12 +244,12 @@ class _ReviewStepState extends State<ReviewStep>
   Widget _buildSummaryItem(String label, String value, IconData icon) {
     return Column(
       children: [
-        Icon(icon, color: Colors.white.withOpacity(0.8), size: 20.adaptSize),
-        SizedBox(height: 4.v),
+        Icon(icon, color: Colors.white.withOpacity(0.8), size: 20),
+        SizedBox(height: 4),
         Text(
           value,
           style: TextStyle(
-            fontSize: 16.fSize,
+            fontSize: 16,
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
@@ -256,7 +257,7 @@ class _ReviewStepState extends State<ReviewStep>
         Text(
           label,
           style: TextStyle(
-            fontSize: 10.fSize,
+            fontSize: 10,
             color: Colors.white.withOpacity(0.8),
           ),
         ),
@@ -360,13 +361,13 @@ class _ReviewStepState extends State<ReviewStep>
 
   Widget _buildSummaryCard(List<Widget> children) {
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.h),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: appTheme.black900.withOpacity(0.06),
+            color: Colors.grey[900] ?? Colors.black.withOpacity(0.06),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -381,17 +382,17 @@ class _ReviewStepState extends State<ReviewStep>
 
   Widget _buildInfoRow(String label, String value) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 6.v),
+      padding: EdgeInsets.symmetric(vertical: 6),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 100.h,
+            width: 100,
             child: Text(
               label,
               style: TextStyle(
-                fontSize: 13.fSize,
-                color: appTheme.gray600,
+                fontSize: 13,
+                color: Colors.grey[600] ?? Colors.grey,
               ),
             ),
           ),
@@ -399,9 +400,9 @@ class _ReviewStepState extends State<ReviewStep>
             child: Text(
               value,
               style: TextStyle(
-                fontSize: 13.fSize,
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: appTheme.gray900,
+                color: Colors.grey[900] ?? Colors.black,
               ),
             ),
           ),
@@ -412,13 +413,13 @@ class _ReviewStepState extends State<ReviewStep>
 
   Widget _buildPublishOptions() {
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.h),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: appTheme.black900.withOpacity(0.06),
+            color: Colors.grey[900] ?? Colors.black.withOpacity(0.06),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -430,18 +431,18 @@ class _ReviewStepState extends State<ReviewStep>
           Text(
             "Chế độ xuất bản:",
             style: TextStyle(
-              fontSize: 14.fSize,
+              fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: appTheme.gray700,
+              color: Colors.grey[700] ?? Colors.grey,
             ),
           ),
-          SizedBox(height: 16.v),
+          SizedBox(height: 16),
           
           ...(_publishOptions.entries.map((entry) {
             return _buildPublishOption(entry.key, entry.value);
           })),
           
-          SizedBox(height: 20.v),
+          SizedBox(height: 20),
           
           _buildToggleOption(
             title: "Thông báo cho thành viên",
@@ -455,7 +456,7 @@ class _ReviewStepState extends State<ReviewStep>
             },
           ),
           
-          SizedBox(height: 16.v),
+          SizedBox(height: 16),
           
           _buildToggleOption(
             title: "Cho phép đăng ký sớm",
@@ -469,14 +470,14 @@ class _ReviewStepState extends State<ReviewStep>
             },
           ),
           
-          SizedBox(height: 20.v),
+          SizedBox(height: 20),
           
           TextField(
             decoration: InputDecoration(
               labelText: "Ghi chú thêm",
               hintText: "Thông tin bổ sung cho người tham gia...",
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.h),
+                borderRadius: BorderRadius.circular(8),
               ),
               alignLabelWithHint: true,
             ),
@@ -496,7 +497,7 @@ class _ReviewStepState extends State<ReviewStep>
     final isSelected = _publishOption == value;
     
     return Container(
-      margin: EdgeInsets.only(bottom: 8.v),
+      margin: EdgeInsets.only(bottom: 8),
       child: InkWell(
         onTap: () {
           setState(() {
@@ -504,32 +505,32 @@ class _ReviewStepState extends State<ReviewStep>
           });
           _updateData();
         },
-        borderRadius: BorderRadius.circular(8.h),
+        borderRadius: BorderRadius.circular(8),
         child: Container(
-          padding: EdgeInsets.all(12.h),
+          padding: EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: isSelected ? appTheme.green50 : appTheme.gray50,
-            borderRadius: BorderRadius.circular(8.h),
+            color: isSelected ? Colors.green[50] ?? Colors.green : Colors.grey[50] ?? Colors.grey,
+            borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: isSelected ? appTheme.green600 : appTheme.gray200,
+              color: isSelected ? Colors.green[600] ?? Colors.green : Colors.grey[200] ?? Colors.grey,
             ),
           ),
           child: Row(
             children: [
               Container(
-                padding: EdgeInsets.all(2.h),
+                padding: EdgeInsets.all(2),
                 decoration: BoxDecoration(
-                  color: isSelected ? appTheme.green600 : appTheme.gray300,
+                  color: isSelected ? Colors.green[600] ?? Colors.green : Colors.grey[300] ?? Colors.grey,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.check,
                   color: Colors.white,
-                  size: 12.adaptSize,
+                  size: 12,
                 ),
               ),
               
-              SizedBox(width: 12.h),
+              SizedBox(width: 12),
               
               Expanded(
                 child: Column(
@@ -538,16 +539,16 @@ class _ReviewStepState extends State<ReviewStep>
                     Text(
                       label,
                       style: TextStyle(
-                        fontSize: 14.fSize,
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: isSelected ? appTheme.green800 : appTheme.gray700,
+                        color: isSelected ? Colors.green[800] ?? Colors.green : Colors.grey[700] ?? Colors.grey,
                       ),
                     ),
                     Text(
                       _getPublishOptionDescription(value),
                       style: TextStyle(
-                        fontSize: 12.fSize,
-                        color: isSelected ? appTheme.green600 : appTheme.gray500,
+                        fontSize: 12,
+                        color: isSelected ? Colors.green[600] ?? Colors.green : Colors.grey[500] ?? Colors.grey,
                       ),
                     ),
                   ],
@@ -575,16 +576,16 @@ class _ReviewStepState extends State<ReviewStep>
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: 14.fSize,
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: appTheme.gray900,
+                  color: Colors.grey[900] ?? Colors.black,
                 ),
               ),
               Text(
                 subtitle,
                 style: TextStyle(
-                  fontSize: 12.fSize,
-                  color: appTheme.gray600,
+                  fontSize: 12,
+                  color: Colors.grey[600] ?? Colors.grey,
                 ),
               ),
             ],
@@ -594,7 +595,7 @@ class _ReviewStepState extends State<ReviewStep>
         Switch(
           value: value,
           onChanged: onChanged,
-          activeThumbColor: appTheme.blue600,
+          activeThumbColor: Colors.blue[600] ?? Colors.blue,
         ),
       ],
     );
@@ -606,11 +607,11 @@ class _ReviewStepState extends State<ReviewStep>
       child: ElevatedButton(
         onPressed: _isPublishing ? null : _handlePublish,
         style: ElevatedButton.styleFrom(
-          backgroundColor: appTheme.green600,
+          backgroundColor: Colors.green[600] ?? Colors.green,
           foregroundColor: Colors.white,
-          padding: EdgeInsets.symmetric(vertical: 16.v),
+          padding: EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.h),
+            borderRadius: BorderRadius.circular(12),
           ),
           elevation: 8,
         ),
@@ -619,18 +620,18 @@ class _ReviewStepState extends State<ReviewStep>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SizedBox(
-                    width: 20.adaptSize,
-                    height: 20.adaptSize,
+                    width: 20,
+                    height: 20,
                     child: CircularProgressIndicator(
                       color: Colors.white,
                       strokeWidth: 2,
                     ),
                   ),
-                  SizedBox(width: 12.h),
+                  SizedBox(width: 12),
                   Text(
                     "Đang xuất bản...",
                     style: TextStyle(
-                      fontSize: 16.fSize,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -639,12 +640,12 @@ class _ReviewStepState extends State<ReviewStep>
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.publish, size: 24.adaptSize),
-                  SizedBox(width: 12.h),
+                  Icon(Icons.publish, size: 24),
+                  SizedBox(width: 12),
                   Text(
                     _getPublishButtonText(),
                     style: TextStyle(
-                      fontSize: 16.fSize,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -742,14 +743,14 @@ class _ReviewStepState extends State<ReviewStep>
             content: Row(
               children: [
                 Icon(Icons.check_circle, color: Colors.white),
-                SizedBox(width: 8.h),
+                SizedBox(width: 8),
                 Text(_getSuccessMessage()),
               ],
             ),
-            backgroundColor: appTheme.green600,
+            backgroundColor: Colors.green[600] ?? Colors.green,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.h),
+              borderRadius: BorderRadius.circular(8),
             ),
           ),
         );
@@ -762,14 +763,14 @@ class _ReviewStepState extends State<ReviewStep>
             content: Row(
               children: [
                 Icon(Icons.error, color: Colors.white),
-                SizedBox(width: 8.h),
+                SizedBox(width: 8),
                 Text("Có lỗi xảy ra khi xuất bản giải đấu"),
               ],
             ),
-            backgroundColor: appTheme.red600,
+            backgroundColor: Colors.red[600] ?? Colors.red,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.h),
+              borderRadius: BorderRadius.circular(8),
             ),
           ),
         );

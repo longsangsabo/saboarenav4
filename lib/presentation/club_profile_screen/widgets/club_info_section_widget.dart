@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
+
 
 import '../../../core/app_export.dart';
 
@@ -14,7 +14,7 @@ class ClubInfoSectionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(4.w),
+      padding: EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -26,7 +26,7 @@ class ClubInfoSectionWidget extends StatelessWidget {
             ),
           ),
           
-          SizedBox(height: 2.h),
+          SizedBox(height: 2),
           
           // Description
           if (clubData["description"] != null) ...[
@@ -34,7 +34,7 @@ class ClubInfoSectionWidget extends StatelessWidget {
               clubData["description"],
               style: AppTheme.lightTheme.textTheme.bodyMedium,
             ),
-            SizedBox(height: 2.h),
+            SizedBox(height: 2),
           ],
           
           // Contact Info
@@ -47,7 +47,7 @@ class ClubInfoSectionWidget extends StatelessWidget {
                   value: clubData["phone"] ?? "Chưa có",
                 ),
               ),
-              SizedBox(width: 3.w),
+              SizedBox(width: 8),
               Expanded(
                 child: _buildInfoCard(
                   icon: Icons.email,
@@ -58,7 +58,7 @@ class ClubInfoSectionWidget extends StatelessWidget {
             ],
           ),
           
-          SizedBox(height: 2.h),
+          SizedBox(height: 2),
           
           // Rating and Members
           Row(
@@ -70,7 +70,7 @@ class ClubInfoSectionWidget extends StatelessWidget {
                   value: '${clubData["rating"] ?? 0.0} (${clubData["reviewCount"] ?? 0} đánh giá)',
                 ),
               ),
-              SizedBox(width: 3.w),
+              SizedBox(width: 8),
               Expanded(
                 child: _buildInfoCard(
                   icon: Icons.people,
@@ -81,7 +81,7 @@ class ClubInfoSectionWidget extends StatelessWidget {
             ],
           ),
           
-          SizedBox(height: 2.h),
+          SizedBox(height: 2),
           
           // Operating Hours
           if (clubData["operatingHours"] != null) ...[
@@ -91,9 +91,9 @@ class ClubInfoSectionWidget extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            SizedBox(height: 1.h),
+            SizedBox(height: 1),
             Container(
-              padding: EdgeInsets.all(3.w),
+              padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: AppTheme.lightTheme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
@@ -102,7 +102,7 @@ class ClubInfoSectionWidget extends StatelessWidget {
                 children: (clubData["operatingHours"] as Map<String, dynamic>)
                     .entries
                     .map((entry) => Padding(
-                          padding: EdgeInsets.symmetric(vertical: 0.5.h),
+                          padding: EdgeInsets.symmetric(vertical: 0.5),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -134,7 +134,7 @@ class ClubInfoSectionWidget extends StatelessWidget {
     required String value,
   }) {
     return Container(
-      padding: EdgeInsets.all(3.w),
+      padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppTheme.lightTheme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
@@ -149,10 +149,10 @@ class ClubInfoSectionWidget extends StatelessWidget {
             children: [
               Icon(
                 icon,
-                size: 5.w,
+                size: 20,
                 color: AppTheme.lightTheme.colorScheme.primary,
               ),
-              SizedBox(width: 2.w),
+              SizedBox(width: 8),
               Expanded(
                 child: Text(
                   title,
@@ -163,7 +163,7 @@ class ClubInfoSectionWidget extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 1.h),
+          SizedBox(height: 1),
           Text(
             value,
             style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(

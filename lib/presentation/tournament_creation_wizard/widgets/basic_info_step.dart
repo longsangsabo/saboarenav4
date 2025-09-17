@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:sabo_arena/core/app_export.dart';
 
 class BasicInfoStep extends StatefulWidget {
   final Map<String, dynamic> data;
@@ -141,42 +140,42 @@ class _BasicInfoStepState extends State<BasicInfoStep>
         return Opacity(
           opacity: _fadeAnimation.value,
           child: SingleChildScrollView(
-            padding: EdgeInsets.all(20.h),
+            padding: EdgeInsets.all(20),
             child: Form(
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildSectionTitle("Thông tin cơ bản", Icons.info_outline),
-                  SizedBox(height: 16.v),
+                  SizedBox(height: 16),
                   _buildTournamentNameField(),
                   
-                  SizedBox(height: 24.v),
+                  SizedBox(height: 24),
                   _buildSectionTitle("Loại game", Icons.sports_esports_outlined),
-                  SizedBox(height: 16.v),
+                  SizedBox(height: 16),
                   _buildGameTypeSelector(),
                   
-                  SizedBox(height: 24.v),
-                  _buildSectionTitle("Định dạng giải đấu", Icons.tournament_outlined),
-                  SizedBox(height: 16.v),
+                  SizedBox(height: 24),
+                                    _buildSectionTitle("Định dạng giải đấu", Icons.emoji_events),
+                  SizedBox(height: 16),
                   _buildTournamentTypeSelector(),
                   
-                  SizedBox(height: 24.v),
+                  SizedBox(height: 24),
                   _buildSectionTitle("Số lượng tham gia", Icons.people_outline),
-                  SizedBox(height: 16.v),
+                  SizedBox(height: 16),
                   _buildMaxParticipantsSelector(),
                   
-                  SizedBox(height: 24.v),
+                  SizedBox(height: 24),
                   _buildSectionTitle("Lệ phí tham gia", Icons.payments_outlined),
-                  SizedBox(height: 16.v),
+                  SizedBox(height: 16),
                   _buildEntryFeeSelector(),
                   
-                  SizedBox(height: 24.v),
+                  SizedBox(height: 24),
                   _buildSectionTitle("Hình ảnh giải đấu", Icons.image_outlined),
-                  SizedBox(height: 16.v),
+                  SizedBox(height: 16),
                   _buildImageUploadSection(),
                   
-                  SizedBox(height: 100.v), // Space for navigation buttons
+                  SizedBox(height: 100), // Space for navigation buttons
                 ],
               ),
             ),
@@ -190,24 +189,24 @@ class _BasicInfoStepState extends State<BasicInfoStep>
     return Row(
       children: [
         Container(
-          padding: EdgeInsets.all(8.h),
+          padding: EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: appTheme.blue50,
-            borderRadius: BorderRadius.circular(8.h),
+            color: Colors.blue[50]!,
+            borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
             icon,
-            color: appTheme.blue600,
-            size: 20.adaptSize,
+            color: Colors.blue[600]!,
+            size: 20,
           ),
         ),
-        SizedBox(width: 12.h),
+        SizedBox(width: 12),
         Text(
           title,
           style: TextStyle(
-            fontSize: 18.fSize,
+            fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: appTheme.gray900,
+            color: Colors.grey[900]!,
           ),
         ),
       ],
@@ -218,10 +217,10 @@ class _BasicInfoStepState extends State<BasicInfoStep>
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.h),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: appTheme.black900.withOpacity(0.06),
+            color: Colors.black.withOpacity(0.06),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -232,14 +231,14 @@ class _BasicInfoStepState extends State<BasicInfoStep>
         decoration: InputDecoration(
           labelText: "Tên giải đấu *",
           hintText: "VD: Giải Bi-a Open 2024",
-          prefixIcon: Icon(Icons.emoji_events_outlined, color: appTheme.gray600),
+          prefixIcon: Icon(Icons.emoji_events_outlined, color: Colors.grey[600]!),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12.h),
+            borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
           ),
           filled: true,
           fillColor: Colors.transparent,
-          contentPadding: EdgeInsets.symmetric(horizontal: 16.h, vertical: 16.v),
+          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
         validator: (value) {
           if (value?.isEmpty ?? true) {
@@ -266,7 +265,7 @@ class _BasicInfoStepState extends State<BasicInfoStep>
         final isSelected = _selectedGameType == gameType.value;
         
         return Container(
-          margin: EdgeInsets.only(bottom: 12.v),
+          margin: EdgeInsets.only(bottom: 12),
           child: InkWell(
             onTap: () {
               setState(() {
@@ -274,26 +273,26 @@ class _BasicInfoStepState extends State<BasicInfoStep>
               });
               _updateData();
             },
-            borderRadius: BorderRadius.circular(12.h),
+            borderRadius: BorderRadius.circular(12),
             child: AnimatedContainer(
               duration: Duration(milliseconds: 200),
-              padding: EdgeInsets.all(16.h),
+              padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12.h),
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: isSelected ? appTheme.blue600 : appTheme.gray200,
+                  color: isSelected ? Colors.blue[600]! : Colors.grey[200]!,
                   width: isSelected ? 2 : 1,
                 ),
                 boxShadow: isSelected ? [
                   BoxShadow(
-                    color: appTheme.blue600.withOpacity(0.15),
+                    color: Colors.blue[600]!.withOpacity(0.15),
                     blurRadius: 8,
                     spreadRadius: 2,
                   ),
                 ] : [
                   BoxShadow(
-                    color: appTheme.black900.withOpacity(0.04),
+                    color: Colors.black.withOpacity(0.04),
                     blurRadius: 6,
                     offset: Offset(0, 2),
                   ),
@@ -302,20 +301,20 @@ class _BasicInfoStepState extends State<BasicInfoStep>
               child: Row(
                 children: [
                   Container(
-                    width: 48.adaptSize,
-                    height: 48.adaptSize,
+                    width: 48,
+                    height: 48,
                     decoration: BoxDecoration(
                       color: gameType.color.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12.h),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Center(
                       child: Text(
                         gameType.icon,
-                        style: TextStyle(fontSize: 24.fSize),
+                        style: TextStyle(fontSize: 24),
                       ),
                     ),
                   ),
-                  SizedBox(width: 16.h),
+                  SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -323,16 +322,16 @@ class _BasicInfoStepState extends State<BasicInfoStep>
                         Text(
                           gameType.label,
                           style: TextStyle(
-                            fontSize: 16.fSize,
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: appTheme.gray900,
+                            color: Colors.grey[900]!,
                           ),
                         ),
                         Text(
                           gameType.description,
                           style: TextStyle(
-                            fontSize: 14.fSize,
-                            color: appTheme.gray600,
+                            fontSize: 14,
+                            color: Colors.grey[600]!,
                           ),
                         ),
                       ],
@@ -340,15 +339,15 @@ class _BasicInfoStepState extends State<BasicInfoStep>
                   ),
                   if (isSelected)
                     Container(
-                      padding: EdgeInsets.all(4.h),
+                      padding: EdgeInsets.all(4),
                       decoration: BoxDecoration(
-                        color: appTheme.blue600,
+                        color: Colors.blue[600]!,
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         Icons.check,
                         color: Colors.white,
-                        size: 16.adaptSize,
+                        size: 16,
                       ),
                     ),
                 ],
@@ -366,7 +365,7 @@ class _BasicInfoStepState extends State<BasicInfoStep>
         final isSelected = _selectedTournamentType == tournamentType.value;
         
         return Container(
-          margin: EdgeInsets.only(bottom: 12.v),
+          margin: EdgeInsets.only(bottom: 12),
           child: InkWell(
             onTap: () {
               setState(() {
@@ -374,26 +373,26 @@ class _BasicInfoStepState extends State<BasicInfoStep>
               });
               _updateData();
             },
-            borderRadius: BorderRadius.circular(12.h),
+            borderRadius: BorderRadius.circular(12),
             child: AnimatedContainer(
               duration: Duration(milliseconds: 200),
-              padding: EdgeInsets.all(16.h),
+              padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12.h),
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: isSelected ? appTheme.green600 : appTheme.gray200,
+                  color: isSelected ? Colors.green[600]! : Colors.grey[200]!,
                   width: isSelected ? 2 : 1,
                 ),
                 boxShadow: isSelected ? [
                   BoxShadow(
-                    color: appTheme.green600.withOpacity(0.15),
+                    color: Colors.green[600]!.withOpacity(0.15),
                     blurRadius: 8,
                     spreadRadius: 2,
                   ),
                 ] : [
                   BoxShadow(
-                    color: appTheme.black900.withOpacity(0.04),
+                    color: Colors.black.withOpacity(0.04),
                     blurRadius: 6,
                     offset: Offset(0, 2),
                   ),
@@ -404,18 +403,18 @@ class _BasicInfoStepState extends State<BasicInfoStep>
                   Row(
                     children: [
                       Container(
-                        padding: EdgeInsets.all(12.h),
+                        padding: EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: (isSelected ? appTheme.green600 : appTheme.gray600).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12.h),
+                          color: (isSelected ? Colors.green[600]! : Colors.grey[600]!).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
                           tournamentType.icon,
-                          color: isSelected ? appTheme.green600 : appTheme.gray600,
-                          size: 24.adaptSize,
+                          color: isSelected ? Colors.green[600]! : Colors.grey[600]!,
+                          size: 24,
                         ),
                       ),
-                      SizedBox(width: 16.h),
+                      SizedBox(width: 16),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -423,16 +422,16 @@ class _BasicInfoStepState extends State<BasicInfoStep>
                             Text(
                               tournamentType.label,
                               style: TextStyle(
-                                fontSize: 16.fSize,
+                                fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: appTheme.gray900,
+                                color: Colors.grey[900]!,
                               ),
                             ),
                             Text(
                               tournamentType.description,
                               style: TextStyle(
-                                fontSize: 14.fSize,
-                                color: appTheme.gray600,
+                                fontSize: 14,
+                                color: Colors.grey[600]!,
                               ),
                             ),
                           ],
@@ -440,21 +439,21 @@ class _BasicInfoStepState extends State<BasicInfoStep>
                       ),
                       if (isSelected)
                         Container(
-                          padding: EdgeInsets.all(4.h),
+                          padding: EdgeInsets.all(4),
                           decoration: BoxDecoration(
-                            color: appTheme.green600,
+                            color: Colors.green[600]!,
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
                             Icons.check,
                             color: Colors.white,
-                            size: 16.adaptSize,
+                            size: 16,
                           ),
                         ),
                     ],
                   ),
                   
-                  SizedBox(height: 12.v),
+                  SizedBox(height: 12),
                   
                   Row(
                     children: [
@@ -465,22 +464,22 @@ class _BasicInfoStepState extends State<BasicInfoStep>
                             Text(
                               "Ưu điểm:",
                               style: TextStyle(
-                                fontSize: 12.fSize,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: appTheme.green600,
+                                color: Colors.green[600]!,
                               ),
                             ),
                             ...tournamentType.pros.map((pro) => Text(
                               "• $pro",
                               style: TextStyle(
-                                fontSize: 11.fSize,
-                                color: appTheme.gray600,
+                                fontSize: 11,
+                                color: Colors.grey[600]!,
                               ),
                             )),
                           ],
                         ),
                       ),
-                      SizedBox(width: 16.h),
+                      SizedBox(width: 16),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -488,16 +487,16 @@ class _BasicInfoStepState extends State<BasicInfoStep>
                             Text(
                               "Nhược điểm:",
                               style: TextStyle(
-                                fontSize: 12.fSize,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: appTheme.orange600,
+                                color: Colors.orange[600]!,
                               ),
                             ),
                             ...tournamentType.cons.map((con) => Text(
                               "• $con",
                               style: TextStyle(
-                                fontSize: 11.fSize,
-                                color: appTheme.gray600,
+                                fontSize: 11,
+                                color: Colors.grey[600]!,
                               ),
                             )),
                           ],
@@ -516,13 +515,13 @@ class _BasicInfoStepState extends State<BasicInfoStep>
 
   Widget _buildMaxParticipantsSelector() {
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.h),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: appTheme.black900.withOpacity(0.06),
+            color: Colors.black.withOpacity(0.06),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -534,16 +533,16 @@ class _BasicInfoStepState extends State<BasicInfoStep>
           Text(
             "Chọn số lượng thí sinh tối đa:",
             style: TextStyle(
-              fontSize: 14.fSize,
+              fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: appTheme.gray700,
+              color: Colors.grey[700]!,
             ),
           ),
-          SizedBox(height: 12.v),
+          SizedBox(height: 12),
           
           Wrap(
-            spacing: 8.h,
-            runSpacing: 8.v,
+            spacing: 8,
+            runSpacing: 8,
             children: _participantOptions.map((count) {
               final isSelected = !_useCustomParticipants && _selectedMaxParticipants == count;
               return InkWell(
@@ -555,17 +554,17 @@ class _BasicInfoStepState extends State<BasicInfoStep>
                   });
                   _updateData();
                 },
-                borderRadius: BorderRadius.circular(8.h),
+                borderRadius: BorderRadius.circular(8),
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16.h, vertical: 10.v),
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   decoration: BoxDecoration(
-                    color: isSelected ? appTheme.blue600 : appTheme.gray100,
-                    borderRadius: BorderRadius.circular(8.h),
+                    color: isSelected ? Colors.blue[600]! : Colors.grey[100]!,
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     "$count người",
                     style: TextStyle(
-                      color: isSelected ? Colors.white : appTheme.gray700,
+                      color: isSelected ? Colors.white : Colors.grey[700]!,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -574,7 +573,7 @@ class _BasicInfoStepState extends State<BasicInfoStep>
             }).toList(),
           ),
           
-          SizedBox(height: 16.v),
+          SizedBox(height: 16),
           
           Row(
             children: [
@@ -589,11 +588,11 @@ class _BasicInfoStepState extends State<BasicInfoStep>
               Text(
                 "Tùy chỉnh:",
                 style: TextStyle(
-                  fontSize: 14.fSize,
-                  color: appTheme.gray700,
+                  fontSize: 14,
+                  color: Colors.grey[700]!,
                 ),
               ),
-              SizedBox(width: 12.h),
+              SizedBox(width: 12),
               if (_useCustomParticipants) ...[
                 Expanded(
                   child: TextFormField(
@@ -603,9 +602,9 @@ class _BasicInfoStepState extends State<BasicInfoStep>
                     decoration: InputDecoration(
                       hintText: "Nhập số",
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.h),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12.h, vertical: 8.v),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       isDense: true,
                     ),
                     onChanged: (value) {
@@ -635,12 +634,12 @@ class _BasicInfoStepState extends State<BasicInfoStep>
           
           if (_useCustomParticipants)
             Padding(
-              padding: EdgeInsets.only(top: 8.v),
+              padding: EdgeInsets.only(top: 8),
               child: Text(
                 "Số lượng: 4 - 128 người",
                 style: TextStyle(
-                  fontSize: 12.fSize,
-                  color: appTheme.gray500,
+                  fontSize: 12,
+                  color: Colors.grey[500]!,
                 ),
               ),
             ),
@@ -651,13 +650,13 @@ class _BasicInfoStepState extends State<BasicInfoStep>
 
   Widget _buildEntryFeeSelector() {
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.h),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: appTheme.black900.withOpacity(0.06),
+            color: Colors.black.withOpacity(0.06),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -669,16 +668,16 @@ class _BasicInfoStepState extends State<BasicInfoStep>
           Text(
             "Lệ phí tham gia (VND):",
             style: TextStyle(
-              fontSize: 14.fSize,
+              fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: appTheme.gray700,
+              color: Colors.grey[700]!,
             ),
           ),
-          SizedBox(height: 12.v),
+          SizedBox(height: 12),
           
           Wrap(
-            spacing: 8.h,
-            runSpacing: 8.v,
+            spacing: 8,
+            runSpacing: 8,
             children: _entryFeeOptions.map((fee) {
               final isSelected = !_useCustomEntryFee && _selectedEntryFee == fee;
               return InkWell(
@@ -690,17 +689,17 @@ class _BasicInfoStepState extends State<BasicInfoStep>
                   });
                   _updateData();
                 },
-                borderRadius: BorderRadius.circular(8.h),
+                borderRadius: BorderRadius.circular(8),
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16.h, vertical: 10.v),
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   decoration: BoxDecoration(
-                    color: isSelected ? appTheme.green600 : appTheme.gray100,
-                    borderRadius: BorderRadius.circular(8.h),
+                    color: isSelected ? Colors.green[600]! : Colors.grey[100]!,
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     "${fee.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} VND",
                     style: TextStyle(
-                      color: isSelected ? Colors.white : appTheme.gray700,
+                      color: isSelected ? Colors.white : Colors.grey[700]!,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -709,7 +708,7 @@ class _BasicInfoStepState extends State<BasicInfoStep>
             }).toList(),
           ),
           
-          SizedBox(height: 16.v),
+          SizedBox(height: 16),
           
           Row(
             children: [
@@ -724,11 +723,11 @@ class _BasicInfoStepState extends State<BasicInfoStep>
               Text(
                 "Tùy chỉnh:",
                 style: TextStyle(
-                  fontSize: 14.fSize,
-                  color: appTheme.gray700,
+                  fontSize: 14,
+                  color: Colors.grey[700]!,
                 ),
               ),
-              SizedBox(width: 12.h),
+              SizedBox(width: 12),
               if (_useCustomEntryFee) ...[
                 Expanded(
                   child: TextFormField(
@@ -738,9 +737,9 @@ class _BasicInfoStepState extends State<BasicInfoStep>
                     decoration: InputDecoration(
                       hintText: "Nhập số tiền",
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.h),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12.h, vertical: 8.v),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       isDense: true,
                       suffixText: "VND",
                     ),
@@ -763,12 +762,12 @@ class _BasicInfoStepState extends State<BasicInfoStep>
 
   Widget _buildImageUploadSection() {
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.h),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: appTheme.gray200,
+          color: Colors.grey[200]!,
           style: BorderStyle.solid,
         ),
       ),
@@ -776,13 +775,13 @@ class _BasicInfoStepState extends State<BasicInfoStep>
         children: [
           if (_tournamentImage.isEmpty) ...[
             Container(
-              height: 120.v,
+              height: 120,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: appTheme.gray100,
-                borderRadius: BorderRadius.circular(8.h),
+                color: Colors.grey[100]!,
+                borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: appTheme.gray300,
+                  color: Colors.grey[300]!,
                   style: BorderStyle.solid,
                 ),
               ),
@@ -791,22 +790,22 @@ class _BasicInfoStepState extends State<BasicInfoStep>
                 children: [
                   Icon(
                     Icons.image_outlined,
-                    color: appTheme.gray500,
-                    size: 48.adaptSize,
+                    color: Colors.grey[500]!,
+                    size: 48,
                   ),
-                  SizedBox(height: 8.v),
+                  SizedBox(height: 8),
                   Text(
                     "Tải lên hình ảnh giải đấu",
                     style: TextStyle(
-                      fontSize: 14.fSize,
-                      color: appTheme.gray600,
+                      fontSize: 14,
+                      color: Colors.grey[600]!,
                     ),
                   ),
                   Text(
                     "Khuyến nghị: 16:9 (1200x675px)",
                     style: TextStyle(
-                      fontSize: 12.fSize,
-                      color: appTheme.gray500,
+                      fontSize: 12,
+                      color: Colors.grey[500]!,
                     ),
                   ),
                 ],
@@ -814,22 +813,33 @@ class _BasicInfoStepState extends State<BasicInfoStep>
             ),
           ] else ...[
             Container(
-              height: 120.v,
+              height: 120,
               width: double.infinity,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8.h),
+                borderRadius: BorderRadius.circular(8),
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(8.h),
-                child: CustomImageWidget(
-                  imagePath: _tournamentImage,
-                  fit: BoxFit.cover,
-                ),
+                borderRadius: BorderRadius.circular(8),
+                child: _tournamentImage.isNotEmpty
+                    ? Image.network(
+                        _tournamentImage,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Icon(
+                          Icons.image,
+                          color: Colors.grey[400]!,
+                          size: 48,
+                        ),
+                      )
+                    : Icon(
+                        Icons.image,
+                        color: Colors.grey[400]!,
+                        size: 48,
+                      ),
               ),
             ),
           ],
           
-          SizedBox(height: 12.v),
+          SizedBox(height: 12),
           
           Row(
             children: [
@@ -839,18 +849,18 @@ class _BasicInfoStepState extends State<BasicInfoStep>
                   icon: Icon(Icons.photo_library_outlined),
                   label: Text("Thư viện"),
                   style: OutlinedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 12.v),
+                    padding: EdgeInsets.symmetric(vertical: 12),
                   ),
                 ),
               ),
-              SizedBox(width: 12.h),
+              SizedBox(width: 12),
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: _selectImageFromCamera,
                   icon: Icon(Icons.camera_alt_outlined),
                   label: Text("Máy ảnh"),
                   style: OutlinedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 12.v),
+                    padding: EdgeInsets.symmetric(vertical: 12),
                   ),
                 ),
               ),
@@ -858,7 +868,7 @@ class _BasicInfoStepState extends State<BasicInfoStep>
           ),
           
           if (_tournamentImage.isNotEmpty) ...[
-            SizedBox(height: 8.v),
+            SizedBox(height: 8),
             TextButton.icon(
               onPressed: () {
                 setState(() {
@@ -866,10 +876,10 @@ class _BasicInfoStepState extends State<BasicInfoStep>
                 });
                 _updateData();
               },
-              icon: Icon(Icons.delete_outline, color: appTheme.red600),
+              icon: Icon(Icons.delete_outline, color: Colors.red[600]!),
               label: Text(
                 "Xóa ảnh",
-                style: TextStyle(color: appTheme.red600),
+                style: TextStyle(color: Colors.red[600]!),
               ),
             ),
           ],

@@ -1,8 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
-
-import '../../core/app_export.dart';
 import '../../services/club_service.dart';
 import '../../models/club.dart';
 import '../../widgets/custom_app_bar.dart';
@@ -70,8 +67,8 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
           Navigator.pushNamed(context, '/club_registration_screen')
               .then((_) => _loadMyClubs());
         },
-        child: const Icon(Icons.add),
         tooltip: 'Đăng ký CLB mới',
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -147,7 +144,7 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
           Text(
             'Bạn chưa đăng ký CLB nào',
             style: TextStyle(
-              fontSize: 18.sp,
+              fontSize: 18,
               fontWeight: FontWeight.w500,
               color: Colors.grey[600],
             ),
@@ -156,7 +153,7 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
           Text(
             'Hãy đăng ký CLB đầu tiên của bạn!',
             style: TextStyle(
-              fontSize: 14.sp,
+              fontSize: 14,
               color: Colors.grey[500],
             ),
           ),
@@ -193,7 +190,7 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
                   child: Text(
                     club.name,
                     style: TextStyle(
-                      fontSize: 16.sp,
+                      fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -214,7 +211,7 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
                     child: Text(
                       club.address!,
                       style: TextStyle(
-                        fontSize: 14.sp,
+                        fontSize: 14,
                         color: Colors.grey[600],
                       ),
                     ),
@@ -229,7 +226,7 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
               Text(
                 club.description!,
                 style: TextStyle(
-                  fontSize: 14.sp,
+                  fontSize: 14,
                   color: Colors.grey[700],
                 ),
                 maxLines: 2,
@@ -242,7 +239,7 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
             Text(
               'Đăng ký: ${_formatDate(club.createdAt)}',
               style: TextStyle(
-                fontSize: 12.sp,
+                fontSize: 12,
                 color: Colors.grey[500],
               ),
             ),
@@ -252,7 +249,7 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
               Text(
                 'Được duyệt: ${_formatDate(club.approvedAt!)}',
                 style: TextStyle(
-                  fontSize: 12.sp,
+                  fontSize: 12,
                   color: Colors.green[600],
                 ),
               ),
@@ -273,7 +270,7 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
                     Text(
                       'Lý do từ chối:',
                       style: TextStyle(
-                        fontSize: 12.sp,
+                        fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: Colors.red[700],
                       ),
@@ -282,7 +279,7 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
                     Text(
                       club.rejectionReason!,
                       style: TextStyle(
-                        fontSize: 12.sp,
+                        fontSize: 12,
                         color: Colors.red[600],
                       ),
                     ),
@@ -356,7 +353,7 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
           Text(
             statusText,
             style: TextStyle(
-              fontSize: 12.sp,
+              fontSize: 12,
               fontWeight: FontWeight.w600,
               color: textColor,
             ),

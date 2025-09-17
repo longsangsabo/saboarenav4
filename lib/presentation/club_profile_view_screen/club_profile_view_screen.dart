@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sabo_arena/core/app_export.dart';
-import 'package:sabo_arena/widgets/custom_app_bar.dart';
+// import 'package:sabo_arena/widgets/custom_app_bar.dart';
+import 'package:sabo_arena/widgets/custom_image_widget.dart';
 
 class ClubProfileViewScreen extends StatefulWidget {
   const ClubProfileViewScreen({super.key});
@@ -69,7 +70,7 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: appTheme.gray50,
+      backgroundColor: Colors.grey[50] ?? Colors.white,
       body: CustomScrollView(
         controller: _scrollController,
         slivers: [
@@ -91,7 +92,7 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
                         _buildFacilitiesSection(),
                         _buildGallerySection(),
                         _buildLocationSection(),
-                        SizedBox(height: 100.v),
+                        SizedBox(height: 100),
                       ],
                     ),
                   ),
@@ -118,12 +119,12 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
         child: Row(
           children: [
             CircleAvatar(
-              radius: 16.h,
+              radius: 16,
               backgroundImage: NetworkImage(
                 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=100&h=100&fit=crop',
               ),
             ),
-            SizedBox(width: 12.h),
+            SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -132,16 +133,16 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
                   Text(
                     "SABO Arena Central",
                     style: TextStyle(
-                      fontSize: 16.fSize,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: appTheme.gray900,
+                      color: Colors.grey[900],
                     ),
                   ),
                   Text(
                     "@saboarena_central",
                     style: TextStyle(
-                      fontSize: 12.fSize,
-                      color: appTheme.gray600,
+                      fontSize: 12,
+                      color: Colors.grey[600] ?? Colors.grey,
                     ),
                   ),
                 ],
@@ -152,11 +153,11 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
       ),
       actions: [
         IconButton(
-          icon: Icon(Icons.share_outlined, color: appTheme.gray700),
+          icon: Icon(Icons.share_outlined, color: Colors.grey[700] ?? Colors.grey),
           onPressed: _onSharePressed,
         ),
         IconButton(
-          icon: Icon(Icons.more_vert, color: appTheme.gray700),
+          icon: Icon(Icons.more_vert, color: Colors.grey[700] ?? Colors.grey),
           onPressed: _onMorePressed,
         ),
       ],
@@ -183,7 +184,7 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
       children: [
         // Cover Image
         CustomImageWidget(
-          imagePath: 'https://images.unsplash.com/photo-1574631806042-182f10c4a017?w=800&h=400&fit=crop',
+          imageUrl: 'https://images.unsplash.com/photo-1574631806042-182f10c4a017?w=800&h=400&fit=crop',
           fit: BoxFit.cover,
         ),
         // Gradient Overlay
@@ -203,34 +204,34 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
         ),
         // Edit Button
         Positioned(
-          top: 40.v,
-          right: 16.h,
+          top: 40,
+          right: 16,
           child: Container(
-            padding: EdgeInsets.all(8.h),
+            padding: EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: Colors.black.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(8.h),
+              borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
               Icons.camera_alt_outlined,
               color: Colors.white,
-              size: 20.adaptSize,
+              size: 20,
             ),
           ),
         ),
         // Club Logo and Info
         Positioned(
-          bottom: 20.v,
-          left: 20.h,
-          right: 20.h,
+          bottom: 20,
+          left: 20,
+          right: 20,
           child: Row(
             children: [
               // Club Logo
               Container(
-                width: 80.adaptSize,
-                height: 80.adaptSize,
+                width: 80,
+                height: 80,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16.h),
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: Colors.white, width: 3),
                   boxShadow: [
                     BoxShadow(
@@ -241,14 +242,14 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
                   ],
                 ),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(13.h),
+                  borderRadius: BorderRadius.circular(13),
                   child: CustomImageWidget(
-                    imagePath: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=200&fit=crop',
+                    imageUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=200&fit=crop',
                     fit: BoxFit.cover,
                   ),
                 ),
               ),
-              SizedBox(width: 16.h),
+              SizedBox(width: 16),
               // Club Info
               Expanded(
                 child: Column(
@@ -260,43 +261,43 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
                           child: Text(
                             "SABO Arena Central",
                             style: TextStyle(
-                              fontSize: 24.fSize,
+                              fontSize: 24,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
                           ),
                         ),
-                        SizedBox(width: 8.h),
+                        SizedBox(width: 8),
                         Icon(
                           Icons.verified,
-                          color: appTheme.blue600,
-                          size: 24.adaptSize,
+                          color: Colors.blue[600] ?? Colors.blue,
+                          size: 24,
                         ),
                       ],
                     ),
-                    SizedBox(height: 4.v),
+                    SizedBox(height: 4),
                     Text(
                       "@saboarena_central",
                       style: TextStyle(
-                        fontSize: 16.fSize,
+                        fontSize: 16,
                         color: Colors.white.withOpacity(0.9),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    SizedBox(height: 8.v),
+                    SizedBox(height: 8),
                     Row(
                       children: [
                         Icon(
                           Icons.location_on_outlined,
                           color: Colors.white.withOpacity(0.8),
-                          size: 16.adaptSize,
+                          size: 16,
                         ),
-                        SizedBox(width: 4.h),
+                        SizedBox(width: 4),
                         Flexible(
                           child: Text(
                             "123 Nguyễn Huệ, Quận 1, TP.HCM",
                             style: TextStyle(
-                              fontSize: 14.fSize,
+                              fontSize: 14,
                               color: Colors.white.withOpacity(0.8),
                             ),
                           ),
@@ -315,13 +316,14 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
 
   Widget _buildBasicInfoSection() {
     return Container(
-      margin: EdgeInsets.fromLTRB(16.h, 16.v, 16.h, 0),
-      padding: EdgeInsets.all(20.h),
-      decoration: AppDecoration.fillWhite.copyWith(
-        borderRadius: BorderRadiusStyle.roundedBorder16,
+      margin: EdgeInsets.fromLTRB(16, 16, 16, 0),
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: appTheme.black900.withOpacity(0.06),
+            color: Colors.black.withOpacity(0.06),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -336,41 +338,41 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
               Text(
                 "Thông tin cơ bản",
                 style: TextStyle(
-                  fontSize: 18.fSize,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: appTheme.gray900,
+                  color: Colors.grey[900],
                 ),
               ),
               IconButton(
-                icon: Icon(Icons.edit_outlined, color: appTheme.gray600),
+                icon: Icon(Icons.edit_outlined, color: Colors.grey[600] ?? Colors.grey),
                 onPressed: _onEditBasicInfo,
-                iconSize: 20.adaptSize,
+                iconSize: 20,
               ),
             ],
           ),
-          SizedBox(height: 16.v),
+          SizedBox(height: 16),
           Text(
             "Arena bi-a hiện đại với hệ thống thi đấu chuyên nghiệp và không gian rộng rãi. "
             "Chúng tôi cung cấp môi trường tốt nhất cho các tournament và giao lưu bi-a.",
             style: TextStyle(
-              fontSize: 15.fSize,
-              color: appTheme.gray700,
+              fontSize: 15,
+              color: Colors.grey[700] ?? Colors.grey,
               height: 1.5,
             ),
           ),
-          SizedBox(height: 16.v),
+          SizedBox(height: 16),
           Row(
             children: [
               _buildInfoChip(
                 icon: Icons.calendar_today_outlined,
                 label: "Thành lập 2020",
-                color: appTheme.blue600,
+                color: Colors.blue[600] ?? Colors.blue,
               ),
-              SizedBox(width: 12.h),
+              SizedBox(width: 12),
               _buildInfoChip(
                 icon: Icons.military_tech_outlined,
                 label: "Xếp hạng #12",
-                color: appTheme.purple600,
+                color: Colors.purple[600] ?? Colors.purple,
               ),
             ],
           ),
@@ -381,7 +383,7 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
 
   Widget _buildStatsSection() {
     return Container(
-      margin: EdgeInsets.fromLTRB(16.h, 16.v, 16.h, 0),
+      margin: EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: Row(
         children: [
           Expanded(
@@ -389,25 +391,25 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
               title: "Thành viên",
               value: "156",
               icon: Icons.people_outline,
-              color: appTheme.green600,
+              color: Colors.green[600] ?? Colors.green,
             ),
           ),
-          SizedBox(width: 12.h),
+          SizedBox(width: 12),
           Expanded(
             child: _buildStatCard(
               title: "Giải đấu",
               value: "24",
               icon: Icons.emoji_events_outlined,
-              color: appTheme.orange600,
+              color: Colors.orange[600] ?? Colors.orange,
             ),
           ),
-          SizedBox(width: 12.h),
+          SizedBox(width: 12),
           Expanded(
             child: _buildStatCard(
               title: "Bàn bi-a",
               value: "20",
               icon: Icons.table_restaurant_outlined,
-              color: appTheme.blue600,
+              color: Colors.blue[600] ?? Colors.blue,
             ),
           ),
         ],
@@ -417,13 +419,14 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
 
   Widget _buildContactInfoSection() {
     return Container(
-      margin: EdgeInsets.fromLTRB(16.h, 16.v, 16.h, 0),
-      padding: EdgeInsets.all(20.h),
-      decoration: AppDecoration.fillWhite.copyWith(
-        borderRadius: BorderRadiusStyle.roundedBorder16,
+      margin: EdgeInsets.fromLTRB(16, 16, 16, 0),
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: appTheme.black900.withOpacity(0.06),
+            color: Colors.black.withOpacity(0.06),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -435,12 +438,12 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
           Text(
             "Liên hệ",
             style: TextStyle(
-              fontSize: 18.fSize,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: appTheme.gray900,
+              color: Colors.grey[900],
             ),
           ),
-          SizedBox(height: 20.v),
+          SizedBox(height: 20),
           _buildContactItem(
             icon: Icons.phone_outlined,
             title: "Điện thoại",
@@ -459,23 +462,23 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
             value: "https://saboarena.vn",
             onTap: () => _onWebsitePressed("https://saboarena.vn"),
           ),
-          SizedBox(height: 16.v),
+          SizedBox(height: 16),
           Row(
             children: [
               Text(
                 "Mạng xã hội:",
                 style: TextStyle(
-                  fontSize: 14.fSize,
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: appTheme.gray700,
+                  color: Colors.grey[700] ?? Colors.grey,
                 ),
               ),
-              SizedBox(width: 16.h),
-              _buildSocialButton(Icons.facebook, appTheme.blue600),
-              SizedBox(width: 8.h),
-              _buildSocialButton(Icons.camera_alt, appTheme.pink600),
-              SizedBox(width: 8.h),
-              _buildSocialButton(Icons.music_note, appTheme.gray900),
+              SizedBox(width: 16),
+              _buildSocialButton(Icons.facebook, Colors.blue[600] ?? Colors.blue),
+              SizedBox(width: 8),
+              _buildSocialButton(Icons.camera_alt, Colors.pink[600] ?? Colors.pink),
+              SizedBox(width: 8),
+              _buildSocialButton(Icons.music_note, Colors.grey[900] ?? Colors.grey),
             ],
           ),
         ],
@@ -485,13 +488,14 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
 
   Widget _buildBusinessInfoSection() {
     return Container(
-      margin: EdgeInsets.fromLTRB(16.h, 16.v, 16.h, 0),
-      padding: EdgeInsets.all(20.h),
-      decoration: AppDecoration.fillWhite.copyWith(
-        borderRadius: BorderRadiusStyle.roundedBorder16,
+      margin: EdgeInsets.fromLTRB(16, 16, 16, 0),
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: appTheme.black900.withOpacity(0.06),
+            color: Colors.black.withOpacity(0.06),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -503,12 +507,12 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
           Text(
             "Thông tin kinh doanh",
             style: TextStyle(
-              fontSize: 18.fSize,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: appTheme.gray900,
+              color: Colors.grey[900],
             ),
           ),
-          SizedBox(height: 20.v),
+          SizedBox(height: 20),
           _buildBusinessItem(
             icon: Icons.access_time_outlined,
             title: "Giờ hoạt động",
@@ -537,13 +541,14 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
     ];
 
     return Container(
-      margin: EdgeInsets.fromLTRB(16.h, 16.v, 16.h, 0),
-      padding: EdgeInsets.all(20.h),
-      decoration: AppDecoration.fillWhite.copyWith(
-        borderRadius: BorderRadiusStyle.roundedBorder16,
+      margin: EdgeInsets.fromLTRB(16, 16, 16, 0),
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: appTheme.black900.withOpacity(0.06),
+            color: Colors.black.withOpacity(0.06),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -555,15 +560,15 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
           Text(
             "Tiện ích",
             style: TextStyle(
-              fontSize: 18.fSize,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: appTheme.gray900,
+              color: Colors.grey[900],
             ),
           ),
-          SizedBox(height: 16.v),
+          SizedBox(height: 16),
           Wrap(
-            spacing: 8.h,
-            runSpacing: 8.v,
+            spacing: 8,
+            runSpacing: 8,
             children: facilities.map((facility) => _buildFacilityChip(facility)).toList(),
           ),
         ],
@@ -580,13 +585,14 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
     ];
 
     return Container(
-      margin: EdgeInsets.fromLTRB(16.h, 16.v, 16.h, 0),
-      padding: EdgeInsets.all(20.h),
-      decoration: AppDecoration.fillWhite.copyWith(
-        borderRadius: BorderRadiusStyle.roundedBorder16,
+      margin: EdgeInsets.fromLTRB(16, 16, 16, 0),
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: appTheme.black900.withOpacity(0.06),
+            color: Colors.black.withOpacity(0.06),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -601,9 +607,9 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
               Text(
                 "Thư viện ảnh",
                 style: TextStyle(
-                  fontSize: 18.fSize,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: appTheme.gray900,
+                  color: Colors.grey[900],
                 ),
               ),
               TextButton(
@@ -611,30 +617,30 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
                 child: Text(
                   "Xem tất cả",
                   style: TextStyle(
-                    color: appTheme.blue600,
-                    fontSize: 14.fSize,
+                    color: Colors.blue[600] ?? Colors.blue,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
             ],
           ),
-          SizedBox(height: 16.v),
+          SizedBox(height: 16),
           GridView.builder(
             shrinkWrap: true,
             physics: NeverScrollableScrollPhysics(),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              crossAxisSpacing: 12.h,
-              mainAxisSpacing: 12.v,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
               childAspectRatio: 1.5,
             ),
             itemCount: galleryImages.length,
             itemBuilder: (context, index) {
               return ClipRRect(
-                borderRadius: BorderRadius.circular(12.h),
+                borderRadius: BorderRadius.circular(12),
                 child: CustomImageWidget(
-                  imagePath: galleryImages[index],
+                  imageUrl: galleryImages[index],
                   fit: BoxFit.cover,
                 ),
               );
@@ -647,13 +653,14 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
 
   Widget _buildLocationSection() {
     return Container(
-      margin: EdgeInsets.fromLTRB(16.h, 16.v, 16.h, 0),
-      padding: EdgeInsets.all(20.h),
-      decoration: AppDecoration.fillWhite.copyWith(
-        borderRadius: BorderRadiusStyle.roundedBorder16,
+      margin: EdgeInsets.fromLTRB(16, 16, 16, 0),
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: appTheme.black900.withOpacity(0.06),
+            color: Colors.black.withOpacity(0.06),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -668,9 +675,9 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
               Text(
                 "Vị trí",
                 style: TextStyle(
-                  fontSize: 18.fSize,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: appTheme.gray900,
+                  color: Colors.grey[900],
                 ),
               ),
               TextButton(
@@ -678,20 +685,20 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
                 child: Text(
                   "Chỉ đường",
                   style: TextStyle(
-                    color: appTheme.blue600,
-                    fontSize: 14.fSize,
+                    color: Colors.blue[600] ?? Colors.blue,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
             ],
           ),
-          SizedBox(height: 16.v),
+          SizedBox(height: 16),
           Container(
-            height: 200.v,
+            height: 200,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12.h),
-              color: appTheme.gray200,
+              borderRadius: BorderRadius.circular(12),
+              color: Colors.grey[200] ?? Colors.grey,
             ),
             child: Center(
               child: Column(
@@ -699,36 +706,36 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
                 children: [
                   Icon(
                     Icons.map_outlined,
-                    color: appTheme.gray600,
-                    size: 48.adaptSize,
+                    color: Colors.grey[600] ?? Colors.grey,
+                    size: 48,
                   ),
-                  SizedBox(height: 8.v),
+                  SizedBox(height: 8),
                   Text(
                     "Bản đồ sẽ được hiển thị ở đây",
                     style: TextStyle(
-                      color: appTheme.gray600,
-                      fontSize: 14.fSize,
+                      color: Colors.grey[600] ?? Colors.grey,
+                      fontSize: 14,
                     ),
                   ),
                 ],
               ),
             ),
           ),
-          SizedBox(height: 16.v),
+          SizedBox(height: 16),
           Row(
             children: [
               Icon(
                 Icons.location_on_outlined,
-                color: appTheme.gray600,
-                size: 20.adaptSize,
+                color: Colors.grey[600] ?? Colors.grey,
+                size: 20,
               ),
-              SizedBox(width: 8.h),
+              SizedBox(width: 8),
               Expanded(
                 child: Text(
                   "123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh",
                   style: TextStyle(
-                    fontSize: 15.fSize,
-                    color: appTheme.gray700,
+                    fontSize: 15,
+                    color: Colors.grey[700] ?? Colors.grey,
                   ),
                 ),
               ),
@@ -742,7 +749,7 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
   Widget _buildFloatingActionButton() {
     return FloatingActionButton.extended(
       onPressed: _onEditProfile,
-      backgroundColor: appTheme.blue600,
+      backgroundColor: Colors.blue[600] ?? Colors.blue,
       label: Text(
         "Chỉnh sửa",
         style: TextStyle(
@@ -753,7 +760,7 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
       icon: Icon(
         Icons.edit_outlined,
         color: Colors.white,
-        size: 20.adaptSize,
+        size: 20,
       ),
     );
   }
@@ -765,22 +772,22 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
     required Color color,
   }) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.h, vertical: 6.v),
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20.h),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: color.withOpacity(0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: color, size: 16.adaptSize),
-          SizedBox(width: 6.h),
+          Icon(icon, color: color, size: 16),
+          SizedBox(width: 6),
           Text(
             label,
             style: TextStyle(
               color: color,
-              fontSize: 12.fSize,
+              fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -796,13 +803,13 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
     required Color color,
   }) {
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.h),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: appTheme.black900.withOpacity(0.06),
+            color: Colors.grey[900] ?? Colors.black.withOpacity(0.06),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -811,27 +818,27 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
       child: Column(
         children: [
           Container(
-            padding: EdgeInsets.all(8.h),
+            padding: EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8.h),
+              borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: color, size: 24.adaptSize),
+            child: Icon(icon, color: color, size: 24),
           ),
-          SizedBox(height: 8.v),
+          SizedBox(height: 8),
           Text(
             value,
             style: TextStyle(
-              fontSize: 20.fSize,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: appTheme.gray900,
+              color: Colors.grey[900],
             ),
           ),
           Text(
             title,
             style: TextStyle(
-              fontSize: 12.fSize,
-              color: appTheme.gray600,
+              fontSize: 12,
+              color: Colors.grey[600] ?? Colors.grey,
             ),
           ),
         ],
@@ -846,23 +853,23 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
     required VoidCallback onTap,
   }) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 16.v),
+      padding: EdgeInsets.only(bottom: 16),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(8.h),
+        borderRadius: BorderRadius.circular(8),
         child: Padding(
-          padding: EdgeInsets.all(8.h),
+          padding: EdgeInsets.all(8),
           child: Row(
             children: [
               Container(
-                padding: EdgeInsets.all(8.h),
+                padding: EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: appTheme.gray100,
-                  borderRadius: BorderRadius.circular(8.h),
+                  color: Colors.grey[100] ?? Colors.grey,
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, color: appTheme.gray600, size: 20.adaptSize),
+                child: Icon(icon, color: Colors.grey[600] ?? Colors.grey, size: 20),
               ),
-              SizedBox(width: 12.h),
+              SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -870,16 +877,16 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
                     Text(
                       title,
                       style: TextStyle(
-                        fontSize: 12.fSize,
-                        color: appTheme.gray500,
+                        fontSize: 12,
+                        color: Colors.grey[500] ?? Colors.grey,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     Text(
                       value,
                       style: TextStyle(
-                        fontSize: 15.fSize,
-                        color: appTheme.gray900,
+                        fontSize: 15,
+                        color: Colors.grey[900],
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -888,8 +895,8 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
               ),
               Icon(
                 Icons.arrow_forward_ios_rounded,
-                color: appTheme.gray400,
-                size: 16.adaptSize,
+                color: Colors.grey[400] ?? Colors.grey,
+                size: 16,
               ),
             ],
           ),
@@ -904,11 +911,11 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
     required String value,
   }) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 16.v),
+      padding: EdgeInsets.only(bottom: 16),
       child: Row(
         children: [
-          Icon(icon, color: appTheme.gray600, size: 20.adaptSize),
-          SizedBox(width: 12.h),
+          Icon(icon, color: Colors.grey[600] ?? Colors.grey, size: 20),
+          SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -916,16 +923,16 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 14.fSize,
-                    color: appTheme.gray700,
+                    fontSize: 14,
+                    color: Colors.grey[700] ?? Colors.grey,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
                   value,
                   style: TextStyle(
-                    fontSize: 13.fSize,
-                    color: appTheme.gray600,
+                    fontSize: 13,
+                    color: Colors.grey[600] ?? Colors.grey,
                   ),
                 ),
               ],
@@ -938,28 +945,28 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
 
   Widget _buildSocialButton(IconData icon, Color color) {
     return Container(
-      padding: EdgeInsets.all(8.h),
+      padding: EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8.h),
+        borderRadius: BorderRadius.circular(8),
       ),
-      child: Icon(icon, color: color, size: 20.adaptSize),
+      child: Icon(icon, color: color, size: 20),
     );
   }
 
   Widget _buildFacilityChip(String facility) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.h, vertical: 6.v),
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: appTheme.blue50,
-        borderRadius: BorderRadius.circular(20.h),
-        border: Border.all(color: appTheme.blue200),
+        color: Colors.blue[50],
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: (Colors.blue[200] ?? Colors.blue)),
       ),
       child: Text(
         facility,
         style: TextStyle(
-          fontSize: 12.fSize,
-          color: appTheme.blue700,
+          fontSize: 12,
+          color: Colors.blue[700] ?? Colors.blue,
           fontWeight: FontWeight.w500,
         ),
       ),

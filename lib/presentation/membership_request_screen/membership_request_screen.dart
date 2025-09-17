@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../core/app_export.dart';
+// import '../../core/app_export.dart';
 import '../../widgets/custom_app_bar.dart';
 
 class MembershipRequestScreen extends StatefulWidget {
-  const MembershipRequestScreen({Key? key}) : super(key: key);
+  const MembershipRequestScreen({super.key});
 
   @override
   _MembershipRequestScreenState createState() => _MembershipRequestScreenState();
@@ -771,7 +771,7 @@ class MembershipRequest {
 // Dialog widgets
 class _RequestDetailDialog extends StatelessWidget {
   final MembershipRequest request;
-
+ 
   const _RequestDetailDialog({Key? key, required this.request}) : super(key: key);
 
   @override
@@ -836,6 +836,25 @@ class _RejectRequestDialog extends StatelessWidget {
       ],
     );
   }
+}
+
+// Minimal UI-only user model and rank enum for this screen
+enum RankType { beginner, amateur, intermediate, advanced, professional }
+
+class User {
+  final String id;
+  final String displayName;
+  final String email;
+  final String avatar;
+  final RankType rank;
+
+  const User({
+    required this.id,
+    required this.displayName,
+    required this.email,
+    required this.avatar,
+    required this.rank,
+  });
 }
 
 class _InviteMemberDialog extends StatelessWidget {

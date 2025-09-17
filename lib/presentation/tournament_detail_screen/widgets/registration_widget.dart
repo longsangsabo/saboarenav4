@@ -244,8 +244,11 @@ class RegistrationWidget extends StatelessWidget {
 
   bool _isDeadlinePassed(String deadline) {
     try {
-      final deadlineDate =
-          DateTime.parse(deadline.split(' ')[0].split('/').reversed.join('-'));
+    // Expecting deadline in format 'dd/MM/yyyy HH:mm' or 'dd/MM/yyyy'
+    final parts = deadline.split(' ');
+    final datePart = parts.first;
+    final normalized = datePart.split('/').reversed.join('-');
+    final deadlineDate = DateTime.parse(normalized);
       return DateTime.now().isAfter(deadlineDate);
     } catch (e) {
       return false;
@@ -254,8 +257,10 @@ class RegistrationWidget extends StatelessWidget {
 
   String _getTimeRemaining(String deadline) {
     try {
-      final deadlineDate =
-          DateTime.parse(deadline.split(' ')[0].split('/').reversed.join('-'));
+    final parts = deadline.split(' ');
+    final datePart = parts.first;
+    final normalized = datePart.split('/').reversed.join('-');
+    final deadlineDate = DateTime.parse(normalized);
       final now = DateTime.now();
       final difference = deadlineDate.difference(now);
 

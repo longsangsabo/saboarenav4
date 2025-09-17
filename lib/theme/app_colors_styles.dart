@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
+
 import 'app_theme.dart';
 
 // AppColors class for color constants
@@ -28,25 +28,25 @@ class AppColors {
 // CustomTextStyles class for text styling
 class CustomTextStyles {
   static TextStyle get bodyMedium => TextStyle(
-    fontSize: 14.sp,
+    fontSize: 14,
     fontWeight: FontWeight.w400,
     color: AppTheme.onBackgroundLight,
   );
   
   static TextStyle get titleMedium => TextStyle(
-    fontSize: 16.sp,
+    fontSize: 16,
     fontWeight: FontWeight.w500,
     color: AppTheme.onBackgroundLight,
   );
   
   static TextStyle get titleLarge => TextStyle(
-    fontSize: 20.sp,
+    fontSize: 20,
     fontWeight: FontWeight.w600,
     color: AppTheme.onBackgroundLight,
   );
   
   static TextStyle get headlineSmall => TextStyle(
-    fontSize: 24.sp,
+    fontSize: 24,
     fontWeight: FontWeight.w700,
     color: AppTheme.onBackgroundLight,
   );

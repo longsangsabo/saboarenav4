@@ -253,7 +253,7 @@ class HorizontalClubList extends StatelessWidget {
                           ),
                           const SizedBox(width: 12),
                           Icon(
-                            Icons.sports_bar,
+                                                        Icons.sports_bar,
                             size: 16,
                             color: colorScheme.onSurface.withOpacity(0.6),
                           ),

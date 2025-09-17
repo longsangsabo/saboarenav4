@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sabo_arena/core/app_export.dart';
+// import 'package:sabo_arena/core/app_export.dart';
+
 
 class PrizesStep extends StatefulWidget {
   final Map<String, dynamic> data;
@@ -134,33 +135,33 @@ class _PrizesStepState extends State<PrizesStep>
         return Opacity(
           opacity: _fadeAnimation.value,
           child: SingleChildScrollView(
-            padding: EdgeInsets.all(20.h),
+            padding: EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildPrizePoolOverview(),
                 
-                SizedBox(height: 24.v),
+                SizedBox(height: 24),
                 _buildSectionTitle("Nguồn giải thưởng", Icons.account_balance_wallet_outlined),
-                SizedBox(height: 16.v),
+                SizedBox(height: 16),
                 _buildPrizeSourceConfig(),
                 
-                SizedBox(height: 24.v),
+                SizedBox(height: 24),
                 _buildSectionTitle("Phân chia giải thưởng", Icons.workspace_premium_outlined),
-                SizedBox(height: 16.v),
+                SizedBox(height: 16),
                 _buildPrizeDistribution(),
                 
-                SizedBox(height: 24.v),
+                SizedBox(height: 24),
                 _buildSectionTitle("Giải thưởng bổ sung", Icons.card_giftcard_outlined),
-                SizedBox(height: 16.v),
+                SizedBox(height: 16),
                 _buildAdditionalPrizes(),
                 
-                SizedBox(height: 24.v),
+                SizedBox(height: 24),
                 _buildSectionTitle("Tài trợ", Icons.handshake_outlined),
-                SizedBox(height: 16.v),
+                SizedBox(height: 16),
                 _buildSponsorshipConfig(),
                 
-                SizedBox(height: 100.v), // Space for navigation buttons
+                SizedBox(height: 100), // Space for navigation buttons
               ],
             ),
           ),
@@ -173,24 +174,24 @@ class _PrizesStepState extends State<PrizesStep>
     return Row(
       children: [
         Container(
-          padding: EdgeInsets.all(8.h),
+          padding: EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: appTheme.blue50,
-            borderRadius: BorderRadius.circular(8.h),
+            color: Colors.blue[50] ?? Colors.blue,
+            borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
             icon,
-            color: appTheme.blue600,
-            size: 20.adaptSize,
+            color: Colors.blue[600] ?? Colors.blue,
+            size: 20,
           ),
         ),
-        SizedBox(width: 12.h),
+        SizedBox(width: 12),
         Text(
           title,
           style: TextStyle(
-            fontSize: 18.fSize,
+            fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: appTheme.gray900,
+            color: Colors.grey[900] ?? Colors.black,
           ),
         ),
       ],
@@ -199,17 +200,17 @@ class _PrizesStepState extends State<PrizesStep>
 
   Widget _buildPrizePoolOverview() {
     return Container(
-      padding: EdgeInsets.all(20.h),
+      padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [appTheme.blue600, appTheme.blue800],
+          colors: [Colors.blue[600] ?? Colors.blue, Colors.blue[800] ?? Colors.blue],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(16.h),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: appTheme.blue600.withOpacity(0.3),
+            color: Colors.blue[600] ?? Colors.blue.withOpacity(0.3),
             blurRadius: 20,
             offset: Offset(0, 8),
           ),
@@ -222,9 +223,9 @@ class _PrizesStepState extends State<PrizesStep>
               Icon(
                 Icons.emoji_events,
                 color: Colors.white,
-                size: 32.adaptSize,
+                size: 32,
               ),
-              SizedBox(width: 16.h),
+              SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -232,14 +233,14 @@ class _PrizesStepState extends State<PrizesStep>
                     Text(
                       "Tổng giải thưởng",
                       style: TextStyle(
-                        fontSize: 16.fSize,
+                        fontSize: 16,
                         color: Colors.white.withOpacity(0.9),
                       ),
                     ),
                     Text(
                       "${(_totalPrizePool / 1000).toStringAsFixed(0)}K VNĐ",
                       style: TextStyle(
-                        fontSize: 28.fSize,
+                        fontSize: 28,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -251,12 +252,12 @@ class _PrizesStepState extends State<PrizesStep>
           ),
           
           if (_totalPrizePool > 0) ...[
-            SizedBox(height: 16.v),
+            SizedBox(height: 16),
             Container(
-              padding: EdgeInsets.all(12.h),
+              padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(8.h),
+                borderRadius: BorderRadius.circular(8),
               ),
               child: _buildPrizeBreakdown(),
             ),
@@ -272,7 +273,7 @@ class _PrizesStepState extends State<PrizesStep>
     final totalFromFees = entryFee * maxParticipants;
     final fromEntryFees = totalFromFees * (100 - _organizerFee) / 100;
     final organizerTake = totalFromFees - fromEntryFees;
-    final fromSponsors = _sponsorContribution + _sponsors.fold(0.0, (sum, sponsor) => sum + sponsor.amount);
+  // Note: sponsor totals are displayed per-sponsor below; aggregated value not used here
     
     return Column(
       children: [
@@ -293,21 +294,21 @@ class _PrizesStepState extends State<PrizesStep>
 
   Widget _buildBreakdownRow(String label, double amount, Color color) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 2.v),
+      padding: EdgeInsets.symmetric(vertical: 2),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             label,
             style: TextStyle(
-              fontSize: 12.fSize,
+              fontSize: 12,
               color: color,
             ),
           ),
           Text(
             "${(amount / 1000).toStringAsFixed(0)}K",
             style: TextStyle(
-              fontSize: 12.fSize,
+              fontSize: 12,
               fontWeight: FontWeight.w600,
               color: color,
             ),
@@ -319,13 +320,13 @@ class _PrizesStepState extends State<PrizesStep>
 
   Widget _buildPrizeSourceConfig() {
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.h),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: appTheme.black900.withOpacity(0.06),
+            color: Colors.grey[900] ?? Colors.black.withOpacity(0.06),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -337,24 +338,24 @@ class _PrizesStepState extends State<PrizesStep>
           Text(
             "Chọn nguồn tài chính:",
             style: TextStyle(
-              fontSize: 14.fSize,
+              fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: appTheme.gray700,
+              color: Colors.grey[700] ?? Colors.grey,
             ),
           ),
-          SizedBox(height: 16.v),
+          SizedBox(height: 16),
           
           ...(_prizeSourceLabels.entries.map((entry) {
             return _buildSourceOption(entry.key, entry.value);
           })),
           
           if (_prizeSource == 'entry_fees' || _prizeSource == 'hybrid') ...[
-            SizedBox(height: 20.v),
+            SizedBox(height: 20),
             _buildOrganizerFeeSlider(),
           ],
           
           if (_prizeSource == 'sponsor' || _prizeSource == 'hybrid') ...[
-            SizedBox(height: 20.v),
+            SizedBox(height: 20),
             _buildSponsorContributionInput(),
           ],
         ],
@@ -366,7 +367,7 @@ class _PrizesStepState extends State<PrizesStep>
     final isSelected = _prizeSource == value;
     
     return Container(
-      margin: EdgeInsets.only(bottom: 8.v),
+      margin: EdgeInsets.only(bottom: 8),
       child: InkWell(
         onTap: () {
           setState(() {
@@ -375,40 +376,40 @@ class _PrizesStepState extends State<PrizesStep>
           _calculatePrizePool();
           _updateData();
         },
-        borderRadius: BorderRadius.circular(8.h),
+        borderRadius: BorderRadius.circular(8),
         child: Container(
-          padding: EdgeInsets.all(12.h),
+          padding: EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: isSelected ? appTheme.blue50 : appTheme.gray50,
-            borderRadius: BorderRadius.circular(8.h),
+            color: isSelected ? Colors.blue[50] ?? Colors.blue : Colors.grey[50] ?? Colors.grey,
+            borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: isSelected ? appTheme.blue600 : appTheme.gray200,
+              color: isSelected ? Colors.blue[600] ?? Colors.blue : Colors.grey[200] ?? Colors.grey,
             ),
           ),
           child: Row(
             children: [
               Container(
-                padding: EdgeInsets.all(2.h),
+                padding: EdgeInsets.all(2),
                 decoration: BoxDecoration(
-                  color: isSelected ? appTheme.blue600 : appTheme.gray300,
+                  color: isSelected ? Colors.blue[600] ?? Colors.blue : Colors.grey[300]!,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.check,
                   color: Colors.white,
-                  size: 12.adaptSize,
+                  size: 12,
                 ),
               ),
               
-              SizedBox(width: 12.h),
+              SizedBox(width: 12),
               
               Expanded(
                 child: Text(
                   label,
                   style: TextStyle(
-                    fontSize: 14.fSize,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: isSelected ? appTheme.blue800 : appTheme.gray700,
+                    color: isSelected ? Colors.blue[800] ?? Colors.blue : Colors.grey[700] ?? Colors.grey,
                   ),
                 ),
               ),
@@ -426,19 +427,19 @@ class _PrizesStepState extends State<PrizesStep>
         Text(
           "Phí tổ chức: ${_organizerFee.toInt()}%",
           style: TextStyle(
-            fontSize: 14.fSize,
+            fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: appTheme.gray700,
+            color: Colors.grey[700] ?? Colors.grey,
           ),
         ),
-        SizedBox(height: 8.v),
+        SizedBox(height: 8),
         
         Slider(
           value: _organizerFee,
           min: 0,
           max: 30,
           divisions: 30,
-          activeColor: appTheme.blue600,
+          activeColor: Colors.blue[600] ?? Colors.blue,
           onChanged: (value) {
             setState(() {
               _organizerFee = value;
@@ -451,24 +452,24 @@ class _PrizesStepState extends State<PrizesStep>
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text("0%", style: TextStyle(fontSize: 11.fSize, color: appTheme.gray500)),
-            Text("30%", style: TextStyle(fontSize: 11.fSize, color: appTheme.gray500)),
+            Text("0%", style: TextStyle(fontSize: 11, color: Colors.grey[50] ?? Colors.grey[50]!)),
+            Text("30%", style: TextStyle(fontSize: 11, color: Colors.grey[50] ?? Colors.grey[50]!)),
           ],
         ),
         
-        SizedBox(height: 8.v),
+        SizedBox(height: 8),
         
         Container(
-          padding: EdgeInsets.all(8.h),
+          padding: EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: appTheme.orange50,
-            borderRadius: BorderRadius.circular(6.h),
+            color: Colors.orange[50]!,
+            borderRadius: BorderRadius.circular(6),
           ),
           child: Text(
             "Phí này dùng để chi trả chi phí tổ chức, quản lý và vận hành giải đấu",
             style: TextStyle(
-              fontSize: 11.fSize,
-              color: appTheme.orange600,
+              fontSize: 11,
+              color: Colors.orange[600]!,
             ),
           ),
         ),
@@ -483,19 +484,19 @@ class _PrizesStepState extends State<PrizesStep>
         Text(
           "Đóng góp từ ban tổ chức:",
           style: TextStyle(
-            fontSize: 14.fSize,
+            fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: appTheme.gray700,
+            color: Colors.grey[700] ?? Colors.grey,
           ),
         ),
-        SizedBox(height: 8.v),
+        SizedBox(height: 8),
         
         TextField(
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
             labelText: "Số tiền (VNĐ)",
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.h),
+              borderRadius: BorderRadius.circular(8),
             ),
             prefixIcon: Icon(Icons.attach_money_outlined),
           ),
@@ -512,13 +513,13 @@ class _PrizesStepState extends State<PrizesStep>
 
   Widget _buildPrizeDistribution() {
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.h),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: appTheme.black900.withOpacity(0.06),
+            color: Colors.grey[900] ?? Colors.black.withOpacity(0.06),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -530,24 +531,24 @@ class _PrizesStepState extends State<PrizesStep>
           Text(
             "Chọn cách chia giải:",
             style: TextStyle(
-              fontSize: 14.fSize,
+              fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: appTheme.gray700,
+              color: Colors.grey[700] ?? Colors.grey,
             ),
           ),
-          SizedBox(height: 16.v),
+          SizedBox(height: 16),
           
           ...(_distributionTemplateLabels.entries.map((entry) {
             return _buildDistributionOption(entry.key, entry.value);
           })),
           
           if (_distributionTemplate != 'custom') ...[
-            SizedBox(height: 16.v),
+            SizedBox(height: 16),
             _buildDistributionPreview(),
           ],
           
           if (_distributionTemplate == 'custom') ...[
-            SizedBox(height: 16.v),
+            SizedBox(height: 16),
             _buildCustomDistribution(),
           ],
         ],
@@ -559,7 +560,7 @@ class _PrizesStepState extends State<PrizesStep>
     final isSelected = _distributionTemplate == value;
     
     return Container(
-      margin: EdgeInsets.only(bottom: 8.v),
+      margin: EdgeInsets.only(bottom: 8),
       child: InkWell(
         onTap: () {
           setState(() {
@@ -567,40 +568,40 @@ class _PrizesStepState extends State<PrizesStep>
           });
           _updateData();
         },
-        borderRadius: BorderRadius.circular(8.h),
+        borderRadius: BorderRadius.circular(8),
         child: Container(
-          padding: EdgeInsets.all(12.h),
+          padding: EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: isSelected ? appTheme.green50 : appTheme.gray50,
-            borderRadius: BorderRadius.circular(8.h),
+            color: isSelected ? Colors.green[50]! : Colors.grey[50] ?? Colors.grey,
+            borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: isSelected ? appTheme.green600 : appTheme.gray200,
+              color: isSelected ? Colors.green[600]! : Colors.grey[200] ?? Colors.grey,
             ),
           ),
           child: Row(
             children: [
               Container(
-                padding: EdgeInsets.all(2.h),
+                padding: EdgeInsets.all(2),
                 decoration: BoxDecoration(
-                  color: isSelected ? appTheme.green600 : appTheme.gray300,
+                  color: isSelected ? Colors.green[600]! : Colors.grey[300]!,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.check,
                   color: Colors.white,
-                  size: 12.adaptSize,
+                  size: 12,
                 ),
               ),
               
-              SizedBox(width: 12.h),
+              SizedBox(width: 12),
               
               Expanded(
                 child: Text(
                   label,
                   style: TextStyle(
-                    fontSize: 14.fSize,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: isSelected ? appTheme.green800 : appTheme.gray700,
+                    color: isSelected ? Colors.green[800]! : Colors.grey[700] ?? Colors.grey,
                   ),
                 ),
               ),
@@ -615,10 +616,10 @@ class _PrizesStepState extends State<PrizesStep>
     final percentages = _distributionTemplates[_distributionTemplate] ?? [];
     
     return Container(
-      padding: EdgeInsets.all(12.h),
+      padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: appTheme.green50,
-        borderRadius: BorderRadius.circular(8.h),
+        color: Colors.green[50]!,
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -626,12 +627,12 @@ class _PrizesStepState extends State<PrizesStep>
           Text(
             "Phân chia chi tiết:",
             style: TextStyle(
-              fontSize: 12.fSize,
+              fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: appTheme.green700,
+              color: Colors.green[700]!,
             ),
           ),
-          SizedBox(height: 8.v),
+          SizedBox(height: 8),
           
           ...percentages.asMap().entries.map((entry) {
             final position = entry.key + 1;
@@ -639,23 +640,23 @@ class _PrizesStepState extends State<PrizesStep>
             final amount = _totalPrizePool * percentage / 100;
             
             return Padding(
-              padding: EdgeInsets.symmetric(vertical: 2.v),
+              padding: EdgeInsets.symmetric(vertical: 2),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     "Hạng $position:",
                     style: TextStyle(
-                      fontSize: 12.fSize,
-                      color: appTheme.green700,
+                      fontSize: 12,
+                      color: Colors.green[700]!,
                     ),
                   ),
                   Text(
                     "${percentage.toStringAsFixed(1)}% (${(amount / 1000).toStringAsFixed(0)}K)",
                     style: TextStyle(
-                      fontSize: 12.fSize,
+                      fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: appTheme.green700,
+                      color: Colors.green[700]!,
                     ),
                   ),
                 ],
@@ -677,17 +678,17 @@ class _PrizesStepState extends State<PrizesStep>
             Text(
               "Phân chia tùy chỉnh:",
               style: TextStyle(
-                fontSize: 12.fSize,
+                fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: appTheme.gray700,
+                color: Colors.grey[700] ?? Colors.grey,
               ),
             ),
             TextButton.icon(
               onPressed: _addCustomDistribution,
-              icon: Icon(Icons.add, size: 16.adaptSize),
+              icon: Icon(Icons.add, size: 16),
               label: Text("Thêm hạng"),
               style: TextButton.styleFrom(
-                foregroundColor: appTheme.blue600,
+                foregroundColor: Colors.blue[600] ?? Colors.blue,
               ),
             ),
           ],
@@ -698,17 +699,17 @@ class _PrizesStepState extends State<PrizesStep>
           final dist = entry.value;
           
           return Container(
-            margin: EdgeInsets.only(bottom: 8.v),
-            padding: EdgeInsets.all(8.h),
+            margin: EdgeInsets.only(bottom: 8),
+            padding: EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: appTheme.gray50,
-              borderRadius: BorderRadius.circular(6.h),
-              border: Border.all(color: appTheme.gray200),
+              color: Colors.grey[50] ?? Colors.grey,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: Colors.grey[200] ?? Colors.grey),
             ),
             child: Row(
               children: [
-                Text("Hạng ${index + 1}:", style: TextStyle(fontSize: 12.fSize)),
-                SizedBox(width: 8.h),
+                Text("Hạng ${index + 1}:", style: TextStyle(fontSize: 12)),
+                SizedBox(width: 8),
                 
                 Expanded(
                   child: TextField(
@@ -716,7 +717,7 @@ class _PrizesStepState extends State<PrizesStep>
                     decoration: InputDecoration(
                       hintText: "%",
                       border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 8.h, vertical: 4.v),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     ),
                     controller: TextEditingController(text: dist.percentage.toString()),
                     onChanged: (value) {
@@ -729,13 +730,13 @@ class _PrizesStepState extends State<PrizesStep>
                   ),
                 ),
                 
-                SizedBox(width: 8.h),
+                SizedBox(width: 8),
                 
                 IconButton(
                   onPressed: () => _removeCustomDistribution(index),
                   icon: Icon(Icons.delete_outline),
-                  iconSize: 16.adaptSize,
-                  color: appTheme.red600,
+                  iconSize: 16,
+                  color: Colors.red[600]!,
                 ),
               ],
             ),
@@ -744,13 +745,13 @@ class _PrizesStepState extends State<PrizesStep>
         
         if (_customDistribution.isEmpty)
           Container(
-            padding: EdgeInsets.all(16.h),
+            padding: EdgeInsets.all(16),
             child: Center(
               child: Text(
                 "Nhấn 'Thêm hạng' để tạo phân chia tùy chỉnh",
                 style: TextStyle(
-                  fontSize: 12.fSize,
-                  color: appTheme.gray500,
+                  fontSize: 12,
+                  color: Colors.grey[50] ?? Colors.grey[50]!,
                 ),
               ),
             ),
@@ -761,13 +762,13 @@ class _PrizesStepState extends State<PrizesStep>
 
   Widget _buildAdditionalPrizes() {
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.h),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: appTheme.black900.withOpacity(0.06),
+            color: Colors.grey[900] ?? Colors.black.withOpacity(0.06),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -782,49 +783,49 @@ class _PrizesStepState extends State<PrizesStep>
               Text(
                 "Giải thưởng phụ",
                 style: TextStyle(
-                  fontSize: 14.fSize,
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: appTheme.gray700,
+                  color: Colors.grey[700] ?? Colors.grey,
                 ),
               ),
               TextButton.icon(
                 onPressed: _addAdditionalPrize,
-                icon: Icon(Icons.add, size: 16.adaptSize),
+                icon: Icon(Icons.add, size: 16),
                 label: Text("Thêm giải"),
                 style: TextButton.styleFrom(
-                  foregroundColor: appTheme.blue600,
+                  foregroundColor: Colors.blue[600] ?? Colors.blue,
                 ),
               ),
             ],
           ),
           
-          SizedBox(height: 12.v),
+          SizedBox(height: 12),
           
           ...(_additionalPrizes.map((prize) {
             return Container(
-              margin: EdgeInsets.only(bottom: 12.v),
-              padding: EdgeInsets.all(12.h),
+              margin: EdgeInsets.only(bottom: 12),
+              padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: appTheme.purple50,
-                borderRadius: BorderRadius.circular(8.h),
-                border: Border.all(color: appTheme.purple200),
+                color: Colors.purple[50]!,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.purple[200]!),
               ),
               child: Row(
                 children: [
                   Container(
-                    padding: EdgeInsets.all(6.h),
+                    padding: EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: appTheme.purple100,
-                      borderRadius: BorderRadius.circular(6.h),
+                      color: Colors.purple[100]!,
+                      borderRadius: BorderRadius.circular(6),
                     ),
                     child: Icon(
                       _getPrizeIcon(prize.type),
-                      color: appTheme.purple600,
-                      size: 20.adaptSize,
+                      color: Colors.purple[600]!,
+                      size: 20,
                     ),
                   ),
                   
-                  SizedBox(width: 12.h),
+                  SizedBox(width: 12),
                   
                   Expanded(
                     child: Column(
@@ -833,24 +834,24 @@ class _PrizesStepState extends State<PrizesStep>
                         Text(
                           prize.title,
                           style: TextStyle(
-                            fontSize: 14.fSize,
+                            fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: appTheme.gray900,
+                            color: Colors.grey[900] ?? Colors.black,
                           ),
                         ),
                         Text(
                           prize.description,
                           style: TextStyle(
-                            fontSize: 12.fSize,
-                            color: appTheme.gray600,
+                            fontSize: 12,
+                            color: Colors.grey[600]!,
                           ),
                         ),
                         if (prize.value > 0)
                           Text(
                             "Giá trị: ${(prize.value / 1000).toStringAsFixed(0)}K VNĐ",
                             style: TextStyle(
-                              fontSize: 11.fSize,
-                              color: appTheme.purple600,
+                              fontSize: 11,
+                              color: Colors.purple[600]!,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -861,8 +862,8 @@ class _PrizesStepState extends State<PrizesStep>
                   IconButton(
                     onPressed: () => _removeAdditionalPrize(prize),
                     icon: Icon(Icons.delete_outline),
-                    iconSize: 20.adaptSize,
-                    color: appTheme.red600,
+                    iconSize: 20,
+                    color: Colors.red[600]!,
                   ),
                 ],
               ),
@@ -871,13 +872,13 @@ class _PrizesStepState extends State<PrizesStep>
           
           if (_additionalPrizes.isEmpty)
             Container(
-              padding: EdgeInsets.all(20.h),
+              padding: EdgeInsets.all(20),
               child: Center(
                 child: Text(
                   "Thêm các giải thưởng phụ như Best Shot, Fair Play, MVP...",
                   style: TextStyle(
-                    fontSize: 14.fSize,
-                    color: appTheme.gray500,
+                    fontSize: 14,
+                    color: Colors.grey[50] ?? Colors.grey[50]!,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -890,13 +891,13 @@ class _PrizesStepState extends State<PrizesStep>
 
   Widget _buildSponsorshipConfig() {
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.h),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: appTheme.black900.withOpacity(0.06),
+            color: Colors.grey[900] ?? Colors.black.withOpacity(0.06),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -914,16 +915,16 @@ class _PrizesStepState extends State<PrizesStep>
                     Text(
                       "Cho phép tài trợ",
                       style: TextStyle(
-                        fontSize: 14.fSize,
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: appTheme.gray900,
+                        color: Colors.grey[900] ?? Colors.black,
                       ),
                     ),
                     Text(
                       "Mở cơ hội cho các nhà tài trợ tham gia",
                       style: TextStyle(
-                        fontSize: 12.fSize,
-                        color: appTheme.gray600,
+                        fontSize: 12,
+                        color: Colors.grey[600]!,
                       ),
                     ),
                   ],
@@ -938,20 +939,20 @@ class _PrizesStepState extends State<PrizesStep>
                   });
                   _updateData();
                 },
-                activeThumbColor: appTheme.blue600,
+                activeThumbColor: Colors.blue[600] ?? Colors.blue,
               ),
             ],
           ),
           
           if (_allowSponsors) ...[
-            SizedBox(height: 20.v),
+            SizedBox(height: 20),
             
             TextField(
               decoration: InputDecoration(
                 labelText: "Quyền lợi nhà tài trợ",
                 hintText: "Logo trên banner, giới thiệu trong lễ khai mạc...",
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.h),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 alignLabelWithHint: true,
               ),
@@ -963,7 +964,7 @@ class _PrizesStepState extends State<PrizesStep>
               },
             ),
             
-            SizedBox(height: 20.v),
+            SizedBox(height: 20),
             
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -971,17 +972,17 @@ class _PrizesStepState extends State<PrizesStep>
                 Text(
                   "Danh sách nhà tài trợ:",
                   style: TextStyle(
-                    fontSize: 12.fSize,
+                    fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: appTheme.gray700,
+                    color: Colors.grey[700] ?? Colors.grey,
                   ),
                 ),
                 TextButton.icon(
                   onPressed: _addSponsor,
-                  icon: Icon(Icons.add, size: 16.adaptSize),
+                  icon: Icon(Icons.add, size: 16),
                   label: Text("Thêm"),
                   style: TextButton.styleFrom(
-                    foregroundColor: appTheme.blue600,
+                    foregroundColor: Colors.blue[600] ?? Colors.blue,
                   ),
                 ),
               ],
@@ -989,12 +990,12 @@ class _PrizesStepState extends State<PrizesStep>
             
             ...(_sponsors.map((sponsor) {
               return Container(
-                margin: EdgeInsets.only(bottom: 8.v),
-                padding: EdgeInsets.all(12.h),
+                margin: EdgeInsets.only(bottom: 8),
+                padding: EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: appTheme.green50,
-                  borderRadius: BorderRadius.circular(8.h),
-                  border: Border.all(color: appTheme.green200),
+                  color: Colors.green[50]!,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.green[200]!),
                 ),
                 child: Row(
                   children: [
@@ -1005,16 +1006,16 @@ class _PrizesStepState extends State<PrizesStep>
                           Text(
                             sponsor.name,
                             style: TextStyle(
-                              fontSize: 14.fSize,
+                              fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: appTheme.gray900,
+                              color: Colors.grey[900] ?? Colors.black,
                             ),
                           ),
                           Text(
                             "Tài trợ: ${(sponsor.amount / 1000).toStringAsFixed(0)}K VNĐ",
                             style: TextStyle(
-                              fontSize: 12.fSize,
-                              color: appTheme.green600,
+                              fontSize: 12,
+                              color: Colors.green[600]!,
                             ),
                           ),
                         ],
@@ -1024,8 +1025,8 @@ class _PrizesStepState extends State<PrizesStep>
                     IconButton(
                       onPressed: () => _removeSponsor(sponsor),
                       icon: Icon(Icons.delete_outline),
-                      iconSize: 20.adaptSize,
-                      color: appTheme.red600,
+                      iconSize: 20,
+                      color: Colors.red[600]!,
                     ),
                   ],
                 ),
@@ -1034,13 +1035,13 @@ class _PrizesStepState extends State<PrizesStep>
             
             if (_sponsors.isEmpty)
               Container(
-                padding: EdgeInsets.all(16.h),
+                padding: EdgeInsets.all(16),
                 child: Center(
                   child: Text(
                     "Chưa có nhà tài trợ nào",
                     style: TextStyle(
-                      fontSize: 12.fSize,
-                      color: appTheme.gray500,
+                      fontSize: 12,
+                      color: Colors.grey[50] ?? Colors.grey[50]!,
                     ),
                   ),
                 ),
@@ -1240,13 +1241,13 @@ class _AdditionalPrizeDialogState extends State<AdditionalPrizeDialog> {
             controller: _titleController,
             decoration: InputDecoration(labelText: "Tên giải thưởng *", border: OutlineInputBorder()),
           ),
-          SizedBox(height: 16.v),
+          SizedBox(height: 16),
           TextField(
             controller: _descriptionController,
             decoration: InputDecoration(labelText: "Mô tả", border: OutlineInputBorder()),
             maxLines: 2,
           ),
-          SizedBox(height: 16.v),
+          SizedBox(height: 16),
           DropdownButtonFormField<String>(
             initialValue: _type,
             decoration: InputDecoration(labelText: "Loại giải", border: OutlineInputBorder()),
@@ -1259,7 +1260,7 @@ class _AdditionalPrizeDialogState extends State<AdditionalPrizeDialog> {
             ],
             onChanged: (value) => setState(() => _type = value!),
           ),
-          SizedBox(height: 16.v),
+          SizedBox(height: 16),
           TextField(
             controller: _valueController,
             keyboardType: TextInputType.number,
@@ -1313,7 +1314,7 @@ class _SponsorDialogState extends State<SponsorDialog> {
             controller: _nameController,
             decoration: InputDecoration(labelText: "Tên nhà tài trợ *", border: OutlineInputBorder()),
           ),
-          SizedBox(height: 16.v),
+          SizedBox(height: 16),
           TextField(
             controller: _amountController,
             keyboardType: TextInputType.number,

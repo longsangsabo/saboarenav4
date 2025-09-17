@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
+
 import 'package:sabo_arena/core/app_export.dart';
 import 'package:sabo_arena/theme/theme_extensions.dart';
 import 'package:sabo_arena/theme/app_colors_styles.dart';
@@ -37,7 +37,7 @@ class _QuickActionCardState extends State<QuickActionCard>
   late Animation<double> _scaleAnimation;
   late Animation<double> _shadowAnimation;
   late Animation<double> _badgeAnimation;
-  bool _isPressed = false;
+  // bool _isPressed = false;  // Unused, commented out
 
   @override
   void initState() {
@@ -106,14 +106,14 @@ class _QuickActionCardState extends State<QuickActionCard>
 
   void _handleTapDown(TapDownDetails details) {
     setState(() {
-      _isPressed = true;
+      // _isPressed = true;
     });
     _controller.forward();
   }
 
   void _handleTapUp(TapUpDetails details) {
     setState(() {
-      _isPressed = false;
+      // _isPressed = false;
     });
     _controller.reverse();
     widget.onPress();
@@ -121,7 +121,7 @@ class _QuickActionCardState extends State<QuickActionCard>
 
   void _handleTapCancel() {
     setState(() {
-      _isPressed = false;
+      // _isPressed = false;
     });
     _controller.reverse();
   }
@@ -140,11 +140,11 @@ class _QuickActionCardState extends State<QuickActionCard>
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(16.h),
+                borderRadius: BorderRadius.circular(16),
                 border: Border(
                   left: BorderSide(
                     color: widget.color,
-                    width: 4.h,
+                    width: 4,
                   ),
                 ),
                 boxShadow: [
@@ -163,20 +163,20 @@ class _QuickActionCardState extends State<QuickActionCard>
               ),
               child: Material(
                 color: Colors.transparent,
-                borderRadius: BorderRadius.circular(16.h),
+                borderRadius: BorderRadius.circular(16),
                 child: InkWell(
                   onTap: widget.isLoading ? null : widget.onPress,
-                  borderRadius: BorderRadius.circular(16.h),
+                  borderRadius: BorderRadius.circular(16),
                   splashColor: widget.color.withOpacity(0.1),
                   highlightColor: widget.color.withOpacity(0.05),
                   child: Padding(
-                    padding: EdgeInsets.all(20.h),
+                    padding: EdgeInsets.all(20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         _buildHeader(),
-                        SizedBox(height: 16.h),
+                        SizedBox(height: 16),
                         _buildContent(),
                       ],
                     ),
@@ -203,7 +203,7 @@ class _QuickActionCardState extends State<QuickActionCard>
 
   Widget _buildIcon() {
     return Container(
-      padding: EdgeInsets.all(12.h),
+      padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -213,7 +213,7 @@ class _QuickActionCardState extends State<QuickActionCard>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(12.h),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: widget.color.withOpacity(0.3),
@@ -224,8 +224,8 @@ class _QuickActionCardState extends State<QuickActionCard>
       ),
       child: widget.isLoading
           ? SizedBox(
-              width: 20.sp,
-              height: 20.sp,
+              width: 20,
+              height: 20,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
@@ -234,7 +234,7 @@ class _QuickActionCardState extends State<QuickActionCard>
           : Icon(
               widget.icon,
               color: Colors.white,
-              size: 20.sp,
+              size: 20,
             ),
     );
   }
@@ -246,7 +246,7 @@ class _QuickActionCardState extends State<QuickActionCard>
         return Transform.scale(
           scale: _badgeAnimation.value,
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 8.h, vertical: 4.h),
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -256,7 +256,7 @@ class _QuickActionCardState extends State<QuickActionCard>
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(12.h),
+              borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
                   color: appTheme.red600.withOpacity(0.4),
@@ -269,7 +269,7 @@ class _QuickActionCardState extends State<QuickActionCard>
               widget.badge! > 99 ? '99+' : widget.badge.toString(),
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 11.sp,
+                fontSize: 11,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -286,17 +286,17 @@ class _QuickActionCardState extends State<QuickActionCard>
         Text(
           widget.title,
           style: TextStyle(
-            fontSize: 16.sp,
+            fontSize: 16,
             fontWeight: FontWeight.bold,
             color: AppTheme.onBackgroundLight,
             letterSpacing: 0.2,
           ),
         ),
-        SizedBox(height: 6.h),
+        SizedBox(height: 6),
         Text(
           widget.subtitle,
           style: TextStyle(
-            fontSize: 13.sp,
+            fontSize: 13,
             color: AppTheme.onSurfaceLight,
             height: 1.3,
           ),
@@ -308,7 +308,7 @@ class _QuickActionCardState extends State<QuickActionCard>
 
 // Specialized Quick Action Cards
 class CreateTournamentCard extends QuickActionCard {
-  CreateTournamentCard({
+  const CreateTournamentCard({
     super.key,
     required super.onPress,
     super.isLoading,
@@ -321,7 +321,7 @@ class CreateTournamentCard extends QuickActionCard {
 }
 
 class ManageMembersCard extends QuickActionCard {
-  ManageMembersCard({
+  const ManageMembersCard({
     super.key,
     required super.onPress,
     int? pendingRequests,
@@ -336,7 +336,7 @@ class ManageMembersCard extends QuickActionCard {
 }
 
 class EditProfileCard extends QuickActionCard {
-  EditProfileCard({
+  const EditProfileCard({
     super.key,
     required super.onPress,
     super.isLoading,
@@ -349,7 +349,7 @@ class EditProfileCard extends QuickActionCard {
 }
 
 class SendNotificationCard extends QuickActionCard {
-  SendNotificationCard({
+  const SendNotificationCard({
     super.key,
     required super.onPress,
     super.isLoading,
@@ -391,7 +391,7 @@ class QuickActionsGrid extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: 16),
         Row(
           children: [
             Expanded(
@@ -400,7 +400,7 @@ class QuickActionsGrid extends StatelessWidget {
                 isLoading: isLoading,
               ),
             ),
-            SizedBox(width: 12.h),
+            SizedBox(width: 12),
             Expanded(
               child: ManageMembersCard(
                 onPress: onManageMembers,
@@ -410,7 +410,7 @@ class QuickActionsGrid extends StatelessWidget {
             ),
           ],
         ),
-        SizedBox(height: 12.h),
+        SizedBox(height: 12),
         Row(
           children: [
             Expanded(
@@ -419,7 +419,7 @@ class QuickActionsGrid extends StatelessWidget {
                 isLoading: isLoading,
               ),
             ),
-            SizedBox(width: 12.h),
+            SizedBox(width: 12),
             Expanded(
               child: SendNotificationCard(
                 onPress: onSendNotification,

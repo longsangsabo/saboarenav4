@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sabo_arena/core/app_export.dart';
+// import 'package:sabo_arena/core/app_export.dart';
 
 class OperatingHoursEditor extends StatefulWidget {
   final Map<String, String> initialHours;
@@ -89,11 +89,11 @@ class _OperatingHoursEditorState extends State<OperatingHoursEditor>
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.h),
-        border: Border.all(color: appTheme.gray200),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12)),
         boxShadow: [
           BoxShadow(
-            color: appTheme.black900.withOpacity(0.04),
+            color: Colors.grey[900] ?? Colors.black.withOpacity(0.04),
             blurRadius: 8,
             offset: Offset(0, 2),
           ),
@@ -124,43 +124,43 @@ class _OperatingHoursEditorState extends State<OperatingHoursEditor>
           _animationController.reverse();
         }
       },
-      borderRadius: BorderRadius.vertical(top: Radius.circular(12.h)),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
       child: Container(
-        padding: EdgeInsets.all(16.h),
+        padding: EdgeInsets.all(16),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Row(
               children: [
                 Container(
-                  padding: EdgeInsets.all(8.h),
+                  padding: EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: appTheme.blue50,
-                    borderRadius: BorderRadius.circular(8.h),
+                    color: Colors.blue[50],
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
                     Icons.access_time_outlined,
-                    color: appTheme.blue600,
-                    size: 20.adaptSize,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 20,
                   ),
                 ),
-                SizedBox(width: 12.h),
+                SizedBox(width: 12),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       "Giờ hoạt động",
                       style: TextStyle(
-                        fontSize: 16.fSize,
+                        fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: appTheme.gray900,
+                        color: Colors.grey[900],
                       ),
                     ),
                     Text(
                       _getQuickSummary(),
                       style: TextStyle(
-                        fontSize: 12.fSize,
-                        color: appTheme.gray600,
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ],
@@ -172,8 +172,8 @@ class _OperatingHoursEditorState extends State<OperatingHoursEditor>
               duration: Duration(milliseconds: 300),
               child: Icon(
                 Icons.expand_more,
-                color: appTheme.gray600,
-                size: 24.adaptSize,
+                color: Theme.of(context).colorScheme.onSurface,
+                size: 24,
               ),
             ),
           ],
@@ -186,28 +186,28 @@ class _OperatingHoursEditorState extends State<OperatingHoursEditor>
     final openDays = _isOpen.values.where((open) => open).length;
     
     return Container(
-      padding: EdgeInsets.fromLTRB(16.h, 0, 16.h, 16.v),
+      padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: Row(
         children: [
           Icon(
             Icons.info_outline,
-            color: appTheme.gray500,
-            size: 16.adaptSize,
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+            size: 16,
           ),
-          SizedBox(width: 8.h),
+          SizedBox(width: 8),
           Text(
             "Mở $openDays/${_days.length} ngày trong tuần",
             style: TextStyle(
-              fontSize: 13.fSize,
-              color: appTheme.gray600,
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           Spacer(),
           Text(
             "Nhấn để chỉnh sửa",
             style: TextStyle(
-              fontSize: 12.fSize,
-              color: appTheme.blue600,
+              fontSize: 12,
+              color: Theme.of(context).colorScheme.primary,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -223,11 +223,11 @@ class _OperatingHoursEditorState extends State<OperatingHoursEditor>
         return Opacity(
           opacity: _slideAnimation.value,
           child: Container(
-            padding: EdgeInsets.fromLTRB(16.h, 0, 16.h, 16.v),
+            padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
             child: Column(
               children: [
                 _buildQuickActions(),
-                SizedBox(height: 16.v),
+                SizedBox(height: 16),
                 ..._days.map((day) => _buildDayEditor(day)),
               ],
             ),
@@ -239,10 +239,10 @@ class _OperatingHoursEditorState extends State<OperatingHoursEditor>
 
   Widget _buildQuickActions() {
     return Container(
-      padding: EdgeInsets.all(12.h),
+      padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: appTheme.gray50,
-        borderRadius: BorderRadius.circular(8.h),
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -250,33 +250,33 @@ class _OperatingHoursEditorState extends State<OperatingHoursEditor>
           Text(
             "Thao tác nhanh",
             style: TextStyle(
-              fontSize: 14.fSize,
+              fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: appTheme.gray700,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
-          SizedBox(height: 8.v),
+          SizedBox(height: 8),
           Wrap(
-            spacing: 8.h,
-            runSpacing: 8.v,
+            spacing: 8,
+            runSpacing: 8,
             children: [
               _buildQuickActionChip(
                 "Mở tất cả",
                 Icons.schedule,
                 () => _applyToAll(true),
-                appTheme.green600,
+                Colors.green[600] ?? Colors.green,
               ),
               _buildQuickActionChip(
                 "Đóng tất cả",
                 Icons.schedule_outlined,
                 () => _applyToAll(false),
-                appTheme.red600,
+                Colors.red[600] ?? Colors.red,
               ),
               _buildQuickActionChip(
                 "Cuối tuần khác",
                 Icons.weekend_outlined,
                 _setWeekendDifferent,
-                appTheme.blue600,
+                Theme.of(context).colorScheme.primary,
               ),
             ],
           ),
@@ -288,24 +288,24 @@ class _OperatingHoursEditorState extends State<OperatingHoursEditor>
   Widget _buildQuickActionChip(String label, IconData icon, VoidCallback onTap, Color color) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20.h),
+      borderRadius: BorderRadius.circular(20),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.h, vertical: 6.v),
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(20.h),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(color: color.withOpacity(0.3)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: color, size: 16.adaptSize),
-            SizedBox(width: 6.h),
+            Icon(icon, color: color, size: 16),
+            SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
                 color: color,
-                fontSize: 12.fSize,
+                fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -317,26 +317,26 @@ class _OperatingHoursEditorState extends State<OperatingHoursEditor>
 
   Widget _buildDayEditor(String day) {
     return Container(
-      margin: EdgeInsets.only(bottom: 12.v),
-      padding: EdgeInsets.all(12.h),
+      margin: EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: _isOpen[day]! ? appTheme.blue50.withOpacity(0.5) : appTheme.gray50,
-        borderRadius: BorderRadius.circular(8.h),
+  color: _isOpen[day]! ? (Colors.blue[50] ?? Colors.blue).withOpacity(0.5) : Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: _isOpen[day]! ? appTheme.blue200 : appTheme.gray200,
+          color: _isOpen[day]! ? (Colors.blue[200] ?? Colors.blue) : Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
         ),
       ),
       child: Row(
         children: [
           // Day name
           SizedBox(
-            width: 80.h,
+            width: 80,
             child: Text(
               _dayNames[day]!,
               style: TextStyle(
-                fontSize: 14.fSize,
+                fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: _isOpen[day]! ? appTheme.blue700 : appTheme.gray600,
+                color: _isOpen[day]! ? (Colors.blue[700] ?? Colors.blue) : Theme.of(context).colorScheme.onSurface,
               ),
             ),
           ),
@@ -350,11 +350,11 @@ class _OperatingHoursEditorState extends State<OperatingHoursEditor>
               });
               _notifyChange();
             },
-            activeThumbColor: appTheme.green600,
+            activeThumbColor: Colors.green[600] ?? Colors.green,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
           
-          SizedBox(width: 12.h),
+          SizedBox(width: 12),
           
           // Time pickers
           if (_isOpen[day]!) ...[
@@ -370,8 +370,8 @@ class _OperatingHoursEditorState extends State<OperatingHoursEditor>
               child: Text(
                 "Đóng cửa",
                 style: TextStyle(
-                  fontSize: 14.fSize,
-                  color: appTheme.gray500,
+                  fontSize: 14,
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                   fontStyle: FontStyle.italic,
                 ),
               ),
@@ -388,21 +388,21 @@ class _OperatingHoursEditorState extends State<OperatingHoursEditor>
         Expanded(
           child: InkWell(
             onTap: () => _selectTime(day, true),
-            borderRadius: BorderRadius.circular(6.h),
+            borderRadius: BorderRadius.circular(6),
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.h, vertical: 6.v),
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(6.h),
-                border: Border.all(color: appTheme.gray300),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: Colors.grey[300] ?? Colors.grey),
               ),
               child: Text(
                 openTime,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 13.fSize,
+                  fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: appTheme.gray700,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
@@ -410,13 +410,13 @@ class _OperatingHoursEditorState extends State<OperatingHoursEditor>
         ),
         
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 8.h),
+          padding: EdgeInsets.symmetric(horizontal: 8),
           child: Text(
             "-",
             style: TextStyle(
-              fontSize: 16.fSize,
+              fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: appTheme.gray600,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ),
@@ -424,21 +424,21 @@ class _OperatingHoursEditorState extends State<OperatingHoursEditor>
         Expanded(
           child: InkWell(
             onTap: () => _selectTime(day, false),
-            borderRadius: BorderRadius.circular(6.h),
+            borderRadius: BorderRadius.circular(6),
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.h, vertical: 6.v),
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(6.h),
-                border: Border.all(color: appTheme.gray300),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: Colors.grey[300] ?? Colors.grey),
               ),
               child: Text(
                 closeTime,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 13.fSize,
+                  fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: appTheme.gray700,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
@@ -483,7 +483,7 @@ class _OperatingHoursEditorState extends State<OperatingHoursEditor>
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: appTheme.blue600,
+              primary: Theme.of(context).colorScheme.primary,
             ),
           ),
           child: child!,

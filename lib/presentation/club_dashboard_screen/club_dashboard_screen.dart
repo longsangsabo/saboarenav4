@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sabo_arena/core/app_export.dart';
-import 'package:sabo_arena/widgets/custom_app_bar.dart';
-import 'package:sizer/sizer.dart';
-import 'package:sabo_arena/theme/app_theme.dart';
-import 'package:sabo_arena/widgets/custom_image_widget.dart';
-import 'package:sabo_arena/routes/app_routes.dart';
+
 import '../member_management_screen/member_management_screen.dart';
 import '../tournament_creation_wizard/tournament_creation_wizard.dart';
 import '../tournament_detail_screen/widgets/tournament_management_panel.dart';
@@ -19,12 +15,16 @@ class ClubDashboardStats {
   final int activeMembers;
   final double monthlyRevenue;
   final int totalTournaments;
+  final int tournaments;
+  final int ranking;
   
   ClubDashboardStats({
     required this.totalMembers,
     required this.activeMembers,
     required this.monthlyRevenue,
     required this.totalTournaments,
+    required this.tournaments,
+    required this.ranking,
   });
 }
 
@@ -33,17 +33,23 @@ class ClubActivity {
   final String subtitle;
   final String type;
   final DateTime timestamp;
+  final String? avatar;
+  final String? icon;
   
   ClubActivity({
     required this.title,
     required this.subtitle,
     required this.type,
     required this.timestamp,
+    this.avatar,
+    this.icon,
   });
 }
 
 class ClubDashboardScreen extends StatefulWidget {
-  const ClubDashboardScreen({super.key});
+  final String? clubId;
+  
+  const ClubDashboardScreen({super.key, this.clubId});
 
   @override
   _ClubDashboardScreenState createState() => _ClubDashboardScreenState();
@@ -131,14 +137,14 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
       appBar: _buildAppBar(),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.all(16.h),
+          padding: EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildQuickStatsSection(),
-              SizedBox(height: 24.h),
+              SizedBox(height: 24),
               _buildQuickActionsSection(),
-              SizedBox(height: 24.h),
+              SizedBox(height: 24),
               _buildRecentActivitySection(),
             ],
           ),
@@ -153,13 +159,13 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
       backgroundColor: Colors.white,
       elevation: 0,
       leading: Container(
-        margin: EdgeInsets.all(8.h),
+        margin: EdgeInsets.all(8),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(8.h),
+          borderRadius: BorderRadius.circular(8),
           child: CustomImageWidget(
             imageUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=100&h=100&fit=crop',
-            height: 40.sp,
-            width: 40.sp,
+            height: 40,
+            width: 40,
             fit: BoxFit.cover,
           ),
         ),
@@ -173,12 +179,12 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
                 _currentClub?.name ?? "CLB của tôi",
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              SizedBox(width: 4.h),
+              SizedBox(width: 4),
               if (_currentClub?.isVerified == true)
                 Icon(
                   Icons.verified,
                   color: AppTheme.primaryLight,
-                  size: 20.sp,
+                  size: 20,
                 ),
             ],
           ),
@@ -203,20 +209,20 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
                 right: 8,
                 top: 8,
                 child: Container(
-                  padding: EdgeInsets.all(4.h),
+                  padding: EdgeInsets.all(4),
                   decoration: BoxDecoration(
                     color: AppTheme.errorLight,
                     shape: BoxShape.circle,
                   ),
                   constraints: BoxConstraints(
-                    minWidth: 16.h,
-                    minHeight: 16.h,
+                    minWidth: 16,
+                    minHeight: 16,
                   ),
                   child: Text(
                     '${_getNotificationCount()}',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 10.sp,
+                      fontSize: 10,
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
@@ -229,7 +235,7 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
           icon: Icon(Icons.settings_outlined, color: AppTheme.textPrimaryLight),
           onPressed: () => _onSettingsPressed(),
         ),
-        SizedBox(width: 8.h),
+        SizedBox(width: 8),
       ],
     );
   }
@@ -245,12 +251,12 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: 16),
         if (_isLoadingData)
           Row(
             children: [
               Expanded(child: _buildLoadingStatsCard()),
-              SizedBox(width: 12.h),
+              SizedBox(width: 12),
               Expanded(child: _buildLoadingStatsCard()),
             ],
           )
@@ -267,7 +273,7 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
                   color: AppTheme.successLight,
                 ),
               ),
-              SizedBox(width: 12.h),
+              SizedBox(width: 12),
               Expanded(
                 child: _buildStatsCard(
                   title: "Giải đấu",
@@ -278,7 +284,7 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
               ),
             ],
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: 12),
           Row(
             children: [
               Expanded(
@@ -292,7 +298,7 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
                   subtitle: "VND",
                 ),
               ),
-              SizedBox(width: 12.h),
+              SizedBox(width: 12),
               Expanded(
                 child: _buildStatsCard(
                   title: "Xếp hạng CLB",
@@ -308,7 +314,7 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
           Row(
             children: [
               Expanded(child: _buildErrorStatsCard()),
-              SizedBox(width: 12.h),
+              SizedBox(width: 12),
               Expanded(child: _buildErrorStatsCard()),
             ],
           ),
@@ -328,7 +334,7 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: 16),
         Row(
           children: [
             Expanded(
@@ -340,7 +346,7 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
                 onPress: () => _onCreateTournament(),
               ),
             ),
-            SizedBox(width: 12.h),
+            SizedBox(width: 12),
             Expanded(
               child: _buildQuickActionCard(
                 title: "Quản lý thành viên",
@@ -353,7 +359,7 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
             ),
           ],
         ),
-        SizedBox(height: 12.h),
+        SizedBox(height: 12),
         Row(
           children: [
             Expanded(
@@ -365,7 +371,7 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
                 onPress: () => _onEditProfile(),
               ),
             ),
-            SizedBox(width: 12.h),
+            SizedBox(width: 12),
             Expanded(
               child: _buildQuickActionCard(
                 title: "Thông báo",
@@ -377,7 +383,7 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
             ),
           ],
         ),
-        SizedBox(height: 12.h),
+        SizedBox(height: 12),
         Row(
           children: [
             Expanded(
@@ -389,13 +395,13 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
                 onPress: () => _onManageTournaments(),
               ),
             ),
-            SizedBox(width: 12.h),
+            SizedBox(width: 12),
             Expanded(
               child: _buildQuickActionCard(
                 title: "Thống kê giải đấu",
                 subtitle: "Xem thống kê và báo cáo",
                 icon: Icons.analytics_outlined,
-                color: AppTheme.infoLight,
+                color: Colors.blue[600] ?? Colors.blue,
                 onPress: () => _onViewTournamentStats(),
               ),
             ),
@@ -430,9 +436,9 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
             ),
           ],
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: 16),
         Container(
-          padding: EdgeInsets.all(16.h),
+          padding: EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
@@ -467,14 +473,14 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
     String? subtitle,
   }) {
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [color.withOpacity(0.1), color.withOpacity(0.05)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(12.h),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: color.withOpacity(0.2)),
       ),
       child: Column(
@@ -483,24 +489,24 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
           Row(
             children: [
               Container(
-                padding: EdgeInsets.all(8.h),
+                padding: EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: color.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(8.h),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   icon,
                   color: color,
-                  size: 20.sp,
+                  size: 20,
                 ),
               ),
               Spacer(),
               if (trend != null)
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 6.h, vertical: 2.h),
+                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
                     color: trend == "up" ? AppTheme.backgroundLight : AppTheme.backgroundLight,
-                    borderRadius: BorderRadius.circular(12.h),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -508,14 +514,14 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
                       Icon(
                         trend == "up" ? Icons.trending_up : Icons.trending_down,
                         color: trend == "up" ? AppTheme.successLight : AppTheme.errorLight,
-                        size: 12.sp,
+                        size: 12,
                       ),
-                      SizedBox(width: 2.h),
+                      SizedBox(width: 2),
                       Text(
                         trendValue ?? "",
                         style: TextStyle(
                           color: trend == "up" ? AppTheme.successLight : AppTheme.errorLight,
-                          fontSize: 10.sp,
+                          fontSize: 10,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -524,31 +530,31 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
                 ),
             ],
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: 12),
           Text(
             value,
             style: TextStyle(
-              fontSize: 24.sp,
+              fontSize: 24,
               fontWeight: FontWeight.bold,
               color: AppTheme.textPrimaryLight,
             ),
           ),
           if (subtitle != null) ...[
-            SizedBox(height: 2.h),
+            SizedBox(height: 2),
             Text(
               subtitle,
               style: TextStyle(
-                fontSize: 12.sp,
+                fontSize: 12,
                 color: AppTheme.textSecondaryLight,
                 fontWeight: FontWeight.w500,
               ),
             ),
           ],
-          SizedBox(height: 4.h),
+          SizedBox(height: 4),
           Text(
             title,
             style: TextStyle(
-              fontSize: 12.sp,
+              fontSize: 12,
               color: AppTheme.textSecondaryLight,
               fontWeight: FontWeight.w500,
             ),
@@ -569,17 +575,17 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
   }) {
     return Material(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(12.h),
+      borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onPress,
-        borderRadius: BorderRadius.circular(12.h),
+        borderRadius: BorderRadius.circular(12),
         child: Container(
-          padding: EdgeInsets.all(16.h),
+          padding: EdgeInsets.all(16),
           decoration: BoxDecoration(
             border: Border(
-              left: BorderSide(color: color, width: 4.h),
+              left: BorderSide(color: color, width: 4),
             ),
-            borderRadius: BorderRadius.circular(12.h),
+            borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
                 color: AppTheme.textPrimaryLight.withOpacity(0.05),
@@ -594,50 +600,50 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
               Row(
                 children: [
                   Container(
-                    padding: EdgeInsets.all(8.h),
+                    padding: EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: color.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8.h),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
                       icon,
                       color: color,
-                      size: 20.sp,
+                      size: 20,
                     ),
                   ),
                   Spacer(),
                   if (badge != null && badge > 0)
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 6.h, vertical: 2.h),
+                      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: AppTheme.errorLight,
-                        borderRadius: BorderRadius.circular(10.h),
+                        borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
                         badge.toString(),
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 10.sp,
+                          fontSize: 10,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                 ],
               ),
-              SizedBox(height: 12.h),
+              SizedBox(height: 12),
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: 14.sp,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimaryLight,
                 ),
               ),
-              SizedBox(height: 4.h),
+              SizedBox(height: 4),
               Text(
                 subtitle,
                 style: TextStyle(
-                  fontSize: 12.sp,
+                  fontSize: 12,
                   color: AppTheme.textSecondaryLight,
                 ),
               ),
@@ -659,20 +665,20 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
     required Color color,
   }) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8.h),
+      padding: EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
           // Avatar or Icon
           Container(
-            width: 40.sp,
-            height: 40.sp,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20.h),
+              borderRadius: BorderRadius.circular(20),
               color: avatar != null ? null : color.withOpacity(0.1),
             ),
             child: avatar != null
                 ? ClipRRect(
-                    borderRadius: BorderRadius.circular(20.h),
+                    borderRadius: BorderRadius.circular(20),
                     child: CustomImageWidget(
                       imageUrl: avatar,
                       fit: BoxFit.cover,
@@ -681,10 +687,10 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
                 : Icon(
                     icon,
                     color: color,
-                    size: 20.sp,
+                    size: 20,
                   ),
           ),
-          SizedBox(width: 12.h),
+          SizedBox(width: 12),
           // Content
           Expanded(
             child: Column(
@@ -693,16 +699,16 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 14.sp,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.textPrimaryLight,
                   ),
                 ),
-                SizedBox(height: 2.h),
+                SizedBox(height: 2),
                 Text(
                   subtitle,
                   style: TextStyle(
-                    fontSize: 12.sp,
+                    fontSize: 12,
                     color: AppTheme.textSecondaryLight,
                   ),
                 ),
@@ -713,7 +719,7 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
           Text(
             _formatRelativeTime(timestamp),
             style: TextStyle(
-              fontSize: 11.sp,
+              fontSize: 11,
               color: AppTheme.backgroundLight,
             ),
           ),
@@ -725,7 +731,7 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
   /// Component - Divider
   Widget _buildDivider() {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4.h),
+      padding: EdgeInsets.symmetric(vertical: 4),
       child: Divider(
         color: AppTheme.dividerLight,
         thickness: 1,
@@ -922,7 +928,7 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
 
   Widget _buildLoadingStatsCard() {
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -940,8 +946,8 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
           Row(
             children: [
               Container(
-                width: 40.sp,
-                height: 40.sp,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
                   color: Colors.grey.shade300,
                   borderRadius: BorderRadius.circular(8),
@@ -955,13 +961,13 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
               ),
             ],
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: 12),
           Container(
             width: double.infinity,
             height: 16,
             color: Colors.grey.shade300,
           ),
-          SizedBox(height: 4.h),
+          SizedBox(height: 4),
           Container(
             width: 80,
             height: 12,
@@ -974,7 +980,7 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
 
   Widget _buildErrorStatsCard() {
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -992,8 +998,8 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
           Row(
             children: [
               Container(
-                width: 40.sp,
-                height: 40.sp,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
                   color: Colors.red.shade100,
                   borderRadius: BorderRadius.circular(8),
@@ -1004,27 +1010,27 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
               Text(
                 'N/A',
                 style: TextStyle(
-                  fontSize: 14.sp,
+                  fontSize: 14,
                   color: AppTheme.errorLight,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ],
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: 12),
           Text(
             'Không thể tải',
             style: TextStyle(
-              fontSize: 14.sp,
+              fontSize: 14,
               fontWeight: FontWeight.bold,
               color: AppTheme.textPrimaryLight,
             ),
           ),
-          SizedBox(height: 4.h),
+          SizedBox(height: 4),
           Text(
             'Thử lại sau',
             style: TextStyle(
-              fontSize: 12.sp,
+              fontSize: 12,
               color: AppTheme.textSecondaryLight,
             ),
           ),
@@ -1049,6 +1055,8 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
           activeMembers: 18,
           monthlyRevenue: 15000000,
           totalTournaments: 3,
+          tournaments: 3,
+          ranking: 5,
         )),
         // Mock data for recent activities
         Future.value([
@@ -1092,11 +1100,11 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             CircularProgressIndicator(color: AppTheme.primaryLight),
-            SizedBox(height: 16.h),
+            SizedBox(height: 16),
             Text(
               'Đang tải dashboard...',
               style: TextStyle(
-                fontSize: 16.sp,
+                fontSize: 16,
                 color: AppTheme.textSecondaryLight,
               ),
             ),
@@ -1120,42 +1128,42 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
           'Không có quyền truy cập',
           style: TextStyle(
             color: AppTheme.textPrimaryLight,
-            fontSize: 18.sp,
+            fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
         ),
       ),
       body: Center(
         child: Padding(
-          padding: EdgeInsets.all(24.w),
+          padding: EdgeInsets.all(24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
                 Icons.lock_outlined,
-                size: 64.sp,
+                size: 64,
                 color: AppTheme.errorLight,
               ),
-              SizedBox(height: 24.h),
+              SizedBox(height: 24),
               Text(
                 'Truy cập bị từ chối',
                 style: TextStyle(
-                  fontSize: 24.sp,
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimaryLight,
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 16.h),
+              SizedBox(height: 16),
               Text(
                 _errorMessage ?? 'Bạn không có quyền truy cập vào trang này.',
                 style: TextStyle(
-                  fontSize: 16.sp,
+                  fontSize: 16,
                   color: AppTheme.textSecondaryLight,
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 32.h),
+              SizedBox(height: 32),
               if (_errorMessage?.contains('đăng nhập') == true) ...[
                 ElevatedButton.icon(
                   onPressed: () {
@@ -1163,14 +1171,14 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primaryLight,
-                    padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   ),
                   icon: Icon(Icons.login, color: Colors.white),
                   label: Text(
                     'Đăng nhập',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 16.sp,
+                      fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -1182,19 +1190,19 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primaryLight,
-                    padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   ),
                   icon: Icon(Icons.add_business, color: Colors.white),
                   label: Text(
                     'Đăng ký CLB',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 16.sp,
+                      fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
-                SizedBox(height: 16.h),
+                SizedBox(height: 16),
                 TextButton(
                   onPressed: () {
                     Navigator.pushNamed(context, AppRoutes.myClubsScreen);
@@ -1203,7 +1211,7 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
                     'Xem CLB của tôi',
                     style: TextStyle(
                       color: AppTheme.primaryLight,
-                      fontSize: 16.sp,
+                      fontSize: 16,
                     ),
                   ),
                 ),
@@ -1219,18 +1227,18 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
     return Column(
       children: List.generate(3, (index) => 
         Padding(
-          padding: EdgeInsets.symmetric(vertical: 8.h),
+          padding: EdgeInsets.symmetric(vertical: 8),
           child: Row(
             children: [
               Container(
-                width: 40.sp,
-                height: 40.sp,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
                   color: Colors.grey.shade300,
                   shape: BoxShape.circle,
                 ),
               ),
-              SizedBox(width: 12.h),
+              SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1240,7 +1248,7 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
                       height: 14,
                       color: Colors.grey.shade300,
                     ),
-                    SizedBox(height: 4.h),
+                    SizedBox(height: 4),
                     Container(
                       width: 200,
                       height: 12,
@@ -1263,28 +1271,28 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
 
   Widget _buildEmptyActivities() {
     return Padding(
-      padding: EdgeInsets.all(24.h),
+      padding: EdgeInsets.all(24),
       child: Column(
         children: [
           Icon(
             Icons.timeline,
-            size: 48.sp,
+            size: 48,
             color: AppTheme.textSecondaryLight,
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: 16),
           Text(
             'Chưa có hoạt động nào',
             style: TextStyle(
-              fontSize: 16.sp,
+              fontSize: 16,
               fontWeight: FontWeight.w600,
               color: AppTheme.textPrimaryLight,
             ),
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: 8),
           Text(
             'Các hoạt động gần đây của CLB sẽ hiển thị ở đây',
             style: TextStyle(
-              fontSize: 14.sp,
+              fontSize: 14,
               color: AppTheme.textSecondaryLight,
             ),
             textAlign: TextAlign.center,

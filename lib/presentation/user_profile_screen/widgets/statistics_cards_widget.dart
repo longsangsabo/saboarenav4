@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
+
 
 import '../../../models/user_profile.dart';
 import '../../../services/user_service.dart';
 import '../../../theme/app_theme.dart';
 import '../../../widgets/custom_icon_widget.dart';
+import '../../../core/app_export.dart';
 
 class StatisticsCardsWidget extends StatefulWidget {
   final String userId;
@@ -92,7 +93,7 @@ class _StatisticsCardsWidgetState extends State<StatisticsCardsWidget> {
               color: AppTheme.lightTheme.colorScheme.onSurface,
             ),
           ),
-          SizedBox(height: 2.h),
+          SizedBox(height: 2),
           Row(
             children: [
               Expanded(
@@ -227,7 +228,7 @@ class _StatisticsCardsWidgetState extends State<StatisticsCardsWidget> {
                   ),
                 ],
               ),
-              SizedBox(height: 1.h),
+              SizedBox(height: 1),
               Text(
                 'Chưa đăng ký',
                 style: AppTheme.lightTheme.textTheme.headlineSmall?.copyWith(
@@ -235,7 +236,7 @@ class _StatisticsCardsWidgetState extends State<StatisticsCardsWidget> {
                   color: Colors.grey.shade600,
                 ),
               ),
-              SizedBox(height: 0.5.h),
+              SizedBox(height: 0.5),
               Text(
                 'Nhấn để đăng ký',
                 style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
@@ -277,7 +278,7 @@ class _StatisticsCardsWidgetState extends State<StatisticsCardsWidget> {
               'Bạn chưa có rank chính thức. Để xem thống kê xếp hạng chính xác và tham gia các trận đấu ranked, hãy đăng ký rank ngay!',
               style: AppTheme.lightTheme.textTheme.bodyMedium,
             ),
-            SizedBox(height: 2.h),
+            SizedBox(height: 2),
             Container(
               padding: EdgeInsets.all(3.w),
               decoration: BoxDecoration(
@@ -380,7 +381,7 @@ class _StatisticsCardsWidgetState extends State<StatisticsCardsWidget> {
               ),
             ],
           ),
-          SizedBox(height: 1.h),
+          SizedBox(height: 1),
           Text(
             value,
             style: AppTheme.lightTheme.textTheme.headlineSmall?.copyWith(
@@ -388,7 +389,7 @@ class _StatisticsCardsWidgetState extends State<StatisticsCardsWidget> {
               color: color,
             ),
           ),
-          SizedBox(height: 0.5.h),
+          SizedBox(height: 0.5),
           Text(
             subtitle,
             style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(

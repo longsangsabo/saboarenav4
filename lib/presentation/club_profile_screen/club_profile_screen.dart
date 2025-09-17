@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/app_export.dart';
@@ -266,19 +266,19 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 3.h),
+                SizedBox(height: 3),
 
                 // Club Info Section
                 ClubInfoSectionWidget(
                   clubData: _clubData,
                 ),
 
-                SizedBox(height: 3.h),
+                SizedBox(height: 3),
 
                 // User Rank Status Section
                 _buildUserRankSection(context),
 
-                SizedBox(height: 3.h),
+                SizedBox(height: 3),
 
                 // Photo Gallery
                 ClubPhotoGalleryWidget(
@@ -286,7 +286,7 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
                   onViewAll: _handleViewAllPhotos,
                 ),
 
-                SizedBox(height: 3.h),
+                SizedBox(height: 3),
 
                 // Members Section
                 ClubMembersWidget(
@@ -296,7 +296,7 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
                   onMemberTap: _handleMemberTap,
                 ),
 
-                SizedBox(height: 3.h),
+                SizedBox(height: 3),
 
                 // Tournaments Section
                 ClubTournamentsWidget(
@@ -307,12 +307,12 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
                   onTournamentTap: _handleTournamentTap,
                 ),
 
-                SizedBox(height: 3.h),
+                SizedBox(height: 3),
 
                 // Rating and Reviews Section
                 _buildRatingSection(context),
 
-                SizedBox(height: 10.h), // Bottom padding for navigation
+                SizedBox(height: 10), // Bottom padding for navigation
               ],
             ),
           ),
@@ -395,11 +395,11 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
     final reviewCount = _clubData["reviewCount"] as int;
 
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 4.w),
-      padding: EdgeInsets.all(4.w),
+      margin: EdgeInsets.symmetric(horizontal: 12),
+      padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(3.w),
+        borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
             color: colorScheme.shadow.withValues(alpha: 0.1),
@@ -432,7 +432,7 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
               ),
             ],
           ),
-          SizedBox(height: 2.h),
+          SizedBox(height: 2),
           Row(
             children: [
               Text(
@@ -442,7 +442,7 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
                   color: colorScheme.primary,
                 ),
               ),
-              SizedBox(width: 2.w),
+              SizedBox(width: 8),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -452,7 +452,7 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
                         iconName:
                             index < rating.floor() ? 'star' : 'star_border',
                         color: Colors.amber,
-                        size: 4.w,
+                        size: 20,
                       );
                     }),
                   ),
@@ -466,18 +466,18 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
               ),
             ],
           ),
-          SizedBox(height: 2.h),
+          SizedBox(height: 2),
           ElevatedButton.icon(
             onPressed: _handleWriteReview,
             icon: CustomIconWidget(
               iconName: 'rate_review',
               color: colorScheme.onPrimary,
-              size: 4.w,
+              size: 20,
             ),
             label: const Text('Viết đánh giá'),
             style: ElevatedButton.styleFrom(
               backgroundColor: colorScheme.primary,
-              minimumSize: Size(double.infinity, 6.h),
+              minimumSize: Size(double.infinity, 6),
             ),
           ),
         ],
@@ -602,7 +602,7 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
   Widget _buildUserRankSection(BuildContext context) {
     if (_isLoadingUser) {
       return Container(
-        padding: EdgeInsets.all(4.w),
+        padding: EdgeInsets.all(12),
         child: Center(
           child: CircularProgressIndicator(
             color: AppTheme.lightTheme.colorScheme.primary,
@@ -621,8 +621,8 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
     final currentElo = _userData!["elo_rating"] as int? ?? 1200;
 
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 4.w),
-      padding: EdgeInsets.all(4.w),
+      margin: EdgeInsets.symmetric(horizontal: 12),
+      padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppTheme.lightTheme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
@@ -650,9 +650,9 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
                 color: hasRank 
                     ? SaboRankSystem.getRankColor(SaboRankSystem.getRankFromElo(currentElo))
                     : Colors.orange,
-                size: 6.w,
+                size: 20,
               ),
-              SizedBox(width: 3.w),
+              SizedBox(width: 8),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -664,7 +664,7 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
                         color: AppTheme.lightTheme.colorScheme.onSurface,
                       ),
                     ),
-                    SizedBox(height: 0.5.h),
+                    SizedBox(height: 0.5),
                     Text(
                       hasRank 
                           ? 'Bạn đã có rank chính thức'
@@ -678,7 +678,7 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
               ),
               if (!hasRank)
                 Container(
-                  padding: EdgeInsets.all(1.w),
+                  padding: EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: Colors.orange,
                     shape: BoxShape.circle,
@@ -686,13 +686,13 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
                   child: Icon(
                     Icons.priority_high,
                     color: Colors.white,
-                    size: 4.w,
+                    size: 18,
                   ),
                 ),
             ],
           ),
           
-          SizedBox(height: 3.h),
+          SizedBox(height: 3),
           
           // Rank info or registration prompt
           if (hasRank) ...[
@@ -710,7 +710,7 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
     final skillDescription = SaboRankSystem.getRankSkillDescription(SaboRankSystem.getRankFromElo(elo));
     
     return Container(
-      padding: EdgeInsets.all(3.w),
+      padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: rankColor.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
@@ -729,14 +729,14 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
                     color: rankColor,
                   ),
                 ),
-                SizedBox(height: 1.h),
+                SizedBox(height: 1),
                 Text(
                   'ELO: $elo',
                   style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
                     color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
                   ),
                 ),
-                SizedBox(height: 0.5.h),
+                SizedBox(height: 0.5),
                 Text(
                   skillDescription,
                   style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
@@ -757,7 +757,7 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          padding: EdgeInsets.all(3.w),
+          padding: EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: Colors.orange.withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
@@ -768,8 +768,8 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
             children: [
               Row(
                 children: [
-                  Icon(Icons.info_outline, color: Colors.orange, size: 5.w),
-                  SizedBox(width: 2.w),
+                  Icon(Icons.info_outline, color: Colors.orange, size: 16),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Để tham gia các trận đấu ranked tại club này, bạn cần đăng ký rank chính thức.',
@@ -780,7 +780,7 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
                   ),
                 ],
               ),
-              SizedBox(height: 2.h),
+              SizedBox(height: 2),
               Text(
                 'Lợi ích khi có rank:',
                 style: AppTheme.lightTheme.textTheme.titleSmall?.copyWith(
@@ -788,14 +788,14 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
                   color: Colors.orange.shade800,
                 ),
               ),
-              SizedBox(height: 1.h),
+              SizedBox(height: 1),
               ...[
                 '• Tham gia các trận đấu ranked',
                 '• Theo dõi ELO rating chính xác',
                 '• Tham gia giải đấu chính thức',
                 '• Xem thống kê chi tiết',
               ].map((benefit) => Padding(
-                padding: EdgeInsets.only(bottom: 0.5.h),
+                padding: EdgeInsets.only(bottom: 0.5),
                 child: Text(
                   benefit,
                   style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
@@ -807,7 +807,7 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
           ),
         ),
         
-        SizedBox(height: 2.h),
+        SizedBox(height: 2),
         
         // Registration button
         SizedBox(
@@ -817,7 +817,7 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.orange,
               foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(vertical: 2.h),
+              padding: EdgeInsets.symmetric(vertical: 2),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -825,8 +825,8 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.how_to_reg, size: 5.w),
-                SizedBox(width: 2.w),
+                Icon(Icons.how_to_reg, size: 16),
+                SizedBox(width: 8),
                 Text(
                   'Đăng ký Rank ngay',
                   style: AppTheme.lightTheme.textTheme.titleSmall?.copyWith(
@@ -862,9 +862,9 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
                 fontWeight: FontWeight.w500,
               ),
             ),
-            SizedBox(height: 2.h),
+            SizedBox(height: 2),
             Container(
-              padding: EdgeInsets.all(3.w),
+              padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: Colors.blue.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
@@ -881,7 +881,7 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
                 ],
               ),
             ),
-            SizedBox(height: 2.h),
+            SizedBox(height: 2),
             Text(
               'Bạn có muốn đăng ký rank ngay bây giờ không?',
               style: AppTheme.lightTheme.textTheme.bodyMedium,
@@ -914,11 +914,11 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
 
   Widget _buildDialogBenefit(String emoji, String text) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 1.h),
+      padding: EdgeInsets.only(bottom: 1),
       child: Row(
         children: [
-          Text(emoji, style: TextStyle(fontSize: 4.w)),
-          SizedBox(width: 2.w),
+          Text(emoji, style: TextStyle(fontSize: 16)),
+          SizedBox(width: 8),
           Expanded(
             child: Text(
               text,

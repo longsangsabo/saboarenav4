@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:sizer/sizer.dart';
+
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
@@ -73,7 +73,7 @@ class _EditProfileModalState extends State<EditProfileModal> {
       if (_selectedAvatarPath != null && _selectedAvatarPath != 'REMOVE_AVATAR') {
         final file = File(_selectedAvatarPath!);
         final bytes = await file.readAsBytes();
-        final fileName = file.path.split('/').last;
+  final fileName = file.path.split(Platform.pathSeparator).last;
         
         // Upload ảnh lên Supabase storage
         final uploadedUrl = await _uploadAvatar(bytes, fileName);
@@ -433,7 +433,7 @@ class _EditProfileModalState extends State<EditProfileModal> {
                       ),
                     ),
                     
-                    SizedBox(height: 4.h),
+                    SizedBox(height: 4),
                     
                     // Họ và tên - có thể chỉnh sửa
                     _buildTextField(
@@ -450,10 +450,10 @@ class _EditProfileModalState extends State<EditProfileModal> {
                         return null;
                       },
                     ),
-                    SizedBox(height: 3.h),
+                    SizedBox(height: 3),
                     
                     _buildInfoDisplay('Email', widget.userProfile.email, Icons.email_outlined),
-                    SizedBox(height: 3.h),
+                    SizedBox(height: 3),
                     
                     // Số điện thoại
                     _buildTextField(
@@ -474,7 +474,7 @@ class _EditProfileModalState extends State<EditProfileModal> {
                       },
                     ),
                     
-                    SizedBox(height: 3.h),
+                    SizedBox(height: 3),
                     
                     // Địa điểm
                     _buildTextField(
@@ -483,7 +483,7 @@ class _EditProfileModalState extends State<EditProfileModal> {
                       icon: Icons.location_on_outlined,
                     ),
                     
-                    SizedBox(height: 3.h),
+                    SizedBox(height: 3),
                     
                     // Giới thiệu bản thân
                     _buildTextField(
@@ -500,7 +500,7 @@ class _EditProfileModalState extends State<EditProfileModal> {
                       },
                     ),
                     
-                    SizedBox(height: 2.h),
+                    SizedBox(height: 2),
                   ],
                 ),
               ),
@@ -531,7 +531,7 @@ class _EditProfileModalState extends State<EditProfileModal> {
             color: Colors.grey.shade700,
           ),
         ),
-        SizedBox(height: 1.h),
+        SizedBox(height: 1),
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
@@ -573,7 +573,7 @@ class _EditProfileModalState extends State<EditProfileModal> {
             color: Colors.grey.shade700,
           ),
         ),
-        SizedBox(height: 1.h),
+        SizedBox(height: 1),
         Container(
           width: double.infinity,
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),

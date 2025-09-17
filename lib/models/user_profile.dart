@@ -19,6 +19,8 @@ class UserProfile {
   final double totalPrizePool; // Total prize money won from tournaments
   final bool isVerified;
   final bool isActive;
+  final bool isBanned;
+  final bool isSuspended;
   final String? location;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -40,10 +42,12 @@ class UserProfile {
     required this.totalLosses,
     required this.totalTournaments,
     required this.rankingPoints,
-    required this.spaPoints,
+  required this.spaPoints,
     required this.totalPrizePool,
     required this.isVerified,
     required this.isActive,
+    this.isBanned = false,
+    this.isSuspended = false,
     this.location,
     required this.createdAt,
     required this.updatedAt,
@@ -73,6 +77,8 @@ class UserProfile {
       totalPrizePool: (json['total_prize_pool'] ?? 0.0).toDouble(),
       isVerified: json['is_verified'] ?? false,
       isActive: json['is_active'] ?? true,
+      isBanned: json['is_banned'] ?? false,
+      isSuspended: json['is_suspended'] ?? false,
       location: json['location'],
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
@@ -100,6 +106,8 @@ class UserProfile {
       'total_prize_pool': totalPrizePool,
       'is_verified': isVerified,
       'is_active': isActive,
+      'is_banned': isBanned,
+      'is_suspended': isSuspended,
       'location': location,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),

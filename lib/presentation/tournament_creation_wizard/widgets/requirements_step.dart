@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sabo_arena/core/app_export.dart';
+// import 'package:sabo_arena/core/app_export.dart';
+
 
 class RequirementsStep extends StatefulWidget {
   final Map<String, dynamic> data;
@@ -115,40 +116,40 @@ class _RequirementsStepState extends State<RequirementsStep>
         return Opacity(
           opacity: _fadeAnimation.value,
           child: SingleChildScrollView(
-            padding: EdgeInsets.all(20.h),
+            padding: EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildSectionTitle("Yêu cầu xếp hạng", Icons.military_tech_outlined),
-                SizedBox(height: 16.v),
+                SizedBox(height: 16),
                 _buildRankRequirements(),
                 
-                SizedBox(height: 24.v),
+                SizedBox(height: 24),
                 _buildSectionTitle("Yêu cầu thành viên", Icons.group_outlined),
-                SizedBox(height: 16.v),
+                SizedBox(height: 16),
                 _buildMembershipRequirements(),
                 
-                SizedBox(height: 24.v),
+                SizedBox(height: 24),
                 _buildSectionTitle("Yêu cầu độ tuổi", Icons.cake_outlined),
-                SizedBox(height: 16.v),
+                SizedBox(height: 16),
                 _buildAgeRequirements(),
                 
-                SizedBox(height: 24.v),
+                SizedBox(height: 24),
                 _buildSectionTitle("Yêu cầu kỹ năng", Icons.emoji_events_outlined),
-                SizedBox(height: 16.v),
+                SizedBox(height: 16),
                 _buildSkillRequirements(),
                 
-                SizedBox(height: 24.v),
+                SizedBox(height: 24),
                 _buildSectionTitle("Quy tắc khác", Icons.rule_outlined),
-                SizedBox(height: 16.v),
+                SizedBox(height: 16),
                 _buildAdditionalRules(),
                 
-                SizedBox(height: 24.v),
+                SizedBox(height: 24),
                 _buildSectionTitle("Quy tắc tùy chỉnh", Icons.add_task_outlined),
-                SizedBox(height: 16.v),
+                SizedBox(height: 16),
                 _buildCustomRules(),
                 
-                SizedBox(height: 100.v), // Space for navigation buttons
+                SizedBox(height: 100), // Space for navigation buttons
               ],
             ),
           ),
@@ -161,24 +162,24 @@ class _RequirementsStepState extends State<RequirementsStep>
     return Row(
       children: [
         Container(
-          padding: EdgeInsets.all(8.h),
+          padding: EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: appTheme.blue50,
-            borderRadius: BorderRadius.circular(8.h),
+            color: Colors.blue[50] ?? Colors.blue,
+            borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
             icon,
-            color: appTheme.blue600,
-            size: 20.adaptSize,
+            color: Colors.blue[600] ?? Colors.blue,
+            size: 20,
           ),
         ),
-        SizedBox(width: 12.h),
+        SizedBox(width: 12),
         Text(
           title,
           style: TextStyle(
-            fontSize: 18.fSize,
+            fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: appTheme.gray900,
+            color: Colors.grey[900] ?? Colors.black,
           ),
         ),
       ],
@@ -187,13 +188,13 @@ class _RequirementsStepState extends State<RequirementsStep>
 
   Widget _buildRankRequirements() {
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.h),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: appTheme.black900.withOpacity(0.06),
+            color: Colors.grey[900] ?? Colors.black.withOpacity(0.06),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -215,30 +216,30 @@ class _RequirementsStepState extends State<RequirementsStep>
           ),
           
           if (_hasRankRequirement) ...[
-            SizedBox(height: 20.v),
+            SizedBox(height: 20),
             _buildRankSelector(),
             
-            SizedBox(height: 16.v),
+            SizedBox(height: 16),
             Container(
-              padding: EdgeInsets.all(12.h),
+              padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: appTheme.blue50,
-                borderRadius: BorderRadius.circular(8.h),
+                color: Colors.blue[50] ?? Colors.blue,
+                borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 children: [
                   Icon(
                     Icons.info_outline,
-                    color: appTheme.blue600,
-                    size: 16.adaptSize,
+                    color: Colors.blue[600] ?? Colors.blue,
+                    size: 16,
                   ),
-                  SizedBox(width: 8.h),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       "Chỉ người chơi từ ${_rankLabels[_minRank]} đến ${_rankLabels[_maxRank]} mới có thể tham gia",
                       style: TextStyle(
-                        fontSize: 12.fSize,
-                        color: appTheme.blue600,
+                        fontSize: 12,
+                        color: Colors.blue[600] ?? Colors.blue,
                       ),
                     ),
                   ),
@@ -258,12 +259,12 @@ class _RequirementsStepState extends State<RequirementsStep>
         Text(
           "Chọn khoảng xếp hạng:",
           style: TextStyle(
-            fontSize: 14.fSize,
+            fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: appTheme.gray700,
+            color: Colors.grey[700] ?? Colors.grey,
           ),
         ),
-        SizedBox(height: 12.v),
+        SizedBox(height: 12),
         
         Row(
           children: [
@@ -274,18 +275,18 @@ class _RequirementsStepState extends State<RequirementsStep>
                   Text(
                     "Từ:",
                     style: TextStyle(
-                      fontSize: 12.fSize,
-                      color: appTheme.gray600,
+                      fontSize: 12,
+                      color: Colors.grey[600] ?? Colors.grey,
                     ),
                   ),
-                  SizedBox(height: 4.v),
+                  SizedBox(height: 4),
                   DropdownButtonFormField<String>(
                     initialValue: _minRank,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.h),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12.h, vertical: 8.v),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     ),
                     items: _ranks.map((rank) {
                       return DropdownMenuItem(
@@ -310,7 +311,7 @@ class _RequirementsStepState extends State<RequirementsStep>
               ),
             ),
             
-            SizedBox(width: 16.h),
+            SizedBox(width: 16),
             
             Expanded(
               child: Column(
@@ -319,18 +320,18 @@ class _RequirementsStepState extends State<RequirementsStep>
                   Text(
                     "Đến:",
                     style: TextStyle(
-                      fontSize: 12.fSize,
-                      color: appTheme.gray600,
+                      fontSize: 12,
+                      color: Colors.grey[600] ?? Colors.grey,
                     ),
                   ),
-                  SizedBox(height: 4.v),
+                  SizedBox(height: 4),
                   DropdownButtonFormField<String>(
                     initialValue: _maxRank,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.h),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12.h, vertical: 8.v),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     ),
                     items: _ranks.where((rank) {
                       return _ranks.indexOf(rank) >= _ranks.indexOf(_minRank);
@@ -358,13 +359,13 @@ class _RequirementsStepState extends State<RequirementsStep>
 
   Widget _buildMembershipRequirements() {
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.h),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: appTheme.black900.withOpacity(0.06),
+            color: Colors.grey[900] ?? Colors.black.withOpacity(0.06),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -384,7 +385,7 @@ class _RequirementsStepState extends State<RequirementsStep>
             },
           ),
           
-          SizedBox(height: 16.v),
+          SizedBox(height: 16),
           
           _buildToggleRow(
             title: "Yêu cầu xác minh tài khoản",
@@ -404,13 +405,13 @@ class _RequirementsStepState extends State<RequirementsStep>
 
   Widget _buildAgeRequirements() {
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.h),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: appTheme.black900.withOpacity(0.06),
+            color: Colors.grey[900] ?? Colors.black.withOpacity(0.06),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -432,7 +433,7 @@ class _RequirementsStepState extends State<RequirementsStep>
           ),
           
           if (_hasAgeRequirement) ...[
-            SizedBox(height: 20.v),
+            SizedBox(height: 20),
             Row(
               children: [
                 Expanded(
@@ -451,7 +452,7 @@ class _RequirementsStepState extends State<RequirementsStep>
                   ),
                 ),
                 
-                SizedBox(width: 16.h),
+                SizedBox(width: 16),
                 
                 Expanded(
                   child: _buildAgeInput(
@@ -487,23 +488,23 @@ class _RequirementsStepState extends State<RequirementsStep>
         Text(
           label,
           style: TextStyle(
-            fontSize: 12.fSize,
-            color: appTheme.gray600,
+            fontSize: 12,
+            color: Colors.grey[600] ?? Colors.grey,
           ),
         ),
-        SizedBox(height: 4.v),
+        SizedBox(height: 4),
         
         Container(
           decoration: BoxDecoration(
-            border: Border.all(color: appTheme.gray300),
-            borderRadius: BorderRadius.circular(8.h),
+            border: Border.all(color: Colors.grey[300]!),
+            borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
             children: [
               IconButton(
                 onPressed: value > 10 ? () => onChanged(value - 1) : null,
-                icon: Icon(Icons.remove, size: 16.adaptSize),
-                color: appTheme.gray600,
+                icon: Icon(Icons.remove, size: 16),
+                color: Colors.grey[600] ?? Colors.grey,
               ),
               
               Expanded(
@@ -511,17 +512,17 @@ class _RequirementsStepState extends State<RequirementsStep>
                   "$value tuổi",
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 14.fSize,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: appTheme.gray900,
+                    color: Colors.grey[900] ?? Colors.black,
                   ),
                 ),
               ),
               
               IconButton(
                 onPressed: value < 99 ? () => onChanged(value + 1) : null,
-                icon: Icon(Icons.add, size: 16.adaptSize),
-                color: appTheme.gray600,
+                icon: Icon(Icons.add, size: 16),
+                color: Colors.grey[600] ?? Colors.grey,
               ),
             ],
           ),
@@ -532,13 +533,13 @@ class _RequirementsStepState extends State<RequirementsStep>
 
   Widget _buildSkillRequirements() {
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.h),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: appTheme.black900.withOpacity(0.06),
+            color: Colors.grey[900] ?? Colors.black.withOpacity(0.06),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -560,20 +561,20 @@ class _RequirementsStepState extends State<RequirementsStep>
           ),
           
           if (_hasSkillRequirement) ...[
-            SizedBox(height: 20.v),
+            SizedBox(height: 20),
             
             Text(
               "Kinh nghiệm tối thiểu:",
               style: TextStyle(
-                fontSize: 14.fSize,
+                fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: appTheme.gray700,
+                color: Colors.grey[700] ?? Colors.grey,
               ),
             ),
-            SizedBox(height: 8.v),
+            SizedBox(height: 8),
             
             Wrap(
-              spacing: 8.h,
+              spacing: 8,
               children: [1, 2, 3, 5, 10].map((years) {
                 final isSelected = _minExperience == years;
                 return InkWell(
@@ -583,19 +584,19 @@ class _RequirementsStepState extends State<RequirementsStep>
                     });
                     _updateData();
                   },
-                  borderRadius: BorderRadius.circular(20.h),
+                  borderRadius: BorderRadius.circular(20),
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16.h, vertical: 8.v),
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
-                      color: isSelected ? appTheme.blue600 : appTheme.gray100,
-                      borderRadius: BorderRadius.circular(20.h),
+                      color: isSelected ? Colors.blue[600] ?? Colors.blue : Colors.grey[100]!,
+                      borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       "$years năm",
                       style: TextStyle(
-                        color: isSelected ? Colors.white : appTheme.gray700,
+                        color: isSelected ? Colors.white : Colors.grey[700] ?? Colors.grey,
                         fontWeight: FontWeight.w600,
-                        fontSize: 13.fSize,
+                        fontSize: 13,
                       ),
                     ),
                   ),
@@ -603,24 +604,24 @@ class _RequirementsStepState extends State<RequirementsStep>
               }).toList(),
             ),
             
-            SizedBox(height: 20.v),
+            SizedBox(height: 20),
             
             Text(
               "Rating tối thiểu: ${_minRating.toInt()}",
               style: TextStyle(
-                fontSize: 14.fSize,
+                fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: appTheme.gray700,
+                color: Colors.grey[700] ?? Colors.grey,
               ),
             ),
-            SizedBox(height: 8.v),
+            SizedBox(height: 8),
             
             Slider(
               value: _minRating,
               min: 500,
               max: 3000,
               divisions: 25,
-              activeColor: appTheme.blue600,
+              activeColor: Colors.blue[600] ?? Colors.blue,
               onChanged: (value) {
                 setState(() {
                   _minRating = value;
@@ -632,8 +633,8 @@ class _RequirementsStepState extends State<RequirementsStep>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("500", style: TextStyle(fontSize: 11.fSize, color: appTheme.gray500)),
-                Text("3000", style: TextStyle(fontSize: 11.fSize, color: appTheme.gray500)),
+                Text("500", style: TextStyle(fontSize: 11, color: Colors.grey[500]!)),
+                Text("3000", style: TextStyle(fontSize: 11, color: Colors.grey[500]!)),
               ],
             ),
           ],
@@ -644,13 +645,13 @@ class _RequirementsStepState extends State<RequirementsStep>
 
   Widget _buildAdditionalRules() {
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.h),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: appTheme.black900.withOpacity(0.06),
+            color: Colors.grey[900] ?? Colors.black.withOpacity(0.06),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -670,7 +671,7 @@ class _RequirementsStepState extends State<RequirementsStep>
             },
           ),
           
-          SizedBox(height: 16.v),
+          SizedBox(height: 16),
           
           _buildToggleRow(
             title: "Cho phép thay thế",
@@ -684,7 +685,7 @@ class _RequirementsStepState extends State<RequirementsStep>
             },
           ),
           
-          SizedBox(height: 16.v),
+          SizedBox(height: 16),
           
           _buildToggleRow(
             title: "Yêu cầu đặt cọc",
@@ -699,14 +700,14 @@ class _RequirementsStepState extends State<RequirementsStep>
           ),
           
           if (_requireDeposit) ...[
-            SizedBox(height: 16.v),
+            SizedBox(height: 16),
             
             TextField(
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 labelText: "Số tiền đặt cọc (VNĐ)",
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.h),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 prefixIcon: Icon(Icons.attach_money_outlined),
               ),
@@ -724,13 +725,13 @@ class _RequirementsStepState extends State<RequirementsStep>
 
   Widget _buildCustomRules() {
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.h),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: appTheme.black900.withOpacity(0.06),
+            color: Colors.grey[900] ?? Colors.black.withOpacity(0.06),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -745,52 +746,52 @@ class _RequirementsStepState extends State<RequirementsStep>
               Text(
                 "Quy tắc tùy chỉnh",
                 style: TextStyle(
-                  fontSize: 14.fSize,
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: appTheme.gray700,
+                  color: Colors.grey[700] ?? Colors.grey,
                 ),
               ),
               TextButton.icon(
                 onPressed: _addCustomRule,
-                icon: Icon(Icons.add, size: 16.adaptSize),
+                icon: Icon(Icons.add, size: 16),
                 label: Text("Thêm quy tắc"),
                 style: TextButton.styleFrom(
-                  foregroundColor: appTheme.blue600,
+                  foregroundColor: Colors.blue[600] ?? Colors.blue,
                 ),
               ),
             ],
           ),
           
-          SizedBox(height: 12.v),
+          SizedBox(height: 12),
           
           ...(_customRules.asMap().entries.map((entry) {
             final index = entry.key;
             final rule = entry.value;
             
             return Container(
-              margin: EdgeInsets.only(bottom: 12.v),
-              padding: EdgeInsets.all(12.h),
+              margin: EdgeInsets.only(bottom: 12),
+              padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: appTheme.gray50,
-                borderRadius: BorderRadius.circular(8.h),
-                border: Border.all(color: appTheme.gray200),
+                color: Colors.grey[50]!,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey[200]!),
               ),
               child: Row(
                 children: [
                   Container(
-                    padding: EdgeInsets.all(4.h),
+                    padding: EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: rule.isRequired ? appTheme.red100 : appTheme.blue100,
-                      borderRadius: BorderRadius.circular(4.h),
+                      color: rule.isRequired ? Colors.red[100]! : Colors.blue[100]!,
+                      borderRadius: BorderRadius.circular(4),
                     ),
                     child: Icon(
                       rule.isRequired ? Icons.warning_outlined : Icons.info_outline,
-                      color: rule.isRequired ? appTheme.red600 : appTheme.blue600,
-                      size: 16.adaptSize,
+                      color: rule.isRequired ? Colors.red[600]! : Colors.blue[600] ?? Colors.blue,
+                      size: 16,
                     ),
                   ),
                   
-                  SizedBox(width: 12.h),
+                  SizedBox(width: 12),
                   
                   Expanded(
                     child: Column(
@@ -799,17 +800,17 @@ class _RequirementsStepState extends State<RequirementsStep>
                         Text(
                           rule.title,
                           style: TextStyle(
-                            fontSize: 14.fSize,
+                            fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: appTheme.gray900,
+                            color: Colors.grey[900] ?? Colors.black,
                           ),
                         ),
                         if (rule.description.isNotEmpty)
                           Text(
                             rule.description,
                             style: TextStyle(
-                              fontSize: 12.fSize,
-                              color: appTheme.gray600,
+                              fontSize: 12,
+                              color: Colors.grey[600] ?? Colors.grey,
                             ),
                           ),
                       ],
@@ -819,15 +820,15 @@ class _RequirementsStepState extends State<RequirementsStep>
                   IconButton(
                     onPressed: () => _editCustomRule(index),
                     icon: Icon(Icons.edit_outlined),
-                    iconSize: 20.adaptSize,
-                    color: appTheme.gray600,
+                    iconSize: 20,
+                    color: Colors.grey[600] ?? Colors.grey,
                   ),
                   
                   IconButton(
                     onPressed: () => _removeCustomRule(index),
                     icon: Icon(Icons.delete_outline),
-                    iconSize: 20.adaptSize,
-                    color: appTheme.red600,
+                    iconSize: 20,
+                    color: Colors.red[600]!,
                   ),
                 ],
               ),
@@ -836,13 +837,13 @@ class _RequirementsStepState extends State<RequirementsStep>
           
           if (_customRules.isEmpty)
             Container(
-              padding: EdgeInsets.all(20.h),
+              padding: EdgeInsets.all(20),
               child: Center(
                 child: Text(
                   "Chưa có quy tắc tùy chỉnh nào. Nhấn 'Thêm quy tắc' để tạo mới.",
                   style: TextStyle(
-                    fontSize: 14.fSize,
-                    color: appTheme.gray500,
+                    fontSize: 14,
+                    color: Colors.grey[500]!,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -868,16 +869,16 @@ class _RequirementsStepState extends State<RequirementsStep>
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: 14.fSize,
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: appTheme.gray900,
+                  color: Colors.grey[900] ?? Colors.black,
                 ),
               ),
               Text(
                 subtitle,
                 style: TextStyle(
-                  fontSize: 12.fSize,
-                  color: appTheme.gray600,
+                  fontSize: 12,
+                  color: Colors.grey[600] ?? Colors.grey,
                 ),
               ),
             ],
@@ -887,7 +888,7 @@ class _RequirementsStepState extends State<RequirementsStep>
         Switch(
           value: value,
           onChanged: onChanged,
-          activeThumbColor: appTheme.blue600,
+          activeThumbColor: Colors.blue[600] ?? Colors.blue,
         ),
       ],
     );
@@ -1042,7 +1043,7 @@ class _CustomRuleDialogState extends State<CustomRuleDialog> {
             maxLines: 1,
           ),
           
-          SizedBox(height: 16.v),
+          SizedBox(height: 16),
           
           TextField(
             controller: _descriptionController,
@@ -1054,7 +1055,7 @@ class _CustomRuleDialogState extends State<CustomRuleDialog> {
             maxLines: 3,
           ),
           
-          SizedBox(height: 16.v),
+          SizedBox(height: 16),
           
           CheckboxListTile(
             value: _isRequired,

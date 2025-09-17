@@ -63,11 +63,6 @@ class AdminService {
       final response = await query
           .order('created_at', ascending: false)
           .range(offset, offset + limit - 1);
-
-      // Ensure response is a List and handle type safety
-      if (response is! List) {
-        throw Exception('Unexpected response type: ${response.runtimeType}');
-      }
       
       return (response as List).map<Club>((json) {
         if (json is! Map<String, dynamic>) {

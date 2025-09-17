@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
+
 
 import '../../../core/app_export.dart';
 
@@ -20,7 +20,7 @@ class ClubHeaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliverAppBar(
-      expandedHeight: 25.h,
+      expandedHeight: 25,
       pinned: true,
       backgroundColor: AppTheme.lightTheme.colorScheme.primary,
       flexibleSpace: FlexibleSpaceBar(
@@ -37,7 +37,7 @@ class ClubHeaderWidget extends StatelessWidget {
                         color: Colors.grey.shade300,
                         child: Icon(
                           Icons.sports_bar,
-                          size: 15.w,
+                          size: 48,
                           color: Colors.grey.shade600,
                         ),
                       );
@@ -47,7 +47,7 @@ class ClubHeaderWidget extends StatelessWidget {
                     color: Colors.grey.shade300,
                     child: Icon(
                       Icons.sports_bar,
-                      size: 15.w,
+                      size: 48,
                       color: Colors.grey.shade600,
                     ),
                   ),
@@ -69,15 +69,15 @@ class ClubHeaderWidget extends StatelessWidget {
             
             // Club Info
             Positioned(
-              bottom: 2.h,
-              left: 4.w,
-              right: 4.w,
+              bottom: 2,
+              left: 12,
+              right: 12,
               child: Row(
                 children: [
                   // Club Logo
                   Container(
-                    width: 15.w,
-                    height: 15.w,
+                    width: 60,
+                    height: 60,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.white, width: 2),
@@ -107,7 +107,7 @@ class ClubHeaderWidget extends StatelessWidget {
                     ),
                   ),
                   
-                  SizedBox(width: 3.w),
+                  SizedBox(width: 60),
                   
                   // Club Name and Info
                   Expanded(
@@ -122,15 +122,15 @@ class ClubHeaderWidget extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 0.5.h),
+                        SizedBox(height: 0.5),
                         Row(
                           children: [
                             Icon(
                               Icons.location_on,
                               color: Colors.white70,
-                              size: 4.w,
+                              size: 16,
                             ),
-                            SizedBox(width: 1.w),
+                            SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 clubData["location"] ?? "Unknown Location",

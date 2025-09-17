@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
+
 
 import '../../../core/app_export.dart';
 import '../../../models/post.dart';
@@ -118,7 +118,7 @@ class _PostCardWidgetState extends State<PostCardWidget>
     final colorScheme = theme.colorScheme;
 
     return Card(
-      margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+      margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1),
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Column(
@@ -185,7 +185,7 @@ class _PostCardWidgetState extends State<PostCardWidget>
                           widget.post.userRank!.substring(0, 1).toUpperCase(),
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 8.sp,
+                            fontSize: 8,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -252,13 +252,13 @@ class _PostCardWidgetState extends State<PostCardWidget>
 
   Widget _buildPostMedia(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 2.h),
+      margin: EdgeInsets.symmetric(vertical: 2),
       width: double.infinity,
-      constraints: BoxConstraints(maxHeight: 50.h),
+      constraints: BoxConstraints(maxHeight: 50),
       child: CustomImageWidget(
         imageUrl: widget.post.imageUrls!.first,
         width: double.infinity,
-        height: 40.h,
+        height: 40,
         fit: BoxFit.cover,
       ),
     );
@@ -266,7 +266,7 @@ class _PostCardWidgetState extends State<PostCardWidget>
 
   Widget _buildLocationAndHashtags(BuildContext context, ThemeData theme) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -293,10 +293,10 @@ class _PostCardWidgetState extends State<PostCardWidget>
             ),
           if (widget.post.hashtags?.isNotEmpty == true)
             Padding(
-              padding: EdgeInsets.only(top: 1.h),
+              padding: EdgeInsets.only(top: 1),
               child: Wrap(
                 spacing: 2.w,
-                runSpacing: 0.5.h,
+                runSpacing: 0.5,
                 children: widget.post.hashtags!.map((hashtag) {
                   return Text(
                     '#$hashtag',
@@ -345,7 +345,7 @@ class _PostCardWidgetState extends State<PostCardWidget>
             ],
           ),
 
-          SizedBox(height: 2.h),
+          SizedBox(height: 2),
 
           // Action buttons
           Row(
@@ -395,7 +395,7 @@ class _PostCardWidgetState extends State<PostCardWidget>
             onTap: onTap,
             borderRadius: BorderRadius.circular(8),
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+              padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [

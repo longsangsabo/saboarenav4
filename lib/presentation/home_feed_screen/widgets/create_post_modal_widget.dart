@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:sizer/sizer.dart';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/app_export.dart';
@@ -261,7 +261,7 @@ class _CreatePostModalWidgetState extends State<CreatePostModalWidget> {
     final colorScheme = theme.colorScheme;
 
     return Container(
-      height: 90.h,
+      height: 90,
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
@@ -335,7 +335,7 @@ class _CreatePostModalWidgetState extends State<CreatePostModalWidget> {
       children: [
         CameraPreview(_cameraController!),
         Positioned(
-          bottom: 8.h,
+          bottom: 8,
           left: 0,
           right: 0,
           child: Row(
@@ -428,7 +428,7 @@ class _CreatePostModalWidgetState extends State<CreatePostModalWidget> {
                   ),
                   Container(
                     padding:
-                        EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
+                        EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5),
                     decoration: BoxDecoration(
                       color: colorScheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
@@ -446,7 +446,7 @@ class _CreatePostModalWidgetState extends State<CreatePostModalWidget> {
             ],
           ),
 
-          SizedBox(height: 3.h),
+          SizedBox(height: 3),
 
           // Text input
           TextField(
@@ -462,12 +462,12 @@ class _CreatePostModalWidgetState extends State<CreatePostModalWidget> {
             style: theme.textTheme.bodyLarge,
           ),
 
-          SizedBox(height: 2.h),
+          SizedBox(height: 2),
 
           // Selected image
           if (_selectedImage != null)
             Container(
-              margin: EdgeInsets.only(bottom: 2.h),
+              margin: EdgeInsets.only(bottom: 2),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
@@ -482,13 +482,13 @@ class _CreatePostModalWidgetState extends State<CreatePostModalWidget> {
                         ? Image.network(
                             _selectedImage!.path,
                             width: double.infinity,
-                            height: 40.h,
+                            height: 40,
                             fit: BoxFit.cover,
                           )
                         : CustomImageWidget(
                             imageUrl: _selectedImage!.path,
                             width: double.infinity,
-                            height: 40.h,
+                            height: 40,
                             fit: BoxFit.cover,
                           ),
                   ),
@@ -540,7 +540,7 @@ class _CreatePostModalWidgetState extends State<CreatePostModalWidget> {
             ),
           ),
 
-          SizedBox(height: 3.h),
+          SizedBox(height: 3),
 
           // Action buttons
           Row(
@@ -588,7 +588,7 @@ class _CreatePostModalWidgetState extends State<CreatePostModalWidget> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 2.h),
+        padding: EdgeInsets.symmetric(vertical: 2),
         decoration: BoxDecoration(
           border: Border.all(
             color: colorScheme.outline.withValues(alpha: 0.2),

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../core/app_export.dart';
 
 class MemberRealtimeService {
   static final MemberRealtimeService _instance = MemberRealtimeService._internal();
@@ -30,7 +29,7 @@ class MemberRealtimeService {
   RealtimeChannel? _activitiesSubscription;
 
   // Current data cache
-  Map<String, List<Map<String, dynamic>>> _dataCache = {};
+  final Map<String, List<Map<String, dynamic>>> _dataCache = {};
 
   // Connection status
   bool _isConnected = false;
@@ -338,22 +337,19 @@ class MemberRealtimeService {
 
     switch (payload.eventType) {
       case PostgresChangeEvent.insert:
-        if (payload.newRecord != null) {
-          currentData.add(payload.newRecord!);
-        }
+        currentData.add(payload.newRecord);
         break;
       case PostgresChangeEvent.update:
-        if (payload.newRecord != null) {
-          final index = currentData.indexWhere((item) => item['id'] == payload.newRecord!['id']);
-          if (index != -1) {
-            currentData[index] = payload.newRecord!;
-          }
+        final index = currentData.indexWhere((item) => item['id'] == payload.newRecord['id']);
+        if (index != -1) {
+          currentData[index] = payload.newRecord;
         }
         break;
       case PostgresChangeEvent.delete:
-        if (payload.oldRecord != null) {
-          currentData.removeWhere((item) => item['id'] == payload.oldRecord!['id']);
-        }
+        currentData.removeWhere((item) => item['id'] == payload.oldRecord['id']);
+        break;
+      case PostgresChangeEvent.all:
+        // No-op for synthetic event type
         break;
     }
 
@@ -371,22 +367,18 @@ class MemberRealtimeService {
 
     switch (payload.eventType) {
       case PostgresChangeEvent.insert:
-        if (payload.newRecord != null) {
-          currentData.insert(0, payload.newRecord!); // Add to beginning for latest first
-        }
+        currentData.insert(0, payload.newRecord); // Add to beginning for latest first
         break;
       case PostgresChangeEvent.update:
-        if (payload.newRecord != null) {
-          final index = currentData.indexWhere((item) => item['id'] == payload.newRecord!['id']);
-          if (index != -1) {
-            currentData[index] = payload.newRecord!;
-          }
+        final index = currentData.indexWhere((item) => item['id'] == payload.newRecord['id']);
+        if (index != -1) {
+          currentData[index] = payload.newRecord;
         }
         break;
       case PostgresChangeEvent.delete:
-        if (payload.oldRecord != null) {
-          currentData.removeWhere((item) => item['id'] == payload.oldRecord!['id']);
-        }
+        currentData.removeWhere((item) => item['id'] == payload.oldRecord['id']);
+        break;
+      case PostgresChangeEvent.all:
         break;
     }
 
@@ -404,22 +396,18 @@ class MemberRealtimeService {
 
     switch (payload.eventType) {
       case PostgresChangeEvent.insert:
-        if (payload.newRecord != null) {
-          currentData.insert(0, payload.newRecord!); // New messages at top
-        }
+        currentData.insert(0, payload.newRecord); // New messages at top
         break;
       case PostgresChangeEvent.update:
-        if (payload.newRecord != null) {
-          final index = currentData.indexWhere((item) => item['id'] == payload.newRecord!['id']);
-          if (index != -1) {
-            currentData[index] = payload.newRecord!;
-          }
+        final index = currentData.indexWhere((item) => item['id'] == payload.newRecord['id']);
+        if (index != -1) {
+          currentData[index] = payload.newRecord;
         }
         break;
       case PostgresChangeEvent.delete:
-        if (payload.oldRecord != null) {
-          currentData.removeWhere((item) => item['id'] == payload.oldRecord!['id']);
-        }
+        currentData.removeWhere((item) => item['id'] == payload.oldRecord['id']);
+        break;
+      case PostgresChangeEvent.all:
         break;
     }
 
@@ -437,24 +425,20 @@ class MemberRealtimeService {
 
     switch (payload.eventType) {
       case PostgresChangeEvent.insert:
-        if (payload.newRecord != null) {
-          currentData.insert(0, payload.newRecord!); // New notifications at top
-          // Show local notification for new items
-          _showLocalNotification(payload.newRecord!);
-        }
+        currentData.insert(0, payload.newRecord); // New notifications at top
+        // Show local notification for new items
+        _showLocalNotification(payload.newRecord);
         break;
       case PostgresChangeEvent.update:
-        if (payload.newRecord != null) {
-          final index = currentData.indexWhere((item) => item['id'] == payload.newRecord!['id']);
-          if (index != -1) {
-            currentData[index] = payload.newRecord!;
-          }
+        final index = currentData.indexWhere((item) => item['id'] == payload.newRecord['id']);
+        if (index != -1) {
+          currentData[index] = payload.newRecord;
         }
         break;
       case PostgresChangeEvent.delete:
-        if (payload.oldRecord != null) {
-          currentData.removeWhere((item) => item['id'] == payload.oldRecord!['id']);
-        }
+        currentData.removeWhere((item) => item['id'] == payload.oldRecord['id']);
+        break;
+      case PostgresChangeEvent.all:
         break;
     }
 
@@ -472,22 +456,18 @@ class MemberRealtimeService {
 
     switch (payload.eventType) {
       case PostgresChangeEvent.insert:
-        if (payload.newRecord != null) {
-          currentData.insert(0, payload.newRecord!); // New activities at top
-        }
+        currentData.insert(0, payload.newRecord); // New activities at top
         break;
       case PostgresChangeEvent.update:
-        if (payload.newRecord != null) {
-          final index = currentData.indexWhere((item) => item['id'] == payload.newRecord!['id']);
-          if (index != -1) {
-            currentData[index] = payload.newRecord!;
-          }
+        final index = currentData.indexWhere((item) => item['id'] == payload.newRecord['id']);
+        if (index != -1) {
+          currentData[index] = payload.newRecord;
         }
         break;
       case PostgresChangeEvent.delete:
-        if (payload.oldRecord != null) {
-          currentData.removeWhere((item) => item['id'] == payload.oldRecord!['id']);
-        }
+        currentData.removeWhere((item) => item['id'] == payload.oldRecord['id']);
+        break;
+      case PostgresChangeEvent.all:
         break;
     }
 

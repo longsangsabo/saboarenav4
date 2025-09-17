@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sabo_arena/core/app_export.dart';
-import 'package:sizer/sizer.dart';
+
 import 'package:sabo_arena/theme/app_theme.dart';
 
 class TournamentBracketView extends StatefulWidget {
@@ -77,7 +77,7 @@ class _TournamentBracketViewState extends State<TournamentBracketView>
       height: MediaQuery.of(context).size.height * 0.7,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.sp)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
         children: [
@@ -92,7 +92,7 @@ class _TournamentBracketViewState extends State<TournamentBracketView>
 
   Widget _buildHeader() {
     return Container(
-      padding: EdgeInsets.all(16.sp),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: AppTheme.dividerLight)),
       ),
@@ -105,7 +105,7 @@ class _TournamentBracketViewState extends State<TournamentBracketView>
                 Text(
                   "Bảng đấu",
                   style: TextStyle(
-                    fontSize: 18.sp,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: AppTheme.textPrimaryLight,
                   ),
@@ -113,7 +113,7 @@ class _TournamentBracketViewState extends State<TournamentBracketView>
                 Text(
                   _getFormatDescription(),
                   style: TextStyle(
-                    fontSize: 12.sp,
+                    fontSize: 12,
                     color: AppTheme.textSecondaryLight,
                   ),
                 ),
@@ -125,22 +125,22 @@ class _TournamentBracketViewState extends State<TournamentBracketView>
           Container(
             decoration: BoxDecoration(
               color: AppTheme.backgroundLight,
-              borderRadius: BorderRadius.circular(8.sp),
+              borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
               children: [
                 IconButton(
                   onPressed: () => _updateScale(false),
-                  icon: Icon(Icons.zoom_out, size: 18.sp),
-                  padding: EdgeInsets.all(8.sp),
-                  constraints: BoxConstraints(minWidth: 32.sp, minHeight: 32.sp),
+                  icon: Icon(Icons.zoom_out, size: 18),
+                  padding: EdgeInsets.all(8),
+                  constraints: BoxConstraints(minWidth: 32, minHeight: 32),
                 ),
-                Container(width: 1, height: 20.sp, color: AppTheme.dividerLight),
+                Container(width: 1, height: 20, color: AppTheme.dividerLight),
                 IconButton(
                   onPressed: () => _updateScale(true),
-                  icon: Icon(Icons.zoom_in, size: 18.sp),
-                  padding: EdgeInsets.all(8.sp),
-                  constraints: BoxConstraints(minWidth: 32.sp, minHeight: 32.sp),
+                  icon: Icon(Icons.zoom_in, size: 18),
+                  padding: EdgeInsets.all(8),
+                  constraints: BoxConstraints(minWidth: 32, minHeight: 32),
                 ),
               ],
             ),
@@ -156,11 +156,11 @@ class _TournamentBracketViewState extends State<TournamentBracketView>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircularProgressIndicator(color: AppTheme.primaryLight),
-          SizedBox(height: 16.sp),
+          SizedBox(height: 16),
           Text(
             "Đang tải bảng đấu...",
             style: TextStyle(
-              fontSize: 14.sp,
+              fontSize: 14,
               color: AppTheme.textSecondaryLight,
             ),
           ),
@@ -183,7 +183,7 @@ class _TournamentBracketViewState extends State<TournamentBracketView>
               child: SingleChildScrollView(
                 scrollDirection: Axis.vertical,
                 child: Container(
-                  padding: EdgeInsets.all(16.sp),
+                  padding: EdgeInsets.all(16),
                   child: _buildBracketLayout(),
                 ),
               ),
@@ -213,7 +213,7 @@ class _TournamentBracketViewState extends State<TournamentBracketView>
           children: [
             _buildRoundColumn(round, index),
             if (index < _rounds.length - 1)
-              SizedBox(width: 40.sp), // Spacing between rounds
+              SizedBox(width: 40), // Spacing between rounds
           ],
         );
       }).toList(),
@@ -225,17 +225,17 @@ class _TournamentBracketViewState extends State<TournamentBracketView>
       children: [
         // Round header
         Container(
-          margin: EdgeInsets.only(bottom: 16.sp),
-          padding: EdgeInsets.symmetric(horizontal: 12.sp, vertical: 6.sp),
+          margin: EdgeInsets.only(bottom: 16),
+          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
             color: AppTheme.primaryLight,
-            borderRadius: BorderRadius.circular(12.sp),
+            borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
             round.name,
             style: TextStyle(
               color: Colors.white,
-              fontSize: 12.sp,
+              fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -257,10 +257,10 @@ class _TournamentBracketViewState extends State<TournamentBracketView>
 
   Widget _buildMatchCard(BracketMatch match) {
     return Container(
-      width: 180.sp,
+      width: 180,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8.sp),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: match.status == 'completed'
               ? AppTheme.successLight.withOpacity(0.3)
@@ -281,10 +281,10 @@ class _TournamentBracketViewState extends State<TournamentBracketView>
           _buildPlayerRow(match.player2, match.score2, match.winner == 2),
           if (match.status != 'pending' && match.scheduledTime != null)
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.sp, vertical: 4.sp),
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: AppTheme.backgroundLight,
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(8.sp)),
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(8)),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -293,18 +293,18 @@ class _TournamentBracketViewState extends State<TournamentBracketView>
                     match.status == 'completed'
                         ? Icons.check_circle_outline
                         : Icons.schedule,
-                    size: 12.sp,
+                    size: 12,
                     color: match.status == 'completed'
                         ? AppTheme.successLight
                         : AppTheme.accentLight,
                   ),
-                  SizedBox(width: 4.sp),
+                  SizedBox(width: 4),
                   Text(
                     match.status == 'completed'
                         ? 'Hoàn thành'
                         : match.scheduledTime!,
                     style: TextStyle(
-                      fontSize: 10.sp,
+                      fontSize: 10,
                       color: match.status == 'completed'
                           ? AppTheme.successLight
                           : AppTheme.accentLight,
@@ -323,10 +323,10 @@ class _TournamentBracketViewState extends State<TournamentBracketView>
     final isEmpty = playerName == null;
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.sp, vertical: 8.sp),
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: isWinner ? AppTheme.successLight.withOpacity(0.1) : Colors.transparent,
-        borderRadius: BorderRadius.circular(isWinner ? 8.sp : 0),
+        borderRadius: BorderRadius.circular(isWinner ? 8 : 0),
       ),
       child: Row(
         children: [
@@ -334,7 +334,7 @@ class _TournamentBracketViewState extends State<TournamentBracketView>
             child: Text(
               isEmpty ? 'TBD' : playerName,
               style: TextStyle(
-                fontSize: 13.sp,
+                fontSize: 13,
                 fontWeight: isWinner ? FontWeight.w600 : FontWeight.normal,
                 color: isEmpty
                     ? AppTheme.textDisabledLight
@@ -344,15 +344,15 @@ class _TournamentBracketViewState extends State<TournamentBracketView>
           ),
           if (!isEmpty && score != null)
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 6.sp, vertical: 2.sp),
+              padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
                 color: isWinner ? AppTheme.successLight : AppTheme.textDisabledLight,
-                borderRadius: BorderRadius.circular(4.sp),
+                borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
                 score.toString(),
                 style: TextStyle(
-                  fontSize: 11.sp,
+                  fontSize: 11,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
@@ -367,22 +367,22 @@ class _TournamentBracketViewState extends State<TournamentBracketView>
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.sp),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppTheme.dividerLight),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: EdgeInsets.all(16.sp),
+            padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: AppTheme.backgroundLight,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(12.sp)),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
             ),
             child: Text(
               "Bảng xếp hạng Round Robin",
               style: TextStyle(
-                fontSize: 16.sp,
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: AppTheme.textPrimaryLight,
               ),
@@ -418,7 +418,7 @@ class _TournamentBracketViewState extends State<TournamentBracketView>
 
   double _getMatchSpacing(int roundIndex, int matchIndex) {
     // Increase spacing in later rounds to align with bracket structure
-    return 16.sp * (1 << roundIndex);
+    return (16 * (1 << roundIndex)).toDouble();
   }
 
   void _updateScale(bool zoomIn) {

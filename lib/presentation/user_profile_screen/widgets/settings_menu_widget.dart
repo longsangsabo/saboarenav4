@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
+
 
 import '../../../core/app_export.dart';
 
@@ -45,7 +45,7 @@ class SettingsMenuWidget extends StatelessWidget {
           ),
         ),
 
-        SizedBox(height: 2.h),
+        SizedBox(height: 2),
 
         // Settings Menu Items
         Container(
@@ -136,7 +136,7 @@ class SettingsMenuWidget extends StatelessWidget {
           ),
         ),
 
-        SizedBox(height: 3.h),
+        SizedBox(height: 3),
 
         // Logout Button
         Container(
@@ -148,7 +148,7 @@ class SettingsMenuWidget extends StatelessWidget {
               backgroundColor: Colors.red.withValues(alpha: 0.1),
               foregroundColor: Colors.red,
               elevation: 0,
-              padding: EdgeInsets.symmetric(vertical: 2.h),
+              padding: EdgeInsets.symmetric(vertical: 2),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
                 side: BorderSide(color: Colors.red.withValues(alpha: 0.3)),
@@ -191,7 +191,7 @@ class SettingsMenuWidget extends StatelessWidget {
       children: [
         ListTile(
           onTap: onTap,
-          contentPadding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+          contentPadding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1),
           leading: Container(
             padding: EdgeInsets.all(2.w),
             decoration: BoxDecoration(

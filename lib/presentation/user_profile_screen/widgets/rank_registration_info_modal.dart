@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
+
 import '../../../core/app_export.dart';
 
 class RankRegistrationInfoModal extends StatelessWidget {
@@ -13,7 +13,7 @@ class RankRegistrationInfoModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 3.h),
+      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 3),
       decoration: BoxDecoration(
         color: AppTheme.lightTheme.colorScheme.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -33,7 +33,7 @@ class RankRegistrationInfoModal extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height: 3.h),
+          SizedBox(height: 3),
 
           // Title
           Text(
@@ -43,12 +43,12 @@ class RankRegistrationInfoModal extends StatelessWidget {
               color: AppTheme.lightTheme.colorScheme.primary,
             ),
           ),
-          SizedBox(height: 1.h),
+          SizedBox(height: 1),
           Text(
             'Đăng ký hạng để mở khóa toàn bộ tiềm năng của bạn trên Sabo Arena!',
             style: AppTheme.lightTheme.textTheme.bodyMedium,
           ),
-          SizedBox(height: 3.h),
+          SizedBox(height: 3),
 
           // Features
           _buildFeatureItem(
@@ -69,7 +69,7 @@ class RankRegistrationInfoModal extends StatelessWidget {
             title: 'Tham gia giải đấu độc quyền',
             subtitle: 'Nhiều giải đấu chỉ dành cho các thành viên đã có hạng.',
           ),
-          SizedBox(height: 4.h),
+          SizedBox(height: 4),
 
           // Call to Action Button
           SizedBox(
@@ -77,7 +77,7 @@ class RankRegistrationInfoModal extends StatelessWidget {
             child: ElevatedButton(
               onPressed: onStartRegistration,
               style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 2.h),
+                padding: EdgeInsets.symmetric(vertical: 2),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -91,7 +91,7 @@ class RankRegistrationInfoModal extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height: 1.h),
+          SizedBox(height: 1),
           Center(
             child: TextButton(
               onPressed: () => Navigator.pop(context),
@@ -108,7 +108,7 @@ class RankRegistrationInfoModal extends StatelessWidget {
 
   Widget _buildFeatureItem(BuildContext context, {required IconData icon, required String title, required String subtitle}) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 1.5.h),
+      padding: EdgeInsets.symmetric(vertical: 1.5),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -128,7 +128,7 @@ class RankRegistrationInfoModal extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                SizedBox(height: 0.5.h),
+                SizedBox(height: 0.5),
                 Text(
                   subtitle,
                   style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
+import '../core/app_export.dart';
+
 import '../../routes/app_routes.dart';
 import '../../services/auth_service.dart';
 
@@ -211,7 +212,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         color: theme.primaryColor,
                       ),
                     ),
-                    SizedBox(height: 1.h),
+                    SizedBox(height: 1),
                     Text(
                       'Tham gia cộng đồng SABO Arena',
                       style: theme.textTheme.bodyLarge?.copyWith(
@@ -222,7 +223,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ),
 
-              SizedBox(height: 4.h),
+              SizedBox(height: 4),
 
               // Signup form
               Form(
@@ -251,7 +252,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       },
                     ),
 
-                    SizedBox(height: 3.h),
+                    SizedBox(height: 3),
 
                     // Email field
                     TextFormField(
@@ -276,7 +277,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       },
                     ),
 
-                    SizedBox(height: 3.h),
+                    SizedBox(height: 3),
 
                     // Role selection
                     DropdownButtonFormField<String>(
@@ -301,7 +302,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       },
                     ),
 
-                    SizedBox(height: 3.h),
+                    SizedBox(height: 3),
 
                     // Password field
                     TextFormField(
@@ -333,7 +334,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       },
                     ),
 
-                    SizedBox(height: 3.h),
+                    SizedBox(height: 3),
 
                     // Confirm password field
                     TextFormField(
@@ -366,12 +367,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       },
                     ),
 
-                    SizedBox(height: 6.h),
+                    SizedBox(height: 6),
 
                     // Signup button
                     SizedBox(
                       width: double.infinity,
-                      height: 6.h,
+                      height: 6,
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _signUp,
                         style: ElevatedButton.styleFrom(
@@ -387,14 +388,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             : Text(
                                 'Đăng ký',
                                 style: TextStyle(
-                                  fontSize: 16.sp,
+                                  fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
                       ),
                     ),
 
-                    SizedBox(height: 4.h),
+                    SizedBox(height: 4),
 
                     // Login link
                     Row(

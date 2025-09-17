@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sabo_arena/core/app_export.dart';
 import 'widgets/basic_info_step.dart';
-import 'widgets/schedule_step.dart';
-import 'widgets/requirements_step.dart';
-import 'widgets/prizes_step.dart';
-import 'widgets/review_step.dart';
 import 'widgets/schedule_step.dart';
 import 'widgets/requirements_step.dart';
 import 'widgets/prizes_step.dart';
@@ -160,7 +155,7 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
-        backgroundColor: appTheme.gray50,
+        backgroundColor: Colors.grey[50] ?? Colors.grey[100],
         appBar: _buildAppBar(),
         body: Column(
           children: [
@@ -183,14 +178,14 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
       title: Text(
         "Tạo giải đấu mới",
         style: TextStyle(
-          fontSize: 18.fSize,
+          fontSize: 18,
           fontWeight: FontWeight.bold,
-          color: appTheme.gray900,
+          color: Colors.grey[900] ?? Colors.black,
         ),
       ),
       centerTitle: true,
       leading: IconButton(
-        icon: Icon(Icons.close, color: appTheme.gray700),
+        icon: Icon(Icons.close, color: Colors.grey[700] ?? Colors.grey),
         onPressed: () => _onBackPressed(),
       ),
       actions: [
@@ -199,8 +194,8 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
           child: Text(
             "Lưu nháp",
             style: TextStyle(
-              color: appTheme.blue600,
-              fontSize: 14.fSize,
+              color: Colors.blue[600] ?? Colors.blue,
+              fontSize: 14,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -210,7 +205,7 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
         preferredSize: Size.fromHeight(1),
         child: Container(
           height: 1,
-          color: appTheme.gray200,
+          color: Colors.grey[200] ?? Colors.grey[300],
         ),
       ),
     );
@@ -218,7 +213,7 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
 
   Widget _buildProgressIndicator() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.h, vertical: 16.v),
+      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       color: Colors.white,
       child: Column(
         children: [
@@ -228,46 +223,46 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
               Text(
                 "Bước ${_currentStep + 1} / ${_steps.length}",
                 style: TextStyle(
-                  fontSize: 14.fSize,
-                  color: appTheme.gray600,
+                  fontSize: 14,
+                  color: Colors.grey[600] ?? Colors.grey,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               Text(
                 "${(((_currentStep + 1) / _steps.length) * 100).toInt()}%",
                 style: TextStyle(
-                  fontSize: 14.fSize,
-                  color: appTheme.blue600,
+                  fontSize: 14,
+                  color: Colors.blue[600] ?? Colors.blue,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ],
           ),
-          SizedBox(height: 12.v),
+          SizedBox(height: 12),
           AnimatedBuilder(
             animation: _progressAnimation,
             builder: (context, child) {
               return Container(
-                height: 6.v,
+                height: 6,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(3.h),
-                  color: appTheme.gray200,
+                  borderRadius: BorderRadius.circular(3),
+                  color: Colors.grey[200] ?? Colors.grey[300],
                 ),
                 child: Stack(
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(3.h),
+                        borderRadius: BorderRadius.circular(3),
                         gradient: LinearGradient(
                           colors: [
-                            appTheme.blue600,
-                            appTheme.blue400,
+                            Colors.blue[600] ?? Colors.blue,
+                            Colors.blue[400] ?? Colors.blue,
                           ],
                         ),
                       ),
-                      width: (MediaQuery.of(context).size.width - 40.h) * 
+                      width: (MediaQuery.of(context).size.width - 40) * 
                              ((_currentStep + 1) / _steps.length) * _progressAnimation.value,
-                      height: 6.v,
+                      height: 6,
                     ),
                   ],
                 ),
@@ -281,7 +276,7 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
 
   Widget _buildStepIndicator() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.h, vertical: 16.v),
+      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       color: Colors.white,
       child: Row(
         children: _steps.asMap().entries.map((entry) {
@@ -297,18 +292,18 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
                   child: Column(
                     children: [
                       Container(
-                        width: 40.adaptSize,
-                        height: 40.adaptSize,
+                        width: 40,
+                        height: 40,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: isCompleted 
-                              ? appTheme.green600 
+                              ? Colors.green[600]! 
                               : isActive 
-                                  ? appTheme.blue600 
-                                  : appTheme.gray300,
+                                  ? Colors.blue[600] ?? Colors.blue 
+                                  : Colors.grey[300]!,
                           boxShadow: isActive ? [
                             BoxShadow(
-                              color: appTheme.blue600.withOpacity(0.3),
+                              color: Colors.blue[600] ?? Colors.blue.withOpacity(0.3),
                               blurRadius: 8,
                               spreadRadius: 2,
                             ),
@@ -319,19 +314,19 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
                               ? Icons.check 
                               : step.icon,
                           color: Colors.white,
-                          size: 20.adaptSize,
+                          size: 20,
                         ),
                       ),
-                      SizedBox(height: 8.v),
+                      SizedBox(height: 8),
                       Text(
                         step.title,
                         style: TextStyle(
-                          fontSize: 10.fSize,
+                          fontSize: 10,
                           color: isActive 
-                              ? appTheme.blue600 
+                              ? Colors.blue[600] ?? Colors.blue 
                               : isCompleted 
-                                  ? appTheme.green600 
-                                  : appTheme.gray600,
+                                  ? Colors.green[600]! 
+                                  : Colors.grey[600] ?? Colors.grey,
                           fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
                         ),
                         textAlign: TextAlign.center,
@@ -342,19 +337,19 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
                   ),
                 ),
                 if (index < _steps.length - 1) ...[
-                  SizedBox(width: 8.h),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Container(
-                      height: 2.v,
+                      height: 2,
                       decoration: BoxDecoration(
                         color: index < _currentStep 
-                            ? appTheme.green600 
-                            : appTheme.gray300,
-                        borderRadius: BorderRadius.circular(1.h),
+                            ? Colors.green[600]! 
+                            : Colors.grey[300]!,
+                        borderRadius: BorderRadius.circular(1),
                       ),
                     ),
                   ),
-                  SizedBox(width: 8.h),
+                  SizedBox(width: 8),
                 ],
               ],
             ),
@@ -420,12 +415,12 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
 
   Widget _buildNavigationButtons() {
     return Container(
-      padding: EdgeInsets.all(20.h),
+      padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: appTheme.black900.withOpacity(0.08),
+            color: Colors.black.withOpacity(0.08),
             blurRadius: 16,
             offset: Offset(0, -4),
           ),
@@ -438,21 +433,21 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
               child: OutlinedButton(
                 onPressed: _isLoading ? null : _goToPreviousStep,
                 style: OutlinedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 16.v),
-                  side: BorderSide(color: appTheme.gray400),
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  side: BorderSide(color: Colors.grey[400]!),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.h),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.arrow_back_ios, size: 16.adaptSize),
-                    SizedBox(width: 8.h),
+                    Icon(Icons.arrow_back_ios, size: 16),
+                    SizedBox(width: 8),
                     Text(
                       "Quay lại",
                       style: TextStyle(
-                        fontSize: 16.fSize,
+                        fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -461,24 +456,24 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
               ),
             ),
           
-          if (_currentStep > 0) SizedBox(width: 16.h),
+          if (_currentStep > 0) SizedBox(width: 16),
           
           Expanded(
             flex: _currentStep == 0 ? 1 : 1,
             child: ElevatedButton(
               onPressed: _isLoading ? null : _goToNextStep,
               style: ElevatedButton.styleFrom(
-                backgroundColor: appTheme.blue600,
-                padding: EdgeInsets.symmetric(vertical: 16.v),
+                backgroundColor: Colors.blue[600] ?? Colors.blue,
+                padding: EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.h),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 elevation: 2,
               ),
               child: _isLoading
                   ? SizedBox(
-                      width: 20.adaptSize,
-                      height: 20.adaptSize,
+                      width: 20,
+                      height: 20,
                       child: CircularProgressIndicator(
                         color: Colors.white,
                         strokeWidth: 2,
@@ -493,17 +488,17 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
                               : "Tiếp theo",
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 16.fSize,
+                            fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        SizedBox(width: 8.h),
+                        SizedBox(width: 8),
                         Icon(
                           _currentStep == _steps.length - 1 
                               ? Icons.publish 
                               : Icons.arrow_forward_ios,
                           color: Colors.white,
-                          size: 16.adaptSize,
+                          size: 16,
                         ),
                       ],
                     ),
@@ -602,7 +597,7 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: appTheme.red600,
+        backgroundColor: Colors.red[600]!,
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -624,7 +619,7 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Đã lưu nháp thành công"),
-          backgroundColor: appTheme.green600,
+          backgroundColor: Colors.green[600]!,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -654,25 +649,25 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
             children: [
               Icon(
                 Icons.check_circle,
-                color: appTheme.green600,
-                size: 64.adaptSize,
+                color: Colors.green[600]!,
+                size: 64,
               ),
-              SizedBox(height: 16.v),
+              SizedBox(height: 16),
               Text(
                 "Giải đấu đã được tạo thành công!",
                 style: TextStyle(
-                  fontSize: 18.fSize,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: appTheme.gray900,
+                  color: Colors.grey[900] ?? Colors.black,
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 8.v),
+              SizedBox(height: 8),
               Text(
                 "Giải đấu '${_tournamentData['basicInfo']['tournamentName']}' đã được xuất bản và sẵn sàng nhận đăng ký.",
                 style: TextStyle(
-                  fontSize: 14.fSize,
-                  color: appTheme.gray600,
+                  fontSize: 14,
+                  color: Colors.grey[600] ?? Colors.grey,
                 ),
                 textAlign: TextAlign.center,
               ),

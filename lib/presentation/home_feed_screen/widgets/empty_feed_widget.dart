@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
+import '../../../core/app_export.dart';
+
 
 
 
@@ -42,7 +43,7 @@ class EmptyFeedWidget extends StatelessWidget {
               ),
             ),
 
-            SizedBox(height: 2.h),
+            SizedBox(height: 2),
 
             // Title
             Text(
@@ -52,12 +53,12 @@ class EmptyFeedWidget extends StatelessWidget {
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: colorScheme.onSurface,
-                fontSize: 18.sp,
+                fontSize: 18,
               ),
               textAlign: TextAlign.center,
             ),
 
-            SizedBox(height: 1.h),
+            SizedBox(height: 1),
 
             // Description
             Text(
@@ -66,12 +67,12 @@ class EmptyFeedWidget extends StatelessWidget {
                   : 'Kết nối với những người chơi billiards khác.',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
-                fontSize: 12.sp,
+                fontSize: 12,
               ),
               textAlign: TextAlign.center,
             ),
 
-            SizedBox(height: 3.h),
+            SizedBox(height: 3),
 
             // Action buttons
             Column(
@@ -87,7 +88,7 @@ class EmptyFeedWidget extends StatelessWidget {
                     ),
                     label: const Text('Tạo bài viết đầu tiên'),
                     style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 1.5.h),
+                      padding: EdgeInsets.symmetric(vertical: 1.5),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -95,7 +96,7 @@ class EmptyFeedWidget extends StatelessWidget {
                   ),
                 ),
                 if (!isNearbyTab) ...[
-                  SizedBox(height: 2.h),
+                  SizedBox(height: 2),
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
@@ -107,7 +108,7 @@ class EmptyFeedWidget extends StatelessWidget {
                       ),
                       label: const Text('Tìm bạn bè'),
                       style: OutlinedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: 1.5.h),
+                        padding: EdgeInsets.symmetric(vertical: 1.5),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),

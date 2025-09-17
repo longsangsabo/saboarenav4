@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/app_export.dart';
+// import '../../../core/app_export.dart';
 import '../member_management_screen.dart';
 
 class AddMemberDialog extends StatefulWidget {
@@ -7,10 +7,10 @@ class AddMemberDialog extends StatefulWidget {
   final Function(MemberData) onMemberAdded;
 
   const AddMemberDialog({
-    Key? key,
+    super.key,
     required this.clubId,
     required this.onMemberAdded,
-  }) : super(key: key);
+  });
 
   @override
   _AddMemberDialogState createState() => _AddMemberDialogState();
@@ -29,7 +29,8 @@ class _AddMemberDialogState extends State<AddMemberDialog>
   
   MembershipType _selectedMembershipType = MembershipType.regular;
   bool _isLoading = false;
-  String _selectedTab = 'single'; // single, bulk, invite
+  // ignore: unused_field
+  final String _selectedTab = 'single'; // single, bulk, invite
 
   @override
   void initState() {
@@ -263,7 +264,7 @@ class _AddMemberDialogState extends State<AddMemberDialog>
           Container(
             padding: EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+              color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
@@ -419,7 +420,7 @@ class _AddMemberDialogState extends State<AddMemberDialog>
           Container(
             padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+              color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
@@ -502,7 +503,7 @@ class _AddMemberDialogState extends State<AddMemberDialog>
           Container(
             padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+              color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: Theme.of(context).colorScheme.outline.withOpacity(0.2),

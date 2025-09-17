@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import '../../../core/app_export.dart';
+// import '../../../core/app_export.dart';
 import '../../member_management_screen/member_management_screen.dart';
 
 class MemberTournamentsTab extends StatefulWidget {
   final MemberData memberData;
 
   const MemberTournamentsTab({
-    Key? key,
+    super.key,
     required this.memberData,
-  }) : super(key: key);
+  });
 
   @override
   _MemberTournamentsTabState createState() => _MemberTournamentsTabState();
@@ -102,7 +102,7 @@ class _MemberTournamentsTabState extends State<MemberTournamentsTab>
                     'Vô địch',
                     '$wins',
                     Icons.emoji_events,
-                    Colors.gold,
+                    Colors.amber,
                   ),
                 ),
                 Expanded(
@@ -165,7 +165,7 @@ class _MemberTournamentsTabState extends State<MemberTournamentsTab>
               '1st',
               'Giải đấu Mùa Hè 2024',
               Icons.military_tech,
-              Colors.gold,
+              Colors.amber,
             ),
             
             SizedBox(height: 12),
@@ -565,7 +565,7 @@ class _MemberTournamentsTabState extends State<MemberTournamentsTab>
   }
 
   Color _getPlacementColor(int placement) {
-    if (placement == 1) return Colors.gold;
+  if (placement == 1) return Colors.amber;
     if (placement == 2) return Colors.grey;
     if (placement == 3) return Colors.brown;
     if (placement <= 10) return Colors.green;

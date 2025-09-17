@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
+
 
 import '../../../core/app_export.dart';
 
@@ -20,7 +20,7 @@ class ClubMembersWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(4.w),
+      padding: EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -40,7 +40,7 @@ class ClubMembersWidget extends StatelessWidget {
             ],
           ),
           
-          SizedBox(height: 2.h),
+          SizedBox(height: 2),
           
           ListView.builder(
             shrinkWrap: true,
@@ -49,8 +49,8 @@ class ClubMembersWidget extends StatelessWidget {
             itemBuilder: (context, index) {
               final member = members[index];
               return Container(
-                margin: EdgeInsets.only(bottom: 2.h),
-                padding: EdgeInsets.all(3.w),
+                margin: EdgeInsets.only(bottom: 2),
+                padding: EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: AppTheme.lightTheme.colorScheme.surface,
                   borderRadius: BorderRadius.circular(12),
@@ -62,16 +62,16 @@ class ClubMembersWidget extends StatelessWidget {
                   children: [
                     // Avatar
                     CircleAvatar(
-                      radius: 6.w,
+                      radius: 24,
                       backgroundImage: member["avatar"] != null
                           ? NetworkImage(member["avatar"])
                           : null,
                       child: member["avatar"] == null
-                          ? Icon(Icons.person, size: 6.w)
+                          ? Icon(Icons.person, size: 24)
                           : null,
                     ),
                     
-                    SizedBox(width: 3.w),
+                    SizedBox(width: 8),
                     
                     // Member Info
                     Expanded(
@@ -90,8 +90,8 @@ class ClubMembersWidget extends StatelessWidget {
                               ),
                               if (member["isOnline"] == true)
                                 Container(
-                                  width: 2.w,
-                                  height: 2.w,
+                                  width: 8,
+                                  height: 8,
                                   decoration: BoxDecoration(
                                     color: Colors.green,
                                     shape: BoxShape.circle,
@@ -99,7 +99,7 @@ class ClubMembersWidget extends StatelessWidget {
                                 ),
                             ],
                           ),
-                          SizedBox(height: 0.5.h),
+                          SizedBox(height: 0.5),
                           Text(
                             member["rank"] ?? "Unranked",
                             style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(

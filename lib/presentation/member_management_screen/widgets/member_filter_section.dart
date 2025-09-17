@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/app_export.dart';
+// import '../../../core/app_export.dart';
 import '../member_management_screen.dart';
 
 class MemberFilterSection extends StatefulWidget {
@@ -11,14 +11,14 @@ class MemberFilterSection extends StatefulWidget {
   final Function(AdvancedFilters) onAdvancedFiltersChanged;
 
   const MemberFilterSection({
-    Key? key,
+  Key? key,
     required this.controller,
     required this.selectedFilter,
     required this.onFilterChanged,
     required this.memberCounts,
     required this.showAdvanced,
     required this.onAdvancedFiltersChanged,
-  }) : super(key: key);
+  });
 
   @override
   _MemberFilterSectionState createState() => _MemberFilterSectionState();
@@ -87,7 +87,7 @@ class _MemberFilterSectionState extends State<MemberFilterSection>
   }
 
   Widget _buildBasicFilters() {
-    return Container(
+    return SizedBox(
       height: 48,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
@@ -157,7 +157,7 @@ class _MemberFilterSectionState extends State<MemberFilterSection>
       margin: EdgeInsets.only(top: 16),
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
@@ -183,10 +183,10 @@ class _MemberFilterSectionState extends State<MemberFilterSection>
               Spacer(),
               TextButton(
                 onPressed: _clearAdvancedFilters,
-                child: Text('Xóa bộ lọc'),
                 style: TextButton.styleFrom(
                   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 ),
+                child: Text('Xóa bộ lọc'),
               ),
             ],
           ),
@@ -212,18 +212,18 @@ class _MemberFilterSectionState extends State<MemberFilterSection>
             children: [
               OutlinedButton(
                 onPressed: _clearAdvancedFilters,
-                child: Text('Đặt lại'),
                 style: OutlinedButton.styleFrom(
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 ),
+                child: Text('Đặt lại'),
               ),
               SizedBox(width: 12),
               ElevatedButton(
                 onPressed: _applyAdvancedFilters,
-                child: Text('Áp dụng'),
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 ),
+                child: Text('Áp dụng'),
               ),
             ],
           ),
@@ -282,7 +282,7 @@ class _MemberFilterSectionState extends State<MemberFilterSection>
         children: [
           Expanded(
             child: DropdownButtonFormField<RankType>(
-              value: _currentFilters.minRank,
+              initialValue: _currentFilters.minRank,
               decoration: InputDecoration(
                 labelText: 'Từ',
                 border: OutlineInputBorder(),
@@ -315,7 +315,7 @@ class _MemberFilterSectionState extends State<MemberFilterSection>
           SizedBox(width: 8),
           Expanded(
             child: DropdownButtonFormField<RankType>(
-              value: _currentFilters.maxRank,
+              initialValue: _currentFilters.maxRank,
               decoration: InputDecoration(
                 labelText: 'Đến',
                 border: OutlineInputBorder(),

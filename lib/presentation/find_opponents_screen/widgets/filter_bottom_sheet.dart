@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
+import '../../../core/app_export.dart';
+
 
 class FilterBottomSheet extends StatefulWidget {
   final Map<String, dynamic> currentFilters;
@@ -39,9 +40,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         children: [
           // Handle bar
           Container(
-            margin: EdgeInsets.only(top: 1.h),
+            margin: EdgeInsets.only(top: 1),
             width: 12.w,
-            height: 0.5.h,
+            height: 0.5,
             decoration: BoxDecoration(
               color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
               borderRadius: BorderRadius.circular(2),
@@ -81,13 +82,13 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildGameTypeFilter(),
-                  SizedBox(height: 3.h),
+                  SizedBox(height: 3),
                   _buildSkillLevelFilter(),
-                  SizedBox(height: 3.h),
+                  SizedBox(height: 3),
                   _buildDistanceFilter(),
-                  SizedBox(height: 3.h),
+                  SizedBox(height: 3),
                   _buildAvailabilityFilter(),
-                  SizedBox(height: 4.h),
+                  SizedBox(height: 4),
                 ],
               ),
             ),
@@ -101,7 +102,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               child: ElevatedButton(
                 onPressed: _applyFilters,
                 style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 2.h),
+                  padding: EdgeInsets.symmetric(vertical: 2),
                 ),
                 child: Text(
                   'Áp dụng bộ lọc',
@@ -133,10 +134,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        SizedBox(height: 1.h),
+        SizedBox(height: 1),
         Wrap(
           spacing: 2.w,
-          runSpacing: 1.h,
+          runSpacing: 1,
           children: gameTypes.map((gameType) {
             final isSelected = selectedTypes.contains(gameType);
             return FilterChip(
@@ -175,10 +176,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        SizedBox(height: 1.h),
+        SizedBox(height: 1),
         Wrap(
           spacing: 2.w,
-          runSpacing: 1.h,
+          runSpacing: 1,
           children: skillLevels.map((level) {
             final isSelected = selectedLevels.contains(level);
             return FilterChip(
@@ -228,7 +229,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             ),
           ],
         ),
-        SizedBox(height: 1.h),
+        SizedBox(height: 1),
         Slider(
           value: distance,
           min: 1.0,
@@ -263,7 +264,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        SizedBox(height: 1.h),
+        SizedBox(height: 1),
         ...availabilityOptions.map((option) {
           final isSelected = selectedAvailability.contains(option['key']);
           return CheckboxListTile(

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
+
 
 import '../../../models/achievement.dart';
 import '../../../services/achievement_service.dart';
 import '../../../theme/app_theme.dart';
 import '../../../widgets/custom_icon_widget.dart';
+import '../../../core/app_export.dart';
 
 class AchievementsSectionWidget extends StatefulWidget {
   final String userId;
@@ -58,7 +59,7 @@ class _AchievementsSectionWidgetState extends State<AchievementsSectionWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 4.w),
+  padding: EdgeInsets.symmetric(horizontal: 4.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -86,14 +87,14 @@ class _AchievementsSectionWidgetState extends State<AchievementsSectionWidget> {
             ],
           ),
           if (_isLoading) ...[
-            SizedBox(height: 2.h),
+            SizedBox(height: 2),
             Center(
               child: CircularProgressIndicator(
                 color: AppTheme.lightTheme.colorScheme.primary,
               ),
             ),
           ] else if (_achievements.isEmpty) ...[
-            SizedBox(height: 2.h),
+            SizedBox(height: 2),
             Container(
               width: double.infinity,
               padding: EdgeInsets.all(4.w),
@@ -108,14 +109,14 @@ class _AchievementsSectionWidgetState extends State<AchievementsSectionWidget> {
                     color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
                     size: 48,
                   ),
-                  SizedBox(height: 2.h),
+                  SizedBox(height: 2),
                   Text(
                     'Chưa có thành tích nào',
                     style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
                       color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
                     ),
                   ),
-                  SizedBox(height: 1.h),
+                  SizedBox(height: 1),
                   Text(
                     'Tham gia trận đấu và giải đấu để mở khóa thành tích!',
                     textAlign: TextAlign.center,
@@ -128,7 +129,7 @@ class _AchievementsSectionWidgetState extends State<AchievementsSectionWidget> {
             ),
           ] else ...[
             // Achievement stats summary
-            SizedBox(height: 2.h),
+            SizedBox(height: 2),
             Container(
               padding: EdgeInsets.all(3.w),
               decoration: BoxDecoration(
@@ -159,7 +160,7 @@ class _AchievementsSectionWidgetState extends State<AchievementsSectionWidget> {
             ),
 
             // Achievement grid
-            SizedBox(height: 3.h),
+            SizedBox(height: 3),
             GridView.builder(
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
@@ -167,7 +168,7 @@ class _AchievementsSectionWidgetState extends State<AchievementsSectionWidget> {
                 crossAxisCount: 3,
                 childAspectRatio: 0.8,
                 crossAxisSpacing: 3.w,
-                mainAxisSpacing: 2.h,
+                mainAxisSpacing: 2,
               ),
               itemCount: _achievements.length,
               itemBuilder: (context, index) {
@@ -238,7 +239,7 @@ class _AchievementsSectionWidgetState extends State<AchievementsSectionWidget> {
             ),
           ),
 
-          SizedBox(height: 1.h),
+          SizedBox(height: 1),
 
           // Achievement name
           Text(
@@ -252,7 +253,7 @@ class _AchievementsSectionWidgetState extends State<AchievementsSectionWidget> {
             ),
           ),
 
-          SizedBox(height: 0.5.h),
+          SizedBox(height: 0.5),
 
           // Achievement category
           Text(
@@ -260,7 +261,7 @@ class _AchievementsSectionWidgetState extends State<AchievementsSectionWidget> {
             textAlign: TextAlign.center,
             style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
               color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-              fontSize: 10.sp,
+              fontSize: 10,
             ),
           ),
         ],
