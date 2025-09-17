@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:share_plus/share_plus.dart' as SharePlus;
+// import 'package:share_plus/share_plus.dart' as SharePlus;
 
 class ShareBottomSheet extends StatelessWidget {
   final String postId;
@@ -172,10 +172,18 @@ class ShareBottomSheet extends StatelessWidget {
   void _shareGeneric(BuildContext context) async {
     try {
       final shareText = _buildShareText();
-      await SharePlus.Share.share(shareText);
-      Navigator.pop(context);
+      // TODO: Implement share functionality when share_plus is available
+      // await SharePlus.Share.share(shareText);
+      if (context.mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Chia sẻ: $shareText')),
+        );
+      }
     } catch (e) {
-      _showError(context, 'Lỗi chia sẻ: $e');
+      if (context.mounted) {
+        _showError(context, 'Lỗi chia sẻ: $e');
+      }
     }
   }
 
@@ -198,11 +206,18 @@ class ShareBottomSheet extends StatelessWidget {
 
   void _shareAsText(BuildContext context) async {
     try {
+      // TODO: Implement share functionality when share_plus is available
       final shareText = _buildShareText();
-      await SharePlus.Share.share(shareText);
-      Navigator.pop(context);
+      if (context.mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Chia sẻ text: $shareText')),
+        );
+      }
     } catch (e) {
-      _showError(context, 'Lỗi chia sẻ text: $e');
+      if (context.mounted) {
+        _showError(context, 'Lỗi chia sẻ text: $e');
+      }
     }
   }
 
@@ -210,13 +225,18 @@ class ShareBottomSheet extends StatelessWidget {
     if (postImageUrl == null) return;
 
     try {
+      // TODO: Implement share functionality when share_plus is available
       final shareText = _buildShareText();
-      // Note: To share image from URL, we would need to download it first
-      // For now, we'll share the URL with the text
-      await SharePlus.Share.share('$shareText\n\nHình ảnh: $postImageUrl');
-      Navigator.pop(context);
+      if (context.mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Chia sẻ hình ảnh: $shareText\nHình: $postImageUrl')),
+        );
+      }
     } catch (e) {
-      _showError(context, 'Lỗi chia sẻ hình ảnh: $e');
+      if (context.mounted) {
+        _showError(context, 'Lỗi chia sẻ hình ảnh: $e');
+      }
     }
   }
 

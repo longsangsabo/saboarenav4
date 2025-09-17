@@ -6,12 +6,41 @@ import 'package:sabo_arena/theme/app_theme.dart';
 import 'package:sabo_arena/widgets/custom_image_widget.dart';
 import 'package:sabo_arena/routes/app_routes.dart';
 import '../member_management_screen/member_management_screen.dart';
-import '../tournament_create_screen/tournament_create_screen.dart';
-import '../club_notification_screen/club_notification_screen.dart';
+import '../tournament_creation_wizard/tournament_creation_wizard.dart';
+import '../tournament_detail_screen/widgets/tournament_management_panel.dart';
+import '../tournament_detail_screen/widgets/tournament_stats_view.dart';
 import '../../services/club_service.dart';
 import '../../services/auth_service.dart';
-import '../../services/club_dashboard_service.dart';
 import '../../models/club.dart';
+
+// Temporary mock classes
+class ClubDashboardStats {
+  final int totalMembers;
+  final int activeMembers;
+  final double monthlyRevenue;
+  final int totalTournaments;
+  
+  ClubDashboardStats({
+    required this.totalMembers,
+    required this.activeMembers,
+    required this.monthlyRevenue,
+    required this.totalTournaments,
+  });
+}
+
+class ClubActivity {
+  final String title;
+  final String subtitle;
+  final String type;
+  final DateTime timestamp;
+  
+  ClubActivity({
+    required this.title,
+    required this.subtitle,
+    required this.type,
+    required this.timestamp,
+  });
+}
 
 class ClubDashboardScreen extends StatefulWidget {
   const ClubDashboardScreen({super.key});
@@ -344,6 +373,30 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
                 icon: Icons.notifications_outlined,
                 color: AppTheme.primaryLight,
                 onPress: () => _onSendNotification(),
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 12.h),
+        Row(
+          children: [
+            Expanded(
+              child: _buildQuickActionCard(
+                title: "Quản lý giải đấu",
+                subtitle: "Xem và quản lý giải đấu",
+                icon: Icons.emoji_events_outlined,
+                color: AppTheme.warningLight,
+                onPress: () => _onManageTournaments(),
+              ),
+            ),
+            SizedBox(width: 12.h),
+            Expanded(
+              child: _buildQuickActionCard(
+                title: "Thống kê giải đấu",
+                subtitle: "Xem thống kê và báo cáo",
+                icon: Icons.analytics_outlined,
+                color: AppTheme.infoLight,
+                onPress: () => _onViewTournamentStats(),
               ),
             ),
           ],
@@ -699,7 +752,10 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
   // Event Handlers
   void _onNotificationPressed() {
     // Navigate to notifications management screen
-    Navigator.pushNamed(context, AppRoutes.clubNotificationScreen);
+    // Navigator.pushNamed(context, AppRoutes.clubNotificationScreen);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Tính năng thông báo đang được phát triển')),
+    );
   }
 
   void _onSettingsPressed() {
@@ -708,18 +764,35 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
   }
 
   void _onCreateTournament() {
-    // Navigate to create tournament screen
+    // Check if user has permission to create tournaments
+    if (!_canManageTournaments()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Chỉ chủ CLB và quản trị viên mới có thể tạo giải đấu'),
+          backgroundColor: AppTheme.errorLight,
+        ),
+      );
+      return;
+    }
+
+    // Navigate to tournament creation wizard
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => TournamentCreateScreen(
-          clubId: _getCurrentClubId(), // TODO: Get actual club ID
+        builder: (context) => TournamentCreationWizard(
+          clubId: widget.clubId,
         ),
       ),
     ).then((result) {
       if (result == true) {
         // Refresh dashboard if tournament was created successfully
         _loadDashboardData();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Giải đấu đã được tạo thành công!'),
+            backgroundColor: AppTheme.successLight,
+          ),
+        );
       }
     });
   }
@@ -738,12 +811,10 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
 
   void _onEditProfile() {
     // Navigate to edit profile screen
-    Navigator.pushNamed(context, AppRoutes.clubProfileEditScreen).then((result) {
-      if (result == true) {
-        // Refresh dashboard if profile was updated
-        _loadDashboardData();
-      }
-    });
+    // Navigator.pushNamed(context, AppRoutes.clubProfileEditScreen);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Tính năng chỉnh sửa profile đang được phát triển')),
+    );
   }
 
   void _onSendNotification() {
@@ -751,8 +822,11 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ClubNotificationScreen(
-          clubId: _getCurrentClubId(), // TODO: Get actual club ID
+        builder: (context) => Scaffold(
+          appBar: AppBar(title: Text('Gửi thông báo')),
+          body: Center(
+            child: Text('Tính năng gửi thông báo đang được phát triển'),
+          ),
         ),
       ),
     ).then((result) {
@@ -775,9 +849,65 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
     );
   }
 
+  void _onManageTournaments() {
+    // Check if user has permission to manage tournaments
+    if (!_canManageTournaments()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Chỉ chủ CLB và quản trị viên mới có thể quản lý giải đấu'),
+          backgroundColor: AppTheme.errorLight,
+        ),
+      );
+      return;
+    }
+
+    // Show tournament management panel
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => TournamentManagementPanel(
+        tournamentId: 'club_tournaments', // Mock ID for club tournaments
+        tournamentStatus: 'active',
+        onStatusChanged: () {
+          // Refresh dashboard data
+          _loadDashboardData();
+        },
+      ),
+    );
+  }
+
+  void _onViewTournamentStats() {
+    // Show tournament statistics view
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => TournamentStatsView(
+        tournamentId: 'club_tournaments_stats', // Mock ID for club tournament stats
+        tournamentStatus: 'active',
+      ),
+    );
+  }
+
   // Helper Methods
   String _getCurrentClubId() {
     return _currentClub?.id ?? '';
+  }
+
+  bool _canManageTournaments() {
+    // Check if current user has permission to manage tournaments
+    // For now, assume all dashboard users can manage (since they can access dashboard)
+    // In real implementation, check if user role is 'owner' or 'admin'
+    final currentUserId = AuthService.instance.currentUser?.id;
+    return currentUserId != null && _currentClub != null && 
+           (_currentClub!.ownerId == currentUserId || _isClubAdmin());
+  }
+
+  bool _isClubAdmin() {
+    // TODO: Implement actual admin role check
+    // This should check if current user is admin of this club
+    return false; // Placeholder - implement when club roles are available
   }
 
   String _formatCurrency(double amount) {
@@ -913,8 +1043,28 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
     try {
       // Load dashboard stats and recent activities in parallel
       final results = await Future.wait([
-        ClubDashboardService.instance.getClubStats(_currentClub!.id),
-        ClubDashboardService.instance.getRecentActivities(_currentClub!.id, limit: 5),
+        // Mock data for club stats
+        Future.value(ClubDashboardStats(
+          totalMembers: 25,
+          activeMembers: 18,
+          monthlyRevenue: 15000000,
+          totalTournaments: 3,
+        )),
+        // Mock data for recent activities
+        Future.value([
+          ClubActivity(
+            title: 'Thành viên mới tham gia',
+            subtitle: 'Nguyễn Văn A đã tham gia club',
+            type: 'member_join',
+            timestamp: DateTime.now().subtract(Duration(hours: 2)),
+          ),
+          ClubActivity(
+            title: 'Giải đấu kết thúc',
+            subtitle: 'Giải đấu tháng 12 đã hoàn thành',
+            type: 'tournament_end',
+            timestamp: DateTime.now().subtract(Duration(days: 1)),
+          ),
+        ]),
       ]);
 
       if (mounted) {

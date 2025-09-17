@@ -10,6 +10,7 @@ import './widgets/club_info_section_widget.dart';
 import './widgets/club_members_widget.dart';
 import './widgets/club_photo_gallery_widget.dart';
 import './widgets/club_tournaments_widget.dart';
+import '../tournament_creation_wizard/tournament_creation_wizard.dart';
 
 class ClubProfileScreen extends StatefulWidget {
   const ClubProfileScreen({super.key});
@@ -564,24 +565,34 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
   }
 
   void _handleViewAllTournaments() {
-    Navigator.pushNamed(context, '/tournament-list-screen');
+    Navigator.pushNamed(
+      context, 
+      AppRoutes.tournamentListScreen,
+      arguments: {'clubId': _clubData['id'].toString()}, // Pass club ID as filter
+    );
   }
 
   void _handleCreateTournament() {
-    // Navigate to create tournament screen
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Tạo giải đấu'),
-        content: const Text('Chức năng tạo giải đấu mới sẽ được triển khai.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Đóng'),
-          ),
-        ],
+    // Navigate to tournament creation wizard
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TournamentCreationWizard(
+          clubId: _clubData['id'].toString(),
+        ),
       ),
-    );
+    ).then((result) {
+      if (result == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Giải đấu đã được tạo thành công!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        // Refresh tournament list
+        setState(() {});
+      }
+    });
   }
 
   void _handleTournamentTap(Map<String, dynamic> tournament) {

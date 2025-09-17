@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import 'package:sabo_arena/core/app_export.dart';
+import 'package:sabo_arena/theme/app_theme.dart';
 
 class TournamentStatsView extends StatefulWidget {
   final String tournamentId;
@@ -74,7 +75,7 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
       height: MediaQuery.of(context).size.height * 0.8,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.h)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.w)),
       ),
       child: Column(
         children: [
@@ -89,7 +90,7 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
 
   Widget _buildHeader() {
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: Colors.grey[600] ?? Colors.grey)),
       ),
@@ -133,7 +134,7 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircularProgressIndicator(color: Colors.grey[600] ?? Colors.grey),
-          SizedBox(height: 16.h),
+          SizedBox(height: 16.w),
           Text(
             "Đang tải thống kê...",
             style: TextStyle(fontSize: 14.sp, color: Colors.grey[600] ?? Colors.grey),
@@ -145,17 +146,17 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
 
   Widget _buildStatsContent() {
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16.w),
       child: Column(
         children: [
           _buildOverviewCards(),
-          SizedBox(height: 24.h),
+          SizedBox(height: 24.w),
           _buildProgressChart(),
-          SizedBox(height: 24.h),
+          SizedBox(height: 24.w),
           _buildParticipationAnalysis(),
-          SizedBox(height: 24.h),
+          SizedBox(height: 24.w),
           _buildMatchStatistics(),
-          SizedBox(height: 24.h),
+          SizedBox(height: 24.w),
           _buildPerformanceMetrics(),
         ],
       ),
@@ -199,8 +200,8 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
               return Transform.scale(
                 scale: _cardAnimations[index].value,
                 child: Container(
-                  margin: EdgeInsets.only(right: index < 2 ? 8.h : 0),
-                  padding: EdgeInsets.all(16.h),
+                  margin: EdgeInsets.only(right: index < 2 ? 8.w : 0),
+                  padding: EdgeInsets.all(16.w),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
@@ -210,7 +211,7 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
-                    borderRadius: BorderRadius.circular(12.h),
+                    borderRadius: BorderRadius.circular(12.w),
                     boxShadow: [
                       BoxShadow(
                         color: (data['color'] as Color).withOpacity(0.3),
@@ -227,7 +228,7 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                         color: Colors.white.withOpacity(0.8),
                         size: 20.sp,
                       ),
-                      SizedBox(height: 8.h),
+                      SizedBox(height: 8.w),
                       
                       Text(
                         data['value'] as String,
@@ -274,10 +275,10 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
           child: Opacity(
             opacity: _cardAnimations[3].value,
             child: Container(
-              padding: EdgeInsets.all(16.h),
+              padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12.h),
+                borderRadius: BorderRadius.circular(12.w),
                 border: Border.all(color: Colors.grey[600] ?? Colors.grey),
                 boxShadow: [
                   BoxShadow(
@@ -293,7 +294,7 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                   Row(
                     children: [
                       Icon(Icons.trending_up, color: Colors.grey[600] ?? Colors.grey, size: 20.sp),
-                      SizedBox(width: 8.h),
+                      SizedBox(width: 8.w),
                       Text(
                         "Tiến độ giải đấu",
                         style: TextStyle(
@@ -305,7 +306,7 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                     ],
                   ),
                   
-                  SizedBox(height: 16.h),
+                  SizedBox(height: 16.w),
                   
                   // Progress timeline
                   Column(
@@ -320,8 +321,8 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                           Column(
                             children: [
                               Container(
-                                width: 20.h,
-                                height: 20.h,
+                                width: 20.w,
+                                height: 20.w,
                                 decoration: BoxDecoration(
                                   color: isCompleted 
                                     ? Colors.grey[600] ?? Colors.grey 
@@ -337,18 +338,18 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                               
                               if (index < _getProgressSteps().length - 1)
                                 Container(
-                                  width: 2.h,
-                                  height: 30.h,
+                                  width: 2.w,
+                                  height: 30.w,
                                   color: isCompleted ? Colors.grey[600] ?? Colors.grey : Colors.grey[600] ?? Colors.grey,
                                 ),
                             ],
                           ),
                           
-                          SizedBox(width: 12.h),
+                          SizedBox(width: 12.w),
                           
                           Expanded(
                             child: Container(
-                              padding: EdgeInsets.symmetric(vertical: 8.h),
+                              padding: EdgeInsets.symmetric(vertical: 8.w),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -405,10 +406,10 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
           child: Opacity(
             opacity: _cardAnimations[4].value,
             child: Container(
-              padding: EdgeInsets.all(16.h),
+              padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12.h),
+                borderRadius: BorderRadius.circular(12.w),
                 border: Border.all(color: Colors.grey[600] ?? Colors.grey),
                 boxShadow: [
                   BoxShadow(
@@ -424,7 +425,7 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                   Row(
                     children: [
                       Icon(Icons.analytics, color: Colors.grey[600] ?? Colors.grey, size: 20.sp),
-                      SizedBox(width: 8.h),
+                      SizedBox(width: 8.w),
                       Text(
                         "Phân tích tham gia",
                         style: TextStyle(
@@ -436,7 +437,7 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                     ],
                   ),
                   
-                  SizedBox(height: 16.h),
+                  SizedBox(height: 16.w),
                   
                   Row(
                     children: [
@@ -448,7 +449,7 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                         ),
                       ),
                       
-                      SizedBox(width: 16.h),
+                      SizedBox(width: 16.w),
                       
                       Expanded(
                         child: _buildAnalysisItem(
@@ -481,22 +482,22 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
           ),
         ),
         
-        SizedBox(height: 8.h),
+        SizedBox(height: 8.w),
         
         ...data.map((item) => Container(
-          margin: EdgeInsets.only(bottom: 4.h),
+          margin: EdgeInsets.only(bottom: 4.w),
           child: Row(
             children: [
               Container(
-                width: 8.h,
-                height: 8.h,
+                width: 8.w,
+                height: 8.w,
                 decoration: BoxDecoration(
                   color: color,
                   shape: BoxShape.circle,
                 ),
               ),
               
-              SizedBox(width: 6.h),
+              SizedBox(width: 6.w),
               
               Expanded(
                 child: Text(
@@ -532,10 +533,10 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
           child: Opacity(
             opacity: _cardAnimations[5].value,
             child: Container(
-              padding: EdgeInsets.all(16.h),
+              padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12.h),
+                borderRadius: BorderRadius.circular(12.w),
                 border: Border.all(color: Colors.grey[600] ?? Colors.grey),
                 boxShadow: [
                   BoxShadow(
@@ -551,7 +552,7 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                   Row(
                     children: [
                       Icon(Icons.sports_score, color: Colors.grey[600] ?? Colors.grey, size: 20.sp),
-                      SizedBox(width: 8.h),
+                      SizedBox(width: 8.w),
                       Text(
                         "Thống kê trận đấu",
                         style: TextStyle(
@@ -563,7 +564,7 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                     ],
                   ),
                   
-                  SizedBox(height: 16.h),
+                  SizedBox(height: 16.w),
                   
                   Row(
                     children: [
@@ -589,7 +590,7 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                     ],
                   ),
                   
-                  SizedBox(height: 12.h),
+                  SizedBox(height: 12.w),
                   
                   Row(
                     children: [
@@ -625,16 +626,16 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
 
   Widget _buildStatItem(String value, String subtitle, String label, IconData icon, Color color) {
     return Container(
-      padding: EdgeInsets.all(12.h),
-      margin: EdgeInsets.only(right: 8.h),
+      padding: EdgeInsets.all(12.w),
+      margin: EdgeInsets.only(right: 8.w),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8.h),
+        borderRadius: BorderRadius.circular(8.w),
       ),
       child: Column(
         children: [
           Icon(icon, color: color, size: 20.sp),
-          SizedBox(height: 4.h),
+          SizedBox(height: 4.w),
           
           Text(
             value,
@@ -670,14 +671,14 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
     final topPerformers = _getTopPerformers();
     
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [Colors.grey[600] ?? Colors.grey.withOpacity(0.1), Colors.grey[600] ?? Colors.grey.withOpacity(0.1)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(12.h),
+        borderRadius: BorderRadius.circular(12.w),
         border: Border.all(color: Colors.grey[600] ?? Colors.grey.withOpacity(0.2)),
       ),
       child: Column(
@@ -686,7 +687,7 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
           Row(
             children: [
               Icon(Icons.emoji_events, color: Colors.grey[600] ?? Colors.grey, size: 20.sp),
-              SizedBox(width: 8.h),
+              SizedBox(width: 8.w),
               Text(
                 "Thành tích xuất sắc",
                 style: TextStyle(
@@ -698,24 +699,24 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
             ],
           ),
           
-          SizedBox(height: 16.h),
+          SizedBox(height: 16.w),
           
           ...topPerformers.asMap().entries.map((entry) {
             final index = entry.key;
             final performer = entry.value;
             
             return Container(
-              margin: EdgeInsets.only(bottom: 8.h),
-              padding: EdgeInsets.all(12.h),
+              margin: EdgeInsets.only(bottom: 8.w),
+              padding: EdgeInsets.all(12.w),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.8),
-                borderRadius: BorderRadius.circular(8.h),
+                borderRadius: BorderRadius.circular(8.w),
               ),
               child: Row(
                 children: [
                   Container(
-                    width: 24.h,
-                    height: 24.h,
+                    width: 24.w,
+                    height: 24.w,
                     decoration: BoxDecoration(
                       color: _getRankColor(index),
                       shape: BoxShape.circle,
@@ -732,14 +733,14 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                     ),
                   ),
                   
-                  SizedBox(width: 12.h),
+                  SizedBox(width: 12.w),
                   
                   CircleAvatar(
                     radius: 16.sp,
                     backgroundImage: NetworkImage(performer['avatar'] as String),
                   ),
                   
-                  SizedBox(width: 12.h),
+                  SizedBox(width: 12.w),
                   
                   Expanded(
                     child: Column(

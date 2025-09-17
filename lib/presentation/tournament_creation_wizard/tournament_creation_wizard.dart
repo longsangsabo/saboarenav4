@@ -11,7 +11,9 @@ import 'widgets/prizes_step.dart';
 import 'widgets/review_step.dart';
 
 class TournamentCreationWizard extends StatefulWidget {
-  const TournamentCreationWizard({super.key});
+  final String? clubId;
+  
+  const TournamentCreationWizard({super.key, this.clubId});
 
   @override
   _TournamentCreationWizardState createState() => _TournamentCreationWizardState();

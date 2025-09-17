@@ -5,12 +5,41 @@ import 'package:sabo_arena/theme/app_theme.dart';
 import 'package:sabo_arena/models/club.dart';
 import 'package:sabo_arena/services/club_service.dart';
 import 'package:sabo_arena/services/auth_service.dart';
-import 'package:sabo_arena/services/club_dashboard_service.dart';
+// import 'package:sabo_arena/services/club_dashboard_service.dart';
 import '../member_management_screen/member_management_screen.dart';
-import '../tournament_create_screen/tournament_create_screen_simple.dart';
-import '../club_notification_screen/club_notification_screen_simple.dart';
-import '../club_settings_screen/club_settings_screen.dart';
-import '../club_reports_screen/club_reports_screen.dart';
+import '../tournament_creation_wizard/tournament_creation_wizard.dart';
+// import '../club_notification_screen/club_notification_screen_simple.dart';
+// import '../club_settings_screen/club_settings_screen.dart';
+// import '../club_reports_screen/club_reports_screen.dart';
+
+// Temporary mock classes
+class ClubDashboardStats {
+  final int totalMembers;
+  final int activeMembers;
+  final double monthlyRevenue;
+  final int totalTournaments;
+  
+  ClubDashboardStats({
+    required this.totalMembers,
+    required this.activeMembers,
+    required this.monthlyRevenue,
+    required this.totalTournaments,
+  });
+}
+
+class ClubActivity {
+  final String title;
+  final String subtitle;
+  final String type;
+  final DateTime timestamp;
+  
+  ClubActivity({
+    required this.title,
+    required this.subtitle,
+    required this.type,
+    required this.timestamp,
+  });
+}
 
 class ClubDashboardScreenSimple extends StatefulWidget {
   final String clubId;
@@ -53,8 +82,28 @@ class _ClubDashboardScreenSimpleState extends State<ClubDashboardScreenSimple> {
       if (isOwner) {
         // Load dashboard data for club owner
         final results = await Future.wait([
-          ClubDashboardService.instance.getClubStats(widget.clubId),
-          ClubDashboardService.instance.getRecentActivities(widget.clubId),
+          // Mock data for club stats
+          Future.value(ClubDashboardStats(
+            totalMembers: 25,
+            activeMembers: 18,
+            monthlyRevenue: 15000000,
+            totalTournaments: 3,
+          )),
+          // Mock data for recent activities
+          Future.value([
+            ClubActivity(
+              title: 'Thành viên mới tham gia',
+              subtitle: 'Nguyễn Văn A đã tham gia club',
+              type: 'member_join',
+              timestamp: DateTime.now().subtract(Duration(hours: 2)),
+            ),
+            ClubActivity(
+              title: 'Giải đấu kết thúc',
+              subtitle: 'Giải đấu tháng 12 đã hoàn thành',
+              type: 'tournament_end',
+              timestamp: DateTime.now().subtract(Duration(days: 1)),
+            ),
+          ]),
         ]);
 
         setState(() {
@@ -164,7 +213,7 @@ class _ClubDashboardScreenSimpleState extends State<ClubDashboardScreenSimple> {
         ),
         _buildStatCard(
           'Giải đấu', 
-          _dashboardStats?.tournaments.toString() ?? '0', 
+          _dashboardStats?.totalTournaments.toString() ?? '0', 
           Icons.emoji_events, 
           AppTheme.accentLight
         ),
@@ -428,16 +477,32 @@ class _ClubDashboardScreenSimpleState extends State<ClubDashboardScreenSimple> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => TournamentCreateScreenSimple(clubId: widget.clubId),
+        builder: (context) => TournamentCreationWizard(
+          clubId: widget.clubId,
+        ),
       ),
-    );
+    ).then((result) {
+      if (result == true) {
+        // Refresh dashboard if tournament was created successfully
+        _loadData();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Giải đấu đã được tạo thành công!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    });
   }
 
   void _navigateToNotifications() {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ClubNotificationScreenSimple(clubId: widget.clubId),
+        builder: (context) => Scaffold(
+          appBar: AppBar(title: Text('Gửi thông báo')),
+          body: Center(child: Text('Tính năng gửi thông báo đang được phát triển')),
+        ),
       ),
     );
   }
@@ -446,7 +511,10 @@ class _ClubDashboardScreenSimpleState extends State<ClubDashboardScreenSimple> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ClubReportsScreen(clubId: widget.clubId),
+        builder: (context) => Scaffold(
+          appBar: AppBar(title: Text('Báo cáo')),
+          body: Center(child: Text('Tính năng báo cáo đang được phát triển')),
+        ),
       ),
     );
   }
@@ -500,7 +568,10 @@ class _ClubDashboardScreenSimpleState extends State<ClubDashboardScreenSimple> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ClubSettingsScreen(clubId: widget.clubId),
+        builder: (context) => Scaffold(
+          appBar: AppBar(title: Text('Cài đặt CLB')),
+          body: Center(child: Text('Tính năng cài đặt CLB đang được phát triển')),
+        ),
       ),
     );
   }
