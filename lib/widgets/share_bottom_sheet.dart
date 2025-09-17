@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:share_plus/share_plus.dart' as SharePlus;
 
 class ShareBottomSheet extends StatelessWidget {
   final String postId;
@@ -172,10 +172,7 @@ class ShareBottomSheet extends StatelessWidget {
   void _shareGeneric(BuildContext context) async {
     try {
       final shareText = _buildShareText();
-      await Share.share(
-        shareText,
-        subject: 'Bài viết từ Sabo Arena',
-      );
+      await SharePlus.Share.share(shareText);
       Navigator.pop(context);
     } catch (e) {
       _showError(context, 'Lỗi chia sẻ: $e');
@@ -202,7 +199,7 @@ class ShareBottomSheet extends StatelessWidget {
   void _shareAsText(BuildContext context) async {
     try {
       final shareText = _buildShareText();
-      await Share.share(shareText);
+      await SharePlus.Share.share(shareText);
       Navigator.pop(context);
     } catch (e) {
       _showError(context, 'Lỗi chia sẻ text: $e');
@@ -216,7 +213,7 @@ class ShareBottomSheet extends StatelessWidget {
       final shareText = _buildShareText();
       // Note: To share image from URL, we would need to download it first
       // For now, we'll share the URL with the text
-      await Share.share('$shareText\n\nHình ảnh: $postImageUrl');
+      await SharePlus.Share.share('$shareText\n\nHình ảnh: $postImageUrl');
       Navigator.pop(context);
     } catch (e) {
       _showError(context, 'Lỗi chia sẻ hình ảnh: $e');

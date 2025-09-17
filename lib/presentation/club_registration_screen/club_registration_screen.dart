@@ -620,7 +620,7 @@ class _ClubRegistrationScreenState extends State<ClubRegistrationScreen> {
 
     try {
       // Call ClubService to create club
-      final clubService = ClubService();
+      final clubService = ClubService.instance;
       
       await clubService.createClub(
         name: _clubNameController.text.trim(),

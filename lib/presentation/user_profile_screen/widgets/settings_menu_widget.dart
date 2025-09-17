@@ -12,6 +12,8 @@ class SettingsMenuWidget extends StatelessWidget {
   final VoidCallback? onHelpSupport;
   final VoidCallback? onAbout;
   final VoidCallback? onLogout;
+  final VoidCallback? onClubManagement;  // Added for club owner
+  final bool isClubOwner;  // Added to check if user is club owner
 
   const SettingsMenuWidget({
     super.key,
@@ -23,6 +25,8 @@ class SettingsMenuWidget extends StatelessWidget {
     this.onHelpSupport,
     this.onAbout,
     this.onLogout,
+    this.onClubManagement,
+    this.isClubOwner = false,
   });
 
   @override
@@ -60,6 +64,18 @@ class SettingsMenuWidget extends StatelessWidget {
           ),
           child: Column(
             children: [
+              // Club Management (only for club owners)
+              if (isClubOwner) ...[
+                _buildSettingsItem(
+                  context,
+                  icon: 'business',
+                  title: 'Quản lý CLB',
+                  subtitle: 'Giao diện quản lý câu lạc bộ',
+                  onTap: onClubManagement,
+                  showDivider: true,
+                  highlight: true,
+                ),
+              ],
               _buildSettingsItem(
                 context,
                 icon: 'person',
@@ -169,6 +185,7 @@ class SettingsMenuWidget extends StatelessWidget {
     required String subtitle,
     VoidCallback? onTap,
     bool showDivider = true,
+    bool highlight = false,
   }) {
     return Column(
       children: [
@@ -178,13 +195,16 @@ class SettingsMenuWidget extends StatelessWidget {
           leading: Container(
             padding: EdgeInsets.all(2.w),
             decoration: BoxDecoration(
-              color: AppTheme.lightTheme.colorScheme.primary
-                  .withValues(alpha: 0.1),
+              color: highlight 
+                  ? Colors.orange.withValues(alpha: 0.1)
+                  : AppTheme.lightTheme.colorScheme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: CustomIconWidget(
               iconName: icon,
-              color: AppTheme.lightTheme.colorScheme.primary,
+              color: highlight 
+                  ? Colors.orange
+                  : AppTheme.lightTheme.colorScheme.primary,
               size: 20,
             ),
           ),

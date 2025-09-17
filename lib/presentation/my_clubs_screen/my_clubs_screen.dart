@@ -15,7 +15,7 @@ class MyClubsScreen extends StatefulWidget {
 }
 
 class _MyClubsScreenState extends State<MyClubsScreen> {
-  final ClubService _clubService = ClubService();
+  final ClubService _clubService = ClubService.instance;
   
   List<Club> _myClubs = [];
   bool _isLoading = true;
@@ -78,21 +78,12 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
 
   PreferredSizeWidget _buildAppBar() {
     return CustomAppBar(
-      height: 60.h,
-      leadingWidth: 52.h,
       leading: IconButton(
         icon: Icon(Icons.arrow_back_ios, color: Colors.white),
         onPressed: () => Navigator.of(context).pop(),
       ),
       centerTitle: true,
-      title: Text(
-        'CLB của tôi',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 18.sp,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
+      title: 'CLB của tôi',
       actions: [
         IconButton(
           icon: Icon(Icons.refresh, color: Colors.white),

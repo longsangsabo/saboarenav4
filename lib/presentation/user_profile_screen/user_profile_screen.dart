@@ -239,6 +239,8 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                     onHelpSupport: _openHelpSupport,
                     onAbout: _openAbout,
                     onLogout: _handleLogout,
+                    onClubManagement: _navigateToClubManagement,
+                    isClubOwner: _userProfile?.role == 'club_owner',
                   ),
                   SizedBox(height: 10.h),
                 ],
@@ -1807,6 +1809,11 @@ class _UserProfileScreenState extends State<UserProfileScreen>
       ),
       builder: (context) => _buildLanguageSelector(),
     );
+  }
+
+  void _navigateToClubManagement() {
+    // Navigate to club management interface
+    Navigator.pushNamed(context, AppRoutes.clubDashboardScreen);
   }
 
   void _openPaymentHistory() {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sizer/sizer.dart';
 import 'package:sabo_arena/core/app_export.dart';
 
 class TournamentStatsView extends StatefulWidget {
@@ -90,7 +91,7 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
     return Container(
       padding: EdgeInsets.all(16.h),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: appTheme.gray200)),
+        border: Border(bottom: BorderSide(color: Colors.grey[600] ?? Colors.grey)),
       ),
       child: Row(
         children: [
@@ -101,16 +102,16 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                 Text(
                   "Thống kê giải đấu",
                   style: TextStyle(
-                    fontSize: 18.fSize,
+                    fontSize: 18.sp,
                     fontWeight: FontWeight.bold,
-                    color: appTheme.gray900,
+                    color: Colors.grey[900] ?? Colors.black,
                   ),
                 ),
                 Text(
                   "Chi tiết và phân tích dữ liệu",
                   style: TextStyle(
-                    fontSize: 12.fSize,
-                    color: appTheme.gray600,
+                    fontSize: 12.sp,
+                    color: Colors.grey[600] ?? Colors.grey,
                   ),
                 ),
               ],
@@ -119,7 +120,7 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
           
           IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: Icon(Icons.close, color: appTheme.gray600),
+            icon: Icon(Icons.close, color: Colors.grey[600] ?? Colors.grey),
           ),
         ],
       ),
@@ -131,11 +132,11 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(color: appTheme.blue600),
-          SizedBox(height: 16.v),
+          CircularProgressIndicator(color: Colors.grey[600] ?? Colors.grey),
+          SizedBox(height: 16.h),
           Text(
             "Đang tải thống kê...",
-            style: TextStyle(fontSize: 14.fSize, color: appTheme.gray600),
+            style: TextStyle(fontSize: 14.sp, color: Colors.grey[600] ?? Colors.grey),
           ),
         ],
       ),
@@ -148,13 +149,13 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
       child: Column(
         children: [
           _buildOverviewCards(),
-          SizedBox(height: 24.v),
+          SizedBox(height: 24.h),
           _buildProgressChart(),
-          SizedBox(height: 24.v),
+          SizedBox(height: 24.h),
           _buildParticipationAnalysis(),
-          SizedBox(height: 24.v),
+          SizedBox(height: 24.h),
           _buildMatchStatistics(),
-          SizedBox(height: 24.v),
+          SizedBox(height: 24.h),
           _buildPerformanceMetrics(),
         ],
       ),
@@ -168,21 +169,21 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
         'value': _stats['total_participants']?.toString() ?? '0',
         'subtitle': 'Đã đăng ký',
         'icon': Icons.people,
-        'color': appTheme.blue600,
+        'color': Colors.grey[600] ?? Colors.grey,
       },
       {
         'title': 'Tỷ lệ hoàn thành',
         'value': '${_stats['completion_rate'] ?? 0}%',
         'subtitle': 'Trận đấu',
         'icon': Icons.pie_chart,
-        'color': appTheme.green600,
+        'color': Colors.grey[600] ?? Colors.grey,
       },
       {
         'title': 'Trận đấu',
         'value': '${_stats['completed_matches']}/${_stats['total_matches']}',
         'subtitle': 'Hoàn thành',
         'icon': Icons.sports_tennis,
-        'color': appTheme.orange600,
+        'color': Colors.grey[600] ?? Colors.grey,
       },
     ];
 
@@ -224,14 +225,14 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                       Icon(
                         data['icon'] as IconData,
                         color: Colors.white.withOpacity(0.8),
-                        size: 20.adaptSize,
+                        size: 20.sp,
                       ),
-                      SizedBox(height: 8.v),
+                      SizedBox(height: 8.h),
                       
                       Text(
                         data['value'] as String,
                         style: TextStyle(
-                          fontSize: 18.fSize,
+                          fontSize: 18.sp,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
@@ -240,7 +241,7 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                       Text(
                         data['title'] as String,
                         style: TextStyle(
-                          fontSize: 10.fSize,
+                          fontSize: 10.sp,
                           color: Colors.white.withOpacity(0.9),
                           fontWeight: FontWeight.w500,
                         ),
@@ -249,7 +250,7 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                       Text(
                         data['subtitle'] as String,
                         style: TextStyle(
-                          fontSize: 9.fSize,
+                          fontSize: 9.sp,
                           color: Colors.white.withOpacity(0.7),
                         ),
                       ),
@@ -277,10 +278,10 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12.h),
-                border: Border.all(color: appTheme.gray200),
+                border: Border.all(color: Colors.grey[600] ?? Colors.grey),
                 boxShadow: [
                   BoxShadow(
-                    color: appTheme.black900.withOpacity(0.05),
+                    color: Colors.grey[600] ?? Colors.grey.withOpacity(0.05),
                     blurRadius: 8,
                     offset: Offset(0, 2),
                   ),
@@ -291,20 +292,20 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.trending_up, color: appTheme.blue600, size: 20.adaptSize),
+                      Icon(Icons.trending_up, color: Colors.grey[600] ?? Colors.grey, size: 20.sp),
                       SizedBox(width: 8.h),
                       Text(
                         "Tiến độ giải đấu",
                         style: TextStyle(
-                          fontSize: 16.fSize,
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.bold,
-                          color: appTheme.gray900,
+                          color: Colors.grey[900] ?? Colors.black,
                         ),
                       ),
                     ],
                   ),
                   
-                  SizedBox(height: 16.v),
+                  SizedBox(height: 16.h),
                   
                   // Progress timeline
                   Column(
@@ -320,16 +321,16 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                             children: [
                               Container(
                                 width: 20.h,
-                                height: 20.v,
+                                height: 20.h,
                                 decoration: BoxDecoration(
                                   color: isCompleted 
-                                    ? appTheme.green600 
-                                    : (isCurrent ? appTheme.blue600 : appTheme.gray300),
+                                    ? Colors.grey[600] ?? Colors.grey 
+                                    : (isCurrent ? Colors.grey[600] ?? Colors.grey : Colors.grey[600] ?? Colors.grey),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
                                   isCompleted ? Icons.check : Icons.circle,
-                                  size: 12.adaptSize,
+                                  size: 12.sp,
                                   color: Colors.white,
                                 ),
                               ),
@@ -337,8 +338,8 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                               if (index < _getProgressSteps().length - 1)
                                 Container(
                                   width: 2.h,
-                                  height: 30.v,
-                                  color: isCompleted ? appTheme.green600 : appTheme.gray300,
+                                  height: 30.h,
+                                  color: isCompleted ? Colors.grey[600] ?? Colors.grey : Colors.grey[600] ?? Colors.grey,
                                 ),
                             ],
                           ),
@@ -347,26 +348,26 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                           
                           Expanded(
                             child: Container(
-                              padding: EdgeInsets.symmetric(vertical: 8.v),
+                              padding: EdgeInsets.symmetric(vertical: 8.h),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     step['title'] as String,
                                     style: TextStyle(
-                                      fontSize: 13.fSize,
+                                      fontSize: 13.sp,
                                       fontWeight: FontWeight.w600,
                                       color: isCompleted || isCurrent 
-                                        ? appTheme.gray900 
-                                        : appTheme.gray500,
+                                        ? Colors.grey[900] ?? Colors.black 
+                                        : Colors.grey[600] ?? Colors.grey,
                                     ),
                                   ),
                                   
                                   Text(
                                     step['subtitle'] as String,
                                     style: TextStyle(
-                                      fontSize: 11.fSize,
-                                      color: appTheme.gray600,
+                                      fontSize: 11.sp,
+                                      color: Colors.grey[600] ?? Colors.grey,
                                     ),
                                   ),
                                 ],
@@ -378,8 +379,8 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                             Text(
                               step['date'] as String,
                               style: TextStyle(
-                                fontSize: 10.fSize,
-                                color: appTheme.gray500,
+                                fontSize: 10.sp,
+                                color: Colors.grey[600] ?? Colors.grey,
                               ),
                             ),
                         ],
@@ -408,10 +409,10 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12.h),
-                border: Border.all(color: appTheme.gray200),
+                border: Border.all(color: Colors.grey[600] ?? Colors.grey),
                 boxShadow: [
                   BoxShadow(
-                    color: appTheme.black900.withOpacity(0.05),
+                    color: Colors.grey[600] ?? Colors.grey.withOpacity(0.05),
                     blurRadius: 8,
                     offset: Offset(0, 2),
                   ),
@@ -422,20 +423,20 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.analytics, color: appTheme.purple600, size: 20.adaptSize),
+                      Icon(Icons.analytics, color: Colors.grey[600] ?? Colors.grey, size: 20.sp),
                       SizedBox(width: 8.h),
                       Text(
                         "Phân tích tham gia",
                         style: TextStyle(
-                          fontSize: 16.fSize,
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.bold,
-                          color: appTheme.gray900,
+                          color: Colors.grey[900] ?? Colors.black,
                         ),
                       ),
                     ],
                   ),
                   
-                  SizedBox(height: 16.v),
+                  SizedBox(height: 16.h),
                   
                   Row(
                     children: [
@@ -443,7 +444,7 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                         child: _buildAnalysisItem(
                           "Theo rank",
                           _getRankDistribution(),
-                          appTheme.blue600,
+                          Colors.grey[600] ?? Colors.grey,
                         ),
                       ),
                       
@@ -453,7 +454,7 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                         child: _buildAnalysisItem(
                           "Theo club",
                           _getClubDistribution(),
-                          appTheme.green600,
+                          Colors.grey[600] ?? Colors.grey,
                         ),
                       ),
                     ],
@@ -474,21 +475,21 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
         Text(
           title,
           style: TextStyle(
-            fontSize: 13.fSize,
+            fontSize: 13.sp,
             fontWeight: FontWeight.w600,
-            color: appTheme.gray700,
+            color: Colors.grey[600] ?? Colors.grey,
           ),
         ),
         
-        SizedBox(height: 8.v),
+        SizedBox(height: 8.h),
         
         ...data.map((item) => Container(
-          margin: EdgeInsets.only(bottom: 4.v),
+          margin: EdgeInsets.only(bottom: 4.h),
           child: Row(
             children: [
               Container(
                 width: 8.h,
-                height: 8.v,
+                height: 8.h,
                 decoration: BoxDecoration(
                   color: color,
                   shape: BoxShape.circle,
@@ -501,8 +502,8 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                 child: Text(
                   item['label'] as String,
                   style: TextStyle(
-                    fontSize: 11.fSize,
-                    color: appTheme.gray600,
+                    fontSize: 11.sp,
+                    color: Colors.grey[600] ?? Colors.grey,
                   ),
                 ),
               ),
@@ -510,7 +511,7 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
               Text(
                 "${item['count']}",
                 style: TextStyle(
-                  fontSize: 11.fSize,
+                  fontSize: 11.sp,
                   fontWeight: FontWeight.w600,
                   color: color,
                 ),
@@ -535,10 +536,10 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12.h),
-                border: Border.all(color: appTheme.gray200),
+                border: Border.all(color: Colors.grey[600] ?? Colors.grey),
                 boxShadow: [
                   BoxShadow(
-                    color: appTheme.black900.withOpacity(0.05),
+                    color: Colors.grey[600] ?? Colors.grey.withOpacity(0.05),
                     blurRadius: 8,
                     offset: Offset(0, 2),
                   ),
@@ -549,20 +550,20 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.sports_score, color: appTheme.orange600, size: 20.adaptSize),
+                      Icon(Icons.sports_score, color: Colors.grey[600] ?? Colors.grey, size: 20.sp),
                       SizedBox(width: 8.h),
                       Text(
                         "Thống kê trận đấu",
                         style: TextStyle(
-                          fontSize: 16.fSize,
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.bold,
-                          color: appTheme.gray900,
+                          color: Colors.grey[900] ?? Colors.black,
                         ),
                       ),
                     ],
                   ),
                   
-                  SizedBox(height: 16.v),
+                  SizedBox(height: 16.h),
                   
                   Row(
                     children: [
@@ -572,7 +573,7 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                           "${_stats['avg_match_duration']} phút",
                           "Thời gian/trận",
                           Icons.timer,
-                          appTheme.blue600,
+                          Colors.grey[600] ?? Colors.grey,
                         ),
                       ),
                       
@@ -582,13 +583,13 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                           _stats['highest_score']?.toString() ?? "3-0",
                           "Trong giải",
                           Icons.trending_up,
-                          appTheme.red600,
+                          Colors.grey[600] ?? Colors.grey,
                         ),
                       ),
                     ],
                   ),
                   
-                  SizedBox(height: 12.v),
+                  SizedBox(height: 12.h),
                   
                   Row(
                     children: [
@@ -598,7 +599,7 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                           "${_stats['close_matches']}",
                           "Hiệp phụ/Deuce",
                           Icons.flash_on,
-                          appTheme.orange600,
+                          Colors.grey[600] ?? Colors.grey,
                         ),
                       ),
                       
@@ -608,7 +609,7 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                           "${_stats['quick_wins']}",
                           "< 15 phút",
                           Icons.speed,
-                          appTheme.green600,
+                          Colors.grey[600] ?? Colors.grey,
                         ),
                       ),
                     ],
@@ -632,13 +633,13 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
       ),
       child: Column(
         children: [
-          Icon(icon, color: color, size: 20.adaptSize),
-          SizedBox(height: 4.v),
+          Icon(icon, color: color, size: 20.sp),
+          SizedBox(height: 4.h),
           
           Text(
             value,
             style: TextStyle(
-              fontSize: 13.fSize,
+              fontSize: 13.sp,
               fontWeight: FontWeight.bold,
               color: color,
             ),
@@ -647,17 +648,17 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
           Text(
             subtitle,
             style: TextStyle(
-              fontSize: 11.fSize,
+              fontSize: 11.sp,
               fontWeight: FontWeight.w600,
-              color: appTheme.gray700,
+              color: Colors.grey[600] ?? Colors.grey,
             ),
           ),
           
           Text(
             label,
             style: TextStyle(
-              fontSize: 9.fSize,
-              color: appTheme.gray500,
+              fontSize: 9.sp,
+              color: Colors.grey[600] ?? Colors.grey,
             ),
           ),
         ],
@@ -672,39 +673,39 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
       padding: EdgeInsets.all(16.h),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [appTheme.blue600.withOpacity(0.1), appTheme.purple600.withOpacity(0.1)],
+          colors: [Colors.grey[600] ?? Colors.grey.withOpacity(0.1), Colors.grey[600] ?? Colors.grey.withOpacity(0.1)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(12.h),
-        border: Border.all(color: appTheme.blue600.withOpacity(0.2)),
+        border: Border.all(color: Colors.grey[600] ?? Colors.grey.withOpacity(0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.emoji_events, color: appTheme.amber600, size: 20.adaptSize),
+              Icon(Icons.emoji_events, color: Colors.grey[600] ?? Colors.grey, size: 20.sp),
               SizedBox(width: 8.h),
               Text(
                 "Thành tích xuất sắc",
                 style: TextStyle(
-                  fontSize: 16.fSize,
+                  fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
-                  color: appTheme.gray900,
+                  color: Colors.grey[900] ?? Colors.black,
                 ),
               ),
             ],
           ),
           
-          SizedBox(height: 16.v),
+          SizedBox(height: 16.h),
           
           ...topPerformers.asMap().entries.map((entry) {
             final index = entry.key;
             final performer = entry.value;
             
             return Container(
-              margin: EdgeInsets.only(bottom: 8.v),
+              margin: EdgeInsets.only(bottom: 8.h),
               padding: EdgeInsets.all(12.h),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.8),
@@ -714,7 +715,7 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                 children: [
                   Container(
                     width: 24.h,
-                    height: 24.v,
+                    height: 24.h,
                     decoration: BoxDecoration(
                       color: _getRankColor(index),
                       shape: BoxShape.circle,
@@ -723,7 +724,7 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                       child: Text(
                         "${index + 1}",
                         style: TextStyle(
-                          fontSize: 11.fSize,
+                          fontSize: 11.sp,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
@@ -734,7 +735,7 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                   SizedBox(width: 12.h),
                   
                   CircleAvatar(
-                    radius: 16.adaptSize,
+                    radius: 16.sp,
                     backgroundImage: NetworkImage(performer['avatar'] as String),
                   ),
                   
@@ -747,17 +748,17 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                         Text(
                           performer['name'] as String,
                           style: TextStyle(
-                            fontSize: 13.fSize,
+                            fontSize: 13.sp,
                             fontWeight: FontWeight.w600,
-                            color: appTheme.gray900,
+                            color: Colors.grey[900] ?? Colors.black,
                           ),
                         ),
                         
                         Text(
                           performer['achievement'] as String,
                           style: TextStyle(
-                            fontSize: 11.fSize,
-                            color: appTheme.gray600,
+                            fontSize: 11.sp,
+                            color: Colors.grey[600] ?? Colors.grey,
                           ),
                         ),
                       ],
@@ -767,7 +768,7 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
                   Text(
                     performer['stat'] as String,
                     style: TextStyle(
-                      fontSize: 12.fSize,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.bold,
                       color: _getRankColor(index),
                     ),
@@ -783,10 +784,10 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
 
   Color _getRankColor(int rank) {
     switch (rank) {
-      case 0: return appTheme.amber600; // Gold
-      case 1: return appTheme.gray500;  // Silver
-      case 2: return appTheme.orange800; // Bronze
-      default: return appTheme.blue600;
+      case 0: return Colors.grey[600] ?? Colors.grey; // Gold
+      case 1: return Colors.grey[600] ?? Colors.grey;  // Silver
+      case 2: return Colors.grey[600] ?? Colors.grey; // Bronze
+      default: return Colors.grey[600] ?? Colors.grey;
     }
   }
 

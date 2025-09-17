@@ -68,19 +68,51 @@ class _ClubApprovalScreenState extends State<ClubApprovalScreen>
         _errorMessage = null;
       });
 
-      final results = await Future.wait([
-        _adminService.getClubsForAdmin(status: 'pending'),
-        _adminService.getClubsForAdmin(status: 'approved'),
-        _adminService.getClubsForAdmin(status: 'rejected'),
-      ]);
+      print('ClubApprovalScreen: Starting to load clubs...');
+      
+      // Load each status separately to identify which one fails
+      List<Club> pendingClubs = [];
+      List<Club> approvedClubs = [];
+      List<Club> rejectedClubs = [];
+      
+      try {
+        print('ClubApprovalScreen: Loading pending clubs...');
+        pendingClubs = await _adminService.getClubsForAdmin(status: 'pending');
+        print('ClubApprovalScreen: Loaded ${pendingClubs.length} pending clubs');
+      } catch (e) {
+        print('ClubApprovalScreen: Error loading pending clubs: $e');
+        throw Exception('Failed to load pending clubs: $e');
+      }
+      
+      try {
+        print('ClubApprovalScreen: Loading approved clubs...');
+        approvedClubs = await _adminService.getClubsForAdmin(status: 'approved');
+        print('ClubApprovalScreen: Loaded ${approvedClubs.length} approved clubs');
+      } catch (e) {
+        print('ClubApprovalScreen: Error loading approved clubs: $e');
+        throw Exception('Failed to load approved clubs: $e');
+      }
+      
+      try {
+        print('ClubApprovalScreen: Loading rejected clubs...');
+        rejectedClubs = await _adminService.getClubsForAdmin(status: 'rejected');
+        print('ClubApprovalScreen: Loaded ${rejectedClubs.length} rejected clubs');
+      } catch (e) {
+        print('ClubApprovalScreen: Error loading rejected clubs: $e');
+        throw Exception('Failed to load rejected clubs: $e');
+      }
 
       setState(() {
-        _pendingClubs = results[0];
-        _approvedClubs = results[1];
-        _rejectedClubs = results[2];
+        _pendingClubs = pendingClubs;
+        _approvedClubs = approvedClubs;
+        _rejectedClubs = rejectedClubs;
         _isLoading = false;
       });
-    } catch (e) {
+      
+      print('ClubApprovalScreen: All clubs loaded successfully');
+    } catch (e, stackTrace) {
+      print('ClubApprovalScreen: Error in _loadClubs: $e');
+      print('ClubApprovalScreen: Stack trace: $stackTrace');
       setState(() {
         _isLoading = false;
         _errorMessage = 'Lỗi tải danh sách CLB: $e';
@@ -91,13 +123,13 @@ class _ClubApprovalScreenState extends State<ClubApprovalScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: appTheme.whiteA700,
+      backgroundColor: AppTheme.backgroundLight,
       appBar: CustomAppBar(
         title: "Quản lý CLB",
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh, color: appTheme.blueGray900),
+            icon: Icon(Icons.refresh, color: AppTheme.textPrimaryLight),
             onPressed: _loadClubs,
           ),
         ],
@@ -115,11 +147,11 @@ class _ClubApprovalScreenState extends State<ClubApprovalScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline, size: 64, color: appTheme.red600),
+          Icon(Icons.error_outline, size: 64, color: AppTheme.errorLight),
           SizedBox(height: 16),
           Text(
             _errorMessage!,
-            style: theme.textTheme.bodyLarge,
+            style: Theme.of(context).textTheme.bodyLarge,
             textAlign: TextAlign.center,
           ),
           SizedBox(height: 16),
@@ -136,12 +168,12 @@ class _ClubApprovalScreenState extends State<ClubApprovalScreen>
     return Column(
       children: [
         Container(
-          color: appTheme.whiteA700,
+          color: AppTheme.backgroundLight,
           child: TabBar(
             controller: _tabController,
-            labelColor: appTheme.deepPurple500,
-            unselectedLabelColor: appTheme.blueGray600,
-            indicatorColor: appTheme.deepPurple500,
+            labelColor: AppTheme.primaryLight,
+            unselectedLabelColor: AppTheme.textSecondaryLight,
+            indicatorColor: AppTheme.primaryLight,
             tabs: [
               Tab(
                 child: Row(
@@ -155,13 +187,13 @@ class _ClubApprovalScreenState extends State<ClubApprovalScreen>
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: appTheme.orange600,
+                          color: AppTheme.warningLight,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
                           _pendingClubs.length.toString(),
                           style: TextStyle(
-                            color: appTheme.whiteA700,
+                            color: AppTheme.onPrimaryLight,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                           ),
@@ -183,13 +215,13 @@ class _ClubApprovalScreenState extends State<ClubApprovalScreen>
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: appTheme.green600,
+                          color: AppTheme.successLight,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
                           _approvedClubs.length.toString(),
                           style: TextStyle(
-                            color: appTheme.whiteA700,
+                            color: AppTheme.onPrimaryLight,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                           ),
@@ -211,13 +243,13 @@ class _ClubApprovalScreenState extends State<ClubApprovalScreen>
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: appTheme.red600,
+                          color: AppTheme.errorLight,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
                           _rejectedClubs.length.toString(),
                           style: TextStyle(
-                            color: appTheme.whiteA700,
+                            color: AppTheme.onPrimaryLight,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                           ),
@@ -287,12 +319,12 @@ class _ClubApprovalScreenState extends State<ClubApprovalScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 64, color: appTheme.blueGray400),
+          Icon(icon, size: 64, color: AppTheme.textDisabledLight),
           SizedBox(height: 16),
           Text(
             message,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: appTheme.blueGray600,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: AppTheme.textSecondaryLight,
             ),
           ),
         ],
@@ -301,23 +333,23 @@ class _ClubApprovalScreenState extends State<ClubApprovalScreen>
   }
 
   Widget _buildClubCard(Club club) {
-    Color statusColor = appTheme.gray500;
+    Color statusColor = AppTheme.textDisabledLight;
     IconData statusIcon = Icons.info;
     String statusText = club.approvalStatus;
 
     switch (club.approvalStatus) {
       case 'pending':
-        statusColor = appTheme.orange600;
+        statusColor = AppTheme.warningLight;
         statusIcon = Icons.pending;
         statusText = 'Chờ duyệt';
         break;
       case 'approved':
-        statusColor = appTheme.green600;
+        statusColor = AppTheme.successLight;
         statusIcon = Icons.check_circle;
         statusText = 'Đã duyệt';
         break;
       case 'rejected':
-        statusColor = appTheme.red600;
+        statusColor = AppTheme.errorLight;
         statusIcon = Icons.cancel;
         statusText = 'Từ chối';
         break;
@@ -326,9 +358,9 @@ class _ClubApprovalScreenState extends State<ClubApprovalScreen>
     return Container(
       margin: EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: appTheme.whiteA700,
+        color: AppTheme.surfaceLight,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: appTheme.gray200),
+        border: Border.all(color: AppTheme.dividerLight),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -354,7 +386,7 @@ class _ClubApprovalScreenState extends State<ClubApprovalScreen>
                       fit: BoxFit.cover,
                     )
                   : null,
-              color: club.coverImageUrl == null ? appTheme.gray100 : null,
+              color: club.coverImageUrl == null ? Color(0xFFEEEEEE) : null,
             ),
             child: Stack(
               children: [
@@ -363,7 +395,7 @@ class _ClubApprovalScreenState extends State<ClubApprovalScreen>
                     child: Icon(
                       Icons.image,
                       size: 48,
-                      color: appTheme.gray400,
+                      color: AppTheme.textDisabledLight,
                     ),
                   ),
                 Positioned(
@@ -378,12 +410,12 @@ class _ClubApprovalScreenState extends State<ClubApprovalScreen>
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(statusIcon, size: 14, color: appTheme.whiteA700),
+                        Icon(statusIcon, size: 14, color: AppTheme.onPrimaryLight),
                         SizedBox(width: 4),
                         Text(
                           statusText,
                           style: TextStyle(
-                            color: appTheme.whiteA700,
+                            color: AppTheme.onPrimaryLight,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
@@ -404,7 +436,7 @@ class _ClubApprovalScreenState extends State<ClubApprovalScreen>
               children: [
                 Text(
                   club.name,
-                  style: theme.textTheme.titleMedium?.copyWith(
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -412,13 +444,13 @@ class _ClubApprovalScreenState extends State<ClubApprovalScreen>
                   SizedBox(height: 4),
                   Row(
                     children: [
-                      Icon(Icons.location_on, size: 16, color: appTheme.gray600),
+                      Icon(Icons.location_on, size: 16, color: AppTheme.textSecondaryLight),
                       SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           club.address!,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: appTheme.gray600,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppTheme.textSecondaryLight,
                           ),
                         ),
                       ),
@@ -447,8 +479,8 @@ class _ClubApprovalScreenState extends State<ClubApprovalScreen>
                   SizedBox(height: 12),
                   Text(
                     club.description!,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: appTheme.blueGray600,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppTheme.textSecondaryLight,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -460,19 +492,19 @@ class _ClubApprovalScreenState extends State<ClubApprovalScreen>
                   Container(
                     padding: EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: appTheme.red50,
+                      color: AppTheme.errorLight.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: appTheme.red200),
+                      border: Border.all(color: AppTheme.errorLight.withOpacity(0.3)),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.warning, size: 16, color: appTheme.red600),
+                        Icon(Icons.warning, size: 16, color: AppTheme.errorLight),
                         SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             'Lý do từ chối: ${club.rejectionReason}',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: appTheme.red700,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppTheme.errorLight,
                             ),
                           ),
                         ),
@@ -493,8 +525,8 @@ class _ClubApprovalScreenState extends State<ClubApprovalScreen>
                           icon: Icon(Icons.cancel, size: 18),
                           label: Text('Từ chối'),
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: appTheme.red600,
-                            side: BorderSide(color: appTheme.red600),
+                            foregroundColor: AppTheme.errorLight,
+                            side: BorderSide(color: AppTheme.errorLight),
                           ),
                         ),
                       ),
@@ -505,8 +537,8 @@ class _ClubApprovalScreenState extends State<ClubApprovalScreen>
                           icon: Icon(Icons.check_circle, size: 18),
                           label: Text('Duyệt'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: appTheme.green600,
-                            foregroundColor: appTheme.whiteA700,
+                            backgroundColor: AppTheme.successLight,
+                            foregroundColor: AppTheme.onPrimaryLight,
                           ),
                         ),
                       ),
@@ -518,8 +550,8 @@ class _ClubApprovalScreenState extends State<ClubApprovalScreen>
                     icon: Icon(Icons.visibility, size: 18),
                     label: Text('Xem chi tiết'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: appTheme.blueGray600,
-                      foregroundColor: appTheme.whiteA700,
+                      backgroundColor: AppTheme.textSecondaryLight,
+                      foregroundColor: AppTheme.onPrimaryLight,
                       minimumSize: Size(double.infinity, 40),
                     ),
                   ),
@@ -538,18 +570,18 @@ class _ClubApprovalScreenState extends State<ClubApprovalScreen>
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: appTheme.blue50,
+        color: AppTheme.primaryLight.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: appTheme.blue700),
+          Icon(icon, size: 14, color: AppTheme.primaryLight),
           SizedBox(width: 4),
           Text(
             text,
             style: TextStyle(
-              color: appTheme.blue700,
+              color: AppTheme.primaryLight,
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
@@ -566,7 +598,7 @@ class _ClubApprovalScreenState extends State<ClubApprovalScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Đã duyệt CLB "${club.name}" thành công'),
-          backgroundColor: appTheme.green600,
+          backgroundColor: AppTheme.successLight,
         ),
       );
       
@@ -575,7 +607,7 @@ class _ClubApprovalScreenState extends State<ClubApprovalScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Lỗi duyệt CLB: $e'),
-          backgroundColor: appTheme.red600,
+          backgroundColor: AppTheme.errorLight,
         ),
       );
     }
@@ -616,9 +648,9 @@ class _ClubApprovalScreenState extends State<ClubApprovalScreen>
                     _rejectClub(club, rejectionReason.trim());
                   },
             style: ElevatedButton.styleFrom(
-              backgroundColor: appTheme.red600,
+              backgroundColor: AppTheme.errorLight,
             ),
-            child: Text('Từ chối', style: TextStyle(color: appTheme.whiteA700)),
+            child: Text('Từ chối', style: TextStyle(color: AppTheme.onPrimaryLight)),
           ),
         ],
       ),
@@ -632,7 +664,7 @@ class _ClubApprovalScreenState extends State<ClubApprovalScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Đã từ chối CLB "${club.name}"'),
-          backgroundColor: appTheme.red600,
+          backgroundColor: AppTheme.errorLight,
         ),
       );
       
@@ -641,7 +673,7 @@ class _ClubApprovalScreenState extends State<ClubApprovalScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Lỗi từ chối CLB: $e'),
-          backgroundColor: appTheme.red600,
+          backgroundColor: AppTheme.errorLight,
         ),
       );
     }

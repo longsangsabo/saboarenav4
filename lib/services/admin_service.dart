@@ -64,8 +64,20 @@ class AdminService {
           .order('created_at', ascending: false)
           .range(offset, offset + limit - 1);
 
-      return response.map<Club>((json) => Club.fromJson(json)).toList();
-    } catch (error) {
+      // Ensure response is a List and handle type safety
+      if (response is! List) {
+        throw Exception('Unexpected response type: ${response.runtimeType}');
+      }
+      
+      return (response as List).map<Club>((json) {
+        if (json is! Map<String, dynamic>) {
+          throw Exception('Invalid club data type: ${json.runtimeType}');
+        }
+        return Club.fromJson(json);
+      }).toList();
+    } catch (error, stackTrace) {
+      print('AdminService.getClubsForAdmin error: $error');
+      print('Stack trace: $stackTrace');
       throw Exception('Failed to get clubs for admin: $error');
     }
   }
@@ -76,10 +88,24 @@ class AdminService {
       final user = _supabase.auth.currentUser;
       if (user == null) throw Exception('Admin not authenticated');
 
-      final response = await _supabase
+      // First, get the club to find the owner_id
+      final clubData = await _supabase
+          .from('clubs')
+          .select('owner_id')
+          .eq('id', clubId)
+          .single();
+
+      final ownerId = clubData['owner_id'];
+      if (ownerId == null) {
+        throw Exception('Club owner not found');
+      }
+
+      // Update club status and activate it
+      final clubResponse = await _supabase
           .from('clubs')
           .update({
             'approval_status': 'approved',
+            'is_active': true, // Auto-activate when approved
             'approved_at': DateTime.now().toIso8601String(),
             'approved_by': user.id,
             'rejection_reason': null, // Clear any previous rejection reason
@@ -89,16 +115,37 @@ class AdminService {
           .select()
           .single();
 
+      // Update user role to club_owner
+      await _supabase
+          .from('users')
+          .update({
+            'role': 'club_owner',
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', ownerId);
+
       // Log admin action
       await _logAdminAction(
         adminId: user.id,
         action: 'approve_club',
         targetId: clubId,
-        details: {'admin_notes': adminNotes},
+        details: {
+          'admin_notes': adminNotes,
+          'owner_id': ownerId,
+          'auto_activated': true,
+          'role_updated': 'club_owner',
+        },
       );
 
-      return Club.fromJson(response);
+      print('✅ Club approved successfully:');
+      print('  - Club ID: $clubId');
+      print('  - Owner ID: $ownerId');
+      print('  - Auto-activated: true');
+      print('  - Role updated to: club_owner');
+
+      return Club.fromJson(clubResponse);
     } catch (error) {
+      print('❌ Failed to approve club: $error');
       throw Exception('Failed to approve club: $error');
     }
   }

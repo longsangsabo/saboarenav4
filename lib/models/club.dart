@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class Club {
   final String id;
   final String ownerId;
@@ -26,6 +28,20 @@ class Club {
   final double? longitude;
   final DateTime createdAt;
   final DateTime updatedAt;
+
+  static Map<String, dynamic>? _parseOpeningHours(dynamic value) {
+    if (value == null) return null;
+    if (value is Map<String, dynamic>) return value;
+    if (value is String) {
+      try {
+        return jsonDecode(value) as Map<String, dynamic>;
+      } catch (e) {
+        // If parsing fails, return null or handle as needed
+        return null;
+      }
+    }
+    return null;
+  }
 
   const Club({
     required this.id,
@@ -71,7 +87,7 @@ class Club {
       profileImageUrl: json['profile_image_url'],
       establishedYear: json['established_year'],
       totalTables: json['total_tables'] ?? 1,
-      openingHours: json['opening_hours'],
+      openingHours: _parseOpeningHours(json['opening_hours']),
       amenities: json['amenities'] != null
           ? List<String>.from(json['amenities'])
           : null,

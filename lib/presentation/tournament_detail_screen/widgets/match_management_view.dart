@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sabo_arena/core/app_export.dart';
+import 'package:sizer/sizer.dart';
 
 class MatchManagementView extends StatefulWidget {
   final String tournamentId;
@@ -77,7 +78,7 @@ class _MatchManagementViewState extends State<MatchManagementView>
       height: MediaQuery.of(context).size.height * 0.85,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.h)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.sp)),
       ),
       child: Column(
         children: [
@@ -94,9 +95,9 @@ class _MatchManagementViewState extends State<MatchManagementView>
 
   Widget _buildHeader() {
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16.sp),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: appTheme.gray200)),
+        border: Border(bottom: BorderSide(color: AppTheme.dividerLight)),
       ),
       child: Row(
         children: [
@@ -107,16 +108,16 @@ class _MatchManagementViewState extends State<MatchManagementView>
                 Text(
                   "Quản lý trận đấu",
                   style: TextStyle(
-                    fontSize: 18.fSize,
+                    fontSize: 18.sp,
                     fontWeight: FontWeight.bold,
-                    color: appTheme.gray900,
+                    color: AppTheme.textPrimaryLight,
                   ),
                 ),
                 Text(
                   "${_matches.length} trận đấu",
                   style: TextStyle(
-                    fontSize: 12.fSize,
-                    color: appTheme.gray600,
+                    fontSize: 12.sp,
+                    color: AppTheme.textSecondaryLight,
                   ),
                 ),
               ],
@@ -126,12 +127,12 @@ class _MatchManagementViewState extends State<MatchManagementView>
           if (widget.canManage)
             ElevatedButton.icon(
               onPressed: _showCreateMatchDialog,
-              icon: Icon(Icons.add, size: 16.adaptSize),
+              icon: Icon(Icons.add, size: 16.sp),
               label: Text("Tạo trận"),
               style: ElevatedButton.styleFrom(
-                backgroundColor: appTheme.blue600,
+                backgroundColor: AppTheme.primaryLight,
                 foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(horizontal: 12.h, vertical: 8.v),
+                padding: EdgeInsets.symmetric(horizontal: 12.sp, vertical: 8.sp),
               ),
             ),
         ],
@@ -141,14 +142,14 @@ class _MatchManagementViewState extends State<MatchManagementView>
 
   Widget _buildFilters() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.h, vertical: 8.v),
+      padding: EdgeInsets.symmetric(horizontal: 16.sp, vertical: 8.sp),
       child: Row(
         children: [
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: appTheme.gray100,
-                borderRadius: BorderRadius.circular(8.h),
+                color: Color(0xFFF0F0F0),
+                borderRadius: BorderRadius.circular(8.sp),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
@@ -166,20 +167,20 @@ class _MatchManagementViewState extends State<MatchManagementView>
                       _filterMatches();
                     });
                   },
-                  style: TextStyle(color: appTheme.gray700, fontSize: 12.fSize),
-                  padding: EdgeInsets.symmetric(horizontal: 12.h),
+                  style: TextStyle(color: AppTheme.textSecondaryLight, fontSize: 12.sp),
+                  padding: EdgeInsets.symmetric(horizontal: 12.sp),
                 ),
               ),
             ),
           ),
           
-          SizedBox(width: 8.h),
+          SizedBox(width: 8.sp),
           
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: appTheme.gray100,
-                borderRadius: BorderRadius.circular(8.h),
+                color: Color(0xFFF0F0F0),
+                borderRadius: BorderRadius.circular(8.sp),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
@@ -196,8 +197,8 @@ class _MatchManagementViewState extends State<MatchManagementView>
                       _filterMatches();
                     });
                   },
-                  style: TextStyle(color: appTheme.gray700, fontSize: 12.fSize),
-                  padding: EdgeInsets.symmetric(horizontal: 12.h),
+                  style: TextStyle(color: AppTheme.textSecondaryLight, fontSize: 12.sp),
+                  padding: EdgeInsets.symmetric(horizontal: 12.sp),
                 ),
               ),
             ),
@@ -210,13 +211,13 @@ class _MatchManagementViewState extends State<MatchManagementView>
   Widget _buildTabBar() {
     return Container(
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: appTheme.gray200)),
+        border: Border(bottom: BorderSide(color: AppTheme.dividerLight)),
       ),
       child: TabBar(
         controller: _tabController,
-        labelColor: appTheme.blue600,
-        unselectedLabelColor: appTheme.gray600,
-        indicatorColor: appTheme.blue600,
+        labelColor: AppTheme.primaryLight,
+        unselectedLabelColor: AppTheme.textSecondaryLight,
+        indicatorColor: AppTheme.primaryLight,
         tabs: [
           Tab(text: 'Danh sách'),
           Tab(text: 'Lịch thi đấu'),
@@ -231,11 +232,11 @@ class _MatchManagementViewState extends State<MatchManagementView>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(color: appTheme.blue600),
-          SizedBox(height: 16.v),
+          CircularProgressIndicator(color: AppTheme.primaryLight),
+          SizedBox(height: 16.sp),
           Text(
             "Đang tải trận đấu...",
-            style: TextStyle(fontSize: 14.fSize, color: appTheme.gray600),
+            style: TextStyle(fontSize: 14.sp, color: AppTheme.textSecondaryLight),
           ),
         ],
       ),
@@ -270,7 +271,7 @@ class _MatchManagementViewState extends State<MatchManagementView>
     }
 
     return ListView.builder(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16.sp),
       itemCount: _filteredMatches.length,
       itemBuilder: (context, index) {
         final match = _filteredMatches[index];
@@ -281,40 +282,40 @@ class _MatchManagementViewState extends State<MatchManagementView>
 
   Widget _buildMatchCard(TournamentMatch match) {
     return Container(
-      margin: EdgeInsets.only(bottom: 12.v),
+      margin: EdgeInsets.only(bottom: 12.sp),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.h),
+        borderRadius: BorderRadius.circular(12.sp),
         border: Border.all(
           color: _getStatusColor(match.status).withOpacity(0.3),
         ),
         boxShadow: [
           BoxShadow(
-            color: appTheme.black900.withOpacity(0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 4,
             offset: Offset(0, 2),
           ),
         ],
       ),
       child: Padding(
-        padding: EdgeInsets.all(16.h),
+        padding: EdgeInsets.all(16.sp),
         child: Column(
           children: [
             // Match header
             Row(
               children: [
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.h, vertical: 4.v),
+                  padding: EdgeInsets.symmetric(horizontal: 8.sp, vertical: 4.sp),
                   decoration: BoxDecoration(
-                    color: appTheme.blue600.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(4.h),
+                    color: AppTheme.primaryLight.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(4.sp),
                   ),
                   child: Text(
                     match.round,
                     style: TextStyle(
-                      fontSize: 11.fSize,
+                      fontSize: 11.sp,
                       fontWeight: FontWeight.w600,
-                      color: appTheme.blue600,
+                      color: AppTheme.primaryLight,
                     ),
                   ),
                 ),
@@ -325,20 +326,20 @@ class _MatchManagementViewState extends State<MatchManagementView>
               ],
             ),
             
-            SizedBox(height: 12.v),
+            SizedBox(height: 12.sp),
             
             // Players and scores
             Row(
               children: [
                 Expanded(child: _buildPlayerInfo(match.player1, match.score1, match.winner == 1)),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.h),
+                  padding: EdgeInsets.symmetric(horizontal: 8.sp),
                   child: Text(
                     "VS",
                     style: TextStyle(
-                      fontSize: 12.fSize,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.bold,
-                      color: appTheme.gray500,
+                      color: AppTheme.textSecondaryLight,
                     ),
                   ),
                 ),
@@ -347,35 +348,35 @@ class _MatchManagementViewState extends State<MatchManagementView>
             ),
             
             if (match.scheduledTime != null || match.table != null) ...[
-              SizedBox(height: 12.v),
+              SizedBox(height: 12.sp),
               Container(
-                padding: EdgeInsets.all(8.h),
+                padding: EdgeInsets.all(8.sp),
                 decoration: BoxDecoration(
-                  color: appTheme.gray50,
-                  borderRadius: BorderRadius.circular(6.h),
+                  color: Color(0xFFF5F5F5),
+                  borderRadius: BorderRadius.circular(6.sp),
                 ),
                 child: Row(
                   children: [
                     if (match.scheduledTime != null) ...[
-                      Icon(Icons.schedule, size: 14.adaptSize, color: appTheme.gray600),
-                      SizedBox(width: 4.h),
+                      Icon(Icons.schedule, size: 14.sp, color: AppTheme.textSecondaryLight),
+                      SizedBox(width: 4.sp),
                       Text(
                         match.scheduledTime!,
-                        style: TextStyle(fontSize: 11.fSize, color: appTheme.gray600),
+                        style: TextStyle(fontSize: 11.sp, color: AppTheme.textSecondaryLight),
                       ),
                     ],
                     
                     if (match.table != null) ...[
                       if (match.scheduledTime != null) ...[
-                        SizedBox(width: 12.h),
-                        Container(width: 1, height: 12.v, color: appTheme.gray300),
-                        SizedBox(width: 12.h),
+                        SizedBox(width: 12.sp),
+                        Container(width: 1, height: 12.sp, color: AppTheme.dividerLight),
+                        SizedBox(width: 12.sp),
                       ],
-                      Icon(Icons.table_restaurant, size: 14.adaptSize, color: appTheme.gray600),
-                      SizedBox(width: 4.h),
+                      Icon(Icons.table_restaurant, size: 14.sp, color: AppTheme.textSecondaryLight),
+                      SizedBox(width: 4.sp),
                       Text(
                         match.table!,
-                        style: TextStyle(fontSize: 11.fSize, color: appTheme.gray600),
+                        style: TextStyle(fontSize: 11.sp, color: AppTheme.textSecondaryLight),
                       ),
                     ],
                   ],
@@ -384,23 +385,23 @@ class _MatchManagementViewState extends State<MatchManagementView>
             ],
             
             if (widget.canManage) ...[
-              SizedBox(height: 12.v),
+              SizedBox(height: 12.sp),
               Row(
                 children: [
                   Expanded(
                     child: _buildActionButton(
                       "Cập nhật KQ",
                       Icons.edit,
-                      appTheme.green600,
+                      AppTheme.successLight,
                       () => _updateMatchResult(match),
                     ),
                   ),
-                  SizedBox(width: 8.h),
+                  SizedBox(width: 8.sp),
                   Expanded(
                     child: _buildActionButton(
                       "Chỉnh sửa",
                       Icons.settings,
-                      appTheme.blue600,
+                      AppTheme.primaryLight,
                       () => _editMatch(match),
                     ),
                   ),
@@ -417,37 +418,37 @@ class _MatchManagementViewState extends State<MatchManagementView>
     return Column(
       children: [
         CircleAvatar(
-          radius: 20.adaptSize,
+          radius: 20.sp,
           backgroundImage: NetworkImage(
             'https://images.unsplash.com/photo-${1580000000000 + playerName.hashCode.abs() % 1000}?w=100&h=100&fit=crop&crop=face'
           ),
-          backgroundColor: appTheme.gray200,
+          backgroundColor: AppTheme.dividerLight,
         ),
         
-        SizedBox(height: 6.v),
+        SizedBox(height: 6.sp),
         
         Text(
           playerName,
           style: TextStyle(
-            fontSize: 12.fSize,
+            fontSize: 12.sp,
             fontWeight: isWinner ? FontWeight.bold : FontWeight.normal,
-            color: isWinner ? appTheme.green700 : appTheme.gray900,
+            color: isWinner ? AppTheme.successLight : AppTheme.textPrimaryLight,
           ),
           textAlign: TextAlign.center,
         ),
         
         if (score != null)
           Container(
-            margin: EdgeInsets.only(top: 4.v),
-            padding: EdgeInsets.symmetric(horizontal: 6.h, vertical: 2.v),
+            margin: EdgeInsets.only(top: 4.sp),
+            padding: EdgeInsets.symmetric(horizontal: 6.sp, vertical: 2.sp),
             decoration: BoxDecoration(
-              color: isWinner ? appTheme.green600 : appTheme.gray400,
-              borderRadius: BorderRadius.circular(8.h),
+              color: isWinner ? AppTheme.successLight : AppTheme.textDisabledLight,
+              borderRadius: BorderRadius.circular(8.sp),
             ),
             child: Text(
               score.toString(),
               style: TextStyle(
-                fontSize: 11.fSize,
+                fontSize: 11.sp,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
@@ -462,15 +463,15 @@ class _MatchManagementViewState extends State<MatchManagementView>
     final label = _getStatusLabel(status);
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.h, vertical: 3.v),
+      padding: EdgeInsets.symmetric(horizontal: 8.sp, vertical: 3.sp),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(10.h),
+        borderRadius: BorderRadius.circular(10.sp),
       ),
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 10.fSize,
+          fontSize: 10.sp,
           fontWeight: FontWeight.w600,
           color: color,
         ),
@@ -481,23 +482,23 @@ class _MatchManagementViewState extends State<MatchManagementView>
   Widget _buildActionButton(String label, IconData icon, Color color, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(6.h),
+      borderRadius: BorderRadius.circular(6.sp),
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 8.v),
+        padding: EdgeInsets.symmetric(vertical: 8.sp),
         decoration: BoxDecoration(
           color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(6.h),
+          borderRadius: BorderRadius.circular(6.sp),
           border: Border.all(color: color.withOpacity(0.3)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 14.adaptSize, color: color),
-            SizedBox(width: 4.h),
+            Icon(icon, size: 14.sp, color: color),
+            SizedBox(width: 4.sp),
             Text(
               label,
               style: TextStyle(
-                fontSize: 11.fSize,
+                fontSize: 11.sp,
                 fontWeight: FontWeight.w600,
                 color: color,
               ),
@@ -523,7 +524,7 @@ class _MatchManagementViewState extends State<MatchManagementView>
     }
 
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16.sp),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: matchesByDate.entries.map((entry) {
@@ -531,47 +532,47 @@ class _MatchManagementViewState extends State<MatchManagementView>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                margin: EdgeInsets.only(bottom: 12.v),
-                padding: EdgeInsets.symmetric(horizontal: 12.h, vertical: 6.v),
+                margin: EdgeInsets.only(bottom: 12.sp),
+                padding: EdgeInsets.symmetric(horizontal: 12.sp, vertical: 6.sp),
                 decoration: BoxDecoration(
-                  color: appTheme.blue600,
-                  borderRadius: BorderRadius.circular(12.h),
+                  color: AppTheme.primaryLight,
+                  borderRadius: BorderRadius.circular(12.sp),
                 ),
                 child: Text(
                   entry.key,
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 12.fSize,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
               
               ...entry.value.map((match) => Container(
-                margin: EdgeInsets.only(bottom: 8.v),
-                padding: EdgeInsets.all(12.h),
+                margin: EdgeInsets.only(bottom: 8.sp),
+                padding: EdgeInsets.all(12.sp),
                 decoration: BoxDecoration(
-                  color: appTheme.gray50,
-                  borderRadius: BorderRadius.circular(8.h),
+                  color: Color(0xFFF5F5F5),
+                  borderRadius: BorderRadius.circular(8.sp),
                 ),
                 child: Row(
                   children: [
                     Text(
                       match.scheduledTime ?? "",
                       style: TextStyle(
-                        fontSize: 13.fSize,
+                        fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
-                        color: appTheme.blue600,
+                        color: AppTheme.primaryLight,
                       ),
                     ),
-                    SizedBox(width: 12.h),
+                    SizedBox(width: 12.sp),
                     
                     Expanded(
                       child: Text(
                         "${match.player1} vs ${match.player2}",
                         style: TextStyle(
-                          fontSize: 12.fSize,
-                          color: appTheme.gray900,
+                          fontSize: 12.sp,
+                          color: AppTheme.textPrimaryLight,
                         ),
                       ),
                     ),
@@ -580,15 +581,15 @@ class _MatchManagementViewState extends State<MatchManagementView>
                       Text(
                         match.table!,
                         style: TextStyle(
-                          fontSize: 11.fSize,
-                          color: appTheme.gray600,
+                          fontSize: 11.sp,
+                          color: AppTheme.textSecondaryLight,
                         ),
                       ),
                   ],
                 ),
               )),
               
-              SizedBox(height: 16.v),
+              SizedBox(height: 16.sp),
             ],
           );
         }).toList(),
@@ -604,16 +605,16 @@ class _MatchManagementViewState extends State<MatchManagementView>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.sports_score, size: 64.adaptSize, color: appTheme.gray400),
-            SizedBox(height: 16.v),
-            Text("Chưa có kết quả", style: TextStyle(fontSize: 16.fSize, fontWeight: FontWeight.w600)),
+            Icon(Icons.sports_score, size: 64.sp, color: AppTheme.textDisabledLight),
+            SizedBox(height: 16.sp),
+            Text("Chưa có kết quả", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600)),
           ],
         ),
       );
     }
 
     return ListView.builder(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16.sp),
       itemCount: completedMatches.length,
       itemBuilder: (context, index) {
         final match = completedMatches[index];
@@ -624,12 +625,12 @@ class _MatchManagementViewState extends State<MatchManagementView>
 
   Widget _buildResultCard(TournamentMatch match) {
     return Container(
-      margin: EdgeInsets.only(bottom: 12.v),
-      padding: EdgeInsets.all(12.h),
+      margin: EdgeInsets.only(bottom: 12.sp),
+      padding: EdgeInsets.all(12.sp),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8.h),
-        border: Border.all(color: appTheme.green600.withOpacity(0.3)),
+        borderRadius: BorderRadius.circular(8.sp),
+        border: Border.all(color: AppTheme.successLight.withOpacity(0.3)),
       ),
       child: Row(
         children: [
@@ -637,24 +638,24 @@ class _MatchManagementViewState extends State<MatchManagementView>
             child: Text(
               "${match.player1} ${match.score1} - ${match.score2} ${match.player2}",
               style: TextStyle(
-                fontSize: 13.fSize,
+                fontSize: 13.sp,
                 fontWeight: FontWeight.w600,
-                color: appTheme.gray900,
+                color: AppTheme.textPrimaryLight,
               ),
             ),
           ),
           
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 6.h, vertical: 2.v),
+            padding: EdgeInsets.symmetric(horizontal: 6.sp, vertical: 2.sp),
             decoration: BoxDecoration(
-              color: appTheme.green600.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(4.h),
+              color: AppTheme.successLight.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(4.sp),
             ),
             child: Text(
               match.round,
               style: TextStyle(
-                fontSize: 10.fSize,
-                color: appTheme.green600,
+                fontSize: 10.sp,
+                color: AppTheme.successLight,
               ),
             ),
           ),
@@ -668,11 +669,11 @@ class _MatchManagementViewState extends State<MatchManagementView>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.sports_tennis, size: 64.adaptSize, color: appTheme.gray400),
-          SizedBox(height: 16.v),
-          Text("Chưa có trận đấu", style: TextStyle(fontSize: 16.fSize, fontWeight: FontWeight.w600)),
-          SizedBox(height: 8.v),
-          Text("Hãy tạo trận đấu đầu tiên", style: TextStyle(color: appTheme.gray600)),
+          Icon(Icons.sports_tennis, size: 64.sp, color: AppTheme.textDisabledLight),
+          SizedBox(height: 16.sp),
+          Text("Chưa có trận đấu", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600)),
+          SizedBox(height: 8.sp),
+          Text("Hãy tạo trận đấu đầu tiên", style: TextStyle(color: AppTheme.textSecondaryLight)),
         ],
       ),
     );
@@ -680,10 +681,10 @@ class _MatchManagementViewState extends State<MatchManagementView>
 
   Color _getStatusColor(String status) {
     switch (status) {
-      case 'scheduled': return appTheme.blue600;
-      case 'ongoing': return appTheme.orange600;
-      case 'completed': return appTheme.green600;
-      default: return appTheme.gray600;
+      case 'scheduled': return AppTheme.primaryLight;
+      case 'ongoing': return AppTheme.warningLight;
+      case 'completed': return AppTheme.successLight;
+      default: return AppTheme.textSecondaryLight;
     }
   }
 

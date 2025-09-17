@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:sabo_arena/theme/app_theme.dart';
 
 import '../../core/app_export.dart';
 import '../../services/admin_service.dart';
+import '../../services/auth_service.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../routes/app_routes.dart';
 import './club_approval_screen.dart';
@@ -54,17 +56,164 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     }
   }
 
+  void _handleMenuAction(String action) async {
+    switch (action) {
+      case 'switch_to_user':
+        _switchToUserMode();
+        break;
+      case 'logout':
+        _handleLogout();
+        break;
+    }
+  }
+
+  void _showAccountSwitchDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          title: Row(
+            children: [
+              Icon(Icons.switch_account, color: AppTheme.primaryLight),
+              SizedBox(width: 8.0),
+              Text('Chuyển đổi tài khoản'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Bạn muốn chuyển sang chế độ nào?'),
+              SizedBox(height: 16.0),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        _switchToUserMode();
+                      },
+                      icon: Icon(Icons.person),
+                      label: Text('Người dùng'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryLight,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 8.0),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        _handleLogout();
+                      },
+                      icon: Icon(Icons.logout),
+                      label: Text('Đăng xuất'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _switchToUserMode() {
+    // Navigate to user profile screen (main user interface)
+    Navigator.of(context).pushReplacementNamed(AppRoutes.userProfileScreen);
+  }
+
+  void _handleLogout() async {
+    try {
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Row(
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(width: 16.0),
+                Text('Đang đăng xuất...'),
+              ],
+            ),
+          );
+        },
+      );
+
+      // Perform logout
+      await AuthService.instance.signOut();
+
+      // Close loading dialog and navigate to login
+      if (context.mounted) {
+        Navigator.of(context).pop(); // Close loading dialog
+        Navigator.of(context).pushReplacementNamed(AppRoutes.loginScreen);
+      }
+    } catch (e) {
+      // Close loading dialog if still open
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi đăng xuất: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: appTheme.whiteA700,
+      backgroundColor: AppTheme.backgroundLight,
       appBar: CustomAppBar(
         title: "Admin Dashboard",
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh, color: appTheme.blueGray900),
+            icon: Icon(Icons.switch_account, color: AppTheme.textPrimaryLight),
+            onPressed: _showAccountSwitchDialog,
+            tooltip: 'Chuyển đổi tài khoản',
+          ),
+          IconButton(
+            icon: Icon(Icons.refresh, color: AppTheme.textPrimaryLight),
             onPressed: _loadDashboardData,
+            tooltip: 'Làm mới',
+          ),
+          PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert, color: AppTheme.textPrimaryLight),
+            onSelected: _handleMenuAction,
+            itemBuilder: (BuildContext context) => [
+              const PopupMenuItem<String>(
+                value: 'switch_to_user',
+                child: ListTile(
+                  leading: Icon(Icons.person),
+                  title: Text('Chuyển sang giao diện người dùng'),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'logout',
+                child: ListTile(
+                  leading: Icon(Icons.logout, color: Colors.red),
+                  title: Text('Đăng xuất', style: TextStyle(color: Colors.red)),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -81,11 +230,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline, size: 64, color: appTheme.red600),
+          Icon(Icons.error_outline, size: 64, color: AppTheme.errorLight),
           SizedBox(height: 16),
           Text(
             _errorMessage!,
-            style: theme.textTheme.bodyLarge,
+            style: Theme.of(context).textTheme.bodyLarge,
             textAlign: TextAlign.center,
           ),
           SizedBox(height: 16),
@@ -124,7 +273,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [appTheme.deepPurple500, appTheme.indigo500],
+          colors: [AppTheme.primaryDark, AppTheme.primaryLight],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -138,16 +287,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               children: [
                 Text(
                   'Chào mừng Admin!',
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    color: appTheme.whiteA700,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: AppTheme.onPrimaryLight,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 SizedBox(height: 8),
                 Text(
                   'Quản lý hệ thống Sabo Arena',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: appTheme.whiteA700.withOpacity(0.8),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.onPrimaryLight.withOpacity(0.8),
                   ),
                 ),
               ],
@@ -156,12 +305,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           Container(
             padding: EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: appTheme.whiteA700.withOpacity(0.2),
+              color: AppTheme.onPrimaryLight.withOpacity(0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               Icons.admin_panel_settings,
-              color: appTheme.whiteA700,
+              color: AppTheme.onPrimaryLight,
               size: 32,
             ),
           ),
@@ -183,7 +332,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       children: [
         Text(
           'Thống kê hệ thống',
-          style: theme.textTheme.titleLarge?.copyWith(
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -195,7 +344,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 title: 'CLB chờ duyệt',
                 value: clubStats['pending'].toString(),
                 icon: Icons.pending_actions,
-                color: appTheme.orange600,
+                color: AppTheme.warningLight,
                 onTap: () => _navigateToClubApproval('pending'),
               ),
             ),
@@ -205,7 +354,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 title: 'CLB đã duyệt',
                 value: clubStats['approved'].toString(),
                 icon: Icons.check_circle,
-                color: appTheme.green600,
+                color: AppTheme.successLight,
                 onTap: () => _navigateToClubApproval('approved'),
               ),
             ),
@@ -219,7 +368,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 title: 'Tổng Users',
                 value: userStats['total'].toString(),
                 icon: Icons.people,
-                color: appTheme.blue600,
+                color: AppTheme.primaryLight,
               ),
             ),
             SizedBox(width: 12),
@@ -228,7 +377,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 title: 'Tournaments',
                 value: tournamentStats['total'].toString(),
                 icon: Icons.emoji_events,
-                color: appTheme.purple600,
+                color: AppTheme.accentLight,
               ),
             ),
           ],
@@ -249,9 +398,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       child: Container(
         padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: appTheme.whiteA700,
+          color: AppTheme.surfaceLight,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: appTheme.gray200),
+          border: Border.all(color: AppTheme.dividerLight),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -275,22 +424,22 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   child: Icon(icon, color: color, size: 20),
                 ),
                 if (onTap != null)
-                  Icon(Icons.arrow_forward_ios, size: 16, color: appTheme.gray600),
+                  Icon(Icons.arrow_forward_ios, size: 16, color: AppTheme.textSecondaryLight),
               ],
             ),
             SizedBox(height: 12),
             Text(
               value,
-              style: theme.textTheme.headlineMedium?.copyWith(
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: appTheme.blueGray900,
+                color: AppTheme.textPrimaryLight,
               ),
             ),
             SizedBox(height: 4),
             Text(
               title,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: appTheme.blueGray600,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppTheme.textSecondaryLight,
               ),
             ),
           ],
@@ -305,7 +454,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       children: [
         Text(
           'Thao tác nhanh',
-          style: theme.textTheme.titleLarge?.copyWith(
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -317,7 +466,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 title: 'Duyệt CLB',
                 subtitle: 'Quản lý đăng ký CLB',
                 icon: Icons.approval,
-                color: appTheme.green600,
+                color: AppTheme.successLight,
                 onTap: () => _navigateToClubApproval(null),
               ),
             ),
@@ -327,7 +476,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 title: 'Quản lý User',
                 subtitle: 'Xem danh sách users',
                 icon: Icons.people_outline,
-                color: appTheme.blue600,
+                color: AppTheme.primaryLight,
                 onTap: () {
                   // TODO: Navigate to user management
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -354,9 +503,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       child: Container(
         padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: appTheme.whiteA700,
+          color: AppTheme.surfaceLight,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: appTheme.gray200),
+          border: Border.all(color: AppTheme.dividerLight),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -379,15 +528,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             SizedBox(height: 12),
             Text(
               title,
-              style: theme.textTheme.titleMedium?.copyWith(
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
             SizedBox(height: 4),
             Text(
               subtitle,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: appTheme.blueGray600,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppTheme.textSecondaryLight,
               ),
             ),
           ],
@@ -405,7 +554,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           children: [
             Text(
               'Hoạt động gần đây',
-              style: theme.textTheme.titleLarge?.copyWith(
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -422,14 +571,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           Container(
             padding: EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: appTheme.gray50,
+              color: AppTheme.backgroundLight,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Center(
               child: Text(
                 'Chưa có hoạt động nào',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: appTheme.blueGray600,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppTheme.textSecondaryLight,
                 ),
               ),
             ),
@@ -444,20 +593,20 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final timestamp = activity['timestamp'] as DateTime;
     final timeAgo = _formatTimeAgo(timestamp);
 
-    Color statusColor = appTheme.gray500;
+    Color statusColor = AppTheme.textSecondaryLight;
     IconData statusIcon = Icons.info;
 
     switch (activity['status']) {
       case 'pending':
-        statusColor = appTheme.orange600;
+        statusColor = AppTheme.warningLight;
         statusIcon = Icons.pending;
         break;
       case 'approved':
-        statusColor = appTheme.green600;
+        statusColor = AppTheme.successLight;
         statusIcon = Icons.check_circle;
         break;
       case 'rejected':
-        statusColor = appTheme.red600;
+        statusColor = AppTheme.errorLight;
         statusIcon = Icons.cancel;
         break;
     }
@@ -466,9 +615,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       margin: EdgeInsets.only(bottom: 12),
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: appTheme.whiteA700,
+        color: AppTheme.surfaceLight,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: appTheme.gray200),
+        border: Border.all(color: AppTheme.dividerLight),
       ),
       child: Row(
         children: [
@@ -487,29 +636,29 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               children: [
                 Text(
                   activity['title'],
-                  style: theme.textTheme.titleSmall?.copyWith(
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 SizedBox(height: 4),
                 Text(
                   activity['description'],
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: appTheme.blueGray600,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppTheme.textSecondaryLight,
                   ),
                 ),
                 SizedBox(height: 4),
                 Text(
                   timeAgo,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: appTheme.blueGray500,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppTheme.textSecondaryLight,
                     fontSize: 11,
                   ),
                 ),
               ],
             ),
           ),
-          Icon(Icons.arrow_forward_ios, size: 16, color: appTheme.gray400),
+          Icon(Icons.arrow_forward_ios, size: 16, color: AppTheme.dividerLight),
         ],
       ),
     );

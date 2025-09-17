@@ -1,5 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:sabo_arena/core/app_export.dart';
+import 'package:sizer/sizer.dart';
+import 'package:sabo_arena/theme/app_theme.dart';
+
+// Define the missing data model for a tournament participant.
+class TournamentParticipant {
+  final String id;
+  final String name;
+  final String avatarUrl;
+  final int rank;
+  final String status;
+  final DateTime registeredAt;
+  final String? club;
+
+  TournamentParticipant({
+    required this.id,
+    required this.name,
+    required this.avatarUrl,
+    required this.rank,
+    required this.status,
+    required this.registeredAt,
+    this.club,
+  });
+}
 
 class ParticipantManagementView extends StatefulWidget {
   final String tournamentId;
@@ -39,7 +62,7 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
     
     _tabController = TabController(length: 3, vsync: this);
     _animationController = AnimationController(
-      duration: Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 600),
       vsync: this,
     );
     
@@ -75,13 +98,29 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
     _animationController.forward();
   }
 
+  // Add the missing mock data generation function.
+  List<TournamentParticipant> _generateMockParticipants() {
+    return List.generate(18, (index) {
+      final statuses = ['confirmed', 'pending', 'checked_in', 'eliminated'];
+      return TournamentParticipant(
+        id: 'user_$index',
+        name: 'Cơ thủ ${index + 1}',
+        avatarUrl: 'https://i.pravatar.cc/150?img=$index',
+        rank: 1200 + (index * 50),
+        status: statuses[index % statuses.length],
+        registeredAt: DateTime.now().subtract(Duration(days: index)),
+        club: index % 3 == 0 ? 'CLB Bida Sài Gòn' : null,
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       height: MediaQuery.of(context).size.height * 0.8,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.h)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.sp)),
       ),
       child: Column(
         children: [
@@ -97,9 +136,9 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
 
   Widget _buildHeader() {
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16.sp),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: appTheme.gray200)),
+        border: Border(bottom: BorderSide(color: AppTheme.dividerLight)),
       ),
       child: Column(
         children: [
@@ -112,16 +151,16 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
                     Text(
                       "Quản lý người chơi",
                       style: TextStyle(
-                        fontSize: 18.fSize,
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.bold,
-                        color: appTheme.gray900,
+                        color: AppTheme.textPrimaryLight,
                       ),
                     ),
                     Text(
                       "${_participants.length}/${widget.maxParticipants} người chơi",
                       style: TextStyle(
-                        fontSize: 12.fSize,
-                        color: appTheme.gray600,
+                        fontSize: 12.sp,
+                        color: AppTheme.textSecondaryLight,
                       ),
                     ),
                   ],
@@ -131,18 +170,19 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
               if (widget.canManage)
                 ElevatedButton.icon(
                   onPressed: _showAddParticipantDialog,
-                  icon: Icon(Icons.person_add, size: 16.adaptSize),
-                  label: Text("Thêm"),
+                  icon: Icon(Icons.person_add, size: 16.sp),
+                  label: const Text("Thêm"),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: appTheme.blue600,
+                    backgroundColor: AppTheme.primaryLight,
                     foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(horizontal: 12.h, vertical: 8.v),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 12.sp, vertical: 8.sp),
                   ),
                 ),
             ],
           ),
           
-          SizedBox(height: 12.v),
+          SizedBox(height: 12.sp),
           _buildSearchAndFilter(),
         ],
       ),
@@ -155,16 +195,17 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
         Expanded(
           child: Container(
             decoration: BoxDecoration(
-              color: appTheme.gray100,
-              borderRadius: BorderRadius.circular(8.h),
+              color: AppTheme.backgroundLight,
+              borderRadius: BorderRadius.circular(8.sp),
             ),
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: "Tìm kiếm người chơi...",
-                prefixIcon: Icon(Icons.search, color: appTheme.gray500),
+                prefixIcon: Icon(Icons.search, color: AppTheme.textDisabledLight),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(horizontal: 12.h, vertical: 8.v),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 12.sp, vertical: 8.sp),
               ),
               onChanged: (value) {
                 setState(() {
@@ -176,20 +217,22 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
           ),
         ),
         
-        SizedBox(width: 8.h),
+        SizedBox(width: 8.sp),
         Container(
           decoration: BoxDecoration(
-            color: appTheme.gray100,
-            borderRadius: BorderRadius.circular(8.h),
+            color: AppTheme.backgroundLight,
+            borderRadius: BorderRadius.circular(8.sp),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: _selectedFilter,
-              items: [
+              items: const [
                 DropdownMenuItem(value: 'all', child: Text('Tất cả')),
-                DropdownMenuItem(value: 'confirmed', child: Text('Đã xác nhận')),
+                DropdownMenuItem(
+                    value: 'confirmed', child: Text('Đã xác nhận')),
                 DropdownMenuItem(value: 'pending', child: Text('Chờ duyệt')),
-                DropdownMenuItem(value: 'checked_in', child: Text('Đã check-in')),
+                DropdownMenuItem(
+                    value: 'checked_in', child: Text('Đã check-in')),
               ],
               onChanged: (value) {
                 setState(() {
@@ -197,9 +240,9 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
                   _filterParticipants();
                 });
               },
-              icon: Icon(Icons.filter_list, color: appTheme.gray600),
-              style: TextStyle(color: appTheme.gray700, fontSize: 12.fSize),
-              padding: EdgeInsets.symmetric(horizontal: 8.h),
+              icon: Icon(Icons.filter_list, color: AppTheme.textSecondaryLight),
+              style: TextStyle(color: AppTheme.textSecondaryLight, fontSize: 12.sp),
+              padding: EdgeInsets.symmetric(horizontal: 8.sp),
             ),
           ),
         ),
@@ -210,14 +253,14 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
   Widget _buildTabBar() {
     return Container(
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: appTheme.gray200)),
+        border: Border(bottom: BorderSide(color: AppTheme.dividerLight)),
       ),
       child: TabBar(
         controller: _tabController,
-        labelColor: appTheme.blue600,
-        unselectedLabelColor: appTheme.gray600,
-        indicatorColor: appTheme.blue600,
-        tabs: [
+        labelColor: AppTheme.primaryLight,
+        unselectedLabelColor: AppTheme.textSecondaryLight,
+        indicatorColor: AppTheme.primaryLight,
+        tabs: const [
           Tab(text: 'Danh sách'),
           Tab(text: 'Thống kê'),
           Tab(text: 'Hoạt động'),
@@ -231,13 +274,13 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(color: appTheme.blue600),
-          SizedBox(height: 16.v),
+          CircularProgressIndicator(color: AppTheme.primaryLight),
+          SizedBox(height: 16.sp),
           Text(
             "Đang tải danh sách...",
             style: TextStyle(
-              fontSize: 14.fSize,
-              color: appTheme.gray600,
+              fontSize: 14.sp,
+              color: AppTheme.textSecondaryLight,
             ),
           ),
         ],
@@ -270,7 +313,7 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
     }
 
     return ListView.builder(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16.sp),
       itemCount: _filteredParticipants.length,
       itemBuilder: (context, index) {
         final participant = _filteredParticipants[index];
@@ -281,32 +324,32 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
 
   Widget _buildParticipantCard(TournamentParticipant participant) {
     return Container(
-      margin: EdgeInsets.only(bottom: 12.v),
+      margin: EdgeInsets.only(bottom: 12.sp),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.h),
-        border: Border.all(color: appTheme.gray200),
+        borderRadius: BorderRadius.circular(12.sp),
+        border: Border.all(color: AppTheme.dividerLight),
         boxShadow: [
           BoxShadow(
-            color: appTheme.black900.withOpacity(0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 4,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Padding(
-        padding: EdgeInsets.all(12.h),
+        padding: EdgeInsets.all(12.sp),
         child: Row(
           children: [
             // Avatar
             CircleAvatar(
-              radius: 24.adaptSize,
+              radius: 24.sp,
               backgroundImage: NetworkImage(participant.avatarUrl),
-              backgroundColor: appTheme.gray200,
+              backgroundColor: AppTheme.backgroundLight,
             ),
-            
-            SizedBox(width: 12.h),
-            
+
+            SizedBox(width: 12.sp),
+
             // Info
             Expanded(
               child: Column(
@@ -318,9 +361,9 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
                         child: Text(
                           participant.name,
                           style: TextStyle(
-                            fontSize: 14.fSize,
+                            fontSize: 14.sp,
                             fontWeight: FontWeight.w600,
-                            color: appTheme.gray900,
+                            color: AppTheme.textPrimaryLight,
                           ),
                         ),
                       ),
@@ -328,43 +371,44 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
                     ],
                   ),
                   
-                  SizedBox(height: 4.v),
+                  SizedBox(height: 4.sp),
                   Row(
                     children: [
-                      Icon(Icons.star, size: 12.adaptSize, color: appTheme.orange600),
-                      SizedBox(width: 4.h),
+                      Icon(Icons.star, size: 12.sp, color: AppTheme.accentLight),
+                      SizedBox(width: 4.sp),
                       Text(
                         "Rank ${participant.rank}",
                         style: TextStyle(
-                          fontSize: 12.fSize,
-                          color: appTheme.gray600,
+                          fontSize: 12.sp,
+                          color: AppTheme.textSecondaryLight,
                         ),
                       ),
                       
-                      SizedBox(width: 12.h),
-                      Icon(Icons.access_time, size: 12.adaptSize, color: appTheme.gray500),
-                      SizedBox(width: 4.h),
+                      SizedBox(width: 12.sp),
+                      Icon(Icons.access_time,
+                          size: 12.sp, color: AppTheme.textDisabledLight),
+                      SizedBox(width: 4.sp),
                       Text(
                         _formatRegistrationTime(participant.registeredAt),
                         style: TextStyle(
-                          fontSize: 11.fSize,
-                          color: appTheme.gray500,
+                          fontSize: 11.sp,
+                          color: AppTheme.textDisabledLight,
                         ),
                       ),
                     ],
                   ),
                   
                   if (participant.club != null) ...[
-                    SizedBox(height: 4.v),
+                    SizedBox(height: 4.sp),
                     Row(
                       children: [
-                        Icon(Icons.group, size: 12.adaptSize, color: appTheme.blue600),
-                        SizedBox(width: 4.h),
+                        Icon(Icons.group, size: 12.sp, color: AppTheme.primaryLight),
+                        SizedBox(width: 4.sp),
                         Text(
                           participant.club!,
                           style: TextStyle(
-                            fontSize: 11.fSize,
-                            color: appTheme.blue600,
+                            fontSize: 11.sp,
+                            color: AppTheme.primaryLight,
                           ),
                         ),
                       ],
@@ -377,15 +421,15 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
             // Actions
             if (widget.canManage)
               PopupMenuButton(
-                icon: Icon(Icons.more_vert, color: appTheme.gray600),
+                icon: Icon(Icons.more_vert, color: AppTheme.textSecondaryLight),
                 itemBuilder: (context) => [
                   PopupMenuItem(
                     value: 'view',
                     child: Row(
                       children: [
-                        Icon(Icons.visibility, size: 16.adaptSize),
-                        SizedBox(width: 8.h),
-                        Text("Xem hồ sơ"),
+                        Icon(Icons.visibility, size: 16.sp),
+                        SizedBox(width: 8.sp),
+                        const Text("Xem hồ sơ"),
                       ],
                     ),
                   ),
@@ -394,9 +438,10 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
                       value: 'approve',
                       child: Row(
                         children: [
-                          Icon(Icons.check_circle, size: 16.adaptSize, color: appTheme.green600),
-                          SizedBox(width: 8.h),
-                          Text("Duyệt"),
+                          Icon(Icons.check_circle,
+                              size: 16.sp, color: AppTheme.successLight),
+                          SizedBox(width: 8.sp),
+                          const Text("Duyệt"),
                         ],
                       ),
                     ),
@@ -404,14 +449,16 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
                     value: 'remove',
                     child: Row(
                       children: [
-                        Icon(Icons.remove_circle, size: 16.adaptSize, color: appTheme.red600),
-                        SizedBox(width: 8.h),
-                        Text("Loại bỏ"),
+                        Icon(Icons.remove_circle,
+                            size: 16.sp, color: AppTheme.errorLight),
+                        SizedBox(width: 8.sp),
+                        const Text("Loại bỏ"),
                       ],
                     ),
                   ),
                 ],
-                onSelected: (value) => _handleParticipantAction(participant, value),
+                onSelected: (value) =>
+                    _handleParticipantAction(participant, value),
               ),
           ],
         ),
@@ -425,36 +472,36 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
     
     switch (status) {
       case 'confirmed':
-        color = appTheme.green600;
+        color = AppTheme.successLight;
         label = 'Đã xác nhận';
         break;
       case 'pending':
-        color = appTheme.orange600;
+        color = AppTheme.warningLight;
         label = 'Chờ duyệt';
         break;
       case 'checked_in':
-        color = appTheme.blue600;
+        color = AppTheme.primaryLight;
         label = 'Đã check-in';
         break;
       case 'eliminated':
-        color = appTheme.red600;
+        color = AppTheme.errorLight;
         label = 'Bị loại';
         break;
       default:
-        color = appTheme.gray600;
+        color = AppTheme.textSecondaryLight;
         label = 'Không rõ';
     }
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 6.h, vertical: 2.v),
+      padding: EdgeInsets.symmetric(horizontal: 6.sp, vertical: 2.sp),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8.h),
+        borderRadius: BorderRadius.circular(8.sp),
       ),
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 10.fSize,
+          fontSize: 10.sp,
           fontWeight: FontWeight.w500,
           color: color,
         ),
@@ -464,13 +511,13 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
 
   Widget _buildStatisticsTab() {
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16.sp),
       child: Column(
         children: [
           _buildRegistrationChart(),
-          SizedBox(height: 16.v),
+          SizedBox(height: 16.sp),
           _buildRankDistribution(),
-          SizedBox(height: 16.v),
+          SizedBox(height: 16.sp),
           _buildClubRepresentation(),
         ],
       ),
@@ -479,11 +526,11 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
 
   Widget _buildRegistrationChart() {
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16.sp),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.h),
-        border: Border.all(color: appTheme.gray200),
+        borderRadius: BorderRadius.circular(12.sp),
+        border: Border.all(color: AppTheme.dividerLight),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -491,16 +538,16 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
           Text(
             "Đăng ký theo thời gian",
             style: TextStyle(
-              fontSize: 16.fSize,
+              fontSize: 16.sp,
               fontWeight: FontWeight.bold,
-              color: appTheme.gray900,
+              color: AppTheme.textPrimaryLight,
             ),
           ),
-          SizedBox(height: 16.v),
+          SizedBox(height: 16.sp),
           
           // Mock chart representation
           SizedBox(
-            height: 120.v,
+            height: 120.sp,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -510,17 +557,18 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Container(
-                      width: 20.h,
+                      width: 20.sp,
                       height: height,
                       decoration: BoxDecoration(
-                        color: appTheme.blue600,
-                        borderRadius: BorderRadius.circular(4.h),
+                        color: AppTheme.primaryLight,
+                        borderRadius: BorderRadius.circular(4.sp),
                       ),
                     ),
-                    SizedBox(height: 4.v),
+                    SizedBox(height: 4.sp),
                     Text(
                       'T${index + 2}',
-                      style: TextStyle(fontSize: 10.fSize, color: appTheme.gray600),
+                      style: TextStyle(
+                          fontSize: 10.sp, color: AppTheme.textSecondaryLight),
                     ),
                   ],
                 );
@@ -534,18 +582,18 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
 
   Widget _buildRankDistribution() {
     final rankData = [
-      {'range': 'Dưới 1000', 'count': 3, 'color': appTheme.red600},
-      {'range': '1000-1500', 'count': 8, 'color': appTheme.orange600},
-      {'range': '1500-2000', 'count': 5, 'color': appTheme.blue600},
-      {'range': 'Trên 2000', 'count': 2, 'color': appTheme.green600},
+      {'range': 'Dưới 1000', 'count': 3, 'color': AppTheme.errorLight},
+      {'range': '1000-1500', 'count': 8, 'color': AppTheme.accentLight},
+      {'range': '1500-2000', 'count': 5, 'color': AppTheme.primaryLight},
+      {'range': 'Trên 2000', 'count': 2, 'color': AppTheme.successLight},
     ];
 
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16.sp),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.h),
-        border: Border.all(color: appTheme.gray200),
+        borderRadius: BorderRadius.circular(12.sp),
+        border: Border.all(color: AppTheme.dividerLight),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -553,40 +601,41 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
           Text(
             "Phân bổ theo rank",
             style: TextStyle(
-              fontSize: 16.fSize,
+              fontSize: 16.sp,
               fontWeight: FontWeight.bold,
-              color: appTheme.gray900,
+              color: AppTheme.textPrimaryLight,
             ),
           ),
-          SizedBox(height: 12.v),
+          SizedBox(height: 12.sp),
           
           ...rankData.map((data) => Padding(
-            padding: EdgeInsets.only(bottom: 8.v),
+            padding: EdgeInsets.only(bottom: 8.sp),
             child: Row(
               children: [
                 Container(
-                  width: 12.h,
-                  height: 12.v,
+                  width: 12.sp,
+                  height: 12.sp,
                   decoration: BoxDecoration(
                     color: data['color'] as Color,
-                    borderRadius: BorderRadius.circular(2.h),
+                    borderRadius: BorderRadius.circular(2.sp),
                   ),
                 ),
-                SizedBox(width: 8.h),
+                SizedBox(width: 8.sp),
                 
                 Expanded(
                   child: Text(
                     data['range'] as String,
-                    style: TextStyle(fontSize: 13.fSize, color: appTheme.gray700),
+                    style: TextStyle(
+                        fontSize: 13.sp, color: AppTheme.textSecondaryLight),
                   ),
                 ),
                 
                 Text(
                   "${data['count']} người",
                   style: TextStyle(
-                    fontSize: 13.fSize,
+                    fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
-                    color: appTheme.gray900,
+                    color: AppTheme.textPrimaryLight,
                   ),
                 ),
               ],
@@ -606,11 +655,11 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
     ];
 
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16.sp),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.h),
-        border: Border.all(color: appTheme.gray200),
+        borderRadius: BorderRadius.circular(12.sp),
+        border: Border.all(color: AppTheme.dividerLight),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -618,29 +667,30 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
           Text(
             "Đại diện các club",
             style: TextStyle(
-              fontSize: 16.fSize,
+              fontSize: 16.sp,
               fontWeight: FontWeight.bold,
-              color: appTheme.gray900,
+              color: AppTheme.textPrimaryLight,
             ),
           ),
-          SizedBox(height: 12.v),
+          SizedBox(height: 12.sp),
           
           ...clubData.map((club) => Padding(
-            padding: EdgeInsets.only(bottom: 8.v),
+            padding: EdgeInsets.only(bottom: 8.sp),
             child: Row(
               children: [
                 Expanded(
                   child: Text(
                     club['name'] as String,
-                    style: TextStyle(fontSize: 13.fSize, color: appTheme.gray700),
+                    style: TextStyle(
+                        fontSize: 13.sp, color: AppTheme.textSecondaryLight),
                   ),
                 ),
                 Text(
                   "${club['count']} người",
                   style: TextStyle(
-                    fontSize: 13.fSize,
+                    fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
-                    color: appTheme.blue600,
+                    color: AppTheme.primaryLight,
                   ),
                 ),
               ],
@@ -655,7 +705,7 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
     final activities = _getMockActivities();
     
     return ListView.builder(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16.sp),
       itemCount: activities.length,
       itemBuilder: (context, index) {
         final activity = activities[index];
@@ -666,50 +716,52 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
 
   Widget _buildActivityItem(Map<String, dynamic> activity) {
     return Container(
-      margin: EdgeInsets.only(bottom: 12.v),
-      padding: EdgeInsets.all(12.h),
+      margin: EdgeInsets.only(bottom: 12.sp),
+      padding: EdgeInsets.all(12.sp),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8.h),
-        border: Border.all(color: appTheme.gray200),
+        borderRadius: BorderRadius.circular(8.sp),
+        border: Border.all(color: AppTheme.dividerLight),
       ),
       child: Row(
         children: [
           CircleAvatar(
-            radius: 16.adaptSize,
+            radius: 16.sp,
             backgroundImage: NetworkImage(activity['avatar']),
-            backgroundColor: appTheme.gray200,
+            backgroundColor: AppTheme.backgroundLight,
           ),
-          
-          SizedBox(width: 12.h),
-          
+
+          SizedBox(width: 12.sp),
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  activity['title'],
-                  style: TextStyle(
-                    fontSize: 13.fSize,
-                    fontWeight: FontWeight.w600,
-                    color: appTheme.gray900,
+                RichText(
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      color: AppTheme.textSecondaryLight,
+                      fontFamily: 'Roboto',
+                    ),
+                    children: [
+                      TextSpan(
+                        text: activity['message'].replaceAll(RegExp(r'<strong>|<\/strong>'), ''),
+                        style: TextStyle(color: AppTheme.textPrimaryLight),
+                      ),
+                    ],
                   ),
                 ),
+                SizedBox(height: 2.sp),
                 Text(
                   activity['time'],
                   style: TextStyle(
-                    fontSize: 11.fSize,
-                    color: appTheme.gray500,
+                    fontSize: 11.sp,
+                    color: AppTheme.textDisabledLight,
                   ),
                 ),
               ],
             ),
-          ),
-          
-          Icon(
-            activity['icon'],
-            color: activity['color'],
-            size: 16.adaptSize,
           ),
         ],
       ),
@@ -721,25 +773,17 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.people_outline, size: 64.adaptSize, color: appTheme.gray400),
-          SizedBox(height: 16.v),
+          Icon(Icons.group_off, size: 64.sp, color: AppTheme.textDisabledLight),
+          SizedBox(height: 16.sp),
           Text(
-            "Chưa có người chơi nào",
-            style: TextStyle(
-              fontSize: 16.fSize,
-              fontWeight: FontWeight.w600,
-              color: appTheme.gray600,
-            ),
+            "Không tìm thấy người chơi",
+            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
           ),
-          SizedBox(height: 8.v),
+          SizedBox(height: 8.sp),
           Text(
-            _searchQuery.isNotEmpty 
-              ? "Không tìm thấy kết quả phù hợp"
-              : "Hãy mời người chơi tham gia giải đấu",
-            style: TextStyle(
-              fontSize: 14.fSize,
-              color: appTheme.gray500,
-            ),
+            "Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppTheme.textSecondaryLight),
           ),
         ],
       ),
@@ -748,131 +792,50 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
 
   void _filterParticipants() {
     setState(() {
-      _filteredParticipants = _participants.where((participant) {
-        final matchesSearch = _searchQuery.isEmpty || 
-          participant.name.toLowerCase().contains(_searchQuery.toLowerCase());
-        
-        final matchesFilter = _selectedFilter == 'all' || 
-          participant.status == _selectedFilter;
-        
-        return matchesSearch && matchesFilter;
+      _filteredParticipants = _participants.where((p) {
+        final matchesQuery = p.name.toLowerCase().contains(_searchQuery.toLowerCase());
+        final matchesFilter = _selectedFilter == 'all' || p.status == _selectedFilter;
+        return matchesQuery && matchesFilter;
       }).toList();
     });
   }
 
   void _showAddParticipantDialog() {
-    // Implementation for adding participant
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text("Thêm người chơi"),
-        content: Text("Tính năng đang được phát triển"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text("Đóng"),
-          ),
-        ],
-      ),
-    );
+    // Placeholder for showing a dialog to add a new participant.
   }
 
   void _handleParticipantAction(TournamentParticipant participant, String action) {
-    // Implementation for participant actions
-    switch (action) {
-      case 'view':
-        // Show participant profile
-        break;
-      case 'approve':
-        // Approve participant
-        break;
-      case 'remove':
-        // Remove participant
-        break;
-    }
+    // Placeholder for handling actions like 'view', 'approve', 'remove'.
   }
 
   String _formatRegistrationTime(DateTime time) {
-    final now = DateTime.now();
-    final difference = now.difference(time);
-    
+    final difference = DateTime.now().difference(time);
     if (difference.inDays > 0) {
-      return "${difference.inDays} ngày trước";
+      return '${difference.inDays} ngày trước';
     } else if (difference.inHours > 0) {
-      return "${difference.inHours} giờ trước";
+      return '${difference.inHours} giờ trước';
     } else {
-      return "${difference.inMinutes} phút trước";
+      return '${difference.inMinutes} phút trước';
     }
-  }
-
-  List<TournamentParticipant> _generateMockParticipants() {
-    final names = [
-      'Nguyễn Văn A', 'Lê Văn B', 'Trần Văn C', 'Phạm Văn D',
-      'Hoàng Văn E', 'Vũ Văn F', 'Đinh Văn G', 'Bùi Văn H',
-      'Đỗ Văn I', 'Hồ Văn J', 'Lý Văn K', 'Mai Văn L',
-      'Phan Văn M', 'Tô Văn N', 'Lâm Văn O', 'Đặng Văn P',
-      'Dương Văn Q', 'Cao Văn R'
-    ];
-    
-    final statuses = ['confirmed', 'pending', 'checked_in', 'confirmed'];
-    final clubs = ['Saigon Ping Pong', 'Hanoi TT Club', 'Da Nang Sports', null];
-    
-    return List.generate(names.length, (index) {
-      return TournamentParticipant(
-        id: 'p_${index + 1}',
-        name: names[index],
-        avatarUrl: 'https://images.unsplash.com/photo-${1580000000000 + index}?w=100&h=100&fit=crop&crop=face',
-        rank: 800 + (index * 150) + (index % 3) * 50,
-        status: statuses[index % statuses.length],
-        club: clubs[index % clubs.length],
-        registeredAt: DateTime.now().subtract(Duration(days: index + 1, hours: index * 2)),
-      );
-    });
   }
 
   List<Map<String, dynamic>> _getMockActivities() {
     return [
       {
-        'title': 'Nguyễn Văn A đã đăng ký tham gia',
-        'time': '2 phút trước',
-        'avatar': 'https://images.unsplash.com/photo-1580000000001?w=50&h=50&fit=crop&crop=face',
-        'icon': Icons.person_add,
-        'color': appTheme.green600,
+        'avatar': 'https://i.pravatar.cc/150?img=1',
+        'message': '<strong>Cơ thủ 2</strong> đã được duyệt.',
+        'time': '5 phút trước',
       },
       {
-        'title': 'Lê Văn B đã check-in',
-        'time': '15 phút trước',
-        'avatar': 'https://images.unsplash.com/photo-1580000000002?w=50&h=50&fit=crop&crop=face',
-        'icon': Icons.check_circle,
-        'color': appTheme.blue600,
+        'avatar': 'https://i.pravatar.cc/150?img=3',
+        'message': '<strong>Cơ thủ 4</strong> đã đăng ký.',
+        'time': '1 giờ trước',
       },
       {
-        'title': 'Trần Văn C đã được duyệt tham gia',
-        'time': '30 phút trước',
-        'avatar': 'https://images.unsplash.com/photo-1580000000003?w=50&h=50&fit=crop&crop=face',
-        'icon': Icons.approval,
-        'color': appTheme.orange600,
-      },
+        'avatar': 'https://i.pravatar.cc/150?img=5',
+        'message': '<strong>Cơ thủ 6</strong> đã bị loại.',
+        'time': '3 giờ trước',
+      }
     ];
   }
-}
-
-class TournamentParticipant {
-  final String id;
-  final String name;
-  final String avatarUrl;
-  final int rank;
-  final String status; // confirmed, pending, checked_in, eliminated
-  final String? club;
-  final DateTime registeredAt;
-
-  TournamentParticipant({
-    required this.id,
-    required this.name,
-    required this.avatarUrl,
-    required this.rank,
-    required this.status,
-    this.club,
-    required this.registeredAt,
-  });
 }

@@ -40,11 +40,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
     );
     
-    Navigator.of(context).pushReplacementNamed(AppRoutes.login);
+    Navigator.of(context).pushReplacementNamed(AppRoutes.loginScreen);
   }
 
   void _navigateToLogin() {
-    Navigator.of(context).pushReplacementNamed(AppRoutes.login);
+    Navigator.of(context).pushReplacementNamed(AppRoutes.loginScreen);
   }
 
   @override

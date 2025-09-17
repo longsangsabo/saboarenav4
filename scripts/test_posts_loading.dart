@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:sabo_arena/services/supabase_service.dart';
 import 'package:sabo_arena/services/post_repository.dart';
 
@@ -7,10 +6,7 @@ void main() async {
     print('🔄 Testing PostRepository.getPosts()...');
     
     // Initialize Supabase
-    final supabaseUrl = Platform.environment['SUPABASE_URL'] ?? 'https://mogjjvscxjwvhtpkrlqr.supabase.co';
-    final supabaseKey = Platform.environment['SUPABASE_ANON_KEY'] ?? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vZ2pqdnNjeGp3dmh0cGtybHFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc5MTk1ODAsImV4cCI6MjA3MzQ5NTU4MH0.u1urXd3uiT0fuqWlJ1Nhp7uJhgdiyOdLSdSWJWczHoQ';
-    
-    await SupabaseService.initialize(supabaseUrl, supabaseKey);
+    await SupabaseService.initialize();
     print('✅ Supabase connected');
 
     // Test PostRepository

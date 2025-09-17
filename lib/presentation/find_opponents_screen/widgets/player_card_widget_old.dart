@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../../models/user_profile.dart';
 import './challenge_modal_widget.dart';

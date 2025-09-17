@@ -8,6 +8,7 @@ import '../presentation/find_opponents_screen/find_opponents_screen.dart';
 import '../presentation/club_main_screen/club_main_screen.dart';
 import '../presentation/club_profile_screen/club_profile_screen.dart';
 import '../presentation/club_registration_screen/club_registration_screen.dart';
+import '../presentation/club_dashboard_screen/club_dashboard_screen.dart';
 import 'package:sabo_arena/presentation/user_profile_screen/user_profile_screen.dart';
 import '../presentation/tournament_detail_screen/tournament_detail_screen.dart';
 import '../presentation/login_screen.dart';
@@ -34,6 +35,7 @@ class AppRoutes {
   static const String adminDashboardScreen = '/admin_dashboard';
   static const String clubApprovalScreen = '/admin_club_approval';
   static const String myClubsScreen = '/my_clubs';
+  static const String clubDashboardScreen = '/club_dashboard';
 
   static const String initial = splashScreen;
 
@@ -54,5 +56,6 @@ class AppRoutes {
         adminDashboardScreen: (context) => const AdminDashboardScreen(),
         clubApprovalScreen: (context) => const ClubApprovalScreen(),
         myClubsScreen: (context) => const MyClubsScreen(),
+        clubDashboardScreen: (context) => const ClubDashboardScreen(),
       };
 }

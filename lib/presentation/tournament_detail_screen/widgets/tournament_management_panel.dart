@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:sizer/sizer.dart';
 import 'package:sabo_arena/core/app_export.dart';
+import 'package:sabo_arena/theme/app_theme.dart';
 
 class TournamentManagementPanel extends StatefulWidget {
   final String tournamentId;
@@ -63,10 +65,10 @@ class _TournamentManagementPanelState extends State<TournamentManagementPanel>
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20.h)),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20.sp)),
                 boxShadow: [
                   BoxShadow(
-                    color: appTheme.black900.withOpacity(0.1),
+                    color: AppTheme.onBackgroundLight.withOpacity(0.1),
                     blurRadius: 20,
                     offset: Offset(0, -4),
                   ),
@@ -87,10 +89,10 @@ class _TournamentManagementPanelState extends State<TournamentManagementPanel>
 
   Widget _buildTabBar() {
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16.sp),
       decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: appTheme.gray200),
+          bottom: BorderSide(color: AppTheme.dividerLight),
         ),
       ),
       child: SingleChildScrollView(
@@ -106,23 +108,23 @@ class _TournamentManagementPanelState extends State<TournamentManagementPanel>
                 setState(() => _selectedTab = index);
                 _animationController.forward(from: 0);
               },
-              borderRadius: BorderRadius.circular(20.h),
+              borderRadius: BorderRadius.circular(20.sp),
               child: Container(
-                margin: EdgeInsets.only(right: 8.h),
-                padding: EdgeInsets.symmetric(horizontal: 16.h, vertical: 8.v),
+                margin: EdgeInsets.only(right: 8.sp),
+                padding: EdgeInsets.symmetric(horizontal: 16.sp, vertical: 8.sp),
                 decoration: BoxDecoration(
-                  color: isSelected ? appTheme.blue600 : Colors.transparent,
-                  borderRadius: BorderRadius.circular(20.h),
+                  color: isSelected ? AppTheme.primaryLight : Colors.transparent,
+                  borderRadius: BorderRadius.circular(20.sp),
                   border: Border.all(
-                    color: isSelected ? appTheme.blue600 : appTheme.gray300,
+                    color: isSelected ? AppTheme.primaryLight : AppTheme.dividerLight,
                   ),
                 ),
                 child: Text(
                   tab,
                   style: TextStyle(
-                    color: isSelected ? Colors.white : appTheme.gray700,
+                    color: isSelected ? Colors.white : AppTheme.textSecondaryLight,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                    fontSize: 14.fSize,
+                    fontSize: 14.sp,
                   ),
                 ),
               ),
@@ -173,16 +175,16 @@ class _TournamentOverviewTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16.sp),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildQuickStats(),
-          SizedBox(height: 16.v),
+          SizedBox(height: 16.sp),
           _buildQuickActions(),
-          SizedBox(height: 16.v),
+          SizedBox(height: 16.sp),
           _buildRecentActivity(),
-          SizedBox(height: 16.v),
+          SizedBox(height: 16.sp),
           _buildUpcomingMatches(),
         ],
       ),
@@ -191,37 +193,37 @@ class _TournamentOverviewTab extends StatelessWidget {
 
   Widget _buildQuickStats() {
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16.sp),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [appTheme.blue600, appTheme.blue800],
+          colors: [AppTheme.primaryLight, AppTheme.primaryDark],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(12.h),
+        borderRadius: BorderRadius.circular(12.sp),
       ),
       child: Column(
         children: [
           Text(
             "Thống kê nhanh",
             style: TextStyle(
-              fontSize: 16.fSize,
+              fontSize: 16.sp,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
           ),
-          SizedBox(height: 16.v),
+          SizedBox(height: 16.sp),
           
           Row(
             children: [
               Expanded(
                 child: _buildStatItem("Người chơi", "16/32", Icons.people_outline),
               ),
-              Container(width: 1, height: 40.v, color: Colors.white.withOpacity(0.3)),
+              Container(width: 1, height: 40.sp, color: Colors.white.withOpacity(0.3)),
               Expanded(
                 child: _buildStatItem("Trận đấu", "8/15", Icons.sports_esports_outlined),
               ),
-              Container(width: 1, height: 40.v, color: Colors.white.withOpacity(0.3)),
+              Container(width: 1, height: 40.sp, color: Colors.white.withOpacity(0.3)),
               Expanded(
                 child: _buildStatItem("Hoàn thành", "53%", Icons.pie_chart_outline),
               ),
@@ -235,12 +237,12 @@ class _TournamentOverviewTab extends StatelessWidget {
   Widget _buildStatItem(String label, String value, IconData icon) {
     return Column(
       children: [
-        Icon(icon, color: Colors.white.withOpacity(0.8), size: 20.adaptSize),
-        SizedBox(height: 4.v),
+        Icon(icon, color: Colors.white.withOpacity(0.8), size: 20.sp),
+        SizedBox(height: 4.sp),
         Text(
           value,
           style: TextStyle(
-            fontSize: 18.fSize,
+            fontSize: 18.sp,
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
@@ -248,7 +250,7 @@ class _TournamentOverviewTab extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            fontSize: 11.fSize,
+            fontSize: 11.sp,
             color: Colors.white.withOpacity(0.8),
           ),
         ),
@@ -258,11 +260,11 @@ class _TournamentOverviewTab extends StatelessWidget {
 
   Widget _buildQuickActions() {
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16.sp),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.h),
-        border: Border.all(color: appTheme.gray200),
+        borderRadius: BorderRadius.circular(12.sp),
+        border: Border.all(color: AppTheme.dividerLight),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,16 +272,16 @@ class _TournamentOverviewTab extends StatelessWidget {
           Text(
             "Thao tác nhanh",
             style: TextStyle(
-              fontSize: 16.fSize,
+              fontSize: 16.sp,
               fontWeight: FontWeight.bold,
-              color: appTheme.gray900,
+              color: AppTheme.textPrimaryLight,
             ),
           ),
-          SizedBox(height: 12.v),
+          SizedBox(height: 12.sp),
           
           Wrap(
-            spacing: 8.h,
-            runSpacing: 8.v,
+            spacing: 8.sp,
+            runSpacing: 8.sp,
             children: _getQuickActions().map((action) {
               return _buildActionButton(
                 label: action['label'],
@@ -302,24 +304,24 @@ class _TournamentOverviewTab extends StatelessWidget {
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(8.h),
+      borderRadius: BorderRadius.circular(8.sp),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.h, vertical: 8.v),
+        padding: EdgeInsets.symmetric(horizontal: 12.sp, vertical: 8.sp),
         decoration: BoxDecoration(
           color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8.h),
+          borderRadius: BorderRadius.circular(8.sp),
           border: Border.all(color: color.withOpacity(0.3)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: color, size: 16.adaptSize),
-            SizedBox(width: 6.h),
+            Icon(icon, color: color, size: 16.sp),
+            SizedBox(width: 6.sp),
             Text(
               label,
               style: TextStyle(
                 color: color,
-                fontSize: 12.fSize,
+                fontSize: 12.sp,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -336,19 +338,19 @@ class _TournamentOverviewTab extends StatelessWidget {
           {
             'label': 'Quản lý ĐK',
             'icon': Icons.person_add_outlined,
-            'color': appTheme.green600,
+            'color': AppTheme.successLight,
             'onTap': () {},
           },
           {
             'label': 'Bắt đầu',
             'icon': Icons.play_circle_outline,
-            'color': appTheme.blue600,
+            'color': AppTheme.primaryLight,
             'onTap': () {},
           },
           {
             'label': 'Chỉnh sửa',
             'icon': Icons.edit_outlined,
-            'color': appTheme.orange600,
+            'color': AppTheme.warningLight,
             'onTap': () {},
           },
         ];
@@ -357,19 +359,19 @@ class _TournamentOverviewTab extends StatelessWidget {
           {
             'label': 'Cập nhật KQ',
             'icon': Icons.update_outlined,
-            'color': appTheme.green600,
+            'color': AppTheme.successLight,
             'onTap': () {},
           },
           {
             'label': 'Bảng đấu',
             'icon': Icons.account_tree_outlined,
-            'color': appTheme.blue600,
+            'color': AppTheme.primaryLight,
             'onTap': () {},
           },
           {
             'label': 'Tin nhắn',
             'icon': Icons.message_outlined,
-            'color': appTheme.purple600,
+            'color': AppTheme.accentLight,
             'onTap': () {},
           },
         ];
@@ -378,13 +380,13 @@ class _TournamentOverviewTab extends StatelessWidget {
           {
             'label': 'Xem KQ',
             'icon': Icons.visibility_outlined,
-            'color': appTheme.blue600,
+            'color': AppTheme.primaryLight,
             'onTap': () {},
           },
           {
             'label': 'Xuất báo cáo',
             'icon': Icons.file_download_outlined,
-            'color': appTheme.green600,
+            'color': AppTheme.successLight,
             'onTap': () {},
           },
         ];
@@ -393,11 +395,11 @@ class _TournamentOverviewTab extends StatelessWidget {
 
   Widget _buildRecentActivity() {
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16.sp),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.h),
-        border: Border.all(color: appTheme.gray200),
+        borderRadius: BorderRadius.circular(12.sp),
+        border: Border.all(color: AppTheme.dividerLight),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -405,12 +407,12 @@ class _TournamentOverviewTab extends StatelessWidget {
           Text(
             "Hoạt động gần đây",
             style: TextStyle(
-              fontSize: 16.fSize,
+              fontSize: 16.sp,
               fontWeight: FontWeight.bold,
-              color: appTheme.gray900,
+              color: AppTheme.textPrimaryLight,
             ),
           ),
-          SizedBox(height: 12.v),
+          SizedBox(height: 12.sp),
           
           ..._getMockActivities().map((activity) => _buildActivityItem(
             activity['title'],
@@ -425,18 +427,18 @@ class _TournamentOverviewTab extends StatelessWidget {
 
   Widget _buildActivityItem(String title, String time, IconData icon, Color color) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 12.v),
+      padding: EdgeInsets.only(bottom: 12.sp),
       child: Row(
         children: [
           Container(
-            padding: EdgeInsets.all(6.h),
+            padding: EdgeInsets.all(6.sp),
             decoration: BoxDecoration(
               color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(6.h),
+              borderRadius: BorderRadius.circular(6.sp),
             ),
-            child: Icon(icon, color: color, size: 16.adaptSize),
+            child: Icon(icon, color: color, size: 16.sp),
           ),
-          SizedBox(width: 12.h),
+          SizedBox(width: 12.sp),
           
           Expanded(
             child: Column(
@@ -445,16 +447,16 @@ class _TournamentOverviewTab extends StatelessWidget {
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 13.fSize,
+                    fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
-                    color: appTheme.gray900,
+                    color: AppTheme.textPrimaryLight,
                   ),
                 ),
                 Text(
                   time,
                   style: TextStyle(
-                    fontSize: 11.fSize,
-                    color: appTheme.gray500,
+                    fontSize: 11.sp,
+                    color: AppTheme.textSecondaryLight,
                   ),
                 ),
               ],
@@ -471,30 +473,30 @@ class _TournamentOverviewTab extends StatelessWidget {
         'title': 'Nguyễn Văn A đã đăng ký tham gia',
         'time': '2 phút trước',
         'icon': Icons.person_add_outlined,
-        'color': appTheme.green600,
+        'color': AppTheme.successLight,
       },
       {
         'title': 'Trận đấu Round 1 - Match 3 đã hoàn thành',
         'time': '15 phút trước',
         'icon': Icons.sports_esports_outlined,
-        'color': appTheme.blue600,
+        'color': AppTheme.primaryLight,
       },
       {
         'title': 'Cập nhật kết quả trận Lê Văn B vs Trần Văn C',
         'time': '30 phút trước',
         'icon': Icons.update_outlined,
-        'color': appTheme.orange600,
+        'color': AppTheme.warningLight,
       },
     ];
   }
 
   Widget _buildUpcomingMatches() {
     return Container(
-      padding: EdgeInsets.all(16.h),
+      padding: EdgeInsets.all(16.sp),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.h),
-        border: Border.all(color: appTheme.gray200),
+        borderRadius: BorderRadius.circular(12.sp),
+        border: Border.all(color: AppTheme.dividerLight),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -505,9 +507,9 @@ class _TournamentOverviewTab extends StatelessWidget {
               Text(
                 "Trận đấu sắp tới",
                 style: TextStyle(
-                  fontSize: 16.fSize,
+                  fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
-                  color: appTheme.gray900,
+                  color: AppTheme.textPrimaryLight,
                 ),
               ),
               TextButton(
@@ -525,11 +527,11 @@ class _TournamentOverviewTab extends StatelessWidget {
 
   Widget _buildMatchItem(Map<String, dynamic> match) {
     return Container(
-      margin: EdgeInsets.only(bottom: 8.v),
-      padding: EdgeInsets.all(12.h),
+      margin: EdgeInsets.only(bottom: 8.sp),
+      padding: EdgeInsets.all(12.sp),
       decoration: BoxDecoration(
-        color: appTheme.gray50,
-        borderRadius: BorderRadius.circular(8.h),
+        color: AppTheme.backgroundLight,
+        borderRadius: BorderRadius.circular(8.sp),
       ),
       child: Row(
         children: [
@@ -540,16 +542,16 @@ class _TournamentOverviewTab extends StatelessWidget {
                 Text(
                   "${match['player1']} vs ${match['player2']}",
                   style: TextStyle(
-                    fontSize: 13.fSize,
+                    fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
-                    color: appTheme.gray900,
+                    color: AppTheme.textPrimaryLight,
                   ),
                 ),
                 Text(
                   match['round'],
                   style: TextStyle(
-                    fontSize: 11.fSize,
-                    color: appTheme.gray600,
+                    fontSize: 11.sp,
+                    color: AppTheme.textSecondaryLight,
                   ),
                 ),
               ],
@@ -562,16 +564,16 @@ class _TournamentOverviewTab extends StatelessWidget {
               Text(
                 match['time'],
                 style: TextStyle(
-                  fontSize: 12.fSize,
+                  fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
-                  color: appTheme.blue600,
+                  color: AppTheme.primaryLight,
                 ),
               ),
               Text(
                 match['table'],
                 style: TextStyle(
-                  fontSize: 10.fSize,
-                  color: appTheme.gray500,
+                  fontSize: 10.sp,
+                  color: AppTheme.textSecondaryLight,
                 ),
               ),
             ],
@@ -613,11 +615,11 @@ class _ParticipantManagementTab extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.people_outline, size: 64.adaptSize, color: appTheme.gray400),
-          SizedBox(height: 16.v),
-          Text("Quản lý người chơi", style: TextStyle(fontSize: 18.fSize, fontWeight: FontWeight.w600)),
-          SizedBox(height: 8.v),
-          Text("Tính năng đang được phát triển", style: TextStyle(color: appTheme.gray600)),
+          Icon(Icons.people_outline, size: 64.sp, color: AppTheme.dividerLight),
+          SizedBox(height: 16.sp),
+          Text("Quản lý người chơi", style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600)),
+          SizedBox(height: 8.sp),
+          Text("Tính năng đang được phát triển", style: TextStyle(color: AppTheme.textSecondaryLight)),
         ],
       ),
     );
@@ -627,7 +629,7 @@ class _ParticipantManagementTab extends StatelessWidget {
 class _BracketManagementTab extends StatelessWidget {
   final String tournamentId;
 
-  const _BracketManagementTab({super.key, required this.tournamentId});
+  const _BracketManagementTab({required this.tournamentId});
 
   @override
   Widget build(BuildContext context) {
@@ -635,11 +637,11 @@ class _BracketManagementTab extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.account_tree_outline, size: 64.adaptSize, color: appTheme.gray400),
-          SizedBox(height: 16.v),
-          Text("Quản lý bảng đấu", style: TextStyle(fontSize: 18.fSize, fontWeight: FontWeight.w600)),
-          SizedBox(height: 8.v),
-          Text("Tính năng đang được phát triển", style: TextStyle(color: appTheme.gray600)),
+          Icon(Icons.account_tree_outlined, size: 64.sp, color: AppTheme.dividerLight),
+          SizedBox(height: 16.sp),
+          Text("Quản lý bảng đấu", style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600)),
+          SizedBox(height: 8.sp),
+          Text("Tính năng đang được phát triển", style: TextStyle(color: AppTheme.textSecondaryLight)),
         ],
       ),
     );
@@ -657,11 +659,11 @@ class _MatchManagementTab extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.sports_esports_outlined, size: 64.adaptSize, color: appTheme.gray400),
-          SizedBox(height: 16.v),
-          Text("Quản lý trận đấu", style: TextStyle(fontSize: 18.fSize, fontWeight: FontWeight.w600)),
-          SizedBox(height: 8.v),
-          Text("Tính năng đang được phát triển", style: TextStyle(color: appTheme.gray600)),
+          Icon(Icons.sports_esports_outlined, size: 64.sp, color: AppTheme.dividerLight),
+          SizedBox(height: 16.sp),
+          Text("Quản lý trận đấu", style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600)),
+          SizedBox(height: 8.sp),
+          Text("Tính năng đang được phát triển", style: TextStyle(color: AppTheme.textSecondaryLight)),
         ],
       ),
     );
@@ -684,11 +686,11 @@ class _TournamentSettingsTab extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.settings_outlined, size: 64.adaptSize, color: appTheme.gray400),
-          SizedBox(height: 16.v),
-          Text("Cài đặt giải đấu", style: TextStyle(fontSize: 18.fSize, fontWeight: FontWeight.w600)),
-          SizedBox(height: 8.v),
-          Text("Tính năng đang được phát triển", style: TextStyle(color: appTheme.gray600)),
+          Icon(Icons.settings_outlined, size: 64.sp, color: AppTheme.dividerLight),
+          SizedBox(height: 16.sp),
+          Text("Cài đặt giải đấu", style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600)),
+          SizedBox(height: 8.sp),
+          Text("Tính năng đang được phát triển", style: TextStyle(color: AppTheme.textSecondaryLight)),
         ],
       ),
     );
