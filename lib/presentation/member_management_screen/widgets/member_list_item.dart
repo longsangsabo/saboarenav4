@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/app_export.dart';
+import '../../../models/member_data.dart';
 import '../member_management_screen.dart';
 
 class MemberListItem extends StatefulWidget {
