@@ -11,6 +11,7 @@ class Club {
   final String? websiteUrl;
   final String? coverImageUrl;
   final String? profileImageUrl;
+  final String? logoUrl;
   final int? establishedYear;
   final int totalTables;
   final Map<String, dynamic>? openingHours;
@@ -54,6 +55,7 @@ class Club {
     this.websiteUrl,
     this.coverImageUrl,
     this.profileImageUrl,
+    this.logoUrl,
     this.establishedYear,
     required this.totalTables,
     this.openingHours,
@@ -85,6 +87,7 @@ class Club {
       websiteUrl: json['website_url'],
       coverImageUrl: json['cover_image_url'],
       profileImageUrl: json['profile_image_url'],
+      logoUrl: json['logo_url'],
       establishedYear: json['established_year'],
       totalTables: json['total_tables'] ?? 1,
       openingHours: _parseOpeningHours(json['opening_hours']),
@@ -127,6 +130,7 @@ class Club {
       'website_url': websiteUrl,
       'cover_image_url': coverImageUrl,
       'profile_image_url': profileImageUrl,
+      'logo_url': logoUrl,
       'established_year': establishedYear,
       'total_tables': totalTables,
       'opening_hours': openingHours,

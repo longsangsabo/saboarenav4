@@ -5,6 +5,8 @@ import 'dart:io';
 import '../../../core/app_export.dart';
 import '../../../core/utils/sabo_rank_system.dart';
 
+import './rank_registration_info_modal.dart';
+
 class ProfileHeaderWidget extends StatelessWidget {
   final Map<String, dynamic> userData;
   final VoidCallback? onEditProfile;
@@ -268,81 +270,94 @@ class ProfileHeaderWidget extends StatelessWidget {
 
           // ELO Rating with Progress
           _buildEloSection(context),
+
+          SizedBox(height: 2.h),
+
+          // SPA Points and Prize Pool Section
+          _buildSpaAndPrizeSection(context),
         ],
       ),
     );
   }
 
   Widget _buildRankBadge(BuildContext context) {
-    // Kiểm tra xem user có rank từ database hay không
     final userRank = userData["rank"] as String?;
     final hasRank = userRank != null && userRank.isNotEmpty && userRank != 'unranked';
-    
+
+    // Bọc toàn bộ widget bằng GestureDetector để có thể nhấn vào
+    return GestureDetector(
+      onTap: () {
+        if (hasRank) {
+          // Người dùng đã có rank, có thể hiển thị thông tin chi tiết về rank
+          _showRankDetails(context);
+        } else {
+          // Người dùng chưa có rank, hiển thị modal đăng ký
+          _showRankInfoModal(context);
+        }
+      },
+      child: _buildRankContent(context, hasRank, userRank),
+    );
+  }
+
+  // Tách riêng nội dung của rank badge để dễ quản lý
+  Widget _buildRankContent(BuildContext context, bool hasRank, String? userRank) {
     if (!hasRank) {
-      // User chưa có rank - hiển thị nút đăng ký rank
-      return GestureDetector(
-        onTap: () => _showRankRegistrationModal(context),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
-          decoration: BoxDecoration(
-            color: Colors.grey.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.shade400, width: 2, style: BorderStyle.solid),
+      // Giao diện khi người dùng CHƯA CÓ RANK
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
+        decoration: BoxDecoration(
+          color: AppTheme.lightTheme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: AppTheme.lightTheme.colorScheme.primary.withOpacity(0.7), 
+            width: 1.5,
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Column(
-                children: [
-                  Text(
-                    'RANK',
-                    style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
-                      color: Colors.grey.shade600,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                  Text(
-                    'Chưa đăng ký',
-                    style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
-                      color: Colors.grey.shade600,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
+           boxShadow: [
+            BoxShadow(
+              color: AppTheme.lightTheme.colorScheme.primary.withOpacity(0.1),
+              blurRadius: 8,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'RANK',
+              style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
+                color: AppTheme.lightTheme.colorScheme.primary,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.2,
               ),
-              SizedBox(width: 1.w),
-              Container(
-                padding: EdgeInsets.all(0.5.w),
-                decoration: BoxDecoration(
-                  color: Colors.orange,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.priority_high,
-                  color: Colors.white,
-                  size: 3.w,
-                ),
+            ),
+            SizedBox(height: 0.5.h),
+            Text(
+              '?',
+              style: AppTheme.lightTheme.textTheme.headlineMedium?.copyWith(
+                color: AppTheme.lightTheme.colorScheme.primary,
+                fontWeight: FontWeight.bold,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       );
     }
 
-    // User có rank - hiển thị rank bình thường  
+    // Giao diện khi người dùng ĐÃ CÓ RANK
     final currentElo = userData["elo_rating"] as int? ?? 1200;
     final rank = SaboRankSystem.getRankFromElo(currentElo);
     final rankColor = SaboRankSystem.getRankColor(rank);
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
       decoration: BoxDecoration(
-        color: rankColor.withValues(alpha: 0.1),
+        color: rankColor.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: rankColor, width: 2),
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             'RANK',
@@ -352,8 +367,9 @@ class ProfileHeaderWidget extends StatelessWidget {
               letterSpacing: 1.2,
             ),
           ),
+          SizedBox(height: 0.5.h),
           Text(
-            userRank,
+            userRank!, // an toàn vì đã check hasRank
             style: AppTheme.lightTheme.textTheme.headlineMedium?.copyWith(
               color: rankColor,
               fontWeight: FontWeight.bold,
@@ -362,6 +378,25 @@ class ProfileHeaderWidget extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _showRankInfoModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => RankRegistrationInfoModal(
+        onStartRegistration: () {
+          Navigator.pop(context); // Đóng modal trước khi điều hướng
+          Navigator.pushNamed(context, AppRoutes.clubSelectionScreen);
+        },
+      ),
+    );
+  }
+
+  void _showRankDetails(BuildContext context) {
+    // Sẽ triển khai sau nếu cần
+    print("TODO: Show Rank Details");
   }
 
   Widget _buildEloSection(BuildContext context) {
@@ -455,7 +490,107 @@ class ProfileHeaderWidget extends StatelessWidget {
     );
   }
 
+  Widget _buildSpaAndPrizeSection(BuildContext context) {
+    final spaPoints = userData["spa_points"] as int? ?? 0;
+    final totalPrizePool = userData["total_prize_pool"] as double? ?? 0.0;
 
+    return Container(
+      padding: EdgeInsets.all(4.w),
+      decoration: BoxDecoration(
+        color: AppTheme.lightTheme.colorScheme.primaryContainer.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppTheme.lightTheme.colorScheme.primary.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          // SPA Points
+          Expanded(
+            child: _buildStatItem(
+              context,
+              icon: 'star',
+              label: 'SPA Points',
+              value: _formatNumber(spaPoints),
+              iconColor: Colors.amber[600]!,
+            ),
+          ),
+          
+          SizedBox(width: 4.w),
+          
+          // Prize Pool
+          Expanded(
+            child: _buildStatItem(
+              context,
+              icon: 'monetization_on',
+              label: 'Prize Pool',
+              value: '\$${_formatCurrency(totalPrizePool)}',
+              iconColor: Colors.green[600]!,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatItem(
+    BuildContext context, {
+    required String icon,
+    required String label,
+    required String value,
+    required Color iconColor,
+  }) {
+    return Column(
+      children: [
+        CustomIconWidget(
+          iconName: icon,
+          color: iconColor,
+          size: 24,
+        ),
+        SizedBox(height: 0.5.h),
+        Text(
+          label,
+          style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
+            color: AppTheme.lightTheme.colorScheme.onSurface.withOpacity(0.7),
+            fontWeight: FontWeight.w500,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: 0.2.h),
+        Text(
+          value,
+          style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
+            color: AppTheme.lightTheme.colorScheme.onSurface,
+            fontWeight: FontWeight.bold,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  String _formatNumber(int number) {
+    if (number >= 1000000) {
+      return '${(number / 1000000).toStringAsFixed(1)}M';
+    } else if (number >= 1000) {
+      return '${(number / 1000).toStringAsFixed(1)}K';
+    } else {
+      return number.toString();
+    }
+  }
+
+  String _formatCurrency(double amount) {
+    if (amount >= 1000000) {
+      return '${(amount / 1000000).toStringAsFixed(1)}M';
+    } else if (amount >= 1000) {
+      return '${(amount / 1000).toStringAsFixed(1)}K';
+    } else if (amount == amount.toInt()) {
+      return amount.toInt().toString();
+    } else {
+      return amount.toStringAsFixed(2);
+    }
+  }
 
   Widget _buildImageWidget({
     required String imageUrl,
@@ -490,85 +625,5 @@ class ProfileHeaderWidget extends StatelessWidget {
         fit: fit,
       );
     }
-  }
-
-  void _showRankRegistrationModal(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Text(
-          'Đăng ký Rank',
-          style: AppTheme.lightTheme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Bạn chưa có rank chính thức. Để tham gia các trận đấu ranked và theo dõi tiến trình của mình, hãy đăng ký rank ngay!',
-              style: AppTheme.lightTheme.textTheme.bodyMedium,
-            ),
-            SizedBox(height: 2.h),
-            Text(
-              'Lợi ích khi có rank:',
-              style: AppTheme.lightTheme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            SizedBox(height: 1.h),
-            _buildBenefitItem('• Tham gia các trận đấu ranked'),
-            _buildBenefitItem('• Theo dõi ELO rating chính xác'),
-            _buildBenefitItem('• Tham gia giải đấu chính thức'),
-            _buildBenefitItem('• Xem thống kê chi tiết'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'Để sau',
-              style: TextStyle(color: Colors.grey.shade600),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // TODO: Navigate to rank registration screen
-              _navigateToRankRegistration(context);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.lightTheme.colorScheme.primary,
-              foregroundColor: Colors.white,
-            ),
-            child: Text('Đăng ký ngay'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBenefitItem(String text) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 0.5.h),
-      child: Text(
-        text,
-        style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
-          color: Colors.grey.shade700,
-        ),
-      ),
-    );
-  }
-
-  void _navigateToRankRegistration(BuildContext context) {
-    // TODO: Implement navigation to rank registration screen
-    // For now, show a simple snackbar
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Chức năng đăng ký rank sẽ được triển khai sớm!'),
-        backgroundColor: AppTheme.lightTheme.colorScheme.primary,
-      ),
-    );
   }
 }

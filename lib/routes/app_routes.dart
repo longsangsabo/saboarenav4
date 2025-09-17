@@ -17,6 +17,7 @@ import '../presentation/forgot_password_screen.dart';
 import '../presentation/admin_dashboard_screen/admin_dashboard_screen.dart';
 import '../presentation/admin_dashboard_screen/club_approval_screen.dart';
 import '../presentation/my_clubs_screen/my_clubs_screen.dart';
+import '../presentation/club_selection_screen/club_selection_screen.dart';
 
 class AppRoutes {
   static const String splashScreen = '/splash';
@@ -36,6 +37,7 @@ class AppRoutes {
   static const String clubApprovalScreen = '/admin_club_approval';
   static const String myClubsScreen = '/my_clubs';
   static const String clubDashboardScreen = '/club_dashboard';
+  static const String clubSelectionScreen = '/club_selection_screen';
 
   static const String initial = splashScreen;
 
@@ -57,5 +59,6 @@ class AppRoutes {
         clubApprovalScreen: (context) => const ClubApprovalScreen(),
         myClubsScreen: (context) => const MyClubsScreen(),
         clubDashboardScreen: (context) => const ClubDashboardScreen(),
+        clubSelectionScreen: (context) => ClubSelectionScreen(),
       };
 }

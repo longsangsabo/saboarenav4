@@ -52,6 +52,22 @@ class ClubService {
     }
   }
 
+  Future<List<Club>> getAllClubs({int limit = 100}) async {
+    try {
+      final response = await _supabase
+          .from('clubs')
+          .select()
+          .eq('is_active', true)
+          .eq('approval_status', 'approved')
+          .order('name', ascending: true)
+          .limit(limit);
+
+      return response.map<Club>((json) => Club.fromJson(json)).toList();
+    } catch (error) {
+      throw Exception('Failed to get all clubs: $error');
+    }
+  }
+
   Future<List<UserProfile>> getClubMembers(String clubId) async {
     try {
       final response = await _supabase.from('club_members').select('''

@@ -15,6 +15,8 @@ class UserProfile {
   final int totalLosses;
   final int totalTournaments;
   final int rankingPoints;
+  final int spaPoints; // SPA reward points earned
+  final double totalPrizePool; // Total prize money won from tournaments
   final bool isVerified;
   final bool isActive;
   final String? location;
@@ -38,6 +40,8 @@ class UserProfile {
     required this.totalLosses,
     required this.totalTournaments,
     required this.rankingPoints,
+    required this.spaPoints,
+    required this.totalPrizePool,
     required this.isVerified,
     required this.isActive,
     this.location,
@@ -65,6 +69,8 @@ class UserProfile {
       totalLosses: json['total_losses'] ?? 0,
       totalTournaments: json['total_tournaments'] ?? 0,
       rankingPoints: json['elo_rating'] ?? 1200,
+      spaPoints: json['spa_points'] ?? 0,
+      totalPrizePool: (json['total_prize_pool'] ?? 0.0).toDouble(),
       isVerified: json['is_verified'] ?? false,
       isActive: json['is_active'] ?? true,
       location: json['location'],
@@ -90,6 +96,8 @@ class UserProfile {
       'total_losses': totalLosses,
       'total_tournaments': totalTournaments,
       'elo_rating': rankingPoints,
+      'spa_points': spaPoints,
+      'total_prize_pool': totalPrizePool,
       'is_verified': isVerified,
       'is_active': isActive,
       'location': location,
@@ -126,6 +134,8 @@ class UserProfile {
       totalLosses: totalLosses,
       totalTournaments: totalTournaments,
       rankingPoints: rankingPoints,
+      spaPoints: spaPoints,
+      totalPrizePool: totalPrizePool,
       isVerified: isVerified,
       isActive: isActive,
       location: location ?? this.location,

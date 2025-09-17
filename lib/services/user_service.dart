@@ -416,4 +416,248 @@ class UserService {
       throw Exception('Failed to find nearby opponents: $error');
     }
   }
+
+  /// Request rank registration at a specific club
+  /// This creates a pending request that club owners can approve or reject
+  Future<Map<String, dynamic>> requestRankRegistration({
+    required String clubId,
+    String? notes,
+  }) async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) throw Exception('User not authenticated');
+
+      // Check if user already has a pending or approved request for this club
+      final existingRequest = await _supabase
+          .from('rank_requests')
+          .select()
+          .eq('user_id', user.id)
+          .eq('club_id', clubId)
+          .maybeSingle();
+
+      if (existingRequest != null) {
+        final status = existingRequest['status'];
+        if (status == 'pending') {
+          throw Exception('Bạn đã có yêu cầu đang chờ xử lý tại câu lạc bộ này');
+        } else if (status == 'approved') {
+          throw Exception('Bạn đã được xác nhận rank tại câu lạc bộ này');
+        }
+        // If rejected, user can send a new request by updating the existing one
+      }
+
+      Map<String, dynamic> requestData = {
+        'user_id': user.id,
+        'club_id': clubId,
+        'status': 'pending',
+        'requested_at': DateTime.now().toIso8601String(),
+      };
+
+      if (notes != null && notes.isNotEmpty) {
+        requestData['notes'] = notes;
+      }
+
+      final response = await _supabase
+          .from('rank_requests')
+          .upsert(requestData)
+          .select()
+          .single();
+
+      return {
+        'success': true,
+        'message': 'Yêu cầu đăng ký rank đã được gửi thành công',
+        'request_id': response['id'],
+        'status': response['status'],
+      };
+    } catch (error) {
+      print('Error requesting rank registration: $error');
+      throw Exception('Không thể gửi yêu cầu đăng ký rank: $error');
+    }
+  }
+
+  /// Get all rank requests for the current user
+  Future<List<Map<String, dynamic>>> getUserRankRequests() async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) throw Exception('User not authenticated');
+
+      final response = await _supabase
+          .from('rank_requests')
+          .select('''
+            *,
+            club:clubs (
+              id,
+              name,
+              address,
+              logo_url
+            )
+          ''')
+          .eq('user_id', user.id)
+          .order('requested_at', ascending: false);
+
+      return List<Map<String, dynamic>>.from(response);
+    } catch (error) {
+      print('Error getting user rank requests: $error');
+      throw Exception('Không thể tải danh sách yêu cầu đăng ký rank: $error');
+    }
+  }
+
+  /// Cancel a pending rank request
+  Future<bool> cancelRankRequest(String requestId) async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) throw Exception('User not authenticated');
+
+      await _supabase
+          .from('rank_requests')
+          .delete()
+          .eq('id', requestId)
+          .eq('user_id', user.id)
+          .eq('status', 'pending');
+
+      return true;
+    } catch (error) {
+      print('Error canceling rank request: $error');
+      throw Exception('Không thể hủy yêu cầu đăng ký rank: $error');
+    }
+  }
+
+  /// Update user's SPA points
+  Future<bool> updateSpaPoints(String userId, int points) async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) throw Exception('User not authenticated');
+
+      // Only allow users to update their own points or admin role
+      final currentUserProfile = await getCurrentUserProfile();
+      if (currentUserProfile?.role != 'admin' && user.id != userId) {
+        throw Exception('Không có quyền cập nhật điểm SPA');
+      }
+
+      await _supabase
+          .from('users')
+          .update({'spa_points': points})
+          .eq('id', userId);
+
+      return true;
+    } catch (error) {
+      print('Error updating SPA points: $error');
+      throw Exception('Không thể cập nhật điểm SPA: $error');
+    }
+  }
+
+  /// Add SPA points to user (increment)
+  Future<bool> addSpaPoints(String userId, int pointsToAdd) async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) throw Exception('User not authenticated');
+
+      // Get current points
+      final response = await _supabase
+          .from('users')
+          .select('spa_points')
+          .eq('id', userId)
+          .single();
+      
+      final currentPoints = response['spa_points'] as int? ?? 0;
+      final newPoints = currentPoints + pointsToAdd;
+
+      await _supabase
+          .from('users')
+          .update({'spa_points': newPoints})
+          .eq('id', userId);
+
+      return true;
+    } catch (error) {
+      print('Error adding SPA points: $error');
+      throw Exception('Không thể thêm điểm SPA: $error');
+    }
+  }
+
+  /// Update user's total prize pool
+  Future<bool> updatePrizePool(String userId, double prizeAmount) async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) throw Exception('User not authenticated');
+
+      // Only allow users to update their own prize pool or admin role
+      final currentUserProfile = await getCurrentUserProfile();
+      if (currentUserProfile?.role != 'admin' && user.id != userId) {
+        throw Exception('Không có quyền cập nhật prize pool');
+      }
+
+      await _supabase
+          .from('users')
+          .update({'total_prize_pool': prizeAmount})
+          .eq('id', userId);
+
+      return true;
+    } catch (error) {
+      print('Error updating prize pool: $error');
+      throw Exception('Không thể cập nhật prize pool: $error');
+    }
+  }
+
+  /// Add prize money to user's total prize pool (increment)
+  Future<bool> addPrizePool(String userId, double prizeToAdd) async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) throw Exception('User not authenticated');
+
+      // Get current prize pool
+      final response = await _supabase
+          .from('users')
+          .select('total_prize_pool')
+          .eq('id', userId)
+          .single();
+      
+      final currentPrize = (response['total_prize_pool'] as double?) ?? 0.0;
+      final newPrize = currentPrize + prizeToAdd;
+
+      await _supabase
+          .from('users')
+          .update({'total_prize_pool': newPrize})
+          .eq('id', userId);
+
+      return true;
+    } catch (error) {
+      print('Error adding to prize pool: $error');
+      throw Exception('Không thể thêm vào prize pool: $error');
+    }
+  }
+
+  /// Get leaderboard by SPA points
+  Future<List<UserProfile>> getTopSpaPointsPlayers({int limit = 10}) async {
+    try {
+      final response = await _supabase
+          .from('users')
+          .select()
+          .eq('is_active', true)
+          .order('spa_points', ascending: false)
+          .limit(limit);
+
+      return response
+          .map<UserProfile>((json) => UserProfile.fromJson(json))
+          .toList();
+    } catch (error) {
+      throw Exception('Failed to get top SPA points players: $error');
+    }
+  }
+
+  /// Get leaderboard by prize pool
+  Future<List<UserProfile>> getTopPrizePoolPlayers({int limit = 10}) async {
+    try {
+      final response = await _supabase
+          .from('users')
+          .select()
+          .eq('is_active', true)
+          .order('total_prize_pool', ascending: false)
+          .limit(limit);
+
+      return response
+          .map<UserProfile>((json) => UserProfile.fromJson(json))
+          .toList();
+    } catch (error) {
+      throw Exception('Failed to get top prize pool players: $error');
+    }
+  }
 }
