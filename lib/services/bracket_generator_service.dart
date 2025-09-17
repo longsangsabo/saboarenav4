@@ -173,6 +173,16 @@ class BracketGeneratorService {
           tournamentId, participants: seededParticipants, options: options
         );
       
+      case TournamentFormats.saboDoubleElimination:
+        return await _generateSaboDoubleEliminationBracket(
+          tournamentId, participants: seededParticipants, options: options
+        );
+      
+      case TournamentFormats.saboDoubleElimination32:
+        return await _generateSaboDoubleElimination32Bracket(
+          tournamentId, participants: seededParticipants, options: options
+        );
+      
       case TournamentFormats.roundRobin:
         return await _generateRoundRobinBracket(
           tournamentId, participants: seededParticipants, options: options
@@ -588,6 +598,132 @@ class BracketGeneratorService {
         'loserRounds': loserRounds,
         'byeCount': byeCount,
         'hasGrandFinal': true,
+      },
+    );
+  }
+
+  /// Generate Sabo Double Elimination DE16 bracket
+  /// 16 players, 27 matches total: WB(14) + LA(7) + LB(3) + Finals(3)
+  static Future<TournamentBracket> _generateSaboDoubleEliminationBracket(
+    String tournamentId, {
+    required List<TournamentParticipant> participants,
+    Map<String, dynamic>? options,
+  }) async {
+    print('$_tag: Generating Sabo Double Elimination DE16 bracket');
+    
+    // Sabo DE16 requires exactly 16 players
+    if (participants.length != 16) {
+      throw Exception('Sabo Double Elimination requires exactly 16 players');
+    }
+    
+    final rounds = <TournamentRound>[];
+    
+    // Generate Winners Bracket (14 matches: 8+4+2)
+    final winnerRounds = _generateSaboWinnersBracket(tournamentId, participants);
+    rounds.addAll(winnerRounds);
+    
+    // Generate Losers Branch A (7 matches: 4+2+1) - handles WR1 losers
+    final losersABranch = _generateSaboLosersBranchA(tournamentId);
+    rounds.addAll(losersABranch);
+    
+    // Generate Losers Branch B (3 matches: 2+1) - handles WR2 losers  
+    final losersBBranch = _generateSaboLosersBranchB(tournamentId);
+    rounds.addAll(losersBBranch);
+    
+    // Generate SABO Finals (3 matches: 2 semifinals + 1 final)
+    final saboFinalsRounds = _generateSaboFinalsRounds(tournamentId);
+    rounds.addAll(saboFinalsRounds);
+    
+    return TournamentBracket(
+      tournamentId: tournamentId,
+      format: TournamentFormats.saboDoubleElimination,
+      participants: participants,
+      rounds: rounds,
+      structure: {
+        'type': 'sabo_de16',
+        'totalMatches': 27,
+        'winnersMatches': 14,
+        'losersAMatches': 7,
+        'losersBMatches': 3,
+        'finalsMatches': 3,
+        'hasLosersBranches': 2,
+        'hasSaboFinals': true,
+      },
+      metadata: {
+        'format': 'Sabo Double Elimination DE16',
+        'description': 'SABO Arena special DE16 format',
+        'createdAt': DateTime.now().toIso8601String(),
+        'rounds': {
+          'winners': [1, 2, 3],
+          'losersA': [101, 102, 103], 
+          'losersB': [201, 202],
+          'finals': [250, 251, 300],
+        }
+      },
+    );
+  }
+
+  /// Generate Sabo Double Elimination DE32 bracket
+  /// 32 players, 55 matches total: Group A(26) + Group B(26) + Cross-Bracket(3)
+  static Future<TournamentBracket> _generateSaboDoubleElimination32Bracket(
+    String tournamentId, {
+    required List<TournamentParticipant> participants,
+    Map<String, dynamic>? options,
+  }) async {
+    print('$_tag: Generating Sabo Double Elimination DE32 bracket');
+    
+    // Sabo DE32 requires exactly 32 players
+    if (participants.length != 32) {
+      throw Exception('Sabo Double Elimination DE32 requires exactly 32 players');
+    }
+    
+    final rounds = <TournamentRound>[];
+    
+    // Split 32 players into 2 groups of 16 each
+    final groupA = participants.take(16).toList();
+    final groupB = participants.skip(16).take(16).toList();
+    
+    // Generate Group A (26 matches: modified DE16 producing 2 qualifiers)
+    final groupARounds = _generateSaboDE32Group(tournamentId, 'A', groupA);
+    rounds.addAll(groupARounds);
+    
+    // Generate Group B (26 matches: modified DE16 producing 2 qualifiers) 
+    final groupBRounds = _generateSaboDE32Group(tournamentId, 'B', groupB);
+    rounds.addAll(groupBRounds);
+    
+    // Generate Cross-Bracket Finals (3 matches: 2 semifinals + 1 final)
+    final crossBracketRounds = _generateSaboDE32CrossBracket(tournamentId);
+    rounds.addAll(crossBracketRounds);
+    
+    return TournamentBracket(
+      tournamentId: tournamentId,
+      format: TournamentFormats.saboDoubleElimination32,
+      participants: participants,
+      rounds: rounds,
+      structure: {
+        'type': 'sabo_de32',
+        'totalMatches': 55,
+        'groupAMatches': 26,
+        'groupBMatches': 26,
+        'crossBracketMatches': 3,
+        'hasGroups': true,
+        'groupCount': 2,
+        'playersPerGroup': 16,
+        'qualifiersPerGroup': 2,
+      },
+      metadata: {
+        'format': 'Sabo Double Elimination DE32',
+        'description': 'SABO Arena DE32 with Two-Group System',
+        'createdAt': DateTime.now().toIso8601String(),
+        'rounds': {
+          'groupA': [1, 2, 3, 101, 102, 103, 201, 202, 250, 251],
+          'groupB': [1, 2, 3, 101, 102, 103, 201, 202, 250, 251],
+          'crossBracket': [350, 400],
+        },
+        'groups': {
+          'A': {'players': 16, 'matches': 26, 'qualifiers': 2},
+          'B': {'players': 16, 'matches': 26, 'qualifiers': 2},
+        }
       },
     );
   }
@@ -1095,6 +1231,723 @@ class BracketGeneratorService {
       currentRound++;
       playersRemaining ~/= 2;
     }
+    
+    return rounds;
+  }
+
+  // ==================== SABO DOUBLE ELIMINATION DE16 HELPERS ====================
+
+  /// Generate Winners Bracket for Sabo DE16 (14 matches: 8+4+2)
+  static List<TournamentRound> _generateSaboWinnersBracket(
+    String tournamentId, 
+    List<TournamentParticipant> participants
+  ) {
+    final rounds = <TournamentRound>[];
+    
+    // WR1: 8 matches (16 → 8) - Using traditional seeding
+    final wr1matches = <TournamentMatch>[];
+    final seedPairs = [
+      [1, 16], [2, 15], [3, 14], [4, 13],
+      [5, 12], [6, 11], [7, 10], [8, 9]
+    ];
+    
+    for (int i = 0; i < 8; i++) {
+      final seed1 = seedPairs[i][0] - 1; // Convert to 0-based index
+      final seed2 = seedPairs[i][1] - 1;
+      
+      final match = TournamentMatch(
+        id: 'WR1M${i + 1}',
+        roundId: _generateRoundId(tournamentId, 1, 'winners'),
+        roundNumber: 1,
+        matchNumber: i + 1,
+        player1: participants[seed1],
+        player2: participants[seed2],
+        status: 'pending',
+        metadata: {
+          'bracketType': 'winners',
+          'saboMatchId': 'WR1M${i + 1}',
+          'seedMatch': '${seedPairs[i][0]} vs ${seedPairs[i][1]}'
+        },
+      );
+      wr1matches.add(match);
+    }
+    
+    rounds.add(TournamentRound(
+      id: _generateRoundId(tournamentId, 1, 'winners'),
+      roundNumber: 1,
+      name: 'Winners Round 1',
+      type: 'winners',
+      matches: wr1matches,
+      metadata: {'matchCount': 8, 'advancement': '8 to WR2, 8 to LA'}
+    ));
+    
+    // WR2: 4 matches (8 → 4)
+    final wr2matches = <TournamentMatch>[];
+    for (int i = 0; i < 4; i++) {
+      final match = TournamentMatch(
+        id: 'WR2M${i + 1}',
+        roundId: _generateRoundId(tournamentId, 2, 'winners'),
+        roundNumber: 2,
+        matchNumber: i + 1,
+        player1: null, // Will be filled from WR1 results
+        player2: null,
+        status: 'pending',
+        metadata: {
+          'bracketType': 'winners',
+          'saboMatchId': 'WR2M${i + 1}',
+          'dependsOn': ['WR1M${i * 2 + 1}', 'WR1M${i * 2 + 2}']
+        },
+      );
+      wr2matches.add(match);
+    }
+    
+    rounds.add(TournamentRound(
+      id: _generateRoundId(tournamentId, 2, 'winners'),
+      roundNumber: 2,
+      name: 'Winners Round 2',
+      type: 'winners',
+      matches: wr2matches,
+      metadata: {'matchCount': 4, 'advancement': '4 to WR3, 4 to LB'}
+    ));
+    
+    // WR3: 2 matches (4 → 2) - SEMIFINALS - No Winners Final!
+    final wr3matches = <TournamentMatch>[];
+    for (int i = 0; i < 2; i++) {
+      final match = TournamentMatch(
+        id: 'WR3M${i + 1}',
+        roundId: _generateRoundId(tournamentId, 3, 'winners'),
+        roundNumber: 3,
+        matchNumber: i + 1,
+        player1: null,
+        player2: null,
+        status: 'pending',
+        metadata: {
+          'bracketType': 'winners',
+          'saboMatchId': 'WR3M${i + 1}',
+          'isSemifinal': true,
+          'dependsOn': ['WR2M${i * 2 + 1}', 'WR2M${i * 2 + 2}']
+        },
+      );
+      wr3matches.add(match);
+    }
+    
+    rounds.add(TournamentRound(
+      id: _generateRoundId(tournamentId, 3, 'winners'),
+      roundNumber: 3,
+      name: 'Winners Semifinals',
+      type: 'winners',
+      matches: wr3matches,
+      metadata: {'matchCount': 2, 'advancement': '2 to SABO Finals', 'isLast': true}
+    ));
+    
+    return rounds;
+  }
+
+  /// Generate Losers Branch A (7 matches: 4+2+1) - handles WR1 losers
+  static List<TournamentRound> _generateSaboLosersBranchA(String tournamentId) {
+    final rounds = <TournamentRound>[];
+    
+    // LAR101: 4 matches (8 → 4) - WR1 losers
+    final lar101matches = <TournamentMatch>[];
+    for (int i = 0; i < 4; i++) {
+      final match = TournamentMatch(
+        id: 'LAR101M${i + 1}',
+        roundId: _generateRoundId(tournamentId, 101, 'losers_a'),
+        roundNumber: 101,
+        matchNumber: i + 1,
+        player1: null, // Filled from WR1 losers
+        player2: null,
+        status: 'pending',
+        metadata: {
+          'bracketType': 'losers_branch_a',
+          'saboMatchId': 'LAR101M${i + 1}',
+          'source': 'WR1_losers',
+          'dependsOn': ['WR1M${i * 2 + 1}', 'WR1M${i * 2 + 2}']
+        },
+      );
+      lar101matches.add(match);
+    }
+    
+    rounds.add(TournamentRound(
+      id: _generateRoundId(tournamentId, 101, 'losers_a'),
+      roundNumber: 101,
+      name: 'Losers Branch A Round 1',
+      type: 'losers_a',
+      matches: lar101matches,
+      metadata: {'matchCount': 4, 'source': 'Winners Round 1 losers'}
+    ));
+    
+    // LAR102: 2 matches (4 → 2)
+    final lar102matches = <TournamentMatch>[];
+    for (int i = 0; i < 2; i++) {
+      final match = TournamentMatch(
+        id: 'LAR102M${i + 1}',
+        roundId: _generateRoundId(tournamentId, 102, 'losers_a'),
+        roundNumber: 102,
+        matchNumber: i + 1,
+        player1: null,
+        player2: null,
+        status: 'pending',
+        metadata: {
+          'bracketType': 'losers_branch_a',
+          'saboMatchId': 'LAR102M${i + 1}',
+          'dependsOn': ['LAR101M${i * 2 + 1}', 'LAR101M${i * 2 + 2}']
+        },
+      );
+      lar102matches.add(match);
+    }
+    
+    rounds.add(TournamentRound(
+      id: _generateRoundId(tournamentId, 102, 'losers_a'),
+      roundNumber: 102,
+      name: 'Losers Branch A Round 2',
+      type: 'losers_a',
+      matches: lar102matches,
+      metadata: {'matchCount': 2}
+    ));
+    
+    // LAR103: 1 match (2 → 1) - Branch A Final
+    final lar103match = TournamentMatch(
+      id: 'LAR103M1',
+      roundId: _generateRoundId(tournamentId, 103, 'losers_a'),
+      roundNumber: 103,
+      matchNumber: 1,
+      player1: null,
+      player2: null,
+      status: 'pending',
+      metadata: {
+        'bracketType': 'losers_branch_a',
+        'saboMatchId': 'LAR103M1',
+        'isBranchFinal': true,
+        'dependsOn': ['LAR102M1', 'LAR102M2']
+      },
+    );
+    
+    rounds.add(TournamentRound(
+      id: _generateRoundId(tournamentId, 103, 'losers_a'),
+      roundNumber: 103,
+      name: 'Losers Branch A Final',
+      type: 'losers_a',
+      matches: [lar103match],
+      metadata: {'matchCount': 1, 'advancement': '1 to SABO Finals'}
+    ));
+    
+    return rounds;
+  }
+
+  /// Generate Losers Branch B (3 matches: 2+1) - handles WR2 losers
+  static List<TournamentRound> _generateSaboLosersBranchB(String tournamentId) {
+    final rounds = <TournamentRound>[];
+    
+    // LBR201: 2 matches (4 → 2) - WR2 losers
+    final lbr201matches = <TournamentMatch>[];
+    for (int i = 0; i < 2; i++) {
+      final match = TournamentMatch(
+        id: 'LBR201M${i + 1}',
+        roundId: _generateRoundId(tournamentId, 201, 'losers_b'),
+        roundNumber: 201,
+        matchNumber: i + 1,
+        player1: null, // Filled from WR2 losers
+        player2: null,
+        status: 'pending',
+        metadata: {
+          'bracketType': 'losers_branch_b',
+          'saboMatchId': 'LBR201M${i + 1}',
+          'source': 'WR2_losers',
+          'dependsOn': ['WR2M${i * 2 + 1}', 'WR2M${i * 2 + 2}']
+        },
+      );
+      lbr201matches.add(match);
+    }
+    
+    rounds.add(TournamentRound(
+      id: _generateRoundId(tournamentId, 201, 'losers_b'),
+      roundNumber: 201,
+      name: 'Losers Branch B Round 1',
+      type: 'losers_b',
+      matches: lbr201matches,
+      metadata: {'matchCount': 2, 'source': 'Winners Round 2 losers'}
+    ));
+    
+    // LBR202: 1 match (2 → 1) - Branch B Final
+    final lbr202match = TournamentMatch(
+      id: 'LBR202M1',
+      roundId: _generateRoundId(tournamentId, 202, 'losers_b'),
+      roundNumber: 202,
+      matchNumber: 1,
+      player1: null,
+      player2: null,
+      status: 'pending',
+      metadata: {
+        'bracketType': 'losers_branch_b',
+        'saboMatchId': 'LBR202M1',
+        'isBranchFinal': true,
+        'dependsOn': ['LBR201M1', 'LBR201M2']
+      },
+    );
+    
+    rounds.add(TournamentRound(
+      id: _generateRoundId(tournamentId, 202, 'losers_b'),
+      roundNumber: 202,
+      name: 'Losers Branch B Final',
+      type: 'losers_b',
+      matches: [lbr202match],
+      metadata: {'matchCount': 1, 'advancement': '1 to SABO Finals'}
+    ));
+    
+    return rounds;
+  }
+
+  /// Generate SABO Finals (3 matches: 2 semifinals + 1 final)
+  static List<TournamentRound> _generateSaboFinalsRounds(String tournamentId) {
+    final rounds = <TournamentRound>[];
+    
+    // SABO Semifinals: 2 matches
+    final semifinalMatches = <TournamentMatch>[];
+    
+    // Semifinal 1: WB Winner 1 vs LA Branch Winner
+    final semi1 = TournamentMatch(
+      id: 'SEMI1',
+      roundId: _generateRoundId(tournamentId, 250, 'sabo_finals'),
+      roundNumber: 250,
+      matchNumber: 1,
+      player1: null, // From WR3M1 winner
+      player2: null, // From LAR103M1 winner
+      status: 'pending',
+      metadata: {
+        'bracketType': 'sabo_finals',
+        'saboMatchId': 'SEMI1',
+        'isSemifinal': true,
+        'matchup': 'WB_Winner_1 vs Branch_A_Winner',
+        'dependsOn': ['WR3M1', 'LAR103M1']
+      },
+    );
+    
+    // Semifinal 2: WB Winner 2 vs LB Branch Winner
+    final semi2 = TournamentMatch(
+      id: 'SEMI2',
+      roundId: _generateRoundId(tournamentId, 251, 'sabo_finals'),
+      roundNumber: 251,
+      matchNumber: 1,
+      player1: null, // From WR3M2 winner
+      player2: null, // From LBR202M1 winner
+      status: 'pending',
+      metadata: {
+        'bracketType': 'sabo_finals',
+        'saboMatchId': 'SEMI2',
+        'isSemifinal': true,
+        'matchup': 'WB_Winner_2 vs Branch_B_Winner',
+        'dependsOn': ['WR3M2', 'LBR202M1']
+      },
+    );
+    
+    semifinalMatches.addAll([semi1, semi2]);
+    
+    rounds.add(TournamentRound(
+      id: _generateRoundId(tournamentId, 250, 'sabo_finals'),
+      roundNumber: 250,
+      name: 'SABO Semifinals',
+      type: 'sabo_finals',
+      matches: semifinalMatches,
+      metadata: {'matchCount': 2, 'phase': 'semifinals'}
+    ));
+    
+    // SABO Final: 1 match
+    final saboFinal = TournamentMatch(
+      id: 'FINAL1',
+      roundId: _generateRoundId(tournamentId, 300, 'sabo_finals'),
+      roundNumber: 300,
+      matchNumber: 1,
+      player1: null, // SEMI1 winner
+      player2: null, // SEMI2 winner
+      status: 'pending',
+      metadata: {
+        'bracketType': 'sabo_finals',
+        'saboMatchId': 'FINAL1',
+        'isFinal': true,
+        'isChampionship': true,
+        'dependsOn': ['SEMI1', 'SEMI2']
+      },
+    );
+    
+    rounds.add(TournamentRound(
+      id: _generateRoundId(tournamentId, 300, 'sabo_finals'),
+      roundNumber: 300,
+      name: 'SABO Final',
+      type: 'sabo_finals',
+      matches: [saboFinal],
+      metadata: {'matchCount': 1, 'phase': 'final', 'isChampionship': true}
+    ));
+    
+    return rounds;
+  }
+
+  // ==================== SABO DOUBLE ELIMINATION DE32 HELPERS ====================
+
+  /// Generate one group (A or B) for Sabo DE32 (26 matches: modified DE16 → 2 qualifiers)
+  static List<TournamentRound> _generateSaboDE32Group(
+    String tournamentId, 
+    String groupId,
+    List<TournamentParticipant> participants
+  ) {
+    final rounds = <TournamentRound>[];
+    
+    // Modified DE16 structure producing exactly 26 matches per group
+    // Winners Bracket (15 matches: 8+4+2+1)
+    final winnerRounds = _generateSaboDE32WinnersBracket(tournamentId, groupId, participants);
+    rounds.addAll(winnerRounds);
+    
+    // Losers Bracket (11 matches: 4+4+2+1) - simplified structure
+    final losersRounds = _generateSaboDE32LosersBracket(tournamentId, groupId);
+    rounds.addAll(losersRounds);
+    
+    return rounds;
+  }
+
+  /// Generate Winners Bracket for DE32 Group (15 matches: 8+4+2+1)
+  static List<TournamentRound> _generateSaboDE32WinnersBracket(
+    String tournamentId,
+    String groupId, 
+    List<TournamentParticipant> participants
+  ) {
+    final rounds = <TournamentRound>[];
+    
+    // WR1: 8 matches (16 → 8)
+    final wr1matches = <TournamentMatch>[];
+    final seedPairs = [
+      [1, 16], [2, 15], [3, 14], [4, 13],
+      [5, 12], [6, 11], [7, 10], [8, 9]
+    ];
+    
+    for (int i = 0; i < 8; i++) {
+      final seed1 = seedPairs[i][0] - 1;
+      final seed2 = seedPairs[i][1] - 1;
+      
+      final match = TournamentMatch(
+        id: '$groupId-WR1M${i + 1}',
+        roundId: _generateRoundId(tournamentId, 1, 'winners_$groupId'),
+        roundNumber: 1,
+        matchNumber: i + 1,
+        player1: participants[seed1],
+        player2: participants[seed2],
+        status: 'pending',
+        metadata: {
+          'bracketType': 'winners',
+          'groupId': groupId,
+          'saboMatchId': '$groupId-WR1M${i + 1}',
+          'seedMatch': '${seedPairs[i][0]} vs ${seedPairs[i][1]}'
+        },
+      );
+      wr1matches.add(match);
+    }
+    
+    rounds.add(TournamentRound(
+      id: _generateRoundId(tournamentId, 1, 'winners_$groupId'),
+      roundNumber: 1,
+      name: 'Group $groupId Winners Round 1',
+      type: 'winners',
+      matches: wr1matches,
+      metadata: {'groupId': groupId, 'matchCount': 8}
+    ));
+    
+    // WR2: 4 matches (8 → 4)
+    final wr2matches = <TournamentMatch>[];
+    for (int i = 0; i < 4; i++) {
+      final match = TournamentMatch(
+        id: '$groupId-WR2M${i + 1}',
+        roundId: _generateRoundId(tournamentId, 2, 'winners_$groupId'),
+        roundNumber: 2,
+        matchNumber: i + 1,
+        player1: null,
+        player2: null,
+        status: 'pending',
+        metadata: {
+          'bracketType': 'winners',
+          'groupId': groupId,
+          'saboMatchId': '$groupId-WR2M${i + 1}',
+          'dependsOn': ['$groupId-WR1M${i * 2 + 1}', '$groupId-WR1M${i * 2 + 2}']
+        },
+      );
+      wr2matches.add(match);
+    }
+    
+    rounds.add(TournamentRound(
+      id: _generateRoundId(tournamentId, 2, 'winners_$groupId'),
+      roundNumber: 2,
+      name: 'Group $groupId Winners Round 2',
+      type: 'winners',
+      matches: wr2matches,
+      metadata: {'groupId': groupId, 'matchCount': 4}
+    ));
+    
+    // WR3: 2 matches (4 → 2) - SEMIFINALS
+    final wr3matches = <TournamentMatch>[];
+    for (int i = 0; i < 2; i++) {
+      final match = TournamentMatch(
+        id: '$groupId-WR3M${i + 1}',
+        roundId: _generateRoundId(tournamentId, 3, 'winners_$groupId'),
+        roundNumber: 3,
+        matchNumber: i + 1,
+        player1: null,
+        player2: null,
+        status: 'pending',
+        metadata: {
+          'bracketType': 'winners',
+          'groupId': groupId,
+          'saboMatchId': '$groupId-WR3M${i + 1}',
+          'isSemifinal': true,
+          'dependsOn': ['$groupId-WR2M${i * 2 + 1}', '$groupId-WR2M${i * 2 + 2}']
+        },
+      );
+      wr3matches.add(match);
+    }
+    
+    rounds.add(TournamentRound(
+      id: _generateRoundId(tournamentId, 3, 'winners_$groupId'),
+      roundNumber: 3,
+      name: 'Group $groupId Winners Semifinals',
+      type: 'winners',
+      matches: wr3matches,
+      metadata: {'groupId': groupId, 'matchCount': 2}
+    ));
+    
+    // Winners Final: 1 match (2 → 1) - Determines Group Winner
+    final wfMatch = TournamentMatch(
+      id: '$groupId-WF',
+      roundId: _generateRoundId(tournamentId, 4, 'winners_$groupId'),
+      roundNumber: 4,
+      matchNumber: 1,
+      player1: null,
+      player2: null,
+      status: 'pending',
+      metadata: {
+        'bracketType': 'winners',
+        'groupId': groupId,
+        'saboMatchId': '$groupId-WF',
+        'isGroupFinal': true,
+        'advancement': 'Group Winner (1st Qualifier)',
+        'dependsOn': ['$groupId-WR3M1', '$groupId-WR3M2']
+      },
+    );
+    
+    rounds.add(TournamentRound(
+      id: _generateRoundId(tournamentId, 4, 'winners_$groupId'),
+      roundNumber: 4,
+      name: 'Group $groupId Winners Final',
+      type: 'winners',
+      matches: [wfMatch],
+      metadata: {'groupId': groupId, 'matchCount': 1, 'advancement': '1st Qualifier'}
+    ));
+    
+    return rounds;
+  }
+
+  /// Generate Losers Bracket for DE32 Group (11 matches: 4+4+2+1)
+  static List<TournamentRound> _generateSaboDE32LosersBracket(String tournamentId, String groupId) {
+    final rounds = <TournamentRound>[];
+    
+    // LR1: 4 matches - initial losers from WR1
+    final lr1matches = <TournamentMatch>[];
+    for (int i = 0; i < 4; i++) {
+      final match = TournamentMatch(
+        id: '$groupId-L${i + 1}',
+        roundId: _generateRoundId(tournamentId, 101, 'losers_$groupId'),
+        roundNumber: 101,
+        matchNumber: i + 1,
+        player1: null,
+        player2: null,
+        status: 'pending',
+        metadata: {
+          'bracketType': 'losers',
+          'groupId': groupId,
+          'saboMatchId': '$groupId-L${i + 1}',
+          'dependsOn': ['$groupId-WR1M${i * 2 + 1}', '$groupId-WR1M${i * 2 + 2}']
+        },
+      );
+      lr1matches.add(match);
+    }
+    
+    rounds.add(TournamentRound(
+      id: _generateRoundId(tournamentId, 101, 'losers_$groupId'),
+      roundNumber: 101,
+      name: 'Group $groupId Losers Round 1',
+      type: 'losers',
+      matches: lr1matches,
+      metadata: {'groupId': groupId, 'matchCount': 4}
+    ));
+    
+    // LR2: 4 matches - second round losers
+    final lr2matches = <TournamentMatch>[];
+    for (int i = 0; i < 4; i++) {
+      final match = TournamentMatch(
+        id: '$groupId-L${4 + i + 1}',
+        roundId: _generateRoundId(tournamentId, 102, 'losers_$groupId'),
+        roundNumber: 102,
+        matchNumber: i + 1,
+        player1: null,
+        player2: null,
+        status: 'pending',
+        metadata: {
+          'bracketType': 'losers',
+          'groupId': groupId,
+          'saboMatchId': '$groupId-L${4 + i + 1}',
+          'dependsOn': i < 2 ? ['$groupId-L${i + 1}', '$groupId-WR2M${i + 1}'] : ['$groupId-L${i + 1}', '$groupId-WR2M${i + 1}']
+        },
+      );
+      lr2matches.add(match);
+    }
+    
+    rounds.add(TournamentRound(
+      id: _generateRoundId(tournamentId, 102, 'losers_$groupId'),
+      roundNumber: 102,
+      name: 'Group $groupId Losers Round 2',
+      type: 'losers',
+      matches: lr2matches,
+      metadata: {'groupId': groupId, 'matchCount': 4}
+    ));
+    
+    // LR3: 2 matches - third round
+    final lr3matches = <TournamentMatch>[];
+    for (int i = 0; i < 2; i++) {
+      final match = TournamentMatch(
+        id: '$groupId-L${8 + i + 1}',
+        roundId: _generateRoundId(tournamentId, 103, 'losers_$groupId'),
+        roundNumber: 103,
+        matchNumber: i + 1,
+        player1: null,
+        player2: null,
+        status: 'pending',
+        metadata: {
+          'bracketType': 'losers',
+          'groupId': groupId,
+          'saboMatchId': '$groupId-L${8 + i + 1}',
+          'dependsOn': ['$groupId-L${4 + i * 2 + 1}', '$groupId-L${4 + i * 2 + 2}']
+        },
+      );
+      lr3matches.add(match);
+    }
+    
+    rounds.add(TournamentRound(
+      id: _generateRoundId(tournamentId, 103, 'losers_$groupId'),
+      roundNumber: 103,
+      name: 'Group $groupId Losers Round 3',
+      type: 'losers',
+      matches: lr3matches,
+      metadata: {'groupId': groupId, 'matchCount': 2}
+    ));
+    
+    // Losers Final: 1 match - Determines 2nd Qualifier
+    final lfMatch = TournamentMatch(
+      id: '$groupId-LF',
+      roundId: _generateRoundId(tournamentId, 104, 'losers_$groupId'),
+      roundNumber: 104,
+      matchNumber: 1,
+      player1: null,
+      player2: null,
+      status: 'pending',
+      metadata: {
+        'bracketType': 'losers',
+        'groupId': groupId,
+        'saboMatchId': '$groupId-LF',
+        'isGroupLosersFinal': true,
+        'advancement': '2nd Qualifier',
+        'dependsOn': ['$groupId-L9', '$groupId-L10']
+      },
+    );
+    
+    rounds.add(TournamentRound(
+      id: _generateRoundId(tournamentId, 104, 'losers_$groupId'),
+      roundNumber: 104,
+      name: 'Group $groupId Losers Final',
+      type: 'losers',
+      matches: [lfMatch],
+      metadata: {'groupId': groupId, 'matchCount': 1, 'advancement': '2nd Qualifier'}
+    ));
+    
+    return rounds;
+  }
+
+
+
+
+
+
+
+  /// Generate Cross-Bracket Finals for DE32 (3 matches: 2 semifinals + 1 final)
+  static List<TournamentRound> _generateSaboDE32CrossBracket(String tournamentId) {
+    final rounds = <TournamentRound>[];
+    
+    // Semifinal 1: Group A Winner 1 vs Group B Winner 1
+    final semifinal1 = TournamentMatch(
+      id: 'SF1',
+      roundId: _generateRoundId(tournamentId, 350, 'cross_bracket'),
+      roundNumber: 350,
+      matchNumber: 1,
+      player1: null, // From A-FINAL1 winner
+      player2: null, // From B-FINAL1 winner
+      status: 'pending',
+      metadata: {
+        'bracketType': 'cross_bracket',
+        'saboMatchId': 'SF1',
+        'isSemifinal': true,
+        'matchup': 'Group_A_Winner_1 vs Group_B_Winner_1',
+        'dependsOn': ['A-FINAL1', 'B-FINAL1']
+      },
+    );
+    
+    // Semifinal 2: Group A Winner 2 vs Group B Winner 2
+    final semifinal2 = TournamentMatch(
+      id: 'SF2',
+      roundId: _generateRoundId(tournamentId, 351, 'cross_bracket'),
+      roundNumber: 351,
+      matchNumber: 1,
+      player1: null, // From A-FINAL2 winner
+      player2: null, // From B-FINAL2 winner
+      status: 'pending',
+      metadata: {
+        'bracketType': 'cross_bracket',
+        'saboMatchId': 'SF2',
+        'isSemifinal': true,
+        'matchup': 'Group_A_Winner_2 vs Group_B_Winner_2',
+        'dependsOn': ['A-FINAL2', 'B-FINAL2']
+      },
+    );
+    
+    rounds.add(TournamentRound(
+      id: _generateRoundId(tournamentId, 350, 'cross_bracket'),
+      roundNumber: 350,
+      name: 'DE32 Semifinals',
+      type: 'cross_bracket',
+      matches: [semifinal1, semifinal2],
+      metadata: {'matchCount': 2, 'phase': 'semifinals'}
+    ));
+    
+    // DE32 Final
+    final de32Final = TournamentMatch(
+      id: 'FINAL',
+      roundId: _generateRoundId(tournamentId, 400, 'cross_bracket'),
+      roundNumber: 400,
+      matchNumber: 1,
+      player1: null, // SF1 winner
+      player2: null, // SF2 winner
+      status: 'pending',
+      metadata: {
+        'bracketType': 'cross_bracket',
+        'saboMatchId': 'FINAL',
+        'isFinal': true,
+        'isChampionship': true,
+        'dependsOn': ['SF1', 'SF2']
+      },
+    );
+    
+    rounds.add(TournamentRound(
+      id: _generateRoundId(tournamentId, 400, 'cross_bracket'),
+      roundNumber: 400,
+      name: 'DE32 Final',
+      type: 'cross_bracket',
+      matches: [de32Final],
+      metadata: {'matchCount': 1, 'phase': 'final', 'isChampionship': true}
+    ));
     
     return rounds;
   }

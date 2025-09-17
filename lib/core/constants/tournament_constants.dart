@@ -10,8 +10,14 @@ class TournamentFormats {
   /// Loại trực tiếp (Single Elimination)
   static const String singleElimination = 'single_elimination';
   
-  /// Loại kép (Double Elimination) 
+  /// Loại kép truyền thống (Traditional Double Elimination) 
   static const String doubleElimination = 'double_elimination';
+  
+  /// Loại kép Sabo DE16 (Sabo Double Elimination 16 players)
+  static const String saboDoubleElimination = 'sabo_double_elimination';
+  
+  /// Loại kép Sabo DE32 (Sabo Double Elimination 32 players)
+  static const String saboDoubleElimination32 = 'sabo_double_elimination_32';
   
   /// Vòng tròn (Round Robin)
   static const String roundRobin = 'round_robin';
@@ -29,6 +35,8 @@ class TournamentFormats {
   static const List<String> allFormats = [
     singleElimination,
     doubleElimination,
+    saboDoubleElimination,
+    saboDoubleElimination32,
     roundRobin,
     swiss,
     parallelGroups,
@@ -51,10 +59,10 @@ class TournamentFormats {
       'color': Colors.red,
     },
     doubleElimination: {
-      'name': 'Double Elimination', 
-      'nameVi': 'Loại kép',
-      'description': 'Players must lose twice to be eliminated',
-      'descriptionVi': 'Người chơi phải thua hai lần mới bị loại',
+      'name': 'Traditional Double Elimination', 
+      'nameVi': 'Loại kép truyền thống',
+      'description': 'Classic double elimination with Winners Final',
+      'descriptionVi': 'Loại kép truyền thống với chung kết Winners',
       'minPlayers': 4,
       'maxPlayers': 32,
       'eliminationType': 'double',
@@ -62,6 +70,45 @@ class TournamentFormats {
       'roundsFormula': 'log2(players)+log2(players/2)',
       'icon': Icons.double_arrow,
       'color': Colors.orange,
+    },
+    saboDoubleElimination: {
+      'name': 'Sabo Double Elimination (DE16)', 
+      'nameVi': 'Loại kép Sabo (DE16)',
+      'description': 'SABO Arena DE16 with 2 Loser Branches + SABO Finals',
+      'descriptionVi': 'DE16 Sabo Arena với 2 nhánh thua + chung kết Sabo',
+      'minPlayers': 16,
+      'maxPlayers': 16,
+      'eliminationType': 'sabo_double',
+      'bracketType': 'sabo_de16',
+      'roundsFormula': '27', // Fixed 27 matches for DE16
+      'icon': Icons.star,
+      'color': Colors.deepPurple,
+      'totalMatches': 27,
+      'winnersMatches': 14, // 8+4+2
+      'losersAMatches': 7,  // 4+2+1  
+      'losersBMatches': 3,  // 2+1
+      'finalsMatches': 3,   // 2 semifinals + 1 final
+    },
+    saboDoubleElimination32: {
+      'name': 'Sabo Double Elimination (DE32)', 
+      'nameVi': 'Loại kép Sabo (DE32)',
+      'description': 'SABO Arena DE32 with Two-Group System + Cross-Bracket Finals',
+      'descriptionVi': 'DE32 Sabo Arena với hệ thống 2 nhóm + chung kết chéo',
+      'minPlayers': 32,
+      'maxPlayers': 32,
+      'eliminationType': 'sabo_double_32',
+      'bracketType': 'sabo_de32',
+      'roundsFormula': '55', // Fixed 55 matches for DE32
+      'icon': Icons.workspaces,
+      'color': Colors.indigo,
+      'totalMatches': 55,
+      'groupAMatches': 26,    // Group A: 14+7+3+2
+      'groupBMatches': 26,    // Group B: 14+7+3+2
+      'crossBracketMatches': 3, // 2 semifinals + 1 final
+      'hasGroups': true,
+      'groupCount': 2,
+      'playersPerGroup': 16,
+      'qualifiersPerGroup': 2,
     },
     roundRobin: {
       'name': 'Round Robin',
