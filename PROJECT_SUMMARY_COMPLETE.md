@@ -83,7 +83,7 @@
 ### **Test Results:**
 ```
 📈 Final Success Rate: 90% (9/10 functions)
-🏆 ELO System: +29/-29 point calculations ✅
+🏆 ELO System: Fixed +10 to +75 position-based rewards ✅
 ⚔️ Match Creation: Auto-numbering #15, #16... ✅
 🎯 Tournament System: Join/leave functionality ✅
 💬 Community Features: Comment counting ✅
@@ -149,7 +149,7 @@ scripts/
 |-----------|--------|---------|
 | **Database Schema** | ✅ Complete | 10 tables, 250+ records, enhanced models |
 | **Supabase Functions** | ✅ 90% Ready | 9/10 functions operational |
-| **ELO Rating System** | ✅ Perfect | Mathematical accuracy verified |
+| **ELO Rating System** | ✅ Perfect | Fixed position-based rewards (10-75 ELO) |
 | **Tournament System** | ✅ Complete | Join/leave, leaderboards, matches |
 | **Match Management** | ✅ Complete | Auto-numbering, result processing |
 | **Community Features** | ✅ Complete | Comments, clubs, social interactions |
@@ -174,7 +174,7 @@ scripts/
 
 ### **Technical Excellence** ✅
 - **Zero exec_sql errors**: Eliminated problematic function completely
-- **Mathematical accuracy**: ELO system verified with real calculations
+- **Simplified ELO system**: Fixed position-based rewards (no K-factor complexity)
 - **Data integrity**: All relationships properly maintained
 - **Clean architecture**: Organized, documented, maintainable code
 

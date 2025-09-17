@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import '../../../core/app_export.dart';
-import '../../member_management_screen/member_management_screen.dart';
+import 'package:sabo_arena/models/user_profile.dart';
+import 'package:sabo_arena/services/ranking_service.dart';
+import 'package:intl/intl.dart';
 
 class MemberOverviewTab extends StatefulWidget {
-  final MemberData memberData;
+  final UserProfile user;
 
   const MemberOverviewTab({
-    Key? key,
-    required this.memberData,
-  }) : super(key: key);
+    super.key,
+    required this.user,
+  });
 
   @override
   _MemberOverviewTabState createState() => _MemberOverviewTabState();
@@ -16,203 +17,150 @@ class MemberOverviewTab extends StatefulWidget {
 
 class _MemberOverviewTabState extends State<MemberOverviewTab>
     with AutomaticKeepAliveClientMixin {
+  final RankingService _rankingService = RankingService();
+
   @override
   bool get wantKeepAlive => true;
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    
+
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildPersonalInfoSection(),
-          SizedBox(height: 24),
-          _buildMembershipDetailsSection(),
-          SizedBox(height: 24),
-          _buildContactInfoSection(),
-          SizedBox(height: 24),
-          _buildNotesSection(),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           _buildQuickStatsSection(),
+          const SizedBox(height: 24),
+          _buildContactInfoSection(),
+          const SizedBox(height: 24),
+          _buildBioSection(),
         ],
       ),
     );
   }
 
   Widget _buildPersonalInfoSection() {
+    final user = widget.user;
+    final rankInfo = _rankingService.getRankDisplayInfo(user.displayRank);
+
     return _buildSection(
       title: 'Thông tin cá nhân',
-      icon: Icons.person,
+      icon: Icons.person_outline,
       children: [
-        _buildInfoRow('Họ và tên', widget.memberData.user.name),
-        _buildInfoRow('Tên đăng nhập', '@${widget.memberData.user.username}'),
-        _buildInfoRow('Xếp hạng', _getRankLabel(widget.memberData.user.rank)),
-        _buildInfoRow('Điểm ELO', '${widget.memberData.user.elo}'),
+        _buildInfoRow('Họ và tên', user.fullName),
+        _buildInfoRow('Tên đăng nhập', '@${user.username ?? ''}'),
+        _buildInfoRow(
+          'Xếp hạng',
+          rankInfo.name,
+          valueWidget: Text(
+            rankInfo.name,
+            style: TextStyle(
+              color: rankInfo.color,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+        ),
+        _buildInfoRow('Điểm ELO', '${user.eloRating}'),
         _buildInfoRow(
           'Trạng thái',
-          widget.memberData.user.isOnline ? 'Đang trực tuyến' : 'Ngoại tuyến',
-          valueColor: widget.memberData.user.isOnline ? Colors.green : Colors.grey,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMembershipDetailsSection() {
-    return _buildSection(
-      title: 'Chi tiết thành viên',
-      icon: Icons.card_membership,
-      children: [
-        _buildInfoRow('ID thành viên', widget.memberData.membershipInfo.membershipId),
-        _buildInfoRow('Loại thành viên', _getMembershipTypeLabel(widget.memberData.membershipInfo.type)),
-        _buildInfoRow('Trạng thái', _getMembershipStatusLabel(widget.memberData.membershipInfo.status)),
-        _buildInfoRow('Ngày tham gia', _formatDate(widget.memberData.membershipInfo.joinDate)),
-        if (widget.memberData.membershipInfo.expiryDate != null)
-          _buildInfoRow('Ngày hết hạn', _formatDate(widget.memberData.membershipInfo.expiryDate!)),
-        _buildInfoRow(
-          'Tự động gia hạn',
-          widget.memberData.membershipInfo.autoRenewal ? 'Có' : 'Không',
-          valueColor: widget.memberData.membershipInfo.autoRenewal ? Colors.green : Colors.orange,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildContactInfoSection() {
-    return _buildSection(
-      title: 'Thông tin liên hệ',
-      icon: Icons.contact_mail,
-      children: [
-        _buildInfoRow('Email', 'user@example.com'), // Mock data
-        _buildInfoRow('Số điện thoại', '+84 123 456 789'), // Mock data
-        _buildInfoRow('Địa chỉ', '123 Đường ABC, Quận 1, TP.HCM'), // Mock data
-        _buildInfoRow('Ngày sinh', '01/01/1990'), // Mock data
-      ],
-    );
-  }
-
-  Widget _buildNotesSection() {
-    return _buildSection(
-      title: 'Ghi chú',
-      icon: Icons.note,
-      action: TextButton.icon(
-        onPressed: _editNotes,
-        icon: Icon(Icons.edit, size: 16),
-        label: Text('Chỉnh sửa'),
-      ),
-      children: [
-        Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
-            ),
-          ),
-          child: Text(
-            'Thành viên tích cực, thường xuyên tham gia các hoạt động của CLB. Có kỹ năng chơi tốt và thái độ thân thiện.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
-            ),
-          ),
+          user.isActive ? 'Đang hoạt động' : 'Không hoạt động',
+          valueColor: user.isActive ? Colors.green : Colors.grey,
         ),
       ],
     );
   }
 
   Widget _buildQuickStatsSection() {
+    final user = widget.user;
+    final totalMatches = user.totalWins + user.totalLosses;
+    final winRate = totalMatches > 0 ? (user.totalWins / totalMatches * 100) : 0.0;
+
     return _buildSection(
-      title: 'Thống kê tổng quan',
-      icon: Icons.analytics,
+      title: 'Thống kê nhanh',
+      icon: Icons.analytics_outlined,
       children: [
-        Container(
-          padding: EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                Theme.of(context).colorScheme.secondary.withOpacity(0.1),
-              ],
+        Row(
+          children: [
+            Expanded(
+              child: _buildStatCard(
+                'Thắng',
+                '${user.totalWins}',
+                Icons.emoji_events_outlined,
+                Colors.green,
+              ),
             ),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildStatCard(
-                      'Tổng trận đấu',
-                      '${widget.memberData.activityStats.totalMatches}',
-                      Icons.sports_esports,
-                      Colors.blue,
-                    ),
-                  ),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: _buildStatCard(
-                      'Tỷ lệ thắng',
-                      '${(widget.memberData.activityStats.winRate * 100).toInt()}%',
-                      Icons.emoji_events,
-                      Colors.green,
-                    ),
-                  ),
-                ],
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildStatCard(
+                'Thua',
+                '${user.totalLosses}',
+                Icons.shield_outlined,
+                Colors.red,
               ),
-              
-              SizedBox(height: 12),
-              
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildStatCard(
-                      'Giải đấu',
-                      '${widget.memberData.activityStats.tournamentsJoined}',
-                      Icons.military_tech,
-                      Colors.orange,
-                    ),
-                  ),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: _buildStatCard(
-                      'Điểm hoạt động',
-                      '${widget.memberData.activityStats.activityScore}',
-                      Icons.local_fire_department,
-                      Colors.red,
-                    ),
-                  ),
-                ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _buildStatCard(
+                'Tổng trận',
+                '$totalMatches',
+                Icons.sports_esports_outlined,
+                Colors.blue,
               ),
-              
-              SizedBox(height: 12),
-              
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildStatCard(
-                      'Bài đăng',
-                      '${widget.memberData.engagement.postsCount}',
-                      Icons.article,
-                      Colors.purple,
-                    ),
-                  ),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: _buildStatCard(
-                      'Điểm tương tác',
-                      '${widget.memberData.engagement.socialScore}',
-                      Icons.favorite,
-                      Colors.pink,
-                    ),
-                  ),
-                ],
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildStatCard(
+                'Tỷ lệ thắng',
+                '${winRate.toStringAsFixed(1)}%',
+                Icons.trending_up,
+                Colors.orange,
               ),
-            ],
-          ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildContactInfoSection() {
+    final user = widget.user;
+    return _buildSection(
+      title: 'Thông tin liên hệ',
+      icon: Icons.contact_mail_outlined,
+      children: [
+        _buildInfoRow('Email', user.email),
+        _buildInfoRow('Số điện thoại', user.phone ?? 'Chưa cập nhật'),
+        _buildInfoRow('Địa chỉ', user.location ?? 'Chưa cập nhật'),
+        _buildInfoRow(
+            'Ngày sinh',
+            user.dateOfBirth != null
+                ? DateFormat('dd/MM/yyyy').format(user.dateOfBirth!)
+                : 'Chưa cập nhật'),
+      ],
+    );
+  }
+
+  Widget _buildBioSection() {
+    final user = widget.user;
+    if (user.bio == null || user.bio!.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return _buildSection(
+      title: 'Tiểu sử',
+      icon: Icons.article_outlined,
+      children: [
+        Text(
+          user.bio!,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.5),
         ),
       ],
     );
@@ -222,7 +170,6 @@ class _MemberOverviewTabState extends State<MemberOverviewTab>
     required String title,
     required IconData icon,
     required List<Widget> children,
-    Widget? action,
   }) {
     return Card(
       elevation: 0,
@@ -234,26 +181,25 @@ class _MemberOverviewTabState extends State<MemberOverviewTab>
         ),
       ),
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Icon(icon, color: Theme.of(context).colorScheme.primary),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     title,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                 ),
-                if (action != null) action,
               ],
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             ...children,
           ],
         ),
@@ -261,171 +207,77 @@ class _MemberOverviewTabState extends State<MemberOverviewTab>
     );
   }
 
-  Widget _buildInfoRow(String label, String value, {Color? valueColor}) {
+  Widget _buildInfoRow(String label, String value,
+      {Color? valueColor, Widget? valueWidget}) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          SizedBox(
-            width: 120,
+          Expanded(
+            flex: 2,
             child: Text(
               label,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-              ),
+                    color:
+                        Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                  ),
             ),
           ),
+          const SizedBox(width: 16),
           Expanded(
-            child: Text(
-              value,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-                color: valueColor ?? Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
+            flex: 3,
+            child: valueWidget ??
+                Text(
+                  value,
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color:
+                        valueColor ?? Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+      String title, String value, IconData icon, Color color) {
     return Container(
-      padding: EdgeInsets.all(12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: color.withOpacity(0.05),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: color.withOpacity(0.2),
         ),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Icon(icon, size: 16, color: color),
-              ),
-              SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  title,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              value,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _getRankLabel(RankType rank) {
-    switch (rank) {
-      case RankType.beginner:
-        return 'Mới bắt đầu';
-      case RankType.amateur:
-        return 'Nghiệp dư';
-      case RankType.intermediate:
-        return 'Trung bình';
-      case RankType.advanced:
-        return 'Nâng cao';
-      case RankType.professional:
-        return 'Chuyên nghiệp';
-    }
-  }
-
-  String _getMembershipTypeLabel(MembershipType type) {
-    switch (type) {
-      case MembershipType.regular:
-        return 'Thường';
-      case MembershipType.vip:
-        return 'VIP';
-      case MembershipType.premium:
-        return 'Premium';
-    }
-  }
-
-  String _getMembershipStatusLabel(MemberStatus status) {
-    switch (status) {
-      case MemberStatus.active:
-        return 'Hoạt động';
-      case MemberStatus.inactive:
-        return 'Không hoạt động';
-      case MemberStatus.suspended:
-        return 'Tạm khóa';
-      case MemberStatus.pending:
-        return 'Chờ duyệt';
-    }
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
-  }
-
-  void _editNotes() {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Container(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Chỉnh sửa ghi chú',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                title,
+                style: Theme.of(context).textTheme.bodyMedium,
+                overflow: TextOverflow.ellipsis,
               ),
-              SizedBox(height: 16),
-              TextField(
-                decoration: InputDecoration(
-                  hintText: 'Nhập ghi chú về thành viên...',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                ),
-                maxLines: 5,
-              ),
-              SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text('Hủy'),
-                  ),
-                  SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text('Lưu'),
-                  ),
-                ],
-              ),
+              Icon(icon, size: 20, color: color),
             ],
           ),
-        ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+          ),
+        ],
       ),
     );
   }

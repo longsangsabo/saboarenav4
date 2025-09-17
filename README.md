@@ -1,6 +1,6 @@
 # Flutter
 
-A modern Flutter-based mobile application utilizing the latest mobile development technologies and tools for building responsive cross-platform applications.
+A modern Flutter-based billiards tournament platform with comprehensive ELO rating system, featuring fixed position-based rewards (10-75 ELO) and tournament management capabilities.
 
 ## 📋 Prerequisites
 

@@ -55,10 +55,8 @@ CREATE TABLE platform_settings (
 
 -- Insert core settings
 INSERT INTO platform_settings (setting_key, setting_value, description, category) VALUES
-('elo_k_factor_default', '32', 'Default K-factor for ELO calculations', 'elo'),
-('elo_k_factor_new_player', '40', 'K-factor for players with <30 games', 'elo'),
-('elo_k_factor_high_elo', '24', 'K-factor for players with ELO >1800', 'elo'),
 ('elo_starting_rating', '1200', 'Starting ELO for new players', 'elo'),
+('elo_fixed_rewards', 'true', 'Use fixed ELO rewards instead of K-factor', 'elo'),
 ('verification_min_matches', '3', 'Minimum matches for rank verification', 'verification'),
 ('verification_win_rate_threshold', '0.4', 'Minimum win rate for rank verification', 'verification'),
 ('tournament_max_participants', '64', 'Maximum participants per tournament', 'tournament'),
@@ -125,16 +123,18 @@ class RankingConstants {
 #### `lib/core/constants/elo_constants.dart`
 ```dart
 class EloConstants {
-  // K-factors
-  static const int K_FACTOR_DEFAULT = 32;
-  static const int K_FACTOR_NEW_PLAYER = 40;
-  static const int K_FACTOR_HIGH_ELO = 24;
-  static const int K_FACTOR_PROVISIONAL = 50;
+  // Fixed ELO rewards (no K-factor system)
+  static const int ELO_WINNER = 75;           // 1st place
+  static const int ELO_RUNNER_UP = 60;        // 2nd place
+  static const int ELO_THIRD_PLACE = 45;      // 3rd place
+  static const int ELO_FOURTH_PLACE = 35;     // 4th place
+  static const int ELO_TOP_25_PERCENT = 25;   // Top 25%
+  static const int ELO_TOP_50_PERCENT = 15;   // Top 50%
+  static const int ELO_TOP_75_PERCENT = 10;   // Top 75%
+  static const int ELO_BOTTOM_25_PERCENT = -5; // Bottom 25%
 
   // ELO thresholds
   static const int STARTING_ELO = 1200;
-  static const int HIGH_ELO_THRESHOLD = 1800;
-  static const int NEW_PLAYER_GAME_THRESHOLD = 30;
 
   // Match type modifiers
   static const double TOURNAMENT_MODIFIER = 1.0;
@@ -175,13 +175,12 @@ class EloConstants {
 #### Database-driven configs (Admin configurable):
 ```dart
 class ConfigService {
-  static Future<int> getEloKFactor(UserProfile user) async {
-    if (user.totalMatches < 30) {
-      return await _getSetting('elo_k_factor_new_player', 40);
-    } else if (user.eloRating > 1800) {
-      return await _getSetting('elo_k_factor_high_elo', 24);
-    }
-    return await _getSetting('elo_k_factor_default', 32);
+  static Future<bool> useFixedEloRewards() async {
+    return await _getSetting('elo_fixed_rewards', true);
+  }
+
+  static Future<int> getStartingElo() async {
+    return await _getSetting('elo_starting_rating', 1200);
   }
 
   static Future<RankDefinition> getRankByElo(int elo) async {

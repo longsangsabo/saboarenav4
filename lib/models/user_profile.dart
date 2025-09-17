@@ -1,3 +1,5 @@
+import 'package:sabo_arena/core/constants/ranking_constants.dart';
+
 class UserProfile {
   final String id;
   final String email;
@@ -14,7 +16,7 @@ class UserProfile {
   final int totalWins;
   final int totalLosses;
   final int totalTournaments;
-  final int rankingPoints;
+  final int eloRating;
   final int spaPoints; // SPA reward points earned
   final double totalPrizePool; // Total prize money won from tournaments
   final bool isVerified;
@@ -39,7 +41,7 @@ class UserProfile {
     required this.totalWins,
     required this.totalLosses,
     required this.totalTournaments,
-    required this.rankingPoints,
+    required this.eloRating,
     required this.spaPoints,
     required this.totalPrizePool,
     required this.isVerified,
@@ -68,7 +70,7 @@ class UserProfile {
       totalWins: json['total_wins'] ?? 0,
       totalLosses: json['total_losses'] ?? 0,
       totalTournaments: json['total_tournaments'] ?? 0,
-      rankingPoints: json['elo_rating'] ?? 1200,
+      eloRating: json['elo_rating'] ?? 1200,
       spaPoints: json['spa_points'] ?? 0,
       totalPrizePool: (json['total_prize_pool'] ?? 0.0).toDouble(),
       isVerified: json['is_verified'] ?? false,
@@ -95,7 +97,7 @@ class UserProfile {
       'total_wins': totalWins,
       'total_losses': totalLosses,
       'total_tournaments': totalTournaments,
-      'elo_rating': rankingPoints,
+      'elo_rating': eloRating,
       'spa_points': spaPoints,
       'total_prize_pool': totalPrizePool,
       'is_verified': isVerified,
@@ -133,7 +135,7 @@ class UserProfile {
       totalWins: totalWins,
       totalLosses: totalLosses,
       totalTournaments: totalTournaments,
-      rankingPoints: rankingPoints,
+      eloRating: eloRating,
       spaPoints: spaPoints,
       totalPrizePool: totalPrizePool,
       isVerified: isVerified,
@@ -148,6 +150,10 @@ class UserProfile {
     int totalGames = totalWins + totalLosses;
     if (totalGames == 0) return 0.0;
     return (totalWins / totalGames) * 100;
+  }
+
+  String get displayRank {
+    return rank ?? RankingConstants.UNRANKED;
   }
 
   String get skillLevelDisplay {
