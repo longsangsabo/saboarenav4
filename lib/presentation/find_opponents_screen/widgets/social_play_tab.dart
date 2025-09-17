@@ -101,7 +101,6 @@ class SocialPlayTab extends StatelessWidget {
                   itemBuilder: (context, index) {
                     return PlayerCardWidget(
                       player: players[index],
-                      playType: PlayType.social, // Casual play
                     );
                   },
                 ),

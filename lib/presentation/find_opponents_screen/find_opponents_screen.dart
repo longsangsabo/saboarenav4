@@ -6,8 +6,8 @@ import '../../services/location_service.dart';
 import '../../routes/app_routes.dart';
 
 import './widgets/filter_bottom_sheet.dart';
-import './widgets/map_view_widget.dart';
-import './widgets/player_card_widget.dart';
+import './widgets/competitive_play_tab.dart';
+import './widgets/social_play_tab.dart';
 
 class FindOpponentsScreen extends StatefulWidget {
   const FindOpponentsScreen({super.key});
@@ -16,7 +16,8 @@ class FindOpponentsScreen extends StatefulWidget {
   State<FindOpponentsScreen> createState() => _FindOpponentsScreenState();
 }
 
-class _FindOpponentsScreenState extends State<FindOpponentsScreen> {
+class _FindOpponentsScreenState extends State<FindOpponentsScreen>
+    with TickerProviderStateMixin {
   final UserService _userService = UserService.instance;
   final LocationService _locationService = LocationService.instance;
 
@@ -26,19 +27,30 @@ class _FindOpponentsScreenState extends State<FindOpponentsScreen> {
   bool _isMapView = false;
   String _selectedSkillLevel = 'all';
   double _radiusKm = 10.0;
+  
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     _loadPlayers();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadPlayers() async {
     try {
-      setState(() {
-        _isLoading = true;
-        _errorMessage = null;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = true;
+          _errorMessage = null;
+        });
+      }
 
       // 1. Get current user's position
       final position = await _locationService.getCurrentPosition();
@@ -55,18 +67,24 @@ class _FindOpponentsScreenState extends State<FindOpponentsScreen> {
           ? players
           : players.where((p) => p.skillLevel == _selectedSkillLevel).toList();
 
-      setState(() {
-        _players = filteredPlayers;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _players = filteredPlayers;
+          _isLoading = false;
+        });
+      }
     } catch (error) {
-      setState(() {
-        _isLoading = false;
-        _errorMessage = error.toString();
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi tải danh sách đối thủ: $_errorMessage')),
-      );
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = error.toString();
+        });
+      }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi tải danh sách đối thủ: $_errorMessage')),
+        );
+      }
     }
   }
 
@@ -83,11 +101,13 @@ class _FindOpponentsScreenState extends State<FindOpponentsScreen> {
           'distance': _radiusKm,
         },
         onFiltersChanged: (filters) {
-          setState(() {
-            _selectedSkillLevel = filters['skillLevel'] ?? 'all';
-            _radiusKm = filters['distance'] ?? 10.0;
-          });
-          _loadPlayers();
+          if (mounted) {
+            setState(() {
+              _selectedSkillLevel = filters['skillLevel'] ?? 'all';
+              _radiusKm = filters['distance'] ?? 10.0;
+            });
+            _loadPlayers();
+          }
         },
       ),
     );
@@ -116,14 +136,49 @@ class _FindOpponentsScreenState extends State<FindOpponentsScreen> {
             icon: const Icon(Icons.tune),
           ),
           IconButton(
-            onPressed: () => setState(() => _isMapView = !_isMapView),
+            onPressed: () {
+              if (mounted) {
+                setState(() => _isMapView = !_isMapView);
+              }
+            },
             icon: Icon(_isMapView ? Icons.list : Icons.map),
           ),
         ],
+        bottom: TabBar(
+          controller: _tabController,
+          labelColor: Theme.of(context).primaryColor,
+          unselectedLabelColor: Colors.grey[600],
+          indicatorColor: Theme.of(context).primaryColor,
+          tabs: const [
+            Tab(
+              icon: Icon(Icons.emoji_events),
+              text: 'Thách đấu',
+            ),
+            Tab(
+              icon: Icon(Icons.groups),
+              text: 'Giao lưu',
+            ),
+          ],
+        ),
       ),
-      body: RefreshIndicator(
-        onRefresh: _loadPlayers,
-        child: _buildBody(),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          CompetitivePlayTab(
+            isLoading: _isLoading,
+            errorMessage: _errorMessage,
+            players: _players,
+            isMapView: _isMapView,
+            onRefresh: _loadPlayers,
+          ),
+          SocialPlayTab(
+            isLoading: _isLoading,
+            errorMessage: _errorMessage,
+            players: _players,
+            isMapView: _isMapView,
+            onRefresh: _loadPlayers,
+          ),
+        ],
       ),
       bottomNavigationBar: SafeArea(
         child: Container(
@@ -197,120 +252,5 @@ class _FindOpponentsScreenState extends State<FindOpponentsScreen> {
     );
   }
 
-  Widget _buildBody() {
-    if (_isLoading) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Đang tìm đối thủ ở gần...'),
-          ],
-        ),
-      );
-    }
 
-    if (_errorMessage != null) {
-      return _buildErrorState();
-    }
-
-    if (_players.isEmpty) {
-      return _buildEmptyState();
-    }
-
-    return _isMapView
-        ? MapViewWidget(players: _players.map((p) => p.toJson()).toList())
-        : ListView.builder(
-            padding: const EdgeInsets.only(top: 8, bottom: 80),
-            itemCount: _players.length,
-            itemBuilder: (context, index) {
-              return PlayerCardWidget(
-                player: _players[index],
-              );
-            },
-          );
-  }
-
-  Widget _buildErrorState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red[400],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Đã xảy ra lỗi',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _errorMessage ?? 'Không thể tải danh sách đối thủ. Vui lòng thử lại.',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: _loadPlayers,
-              child: const Text('Thử lại'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.person_search,
-              size: 64,
-              color: Colors.grey[400],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Không tìm thấy đối thủ',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey[600],
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Thử thay đổi bộ lọc để tìm thêm người chơi',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[500],
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: _loadPlayers,
-              child: const Text('Tải lại'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }

@@ -71,13 +71,32 @@ class ClubService {
   Future<List<UserProfile>> getClubMembers(String clubId) async {
     try {
       final response = await _supabase.from('club_members').select('''
-            *,
-            users (*)
+            club_id,
+            user_id,
+            joined_at,
+            is_favorite,
+            users!inner (
+              id,
+              email,
+              full_name,
+              username,
+              bio,
+              avatar_url,
+              phone,
+              role,
+              skill_level,
+              ranking_points,
+              is_verified,
+              is_active,
+              display_name,
+              rank,
+              elo_rating,
+              spa_points
+            )
           ''').eq('club_id', clubId).order('joined_at');
 
       return response
-          .map<UserProfile>(
-              (json) => UserProfile.fromJson(json['users']))
+          .map<UserProfile>((json) => UserProfile.fromJson(json['users']))
           .toList();
     } catch (error) {
       throw Exception('Failed to get club members: $error');

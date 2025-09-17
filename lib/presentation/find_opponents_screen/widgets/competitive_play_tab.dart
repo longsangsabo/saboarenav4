@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../models/user_profile.dart';
 import './map_view_widget.dart';
 import './player_card_widget.dart';
-import './social_play_tab.dart'; // For PlayType enum
+
 
 class CompetitivePlayTab extends StatelessWidget {
   final bool isLoading;
@@ -122,7 +122,6 @@ class CompetitivePlayTab extends StatelessWidget {
                   itemBuilder: (context, index) {
                     return PlayerCardWidget(
                       player: players[index],
-                      playType: PlayType.competitive, // Ranked play
                     );
                   },
                 ),
@@ -144,12 +143,15 @@ class CompetitivePlayTab extends StatelessWidget {
         children: [
           Icon(icon, size: 16, color: color),
           const SizedBox(width: 4),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12,
-              color: color,
-              fontWeight: FontWeight.w500,
+          Flexible(
+            child: Text(
+              title,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 12,
+                color: color,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ],
