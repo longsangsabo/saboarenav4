@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-// import '../../../core/app_export.dart';
+import '../../../core/app_export.dart';
 import '../../member_management_screen/member_management_screen.dart';
 
 class MemberSettingsTab extends StatefulWidget {
@@ -7,10 +7,10 @@ class MemberSettingsTab extends StatefulWidget {
   final Function(MemberData) onMemberUpdated;
 
   const MemberSettingsTab({
-    super.key,
+    Key? key,
     required this.memberData,
     required this.onMemberUpdated,
-  });
+  }) : super(key: key);
 
   @override
   _MemberSettingsTabState createState() => _MemberSettingsTabState();

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:sizer/sizer.dart';
 
 import '../../../core/app_export.dart';
 
@@ -33,7 +33,7 @@ class SocialFeaturesWidget extends StatelessWidget {
           ),
         ),
 
-        SizedBox(height: 2),
+        SizedBox(height: 2.h),
 
         // Social Stats Row
         Padding(
@@ -73,12 +73,12 @@ class SocialFeaturesWidget extends StatelessWidget {
           ),
         ),
 
-        SizedBox(height: 3),
+        SizedBox(height: 3.h),
 
         // Recent Friends Section
         _buildRecentFriendsSection(context),
 
-        SizedBox(height: 3),
+        SizedBox(height: 3.h),
 
         // Recent Challenges Section
         _buildRecentChallengesSection(context),
@@ -121,7 +121,7 @@ class SocialFeaturesWidget extends StatelessWidget {
               color: AppTheme.lightTheme.colorScheme.primary,
               size: 24,
             ),
-            SizedBox(height: 1),
+            SizedBox(height: 1.h),
             Text(
               count,
               style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
@@ -129,7 +129,7 @@ class SocialFeaturesWidget extends StatelessWidget {
                 color: AppTheme.lightTheme.colorScheme.onSurface,
               ),
             ),
-            SizedBox(height: 0.5),
+            SizedBox(height: 0.5.h),
             Text(
               title,
               style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
@@ -180,9 +180,9 @@ class SocialFeaturesWidget extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(height: 1),
+        SizedBox(height: 1.h),
         SizedBox(
-          height: 12,
+          height: 12.h,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: EdgeInsets.symmetric(horizontal: 4.w),
@@ -249,7 +249,7 @@ class SocialFeaturesWidget extends StatelessWidget {
             ],
           ),
 
-          SizedBox(height: 1),
+          SizedBox(height: 1.h),
 
           // Friend Name
           Text(
@@ -302,7 +302,7 @@ class SocialFeaturesWidget extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(height: 1),
+        SizedBox(height: 1.h),
         ListView.builder(
           shrinkWrap: true,
           physics: NeverScrollableScrollPhysics(),
@@ -324,7 +324,7 @@ class SocialFeaturesWidget extends StatelessWidget {
     final statusText = _getChallengeStatusText(status);
 
     return Container(
-      margin: EdgeInsets.only(bottom: 2),
+      margin: EdgeInsets.only(bottom: 2.h),
       padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
         color: AppTheme.lightTheme.colorScheme.surface,
@@ -382,7 +382,7 @@ class SocialFeaturesWidget extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(height: 0.5),
+                SizedBox(height: 0.5.h),
                 Text(
                   '${challenge["gameType"] as String? ?? "8-Ball"} • ${challenge["date"] as String? ?? "Hôm nay"}',
                   style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
@@ -395,7 +395,7 @@ class SocialFeaturesWidget extends StatelessWidget {
 
           // Status Badge
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1),
+            padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
             decoration: BoxDecoration(
               color: statusColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),

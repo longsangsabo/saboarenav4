@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/app_export.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../member_management_screen/member_management_screen.dart';
 
@@ -6,9 +7,9 @@ class MemberProfileEditScreen extends StatefulWidget {
   final MemberData memberData;
 
   const MemberProfileEditScreen({
-    super.key,
+    Key? key,
     required this.memberData,
-  });
+  }) : super(key: key);
 
   @override
   _MemberProfileEditScreenState createState() => _MemberProfileEditScreenState();
@@ -78,19 +79,18 @@ class _MemberProfileEditScreenState extends State<MemberProfileEditScreen>
     final user = widget.memberData.user;
     final membership = widget.memberData.membershipInfo;
 
-  _displayNameController = TextEditingController(text: user.name);
-  // UserInfo doesn't include email/phone/location/bio/social links; keep empty for now
-  _emailController = TextEditingController(text: '');
-  _phoneController = TextEditingController(text: '');
-  _locationController = TextEditingController(text: '');
-  _bioController = TextEditingController(text: '');
-  _instagramController = TextEditingController(text: '');
-  _facebookController = TextEditingController(text: '');
+    _displayNameController = TextEditingController(text: user.displayName);
+    _emailController = TextEditingController(text: user.email);
+    _phoneController = TextEditingController(text: user.phone ?? '');
+    _locationController = TextEditingController(text: user.location ?? '');
+    _bioController = TextEditingController(text: user.bio ?? '');
+    _instagramController = TextEditingController(text: user.socialLinks?.instagram ?? '');
+    _facebookController = TextEditingController(text: user.socialLinks?.facebook ?? '');
 
-  _selectedAvatarUrl = user.avatar;
+    _selectedAvatarUrl = user.avatar;
     _selectedMembershipType = membership.type;
     _selectedStatus = membership.status;
-  _selectedRank = user.rank;
+    _selectedRank = user.rank;
 
     // Add change listeners to detect modifications
     _displayNameController.addListener(_onFormChanged);
@@ -593,7 +593,7 @@ class _MemberProfileEditScreenState extends State<MemberProfileEditScreen>
     required void Function(T?) onChanged,
   }) {
     return DropdownButtonFormField<T>(
-      initialValue: value,
+      value: value,
       onChanged: onChanged,
       decoration: InputDecoration(
         labelText: label,
@@ -779,8 +779,6 @@ class _MemberProfileEditScreenState extends State<MemberProfileEditScreen>
     switch (rank) {
       case RankType.beginner:
         return 'Mới bắt đầu';
-      case RankType.amateur:
-        return 'Nghiệp dư';
       case RankType.intermediate:
         return 'Trung bình';
       case RankType.advanced:

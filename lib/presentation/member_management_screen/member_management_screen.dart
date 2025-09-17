@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/app_export.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../models/member_analytics.dart';
+import '../../models/member_data.dart';
 import '../../theme/app_theme.dart';
 import '../../services/member_management_service.dart';
 import '../tournament_create_screen/tournament_create_screen_simple.dart';
@@ -17,9 +18,9 @@ class MemberManagementScreen extends StatefulWidget {
   final String clubId;
 
   const MemberManagementScreen({
-    super.key,
+    Key? key,
     required this.clubId,
-  });
+  }) : super(key: key);
 
   @override
   _MemberManagementScreenState createState() => _MemberManagementScreenState();
@@ -35,12 +36,12 @@ class _MemberManagementScreenState extends State<MemberManagementScreen>
   String _searchQuery = '';
   String _selectedFilter = 'all';
   bool _showAdvancedFilters = false;
-  final List<String> _selectedMembers = [];
+  List<String> _selectedMembers = [];
   
   // Mock data - replace with actual API calls
   List<MemberData> _allMembers = [];
   List<MemberData> _filteredMembers = [];
-  final MemberAnalytics _analytics = const MemberAnalytics(
+  MemberAnalytics _analytics = const MemberAnalytics(
     totalMembers: 100,
     activeMembers: 78,
     newThisMonth: 15,
@@ -429,6 +430,7 @@ class _MemberManagementScreenState extends State<MemberManagementScreen>
             _allMembers.insert(0, member);
             _filterMembers();
           });
+          _loadMemberData(); // Refresh the member list from API
         },
       ),
     );
@@ -539,225 +541,8 @@ class _MemberManagementScreenState extends State<MemberManagementScreen>
 
   List<MemberData> _convertToMemberData(List<Map<String, dynamic>> apiData) {
     return apiData.map((data) {
-      final userProfile = data['user_profiles'] as Map<String, dynamic>? ?? {};
-      final joinedAt = DateTime.tryParse(data['joined_at'] ?? '') ?? DateTime.now();
-      final lastActivityAt = DateTime.tryParse(data['last_activity_at'] ?? '') ?? DateTime.now();
-      
-      return MemberData(
-        id: data['id']?.toString() ?? '',
-        user: UserInfo(
-          avatar: userProfile['avatar_url'] ?? '',
-          name: userProfile['full_name'] ?? 'Unknown User',
-          username: userProfile['username'] ?? 'unknown',
-          rank: _parseRankType(userProfile['rank'] ?? 'beginner'),
-          elo: userProfile['elo'] ?? 1000,
-          isOnline: _calculateIsOnline(lastActivityAt),
-        ),
-        membershipInfo: MembershipInfo(
-          type: _parseMembershipType(data['membership_type'] ?? 'regular'),
-          status: _parseMemberStatus(data['status'] ?? 'active'),
-          joinDate: joinedAt,
-          membershipId: data['id']?.toString() ?? '',
-          expiryDate: data['expires_at'] != null ? DateTime.tryParse(data['expires_at']) : null,
-          autoRenewal: data['auto_renewal'] ?? false,
-        ),
-        activityStats: ActivityStats(
-          lastActive: lastActivityAt,
-          totalMatches: data['total_matches'] ?? 0,
-          tournamentsJoined: data['tournaments_joined'] ?? 0,
-          winRate: (data['win_rate'] ?? 0).toDouble(),
-          activityScore: data['activity_score'] ?? 0,
-        ),
-        engagement: EngagementStats(
-          postsCount: data['posts_count'] ?? 0,
-          commentsCount: data['comments_count'] ?? 0,
-          likesReceived: data['likes_received'] ?? 0,
-          socialScore: data['social_score'] ?? 0,
-        ),
-      );
+      return MemberData.fromSupabaseData(data);
     }).toList();
   }
 
-  RankType _parseRankType(String rank) {
-    switch (rank.toLowerCase()) {
-      case 'amateur': return RankType.amateur;
-      case 'intermediate': return RankType.intermediate;
-      case 'advanced': return RankType.advanced;
-      case 'professional': return RankType.professional;
-      default: return RankType.beginner;
-    }
-  }
-
-  MembershipType _parseMembershipType(String type) {
-    switch (type.toLowerCase()) {
-      case 'vip': return MembershipType.vip;
-      case 'premium': return MembershipType.premium;
-      default: return MembershipType.regular;
-    }
-  }
-
-  MemberStatus _parseMemberStatus(String status) {
-    switch (status.toLowerCase()) {
-      case 'inactive': return MemberStatus.inactive;
-      case 'suspended': return MemberStatus.suspended;
-      case 'pending': return MemberStatus.pending;
-      default: return MemberStatus.active;
-    }
-  }
-
-  bool _calculateIsOnline(DateTime lastActivity) {
-    final now = DateTime.now();
-    final difference = now.difference(lastActivity);
-    return difference.inMinutes <= 15; // Consider online if active within 15 minutes
-  }
-
-  // ignore: unused_element
-  List<MemberData> _generateMockMembers() {
-    // Generate mock member data - replace with API call
-    return List.generate(50, (index) {
-      final joinDate = DateTime.now().subtract(Duration(days: index * 10));
-      return MemberData(
-        id: 'member_$index',
-        user: UserInfo(
-          avatar: 'https://images.unsplash.com/photo-${1580000000000 + index}?w=100&h=100&fit=crop&crop=face',
-          name: 'Thành viên ${index + 1}',
-          username: 'member${index + 1}',
-          rank: RankType.values[index % RankType.values.length],
-          elo: 1000 + (index * 50),
-          isOnline: index % 3 == 0,
-        ),
-        membershipInfo: MembershipInfo(
-          type: MembershipType.values[index % MembershipType.values.length],
-          status: MemberStatus.values[index % MemberStatus.values.length],
-          joinDate: joinDate,
-          membershipId: 'MB${1000 + index}',
-          autoRenewal: index % 2 == 0,
-        ),
-        activityStats: ActivityStats(
-          lastActive: DateTime.now().subtract(Duration(hours: index % 24)),
-          totalMatches: index * 5,
-          tournamentsJoined: index % 10,
-          winRate: 0.6 + (index % 40) / 100,
-          activityScore: 50 + (index % 50),
-        ),
-        engagement: EngagementStats(
-          postsCount: index % 20,
-          commentsCount: index % 50,
-          likesReceived: index * 10,
-          socialScore: index % 100,
-        ),
-      );
-    });
-  }
-}
-
-// Data models
-enum RankType { beginner, amateur, intermediate, advanced, professional }
-enum MembershipType { regular, vip, premium }
-enum MemberStatus { active, inactive, suspended, pending }
-
-class MemberData {
-  final String id;
-  final UserInfo user;
-  final MembershipInfo membershipInfo;
-  final ActivityStats activityStats;
-  final EngagementStats engagement;
-
-  MemberData({
-    required this.id,
-    required this.user,
-    required this.membershipInfo,
-    required this.activityStats,
-    required this.engagement,
-  });
-}
-
-class UserInfo {
-  final String avatar;
-  final String name;
-  final String username;
-  final RankType rank;
-  final int elo;
-  final bool isOnline;
-
-  UserInfo({
-    required this.avatar,
-    required this.name,
-    required this.username,
-    required this.rank,
-    required this.elo,
-    required this.isOnline,
-  });
-}
-
-class MembershipInfo {
-  final MembershipType type;
-  final MemberStatus status;
-  final DateTime joinDate;
-  final String membershipId;
-  final DateTime? expiryDate;
-  final bool autoRenewal;
-
-  MembershipInfo({
-    required this.type,
-    required this.status,
-    required this.joinDate,
-    required this.membershipId,
-    this.expiryDate,
-    required this.autoRenewal,
-  });
-}
-
-class ActivityStats {
-  final DateTime lastActive;
-  final int totalMatches;
-  final int tournamentsJoined;
-  final double winRate;
-  final int activityScore;
-
-  ActivityStats({
-    required this.lastActive,
-    required this.totalMatches,
-    required this.tournamentsJoined,
-    required this.winRate,
-    required this.activityScore,
-  });
-}
-
-class EngagementStats {
-  final int postsCount;
-  final int commentsCount;
-  final int likesReceived;
-  final int socialScore;
-
-  EngagementStats({
-    required this.postsCount,
-    required this.commentsCount,
-    required this.likesReceived,
-    required this.socialScore,
-  });
-}
-
-
-
-class AdvancedFilters {
-  final List<MembershipType> membershipTypes;
-  final RankType? minRank;
-  final RankType? maxRank;
-  final DateTime? joinStartDate;
-  final DateTime? joinEndDate;
-  final List<String> activityLevels;
-  final int? minElo;
-  final int? maxElo;
-
-  AdvancedFilters({
-    this.membershipTypes = const [],
-    this.minRank,
-    this.maxRank,
-    this.joinStartDate,
-    this.joinEndDate,
-    this.activityLevels = const [],
-    this.minElo,
-    this.maxElo,
-  });
 }

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-
+import 'package:sizer/sizer.dart';
 import '../../theme/app_theme.dart';
 
 class ClubNotificationScreen extends StatefulWidget {
   final String? clubId;
 
   const ClubNotificationScreen({
-    super.key,
+    Key? key,
     this.clubId,
-  });
+  }) : super(key: key);
 
   @override
   _ClubNotificationScreenState createState() => _ClubNotificationScreenState();
@@ -49,7 +49,7 @@ class _ClubNotificationScreenState extends State<ClubNotificationScreen> {
           'Gửi thông báo',
           style: TextStyle(
             color: AppTheme.textPrimaryLight,
-            fontSize: 18,
+            fontSize: 18.sp,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -60,7 +60,7 @@ class _ClubNotificationScreenState extends State<ClubNotificationScreen> {
               'Gửi',
               style: TextStyle(
                 color: AppTheme.primaryLight,
-                fontSize: 16,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -70,18 +70,18 @@ class _ClubNotificationScreenState extends State<ClubNotificationScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.all(16.w),
               child: Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildMessageSection(),
-                    SizedBox(height: 24),
+                    SizedBox(height: 24.h),
                     _buildSettingsSection(),
-                    SizedBox(height: 24),
+                    SizedBox(height: 24.h),
                     _buildPreviewSection(),
-                    SizedBox(height: 32),
+                    SizedBox(height: 32.h),
                     _buildSendButton(),
                   ],
                 ),
@@ -92,7 +92,7 @@ class _ClubNotificationScreenState extends State<ClubNotificationScreen> {
 
   Widget _buildMessageSection() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -110,12 +110,12 @@ class _ClubNotificationScreenState extends State<ClubNotificationScreen> {
           Text(
             'Nội dung thông báo',
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 18.sp,
               fontWeight: FontWeight.w600,
               color: AppTheme.textPrimaryLight,
             ),
           ),
-          SizedBox(height: 16),
+          SizedBox(height: 16.h),
           
           // Title
           TextFormField(
@@ -136,7 +136,7 @@ class _ClubNotificationScreenState extends State<ClubNotificationScreen> {
             },
           ),
           
-          SizedBox(height: 16),
+          SizedBox(height: 16.h),
           
           // Message
           TextFormField(
@@ -165,7 +165,7 @@ class _ClubNotificationScreenState extends State<ClubNotificationScreen> {
 
   Widget _buildSettingsSection() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -183,16 +183,16 @@ class _ClubNotificationScreenState extends State<ClubNotificationScreen> {
           Text(
             'Cài đặt gửi',
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 18.sp,
               fontWeight: FontWeight.w600,
               color: AppTheme.textPrimaryLight,
             ),
           ),
-          SizedBox(height: 16),
+          SizedBox(height: 16.h),
           
           // Notification Type
           DropdownButtonFormField<String>(
-            initialValue: _notificationType,
+            value: _notificationType,
             decoration: InputDecoration(
               labelText: 'Loại thông báo',
               border: OutlineInputBorder(
@@ -225,11 +225,11 @@ class _ClubNotificationScreenState extends State<ClubNotificationScreen> {
             },
           ),
           
-          SizedBox(height: 16),
+          SizedBox(height: 16.h),
           
           // Target Audience
           DropdownButtonFormField<String>(
-            initialValue: _targetAudience,
+            value: _targetAudience,
             decoration: InputDecoration(
               labelText: 'Đối tượng nhận',
               border: OutlineInputBorder(
@@ -262,7 +262,7 @@ class _ClubNotificationScreenState extends State<ClubNotificationScreen> {
             },
           ),
           
-          SizedBox(height: 16),
+          SizedBox(height: 16.h),
           
           // Urgent Toggle
           SwitchListTile(
@@ -271,7 +271,7 @@ class _ClubNotificationScreenState extends State<ClubNotificationScreen> {
               _isUrgent 
                   ? 'Thông báo sẽ được ưu tiên hiển thị'
                   : 'Thông báo thường',
-              style: TextStyle(fontSize: 12),
+              style: TextStyle(fontSize: 12.sp),
             ),
             value: _isUrgent,
             onChanged: (value) {
@@ -279,7 +279,7 @@ class _ClubNotificationScreenState extends State<ClubNotificationScreen> {
                 _isUrgent = value;
               });
             },
-            activeThumbColor: AppTheme.errorLight,
+            activeColor: AppTheme.errorLight,
           ),
         ],
       ),
@@ -288,7 +288,7 @@ class _ClubNotificationScreenState extends State<ClubNotificationScreen> {
 
   Widget _buildPreviewSection() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -306,22 +306,22 @@ class _ClubNotificationScreenState extends State<ClubNotificationScreen> {
           Row(
             children: [
               Icon(Icons.preview, color: AppTheme.primaryLight),
-              SizedBox(width: 8),
+              SizedBox(width: 8.w),
               Text(
                 'Xem trước',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 18.sp,
                   fontWeight: FontWeight.w600,
                   color: AppTheme.textPrimaryLight,
                 ),
               ),
             ],
           ),
-          SizedBox(height: 16),
+          SizedBox(height: 16.h),
           
           // Preview Card
           Container(
-            padding: EdgeInsets.all(16),
+            padding: EdgeInsets.all(12.w),
             decoration: BoxDecoration(
               color: _isUrgent ? Colors.red.shade50 : Colors.grey.shade50,
               borderRadius: BorderRadius.circular(8),
@@ -339,14 +339,14 @@ class _ClubNotificationScreenState extends State<ClubNotificationScreen> {
                       color: _isUrgent ? Colors.red : AppTheme.primaryLight,
                       size: 20,
                     ),
-                    SizedBox(width: 8),
+                    SizedBox(width: 8.w),
                     Expanded(
                       child: Text(
                         _titleController.text.isNotEmpty 
                             ? _titleController.text 
                             : 'Tiêu đề thông báo',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
                           color: AppTheme.textPrimaryLight,
                         ),
@@ -363,28 +363,28 @@ class _ClubNotificationScreenState extends State<ClubNotificationScreen> {
                           'KHẨN',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 10,
+                            fontSize: 10.sp,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                   ],
                 ),
-                SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 Text(
                   _messageController.text.isNotEmpty 
                       ? _messageController.text 
                       : 'Nội dung thông báo sẽ hiển thị ở đây...',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 14.sp,
                     color: AppTheme.textSecondaryLight,
                   ),
                 ),
-                SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 Text(
                   'Gửi đến: ${_getAudienceText()}',
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 12.sp,
                     color: AppTheme.textSecondaryLight,
                     fontStyle: FontStyle.italic,
                   ),
@@ -400,7 +400,7 @@ class _ClubNotificationScreenState extends State<ClubNotificationScreen> {
   Widget _buildSendButton() {
     return SizedBox(
       width: double.infinity,
-      height: 48,
+      height: 48.h,
       child: ElevatedButton.icon(
         onPressed: _isLoading ? null : _sendNotification,
         style: ElevatedButton.styleFrom(
@@ -422,7 +422,7 @@ class _ClubNotificationScreenState extends State<ClubNotificationScreen> {
         label: Text(
           _isLoading ? 'Đang gửi...' : 'Gửi thông báo',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 16.sp,
             fontWeight: FontWeight.w600,
             color: Colors.white,
           ),

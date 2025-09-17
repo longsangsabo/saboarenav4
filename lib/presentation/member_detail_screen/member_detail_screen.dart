@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/app_export.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../member_management_screen/member_management_screen.dart';
 import 'widgets/member_overview_tab.dart';
@@ -13,11 +14,11 @@ class MemberDetailScreen extends StatefulWidget {
   final MemberData? initialMemberData;
 
   const MemberDetailScreen({
-    super.key,
+    Key? key,
     required this.clubId,
     required this.memberId,
     this.initialMemberData,
-  });
+  }) : super(key: key);
 
   @override
   _MemberDetailScreenState createState() => _MemberDetailScreenState();
@@ -85,7 +86,7 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: _buildAppBar(),
       body: _isLoading ? _buildLoadingState() : _buildMainContent(),
       floatingActionButton: _buildFloatingActionButton(),
@@ -188,7 +189,7 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
           Text(
             'Đang tải thông tin thành viên...',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              color: Theme.of(context).colorScheme.onBackground.withOpacity(0.6),
             ),
           ),
         ],
@@ -347,7 +348,7 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
                 Text(
                   '@${_memberData!.user.username}',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                    color: Theme.of(context).colorScheme.onBackground.withOpacity(0.7),
                   ),
                 ),
 
@@ -421,7 +422,7 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
             text: 'Tổng quan',
           ),
           Tab(
-            icon: Icon(Icons.timeline),
+            icon: Icon(Icons.activity),
             text: 'Hoạt động',
           ),
           Tab(
@@ -541,7 +542,7 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
         Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+            color: Theme.of(context).colorScheme.onBackground.withOpacity(0.6),
           ),
         ),
       ],

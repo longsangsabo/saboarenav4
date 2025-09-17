@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
+import 'package:sizer/sizer.dart';
 
 import '../../../core/app_export.dart';
 import '../../../widgets/custom_icon_widget.dart';
@@ -153,7 +153,7 @@ class _MapViewWidgetState extends State<MapViewWidget> {
 
     if (_isLoading) {
       return SizedBox(
-        height: 100 - 20,
+        height: 100.h - 20.h,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -161,7 +161,7 @@ class _MapViewWidgetState extends State<MapViewWidget> {
               CircularProgressIndicator(
                 color: theme.colorScheme.primary,
               ),
-              SizedBox(height: 2),
+              SizedBox(height: 2.h),
               Text(
                 'Đang tải bản đồ...',
                 style: theme.textTheme.bodyMedium,
@@ -174,7 +174,7 @@ class _MapViewWidgetState extends State<MapViewWidget> {
 
     if (_currentPosition == null) {
       return SizedBox(
-        height: 100 - 20,
+        height: 100.h - 20.h,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -184,12 +184,12 @@ class _MapViewWidgetState extends State<MapViewWidget> {
                 color: theme.colorScheme.onSurfaceVariant,
                 size: 48,
               ),
-              SizedBox(height: 2),
+              SizedBox(height: 2.h),
               Text(
                 'Không thể truy cập vị trí',
                 style: theme.textTheme.titleMedium,
               ),
-              SizedBox(height: 1),
+              SizedBox(height: 1.h),
               Text(
                 'Vui lòng bật GPS và cấp quyền truy cập vị trí',
                 style: theme.textTheme.bodyMedium?.copyWith(
@@ -197,7 +197,7 @@ class _MapViewWidgetState extends State<MapViewWidget> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 2),
+              SizedBox(height: 2.h),
               ElevatedButton(
                 onPressed: _getCurrentLocation,
                 child: Text('Thử lại'),
@@ -209,7 +209,7 @@ class _MapViewWidgetState extends State<MapViewWidget> {
     }
 
     return SizedBox(
-      height: 100 - 20,
+      height: 100.h - 20.h,
       child: GoogleMap(
         onMapCreated: (GoogleMapController controller) {
           _mapController = controller;

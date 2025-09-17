@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-// import '../../../core/app_export.dart';
+import '../../../core/app_export.dart';
 import '../../../models/member_analytics.dart';
 
 class MemberAnalyticsCard extends StatefulWidget {
   final MemberAnalytics analytics;
   
   const MemberAnalyticsCard({
-    super.key,
+    Key? key,
     required this.analytics,
-  });
+  }) : super(key: key);
 
   @override
   _MemberAnalyticsCardState createState() => _MemberAnalyticsCardState();
@@ -59,9 +59,6 @@ class _MemberAnalyticsCardState extends State<MemberAnalyticsCard>
 
   @override
   Widget build(BuildContext context) {
-    final int total = widget.analytics.totalMembers;
-    final int active = widget.analytics.activeMembers;
-    final double _activityPercentage = total > 0 ? (active * 100.0 / total) : 0.0;
     return Container(
       padding: EdgeInsets.all(16),
       child: Column(
@@ -96,9 +93,9 @@ class _MemberAnalyticsCardState extends State<MemberAnalyticsCard>
                   animation: _animations[0],
                   icon: Icons.trending_up,
                   title: 'Tăng trưởng tháng',
-                  value: '+${widget.analytics.newThisMonth}',
-                  subtitle: 'Tổng: ${widget.analytics.totalMembers}',
-                  trend: widget.analytics.growthRate,
+                  value: '+${widget.analytics.memberGrowth.thisMonth}',
+                  subtitle: 'So với tháng trước: ${widget.analytics.memberGrowth.lastMonth}',
+                  trend: widget.analytics.memberGrowth.growthRate,
                   color: Colors.green,
                 ),
               ),
@@ -110,9 +107,9 @@ class _MemberAnalyticsCardState extends State<MemberAnalyticsCard>
                   animation: _animations[1],
                   icon: Icons.people_alt,
                   title: 'Hoạt động',
-                  value: '${_activityPercentage.toInt()}%',
-                  subtitle: '${widget.analytics.activeMembers} hoạt động',
-                  trend: _activityPercentage > 70 ? 5.0 : -2.0,
+                  value: '${widget.analytics.activityRate.percentage.toInt()}%',
+                  subtitle: '${widget.analytics.activityRate.active} hoạt động',
+                  trend: widget.analytics.activityRate.percentage > 70 ? 5.0 : -2.0,
                   color: Colors.blue,
                 ),
               ),
@@ -124,9 +121,9 @@ class _MemberAnalyticsCardState extends State<MemberAnalyticsCard>
                   animation: _animations[2],
                   icon: Icons.refresh,
                   title: 'Duy trì',
-                  value: '${(widget.analytics.growthRate.abs() * 100).toInt()}%',
-                  subtitle: 'Tăng trưởng tuyệt đối',
-                  trend: widget.analytics.growthRate >= 0 ? 3.2 : -1.5,
+                  value: '${widget.analytics.retentionRate.rate.toInt()}%',
+                  subtitle: 'Tỷ lệ gia hạn',
+                  trend: widget.analytics.retentionRate.trend == 'up' ? 3.2 : -1.5,
                   color: Colors.orange,
                 ),
               ),
@@ -265,14 +262,14 @@ class _MemberAnalyticsCardState extends State<MemberAnalyticsCard>
 
 class _DetailedAnalyticsDialog extends StatelessWidget {
   final MemberAnalytics analytics;
- 
-  const _DetailedAnalyticsDialog({Key? key, required this.analytics}) : super(key: key);
+
+  const _DetailedAnalyticsDialog({
+    Key? key,
+    required this.analytics,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final total = analytics.totalMembers;
-    final active = analytics.activeMembers;
-    final activityPercentage = total > 0 ? (active * 100.0 / total) : 0.0;
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
@@ -314,10 +311,10 @@ class _DetailedAnalyticsDialog extends StatelessWidget {
                       'Tăng trưởng thành viên',
                       Icons.trending_up,
                       [
-                        _DetailItem('Tháng này', '${analytics.newThisMonth} thành viên'),
-                        _DetailItem('Tổng thành viên', '${analytics.totalMembers} thành viên'),
-                        _DetailItem('Tỷ lệ tăng trưởng', '${(analytics.growthRate * 100).toStringAsFixed(1)}%'),
-                        _DetailItem('Xu hướng', analytics.growthRate > 0 ? 'Tích cực' : 'Tiêu cực'),
+                        _DetailItem('Tháng này', '${analytics.memberGrowth.thisMonth} thành viên'),
+                        _DetailItem('Tháng trước', '${analytics.memberGrowth.lastMonth} thành viên'),
+                        _DetailItem('Tỷ lệ tăng trưởng', '${analytics.memberGrowth.growthRate.toStringAsFixed(1)}%'),
+                        _DetailItem('Xu hướng', analytics.memberGrowth.growthRate > 0 ? 'Tích cực' : 'Tiêu cực'),
                       ],
                     ),
                     
@@ -328,10 +325,10 @@ class _DetailedAnalyticsDialog extends StatelessWidget {
                       'Tỷ lệ hoạt động',
                       Icons.people_alt,
                       [
-                        _DetailItem('Thành viên hoạt động', '${analytics.activeMembers} người'),
-                        _DetailItem('Thành viên không hoạt động', '${analytics.totalMembers - analytics.activeMembers} người'),
-                        _DetailItem('Tỷ lệ hoạt động', '${activityPercentage.toStringAsFixed(1)}%'),
-                        _DetailItem('Đánh giá', activityPercentage > 70 ? 'Tốt' : 'Cần cải thiện'),
+                        _DetailItem('Thành viên hoạt động', '${analytics.activityRate.active} người'),
+                        _DetailItem('Thành viên không hoạt động', '${analytics.activityRate.inactive} người'),
+                        _DetailItem('Tỷ lệ hoạt động', '${analytics.activityRate.percentage.toStringAsFixed(1)}%'),
+                        _DetailItem('Đánh giá', analytics.activityRate.percentage > 70 ? 'Tốt' : 'Cần cải thiện'),
                       ],
                     ),
                     
@@ -342,9 +339,9 @@ class _DetailedAnalyticsDialog extends StatelessWidget {
                       'Tỷ lệ duy trì',
                       Icons.refresh,
                       [
-                        _DetailItem('Tăng trưởng tuyệt đối', '${(analytics.growthRate.abs() * 100).toStringAsFixed(1)}%'),
-                        _DetailItem('Xu hướng', analytics.growthRate >= 0 ? 'Tăng' : 'Giảm'),
-                        _DetailItem('Đánh giá', analytics.growthRate > 0.1 ? 'Xuất sắc' : 'Cần cải thiện'),
+                        _DetailItem('Tỷ lệ gia hạn', '${analytics.retentionRate.rate.toStringAsFixed(1)}%'),
+                        _DetailItem('Xu hướng', analytics.retentionRate.trend == 'up' ? 'Tăng' : 'Giảm'),
+                        _DetailItem('Đánh giá', analytics.retentionRate.rate > 80 ? 'Xuất sắc' : 'Cần cải thiện'),
                       ],
                     ),
                   ],

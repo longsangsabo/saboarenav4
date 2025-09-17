@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:sabo_arena/core/app_export.dart';
 
 enum ActivityType {
   memberJoined,
@@ -145,7 +145,7 @@ class _ActivityTimelineState extends State<ActivityTimeline>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildHeader(),
-        SizedBox(height: 16),
+        SizedBox(height: 16.v),
         _buildActivityList(),
       ],
     );
@@ -157,8 +157,7 @@ class _ActivityTimelineState extends State<ActivityTimeline>
       children: [
         Text(
           "Hoạt động gần đây",
-          style: const TextStyle(
-            fontSize: 20,
+          style: CustomTextStyles.titleLarge.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -166,23 +165,23 @@ class _ActivityTimelineState extends State<ActivityTimeline>
           TextButton(
             onPressed: widget.onViewAll,
             style: TextButton.styleFrom(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: EdgeInsets.symmetric(horizontal: 12.h, vertical: 6.v),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   "Xem tất cả",
-                  style: TextStyle().copyWith(
-                    color: Colors.blue,
+                  style: CustomTextStyles.bodyMedium.copyWith(
+                    color: appTheme.blue600,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                SizedBox(width: 4),
+                SizedBox(width: 4.h),
                 Icon(
                   Icons.arrow_forward_ios_rounded,
-                  color: Colors.blue,
-                  size: 12,
+                  color: appTheme.blue600,
+                  size: 12.adaptSize,
                 ),
               ],
             ),
@@ -201,12 +200,11 @@ class _ActivityTimelineState extends State<ActivityTimeline>
     }
 
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+      decoration: AppDecoration.fillWhite.copyWith(
+        borderRadius: BorderRadiusStyle.roundedBorder16,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: appTheme.black900.withOpacity(0.06),
             blurRadius: 12,
             offset: Offset(0, 4),
             spreadRadius: -2,
@@ -264,15 +262,15 @@ class _ActivityTimelineState extends State<ActivityTimeline>
         child: InkWell(
           onTap: () => widget.onActivityTap?.call(activity),
           child: Padding(
-            padding: EdgeInsets.all(20),
+            padding: EdgeInsets.all(20.h),
             child: Row(
               children: [
                 if (widget.showTimeline) ...[
                   _buildTimelineIndicator(activity, index, isLast),
-                  SizedBox(width: 16),
+                  SizedBox(width: 16.h),
                 ],
                 _buildActivityAvatar(activity),
-                SizedBox(width: 16),
+                SizedBox(width: 16.h),
                 Expanded(child: _buildActivityContent(activity)),
                 _buildActivityTimestamp(activity),
               ],
@@ -291,12 +289,12 @@ class _ActivityTimelineState extends State<ActivityTimeline>
     final color = _getActivityColor(activity);
     
     return SizedBox(
-      width: 20,
+      width: 20.h,
       child: Column(
         children: [
           Container(
-            width: 12,
-            height: 12,
+            width: 12.adaptSize,
+            height: 12.adaptSize,
             decoration: BoxDecoration(
               color: color,
               shape: BoxShape.circle,
@@ -315,10 +313,10 @@ class _ActivityTimelineState extends State<ActivityTimeline>
           ),
           if (!isLast)
             Container(
-              width: 2,
-              height: 40,
-              color: Colors.grey[200],
-              margin: EdgeInsets.only(top: 8),
+              width: 2.h,
+              height: 40.v,
+              color: appTheme.gray200,
+              margin: EdgeInsets.only(top: 8.v),
             ),
         ],
       ),
@@ -330,10 +328,10 @@ class _ActivityTimelineState extends State<ActivityTimeline>
     final icon = _getActivityIcon(activity);
 
     return Container(
-      width: 48,
-      height: 48,
+      width: 48.adaptSize,
+      height: 48.adaptSize,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(24.h),
         color: activity.avatar != null ? null : color.withOpacity(0.1),
         border: Border.all(
           color: color.withOpacity(0.2),
@@ -342,21 +340,16 @@ class _ActivityTimelineState extends State<ActivityTimeline>
       ),
       child: activity.avatar != null
           ? ClipRRect(
-              borderRadius: BorderRadius.circular(22),
-              child: Image.network(
-                activity.avatar!,
+              borderRadius: BorderRadius.circular(22.h),
+              child: CustomImageWidget(
+                imagePath: activity.avatar!,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Icon(
-                  Icons.person,
-                  color: Colors.grey[600]!,
-                  size: 24,
-                ),
               ),
             )
           : Icon(
               icon,
               color: color,
-              size: 24,
+              size: 24.adaptSize,
             ),
     );
   }
@@ -368,19 +361,19 @@ class _ActivityTimelineState extends State<ActivityTimeline>
         Text(
           activity.title,
           style: TextStyle(
-            fontSize: 15,
+            fontSize: 15.fSize,
             fontWeight: FontWeight.w600,
-            color: Colors.grey[900],
+            color: appTheme.gray900,
           ),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
-        SizedBox(height: 4),
+        SizedBox(height: 4.v),
         Text(
           activity.subtitle,
           style: TextStyle(
-            fontSize: 13,
-            color: Colors.grey[600]!,
+            fontSize: 13.fSize,
+            color: appTheme.gray600,
           ),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
@@ -398,8 +391,8 @@ class _ActivityTimelineState extends State<ActivityTimeline>
         Text(
           _formatRelativeTime(activity.timestamp),
           style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[500]!,
+            fontSize: 12.fSize,
+            color: appTheme.gray500,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -413,11 +406,11 @@ class _ActivityTimelineState extends State<ActivityTimeline>
     final label = _getActivityTypeLabel(activity.type);
 
     return Container(
-      margin: EdgeInsets.only(top: 4),
-      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      margin: EdgeInsets.only(top: 4.v),
+      padding: EdgeInsets.symmetric(horizontal: 6.h, vertical: 2.v),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(8.h),
         border: Border.all(
           color: color.withOpacity(0.3),
         ),
@@ -425,7 +418,7 @@ class _ActivityTimelineState extends State<ActivityTimeline>
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 9,
+          fontSize: 9.fSize,
           color: color,
           fontWeight: FontWeight.w600,
         ),
@@ -435,10 +428,10 @@ class _ActivityTimelineState extends State<ActivityTimeline>
 
   Widget _buildActivityMetadata(Map<String, dynamic> metadata) {
     return Padding(
-      padding: EdgeInsets.only(top: 6),
+      padding: EdgeInsets.only(top: 6.v),
       child: Wrap(
-        spacing: 8,
-        runSpacing: 4,
+        spacing: 8.h,
+        runSpacing: 4.v,
         children: metadata.entries
             .take(2)
             .map((entry) => _buildMetadataChip(entry.key, entry.value.toString()))
@@ -449,16 +442,16 @@ class _ActivityTimelineState extends State<ActivityTimeline>
 
   Widget _buildMetadataChip(String key, String value) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: EdgeInsets.symmetric(horizontal: 6.h, vertical: 2.v),
       decoration: BoxDecoration(
-        color: Colors.grey[100]!,
-        borderRadius: BorderRadius.circular(6),
+        color: appTheme.gray100,
+        borderRadius: BorderRadius.circular(6.h),
       ),
       child: Text(
         '$key: $value',
         style: TextStyle(
-          fontSize: 10,
-          color: Colors.grey[600]!,
+          fontSize: 10.fSize,
+          color: appTheme.gray600,
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -467,23 +460,23 @@ class _ActivityTimelineState extends State<ActivityTimeline>
 
   Widget _buildSwipeBackground() {
     return Container(
-      color: Colors.red[600]!,
+      color: appTheme.red600,
       alignment: Alignment.centerRight,
-      padding: EdgeInsets.symmetric(horizontal: 20),
+      padding: EdgeInsets.symmetric(horizontal: 20.h),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             Icons.delete_outline,
             color: Colors.white,
-            size: 24,
+            size: 24.adaptSize,
           ),
-          SizedBox(height: 4),
+          SizedBox(height: 4.v),
           Text(
             "Xóa",
             style: TextStyle(
               color: Colors.white,
-              fontSize: 12,
+              fontSize: 12.fSize,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -494,7 +487,7 @@ class _ActivityTimelineState extends State<ActivityTimeline>
 
   Widget _buildDivider() {
     return Divider(
-      color: Colors.grey[200],
+      color: appTheme.gray200,
       thickness: 1,
       height: 1,
     );
@@ -502,33 +495,32 @@ class _ActivityTimelineState extends State<ActivityTimeline>
 
   Widget _buildEmptyState() {
     return Container(
-      padding: EdgeInsets.all(40),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+      padding: EdgeInsets.all(40.h),
+      decoration: AppDecoration.fillWhite.copyWith(
+        borderRadius: BorderRadiusStyle.roundedBorder16,
       ),
       child: Column(
         children: [
           Icon(
             Icons.timeline_outlined,
-            color: Colors.grey[400]!,
-            size: 48,
+            color: appTheme.gray400,
+            size: 48.adaptSize,
           ),
-          SizedBox(height: 16),
+          SizedBox(height: 16.v),
           Text(
             "Chưa có hoạt động nào",
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 16.fSize,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[600]!,
+              color: appTheme.gray600,
             ),
           ),
-          SizedBox(height: 8),
+          SizedBox(height: 8.v),
           Text(
             "Các hoạt động của CLB sẽ được hiển thị tại đây",
             style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[500]!,
+              fontSize: 14.fSize,
+              color: appTheme.gray500,
             ),
             textAlign: TextAlign.center,
           ),
@@ -543,21 +535,21 @@ class _ActivityTimelineState extends State<ActivityTimeline>
 
     switch (activity.type) {
       case ActivityType.memberJoined:
-        return Colors.green[600]!;
+        return appTheme.green600;
       case ActivityType.memberLeft:
-        return Colors.red[600]!;
+        return appTheme.red600;
       case ActivityType.tournamentCreated:
-        return Colors.orange[600]!;
+        return appTheme.orange600;
       case ActivityType.tournamentEnded:
-        return Colors.purple[600]!;
+        return appTheme.purple600;
       case ActivityType.matchCompleted:
-        return Colors.blue;
+        return appTheme.blue600;
       case ActivityType.paymentReceived:
-        return Colors.teal[600]!;
+        return appTheme.teal600;
       case ActivityType.profileUpdated:
-        return Colors.indigo[600]!;
+        return appTheme.indigo600;
       case ActivityType.notificationSent:
-        return Colors.pink[600]!;
+        return appTheme.pink600;
     }
   }
 
@@ -574,7 +566,7 @@ class _ActivityTimelineState extends State<ActivityTimeline>
       case ActivityType.tournamentEnded:
         return Icons.military_tech_outlined;
       case ActivityType.matchCompleted:
-                return Icons.sports_esports_outlined;
+        return Icons.sports_esports_outlined;
       case ActivityType.paymentReceived:
         return Icons.payment_outlined;
       case ActivityType.profileUpdated:

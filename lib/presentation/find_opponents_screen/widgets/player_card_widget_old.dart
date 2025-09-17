@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/app_export.dart';
-
+import 'package:sizer/sizer.dart';
 
 import '../../../models/user_profile.dart';
 import './challenge_modal_widget.dart';
@@ -13,7 +12,7 @@ class PlayerCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6),
+      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
@@ -25,7 +24,7 @@ class PlayerCardWidget extends StatelessWidget {
                 // Player Avatar
                 Container(
                   width: 50.w,
-                  height: 50,
+                  height: 50.h,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: Colors.grey[200],
@@ -55,27 +54,27 @@ class PlayerCardWidget extends StatelessWidget {
                       Text(
                         player.fullName,
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       if (player.username != null) ...[
-                        SizedBox(height: 2),
+                        SizedBox(height: 2.h),
                         Text(
                           '@${player.username}',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 12.sp,
                             color: Colors.grey[600],
                           ),
                         ),
                       ],
-                      SizedBox(height: 4),
+                      SizedBox(height: 4.h),
 
                       // Skill Level Badge
                       Container(
                         padding: EdgeInsets.symmetric(
                           horizontal: 8.w,
-                          vertical: 2,
+                          vertical: 2.h,
                         ),
                         decoration: BoxDecoration(
                           color: _getSkillLevelColor(player.skillLevel),
@@ -84,7 +83,7 @@ class PlayerCardWidget extends StatelessWidget {
                         child: Text(
                           player.skillLevelDisplay,
                           style: TextStyle(
-                            fontSize: 10,
+                            fontSize: 10.sp,
                             color: Colors.white,
                             fontWeight: FontWeight.w500,
                           ),
@@ -101,7 +100,7 @@ class PlayerCardWidget extends StatelessWidget {
                     backgroundColor: Theme.of(context).primaryColor,
                     padding: EdgeInsets.symmetric(
                       horizontal: 16.w,
-                      vertical: 8,
+                      vertical: 8.h,
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -110,7 +109,7 @@ class PlayerCardWidget extends StatelessWidget {
                   child: Text(
                     'Thách đấu',
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -118,7 +117,7 @@ class PlayerCardWidget extends StatelessWidget {
               ],
             ),
 
-            SizedBox(height: 12),
+            SizedBox(height: 12.h),
 
             // Player Stats
             Row(
@@ -155,16 +154,16 @@ class PlayerCardWidget extends StatelessWidget {
             ),
 
             if (player.location != null) ...[
-              SizedBox(height: 8),
+              SizedBox(height: 8.h),
               Row(
                 children: [
-                  Icon(Icons.location_on, size: 14, color: Colors.grey[500]),
+                  Icon(Icons.location_on, size: 14.sp, color: Colors.grey[500]),
                   SizedBox(width: 4.w),
                   Expanded(
                     child: Text(
                       player.location!,
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: 11.sp,
                         color: Colors.grey[600],
                       ),
                       overflow: TextOverflow.ellipsis,
@@ -185,13 +184,13 @@ class PlayerCardWidget extends StatelessWidget {
         Text(
           value,
           style: TextStyle(
-            fontSize: 14,
+            fontSize: 14.sp,
             fontWeight: FontWeight.w600,
             color: color,
           ),
         ),
-        SizedBox(height: 2),
-        Text(label, style: TextStyle(fontSize: 10, color: Colors.grey[600])),
+        SizedBox(height: 2.h),
+        Text(label, style: TextStyle(fontSize: 10.sp, color: Colors.grey[600])),
       ],
     );
   }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:sizer/sizer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/app_export.dart';
 import '../../routes/app_routes.dart';
@@ -188,7 +188,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     style: TextButton.styleFrom(
                       backgroundColor: const Color(0xFF4A7C59),
                       foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2),
+                      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(25),
                       ),
@@ -196,7 +196,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: Text(
                       _currentPage == _onboardingData.length - 1 ? "Bắt đầu" : "Bỏ qua",
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -229,7 +229,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
             // Page indicators
             Padding(
-              padding: EdgeInsets.symmetric(vertical: 3),
+              padding: EdgeInsets.symmetric(vertical: 3.h),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -240,7 +240,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       icon: Icon(
                         Icons.arrow_back_ios,
                         color: Colors.grey[400],
-                        size: 20,
+                        size: 20.sp,
                       ),
                     )
                   else
@@ -271,7 +271,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       icon: Icon(
                         Icons.arrow_forward_ios,
                         color: Colors.grey[400],
-                        size: 20,
+                        size: 20.sp,
                       ),
                     )
                   else
@@ -291,7 +291,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       child: SingleChildScrollView(
         child: Column(
           children: [
-            SizedBox(height: 6),
+            SizedBox(height: 6.h),
             
             // Billiard ball icon
             Container(
@@ -334,7 +334,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       child: Text(
                         'S',
                         style: TextStyle(
-                          fontSize: 28,
+                          fontSize: 28.sp,
                           fontWeight: FontWeight.bold,
                           color: const Color(0xFF4A7C59),
                         ),
@@ -358,13 +358,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
           ),
 
-          SizedBox(height: 6),
+          SizedBox(height: 6.h),
 
           // Title
           Text(
             data.title,
             style: TextStyle(
-              fontSize: 24,
+              fontSize: 24.sp,
               fontWeight: FontWeight.bold,
               color: Colors.black,
               letterSpacing: 1.2,
@@ -372,7 +372,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             textAlign: TextAlign.center,
           ),
 
-          SizedBox(height: 8),
+          SizedBox(height: 8.h),
 
           // Role selection
           Row(
@@ -403,11 +403,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           size: 20.w,
                           color: const Color(0xFF4A7C59),
                         ),
-                        SizedBox(height: 2),
+                        SizedBox(height: 2.h),
                         Text(
                           'Người chơi',
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
                             color: Colors.black,
                           ),
@@ -446,11 +446,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           size: 20.w,
                           color: const Color(0xFF4A7C59),
                         ),
-                        SizedBox(height: 2),
+                        SizedBox(height: 2.h),
                         Text(
                           'Chủ CLB',
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
                             color: Colors.black,
                           ),
@@ -463,7 +463,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ],
           ),
           
-          SizedBox(height: 4), // Add some bottom padding
+          SizedBox(height: 4.h), // Add some bottom padding
         ],
         ),
       ),
@@ -476,25 +476,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       child: SingleChildScrollView(
         child: Column(
           children: [
-            SizedBox(height: 2),
+            SizedBox(height: 2.h),
             
             // Illustration
             Container(
               width: 50.w,
-              height: 30,
+              height: 30.h,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
             ),
             child: _buildIllustration(_currentPage),
           ),
 
-          SizedBox(height: 3),
+          SizedBox(height: 3.h),
 
           // Title
           Text(
             data.title,
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 20.sp,
               fontWeight: FontWeight.bold,
               color: Colors.black,
               letterSpacing: 1.2,
@@ -502,20 +502,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             textAlign: TextAlign.center,
           ),
 
-          SizedBox(height: 2),
+          SizedBox(height: 2.h),
 
           // Description
           Text(
             data.description,
             style: TextStyle(
-              fontSize: 13,
+              fontSize: 13.sp,
               color: Colors.grey[600],
               height: 1.4,
             ),
             textAlign: TextAlign.center,
           ),
 
-          SizedBox(height: 4), // Add some bottom padding
+          SizedBox(height: 4.h), // Add some bottom padding
         ],
         ),
       ),
@@ -550,11 +550,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             children: [
               // Mountains and path illustration
               Positioned(
-                bottom: 10,
+                bottom: 10.h,
                 left: 10.w,
                 right: 10.w,
                 child: Container(
-                  height: 20,
+                  height: 20.h,
                   decoration: BoxDecoration(
                     color: Colors.green[200],
                     borderRadius: BorderRadius.circular(15),
@@ -567,7 +567,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         left: 20,
                         right: 20,
                         child: Container(
-                          height: 8,
+                          height: 8.h,
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(50),
@@ -576,7 +576,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ),
                       // Person icon
                       Positioned(
-                        bottom: 8,
+                        bottom: 8.h,
                         left: 30,
                         child: Icon(
                           Icons.person_search,

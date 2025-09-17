@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-// import '../../../core/app_export.dart';
+import '../../../core/app_export.dart';
 import '../../member_management_screen/member_management_screen.dart';
 
 class MemberOverviewTab extends StatefulWidget {
   final MemberData memberData;
 
   const MemberOverviewTab({
-    super.key,
+    Key? key,
     required this.memberData,
-  });
+  }) : super(key: key);
 
   @override
   _MemberOverviewTabState createState() => _MemberOverviewTabState();
@@ -107,7 +107,7 @@ class _MemberOverviewTabState extends State<MemberOverviewTab>
           width: double.infinity,
           padding: EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+            color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: Theme.of(context).colorScheme.outline.withOpacity(0.2),

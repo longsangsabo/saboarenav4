@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
+import 'package:sizer/sizer.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../core/app_export.dart';
@@ -172,11 +172,11 @@ class _UserProfileScreenState extends State<UserProfileScreen>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.person_off_outlined, size: 80, color: Colors.grey),
-              SizedBox(height: 2),
+              SizedBox(height: 2.h),
               Text('Không thể tải hồ sơ', style: AppTheme.lightTheme.textTheme.titleLarge),
-              SizedBox(height: 1),
+              SizedBox(height: 1.h),
               Text('Vui lòng đăng nhập hoặc thử lại.', style: AppTheme.lightTheme.textTheme.bodyMedium),
-              SizedBox(height: 4),
+              SizedBox(height: 4.h),
               ElevatedButton(
                 onPressed: () => Navigator.pushNamed(context, AppRoutes.loginScreen),
                 child: Text('Đăng nhập'),
@@ -216,21 +216,21 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                     onCoverPhotoTap: _changeCoverPhoto,
                     onAvatarTap: _changeAvatar,
                   ),
-                  SizedBox(height: 3),
+                  SizedBox(height: 3.h),
                   StatisticsCardsWidget(userId: _userProfile!.id),
-                  SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                   AchievementsSectionWidget(
                     userId: _userProfile!.id,
                     onViewAll: _viewAllAchievements,
                   ),
-                  SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                   SocialFeaturesWidget(
                     socialData: _socialData,
                     onFriendsListTap: _viewFriendsList,
                     onRecentChallengesTap: _viewRecentChallenges,
                     onTournamentHistoryTap: _viewTournamentHistory,
                   ),
-                  SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                   SettingsMenuWidget(
                     onAccountSettings: _openAccountSettings,
                     onPrivacySettings: _openPrivacySettings,
@@ -243,7 +243,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                     onClubManagement: _navigateToClubManagement,
                     isClubOwner: _userProfile?.role == 'club_owner',
                   ),
-                  SizedBox(height: 10),
+                  SizedBox(height: 10.h),
                 ],
               ),
             ),

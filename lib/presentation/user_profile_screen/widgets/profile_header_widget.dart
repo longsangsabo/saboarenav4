@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:sizer/sizer.dart';
 import 'dart:io';
 
 import '../../../core/app_export.dart';
@@ -48,7 +48,7 @@ class ProfileHeaderWidget extends StatelessWidget {
           // Profile Info Section
           _buildProfileInfoSection(context),
 
-          SizedBox(height: 2),
+          SizedBox(height: 2.h),
         ],
       ),
     );
@@ -56,7 +56,7 @@ class ProfileHeaderWidget extends StatelessWidget {
 
   Widget _buildCoverPhotoSection(BuildContext context) {
     return SizedBox(
-      height: 25,
+      height: 25.h,
       width: double.infinity,
       child: Stack(
         children: [
@@ -64,7 +64,7 @@ class ProfileHeaderWidget extends StatelessWidget {
           GestureDetector(
             onTap: onCoverPhotoTap,
             child: Container(
-              height: 20,
+              height: 20.h,
               width: double.infinity,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.only(
@@ -81,7 +81,7 @@ class ProfileHeaderWidget extends StatelessWidget {
                   imageUrl: userData["coverPhoto"] as String? ??
                       "https://images.pexels.com/photos/1040473/pexels-photo-1040473.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
                   width: double.infinity,
-                  height: 20,
+                  height: 20.h,
                   fit: BoxFit.cover,
                 ),
               ),
@@ -90,7 +90,7 @@ class ProfileHeaderWidget extends StatelessWidget {
 
           // Cover Photo Edit Button
           Positioned(
-            top: 2,
+            top: 2.h,
             right: 4.w,
             child: GestureDetector(
               onTap: onCoverPhotoTap,
@@ -119,7 +119,7 @@ class ProfileHeaderWidget extends StatelessWidget {
 
           // Edit Profile Button
           Positioned(
-            bottom: 1,
+            bottom: 1.h,
             right: 4.w,
             child: _buildEditButton(context),
           ),
@@ -190,7 +190,7 @@ class ProfileHeaderWidget extends StatelessWidget {
     return GestureDetector(
       onTap: onEditProfile,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1),
+        padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
         decoration: BoxDecoration(
           color: AppTheme.lightTheme.colorScheme.primary,
           borderRadius: BorderRadius.circular(20),
@@ -227,7 +227,7 @@ class ProfileHeaderWidget extends StatelessWidget {
 
   Widget _buildProfileInfoSection(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2),
+      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -248,7 +248,7 @@ class ProfileHeaderWidget extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: 0.5),
+                    SizedBox(height: 0.5.h),
                     Text(
                       userData["bio"] as String? ??
                           "Billiards enthusiast • Tournament player",
@@ -266,12 +266,12 @@ class ProfileHeaderWidget extends StatelessWidget {
             ],
           ),
 
-          SizedBox(height: 2),
+          SizedBox(height: 2.h),
 
           // ELO Rating with Progress
           _buildEloSection(context),
 
-          SizedBox(height: 2),
+          SizedBox(height: 2.h),
 
           // SPA Points and Prize Pool Section
           _buildSpaAndPrizeSection(context),
@@ -304,7 +304,7 @@ class ProfileHeaderWidget extends StatelessWidget {
     if (!hasRank) {
       // Giao diện khi người dùng CHƯA CÓ RANK
       return Container(
-        padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5),
+        padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
         decoration: BoxDecoration(
           color: AppTheme.lightTheme.colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
@@ -331,7 +331,7 @@ class ProfileHeaderWidget extends StatelessWidget {
                 letterSpacing: 1.2,
               ),
             ),
-            SizedBox(height: 0.5),
+            SizedBox(height: 0.5.h),
             Text(
               '?',
               style: AppTheme.lightTheme.textTheme.headlineMedium?.copyWith(
@@ -350,7 +350,7 @@ class ProfileHeaderWidget extends StatelessWidget {
     final rankColor = SaboRankSystem.getRankColor(rank);
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5),
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
       decoration: BoxDecoration(
         color: rankColor.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
@@ -367,7 +367,7 @@ class ProfileHeaderWidget extends StatelessWidget {
               letterSpacing: 1.2,
             ),
           ),
-          SizedBox(height: 0.5),
+          SizedBox(height: 0.5.h),
           Text(
             userRank!, // an toàn vì đã check hasRank
             style: AppTheme.lightTheme.textTheme.headlineMedium?.copyWith(
@@ -440,7 +440,7 @@ class ProfileHeaderWidget extends StatelessWidget {
             ],
           ),
 
-          SizedBox(height: 0.5),
+          SizedBox(height: 0.5.h),
 
           // Skill description
           Text(
@@ -453,7 +453,7 @@ class ProfileHeaderWidget extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
 
-          SizedBox(height: 1),
+          SizedBox(height: 1.h),
 
           // Progress Bar
           Container(
@@ -475,7 +475,7 @@ class ProfileHeaderWidget extends StatelessWidget {
             ),
           ),
 
-          SizedBox(height: 0.5),
+          SizedBox(height: 0.5.h),
 
           Text(
             nextRankInfo['pointsNeeded'] > 0 
@@ -548,7 +548,7 @@ class ProfileHeaderWidget extends StatelessWidget {
           color: iconColor,
           size: 24,
         ),
-        SizedBox(height: 0.5),
+        SizedBox(height: 0.5.h),
         Text(
           label,
           style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
@@ -557,7 +557,7 @@ class ProfileHeaderWidget extends StatelessWidget {
           ),
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: 0.2),
+        SizedBox(height: 0.2.h),
         Text(
           value,
           style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(

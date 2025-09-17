@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:sizer/sizer.dart';
 
 import '../../../core/app_export.dart';
 
@@ -59,9 +59,9 @@ class _ChallengeModalWidgetState extends State<ChallengeModalWidget> {
         children: [
           // Handle bar
           Container(
-            margin: EdgeInsets.only(top: 1),
+            margin: EdgeInsets.only(top: 1.h),
             width: 12.w,
-            height: 0.5,
+            height: 0.5.h,
             decoration: BoxDecoration(
               color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
               borderRadius: BorderRadius.circular(2),
@@ -115,19 +115,19 @@ class _ChallengeModalWidgetState extends State<ChallengeModalWidget> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildGameTypeSelection(),
-                  SizedBox(height: 3),
+                  SizedBox(height: 3.h),
                   if (widget.challengeType == 'thach_dau') ...[
                     _buildHandicapSelection(),
-                    SizedBox(height: 3),
+                    SizedBox(height: 3.h),
                     _buildSpaPointsSelection(),
-                    SizedBox(height: 3),
+                    SizedBox(height: 3.h),
                   ],
                   _buildDateTimeSelection(),
-                  SizedBox(height: 3),
+                  SizedBox(height: 3.h),
                   _buildLocationSelection(),
-                  SizedBox(height: 3),
+                  SizedBox(height: 3.h),
                   _buildNotesSection(),
-                  SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                 ],
               ),
             ),
@@ -141,7 +141,7 @@ class _ChallengeModalWidgetState extends State<ChallengeModalWidget> {
               child: ElevatedButton(
                 onPressed: _sendChallenge,
                 style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 2),
+                  padding: EdgeInsets.symmetric(vertical: 2.h),
                 ),
                 child: Text(
                   widget.challengeType == 'thach_dau'
@@ -173,7 +173,7 @@ class _ChallengeModalWidgetState extends State<ChallengeModalWidget> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        SizedBox(height: 1),
+        SizedBox(height: 1.h),
         Wrap(
           spacing: 2.w,
           children: _gameTypes.map((gameType) {
@@ -219,7 +219,7 @@ class _ChallengeModalWidgetState extends State<ChallengeModalWidget> {
             ),
           ],
         ),
-        SizedBox(height: 1),
+        SizedBox(height: 1.h),
         Slider(
           value: _handicapValue.toDouble(),
           min: 0,
@@ -259,10 +259,10 @@ class _ChallengeModalWidgetState extends State<ChallengeModalWidget> {
             ),
           ],
         ),
-        SizedBox(height: 1),
+        SizedBox(height: 1.h),
         Wrap(
           spacing: 2.w,
-          runSpacing: 1,
+          runSpacing: 1.h,
           children: [0, 10, 20, 50, 100, 200].map((points) {
             final isSelected = _spaPoints == points;
             return ChoiceChip(
@@ -294,7 +294,7 @@ class _ChallengeModalWidgetState extends State<ChallengeModalWidget> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        SizedBox(height: 1),
+        SizedBox(height: 1.h),
         Row(
           children: [
             Expanded(
@@ -342,7 +342,7 @@ class _ChallengeModalWidgetState extends State<ChallengeModalWidget> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        SizedBox(height: 1),
+        SizedBox(height: 1.h),
         DropdownButtonFormField<String>(
           initialValue: _selectedLocation,
           decoration: InputDecoration(
@@ -350,7 +350,7 @@ class _ChallengeModalWidgetState extends State<ChallengeModalWidget> {
               borderRadius: BorderRadius.circular(8),
             ),
             contentPadding:
-                EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.5),
+                EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.5.h),
           ),
           items: _locations.map((location) {
             return DropdownMenuItem(
@@ -382,7 +382,7 @@ class _ChallengeModalWidgetState extends State<ChallengeModalWidget> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        SizedBox(height: 1),
+        SizedBox(height: 1.h),
         TextField(
           maxLines: 3,
           decoration: InputDecoration(

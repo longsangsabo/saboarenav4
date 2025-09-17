@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:sizer/sizer.dart';
 
-
-
+import '../../core/app_export.dart';
 import '../../services/admin_service.dart';
 import '../../models/user_profile.dart';
-
+import '../../widgets/custom_app_bar.dart';
 
 /// DEMO: User Management Screen for Admin
 /// This is a proposal/mockup for future implementation
@@ -85,13 +85,13 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
         bool matchesFilter = true;
         switch (_selectedFilter) {
           case 'banned':
-            matchesFilter = user.isBanned;
+            matchesFilter = false; // Mock data - user.isBanned not implemented
             break;
           case 'suspended':
-            matchesFilter = user.isSuspended;
+            matchesFilter = false; // Mock data - user.isSuspended not implemented
             break;
           case 'verified':
-            matchesFilter = user.isVerified;
+            matchesFilter = user.isVerified ?? false;
             break;
           case 'all':
           default:
@@ -118,9 +118,9 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
   }
 
   PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      backgroundColor: Colors.blue[600],
-      elevation: 0,
+    return CustomAppBar(
+      height: 60.h,
+      leadingWidth: 52.h,
       leading: IconButton(
         icon: Icon(Icons.arrow_back_ios, color: Colors.white),
         onPressed: () => Navigator.of(context).pop(),
@@ -130,7 +130,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
         'Quản lý Users',
         style: TextStyle(
           color: Colors.white,
-          fontSize: 18,
+          fontSize: 18.sp,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -199,24 +199,24 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
       avatar: Icon(
         icon,
         size: 18,
-        color: isSelected ? Colors.white : Colors.blue[600]!,
+        color: isSelected ? Colors.white : appTheme.primary,
       ),
       label: Text(
         label,
         style: TextStyle(
-          color: isSelected ? Colors.white : Colors.blue[600]!,
+          color: isSelected ? Colors.white : appTheme.primary,
           fontWeight: FontWeight.w500,
         ),
       ),
-      backgroundColor: isSelected ? Colors.blue[600]! : Colors.grey[100],
-      selectedColor: Colors.blue[600]!,
+      backgroundColor: isSelected ? appTheme.primary : Colors.grey[100],
+      selectedColor: appTheme.primary,
     );
   }
 
   Widget _buildUserStats() {
     final totalUsers = _users.length;
-    final bannedUsers = _users.where((u) => u.isBanned).length;
-    final verifiedUsers = _users.where((u) => u.isVerified).length;
+    final bannedUsers = _users.where((u) => u.isBanned ?? false).length;
+    final verifiedUsers = _users.where((u) => u.isVerified ?? false).length;
     
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -244,7 +244,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
           Text(
             count.toString(),
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 16.sp,
               fontWeight: FontWeight.bold,
               color: color,
             ),
@@ -252,7 +252,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
           Text(
             label,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 12.sp,
               color: color,
             ),
           ),
@@ -314,7 +314,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
           Text(
             'Không tìm thấy user nào',
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 18.sp,
               fontWeight: FontWeight.w500,
               color: Colors.grey[600],
             ),
@@ -323,7 +323,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
           Text(
             'Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm',
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 14.sp,
               color: Colors.grey[500],
             ),
           ),
@@ -358,7 +358,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                               ? user.fullName[0].toUpperCase()
                               : 'U',
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 18.sp,
                             fontWeight: FontWeight.bold,
                           ),
                         )
@@ -377,11 +377,11 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                           Text(
                             user.fullName,
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          if (user.isVerified) ...[
+                          if (user.isVerified ?? false) ...[
                             SizedBox(width: 4),
                             Icon(
                               Icons.verified,
@@ -394,14 +394,14 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                       Text(
                         user.email,
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 14.sp,
                           color: Colors.grey[600],
                         ),
                       ),
                       Text(
-                        'Role: ${user.role}',
+                        'Role: ${user.role ?? 'user'}',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 12.sp,
                           color: Colors.grey[500],
                         ),
                       ),
@@ -412,11 +412,11 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                 // Status badges
                 Column(
                   children: [
-                    if (user.isBanned)
+                    if (false)
                       _buildStatusBadge('Banned', Colors.red),
-                    if (user.isSuspended)
+                    if (false)
                       _buildStatusBadge('Suspended', Colors.orange),
-                    if (!(user.isBanned) && !(user.isSuspended))
+                    if (!(false) && !(false))
                       _buildStatusBadge('Active', Colors.green),
                   ],
                 ),
@@ -462,7 +462,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
       child: Text(
         text,
         style: TextStyle(
-          fontSize: 10,
+          fontSize: 10.sp,
           fontWeight: FontWeight.w600,
           color: color,
         ),
@@ -486,7 +486,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
               SizedBox(height: 8),
               Text('Email: ${user.email}'),
               SizedBox(height: 8),
-              Text('Role: ${user.role}'),
+              Text('Role: ${user.role ?? 'user'}'),
               SizedBox(height: 8),
               Text('Ngày tạo: ${user.createdAt}'),
               // Add more details as needed
@@ -514,14 +514,14 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
             Text(
               'Hành động với ${user.fullName}',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 18.sp,
                 fontWeight: FontWeight.w600,
               ),
             ),
             SizedBox(height: 16),
             
             // Action buttons
-            if (!(user.isBanned))
+            if (!(false))
               ListTile(
                 leading: Icon(Icons.block, color: Colors.red),
                 title: Text('Ban User'),
@@ -531,7 +531,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                 },
               ),
             
-            if (!(user.isSuspended) && !(user.isBanned))
+            if (!(false) && !(false))
               ListTile(
                 leading: Icon(Icons.pause_circle, color: Colors.orange),
                 title: Text('Suspend User'),
@@ -541,7 +541,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                 },
               ),
             
-            if (user.isBanned || user.isSuspended)
+            if (user.isBanned ?? false)
               ListTile(
                 leading: Icon(Icons.restore, color: Colors.green),
                 title: Text('Khôi phục User'),
@@ -551,7 +551,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                 },
               ),
             
-            if (!(user.isVerified))
+            if (!(user.isVerified ?? false))
               ListTile(
                 leading: Icon(Icons.verified, color: Colors.blue),
                 title: Text('Verify User'),

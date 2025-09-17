@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:sizer/sizer.dart';
+import 'package:sabo_arena/core/app_export.dart';
 import 'package:sabo_arena/theme/theme_extensions.dart';
 
 class AnimatedStatsCard extends StatefulWidget {
@@ -126,9 +127,9 @@ class _AnimatedStatsCardState extends State<AnimatedStatsCard>
               color: Colors.transparent,
               child: InkWell(
                 onTap: widget.onPress,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(16.h),
                 child: Container(
-                  padding: EdgeInsets.all(20),
+                  padding: EdgeInsets.all(20.h),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
@@ -140,7 +141,7 @@ class _AnimatedStatsCardState extends State<AnimatedStatsCard>
                       end: Alignment.bottomRight,
                       stops: [0.0, 0.5, 1.0],
                     ),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(16.h),
                     border: Border.all(
                       color: widget.color.withOpacity(0.3),
                       width: 1.5,
@@ -165,9 +166,9 @@ class _AnimatedStatsCardState extends State<AnimatedStatsCard>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       _buildHeader(),
-                      SizedBox(height: 16),
+                      SizedBox(height: 16.h),
                       _buildValue(),
-                      SizedBox(height: 8),
+                      SizedBox(height: 8.h),
                       _buildTitle(),
                     ],
                   ),
@@ -189,7 +190,7 @@ class _AnimatedStatsCardState extends State<AnimatedStatsCard>
             return Transform.scale(
               scale: _pulseAnimation.value,
               child: Container(
-                padding: EdgeInsets.all(12),
+                padding: EdgeInsets.all(12.h),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
@@ -199,7 +200,7 @@ class _AnimatedStatsCardState extends State<AnimatedStatsCard>
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.h),
                   boxShadow: [
                     BoxShadow(
                       color: widget.color.withOpacity(0.3),
@@ -211,7 +212,7 @@ class _AnimatedStatsCardState extends State<AnimatedStatsCard>
                 child: Icon(
                   widget.icon,
                   color: Colors.white,
-                  size: 24,
+                  size: 24.sp,
                 ),
               ),
             );
@@ -229,14 +230,14 @@ class _AnimatedStatsCardState extends State<AnimatedStatsCard>
 
   Widget _buildTrendIndicator() {
     final isUp = widget.trend == "up";
-    final trendColor = isUp ? Colors.green[600] ?? Colors.green : appTheme.red600;
-    final backgroundColor = isUp ? Colors.green[50] ?? Colors.green : appTheme.red50;
+    final trendColor = isUp ? appTheme.green600 : appTheme.red600;
+    final backgroundColor = isUp ? appTheme.green50 : appTheme.red50;
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: EdgeInsets.symmetric(horizontal: 8.h, vertical: 4.h),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.h),
         border: Border.all(
           color: trendColor.withOpacity(0.3),
         ),
@@ -247,14 +248,14 @@ class _AnimatedStatsCardState extends State<AnimatedStatsCard>
           Icon(
             isUp ? Icons.trending_up_rounded : Icons.trending_down_rounded,
             color: trendColor,
-            size: 16,
+            size: 16.sp,
           ),
-          SizedBox(width: 4),
+          SizedBox(width: 4.h),
           Text(
             widget.trendValue ?? "",
             style: TextStyle(
               color: trendColor,
-              fontSize: 12,
+              fontSize: 12.sp,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -279,7 +280,7 @@ class _AnimatedStatsCardState extends State<AnimatedStatsCard>
               child: Text(
                 displayValue,
                 style: TextStyle(
-                  fontSize: 32,
+                  fontSize: 32.sp,
                   fontWeight: FontWeight.bold,
                   color: appTheme.onBackgroundLight,
                   letterSpacing: -0.5,
@@ -288,13 +289,13 @@ class _AnimatedStatsCardState extends State<AnimatedStatsCard>
               ),
             ),
             if (widget.subtitle != null) ...[
-              SizedBox(width: 4),
+              SizedBox(width: 4.h),
               Padding(
-                padding: EdgeInsets.only(bottom: 4),
+                padding: EdgeInsets.only(bottom: 4.h),
                 child: Text(
                   widget.subtitle!,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 14.sp,
                     color: appTheme.onSurfaceLight,
                     fontWeight: FontWeight.w600,
                   ),
@@ -311,7 +312,7 @@ class _AnimatedStatsCardState extends State<AnimatedStatsCard>
     return Text(
       widget.title,
       style: TextStyle(
-        fontSize: 14,
+        fontSize: 14.sp,
         color: appTheme.onBackgroundLight,
         fontWeight: FontWeight.w600,
         letterSpacing: 0.2,

@@ -10,12 +10,12 @@ class CommentsModal extends StatefulWidget {
   final VoidCallback? onCommentDeleted;
 
   const CommentsModal({
-    super.key,
+    Key? key,
     required this.postId,
     required this.postTitle,
     this.onCommentAdded,
     this.onCommentDeleted,
-  });
+  }) : super(key: key);
 
   @override
   State<CommentsModal> createState() => _CommentsModalState();

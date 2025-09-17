@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
 import '../../widgets/custom_app_bar.dart';
@@ -108,9 +108,7 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
   Future<void> _loadMorePosts() async {
     if (_isLoading) return;
 
-    if (mounted) {
-      setState(() => _isLoading = true);
-    }
+    setState(() => _isLoading = true);
 
     try {
       // Load more posts using getFeedPosts
@@ -132,16 +130,12 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
         );
       }
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      setState(() => _isLoading = false);
     }
   }
 
   Future<void> _refreshFeed() async {
-    if (mounted) {
-      setState(() => _isLoading = true);
-    }
+    setState(() => _isLoading = true);
 
     try {
       await _loadPosts();
@@ -165,9 +159,7 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
         );
       }
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      setState(() => _isLoading = false);
     }
   }
 
@@ -204,12 +196,10 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
       final currentlyLiked = post['isLiked'] ?? false;
       
       // Optimistic update
-      if (mounted) {
-        setState(() {
-          post['isLiked'] = !currentlyLiked;
-          post['likeCount'] = (post['likeCount'] ?? 0) + (!currentlyLiked ? 1 : -1);
-        });
-      }
+      setState(() {
+        post['isLiked'] = !currentlyLiked;
+        post['likeCount'] = (post['likeCount'] ?? 0) + (!currentlyLiked ? 1 : -1);
+      });
 
       // Call backend
       if (!currentlyLiked) {
@@ -220,12 +210,10 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
       
     } catch (e) {
       // Revert optimistic update on error
-      if (mounted) {
-        setState(() {
-          post['isLiked'] = !post['isLiked'];
-          post['likeCount'] = (post['likeCount'] ?? 0) + (post['isLiked'] ? -1 : 1);
-        });
-      }
+      setState(() {
+        post['isLiked'] = !post['isLiked'];
+        post['likeCount'] = (post['likeCount'] ?? 0) + (post['isLiked'] ? -1 : 1);
+      });
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -329,11 +317,11 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
                           CircularProgressIndicator(
                             color: AppTheme.lightTheme.colorScheme.primary,
                           ),
-                          SizedBox(height: 2),
+                          SizedBox(height: 2.h),
                           Text(
                             'Đang tải bảng tin...',
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 12.sp,
                               color: Colors.grey[600],
                             ),
                           ),
@@ -350,16 +338,16 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
                                 size: 48,
                                 color: Colors.red[400],
                               ),
-                              SizedBox(height: 2),
+                              SizedBox(height: 2.h),
                               Text(
                                 _errorMessage!,
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 12.sp,
                                   color: Colors.red[600],
                                 ),
                                 textAlign: TextAlign.center,
                               ),
-                              SizedBox(height: 3),
+                              SizedBox(height: 3.h),
                               ElevatedButton(
                                 onPressed: _loadPosts,
                                 child: Text('Thử lại'),
@@ -380,7 +368,7 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
                       child: ListView.builder(
                         controller: _scrollController,
                         physics: const AlwaysScrollableScrollPhysics(),
-                        padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1),
+                        padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
                         itemCount: _currentPosts.length + (_isLoading ? 1 : 0),
                         itemBuilder: (context, index) {
                           if (index == _currentPosts.length) {

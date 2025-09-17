@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sabo_arena/core/app_export.dart';
-
+import 'package:sizer/sizer.dart';
 import 'package:sabo_arena/theme/app_theme.dart';
 
 // Define the missing data model for a tournament participant.
@@ -120,7 +120,7 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
       height: MediaQuery.of(context).size.height * 0.8,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.sp)),
       ),
       child: Column(
         children: [
@@ -136,7 +136,7 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
 
   Widget _buildHeader() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.sp),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: AppTheme.dividerLight)),
       ),
@@ -151,7 +151,7 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
                     Text(
                       "Quản lý người chơi",
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.bold,
                         color: AppTheme.textPrimaryLight,
                       ),
@@ -159,7 +159,7 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
                     Text(
                       "${_participants.length}/${widget.maxParticipants} người chơi",
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 12.sp,
                         color: AppTheme.textSecondaryLight,
                       ),
                     ),
@@ -170,19 +170,19 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
               if (widget.canManage)
                 ElevatedButton.icon(
                   onPressed: _showAddParticipantDialog,
-                  icon: Icon(Icons.person_add, size: 16),
+                  icon: Icon(Icons.person_add, size: 16.sp),
                   label: const Text("Thêm"),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primaryLight,
                     foregroundColor: Colors.white,
                     padding:
-                        EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        EdgeInsets.symmetric(horizontal: 12.sp, vertical: 8.sp),
                   ),
                 ),
             ],
           ),
           
-          SizedBox(height: 12),
+          SizedBox(height: 12.sp),
           _buildSearchAndFilter(),
         ],
       ),
@@ -196,7 +196,7 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
           child: Container(
             decoration: BoxDecoration(
               color: AppTheme.backgroundLight,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.sp),
             ),
             child: TextField(
               controller: _searchController,
@@ -205,7 +205,7 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
                 prefixIcon: Icon(Icons.search, color: AppTheme.textDisabledLight),
                 border: InputBorder.none,
                 contentPadding:
-                    EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    EdgeInsets.symmetric(horizontal: 12.sp, vertical: 8.sp),
               ),
               onChanged: (value) {
                 setState(() {
@@ -217,11 +217,11 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
           ),
         ),
         
-        SizedBox(width: 8),
+        SizedBox(width: 8.sp),
         Container(
           decoration: BoxDecoration(
             color: AppTheme.backgroundLight,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(8.sp),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
@@ -241,8 +241,8 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
                 });
               },
               icon: Icon(Icons.filter_list, color: AppTheme.textSecondaryLight),
-              style: TextStyle(color: AppTheme.textSecondaryLight, fontSize: 12),
-              padding: EdgeInsets.symmetric(horizontal: 8),
+              style: TextStyle(color: AppTheme.textSecondaryLight, fontSize: 12.sp),
+              padding: EdgeInsets.symmetric(horizontal: 8.sp),
             ),
           ),
         ),
@@ -275,11 +275,11 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircularProgressIndicator(color: AppTheme.primaryLight),
-          SizedBox(height: 16),
+          SizedBox(height: 16.sp),
           Text(
             "Đang tải danh sách...",
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 14.sp,
               color: AppTheme.textSecondaryLight,
             ),
           ),
@@ -313,7 +313,7 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
     }
 
     return ListView.builder(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.sp),
       itemCount: _filteredParticipants.length,
       itemBuilder: (context, index) {
         final participant = _filteredParticipants[index];
@@ -324,10 +324,10 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
 
   Widget _buildParticipantCard(TournamentParticipant participant) {
     return Container(
-      margin: EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: 12.sp),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.sp),
         border: Border.all(color: AppTheme.dividerLight),
         boxShadow: [
           BoxShadow(
@@ -338,17 +338,17 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
         ],
       ),
       child: Padding(
-        padding: EdgeInsets.all(12),
+        padding: EdgeInsets.all(12.sp),
         child: Row(
           children: [
             // Avatar
             CircleAvatar(
-              radius: 24,
+              radius: 24.sp,
               backgroundImage: NetworkImage(participant.avatarUrl),
               backgroundColor: AppTheme.backgroundLight,
             ),
 
-            SizedBox(width: 12),
+            SizedBox(width: 12.sp),
 
             // Info
             Expanded(
@@ -361,7 +361,7 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
                         child: Text(
                           participant.name,
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 14.sp,
                             fontWeight: FontWeight.w600,
                             color: AppTheme.textPrimaryLight,
                           ),
@@ -371,27 +371,27 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
                     ],
                   ),
                   
-                  SizedBox(height: 4),
+                  SizedBox(height: 4.sp),
                   Row(
                     children: [
-                      Icon(Icons.star, size: 12, color: AppTheme.accentLight),
-                      SizedBox(width: 4),
+                      Icon(Icons.star, size: 12.sp, color: AppTheme.accentLight),
+                      SizedBox(width: 4.sp),
                       Text(
                         "Rank ${participant.rank}",
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 12.sp,
                           color: AppTheme.textSecondaryLight,
                         ),
                       ),
                       
-                      SizedBox(width: 12),
+                      SizedBox(width: 12.sp),
                       Icon(Icons.access_time,
-                          size: 12, color: AppTheme.textDisabledLight),
-                      SizedBox(width: 4),
+                          size: 12.sp, color: AppTheme.textDisabledLight),
+                      SizedBox(width: 4.sp),
                       Text(
                         _formatRegistrationTime(participant.registeredAt),
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 11.sp,
                           color: AppTheme.textDisabledLight,
                         ),
                       ),
@@ -399,15 +399,15 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
                   ),
                   
                   if (participant.club != null) ...[
-                    SizedBox(height: 4),
+                    SizedBox(height: 4.sp),
                     Row(
                       children: [
-                        Icon(Icons.group, size: 12, color: AppTheme.primaryLight),
-                        SizedBox(width: 4),
+                        Icon(Icons.group, size: 12.sp, color: AppTheme.primaryLight),
+                        SizedBox(width: 4.sp),
                         Text(
                           participant.club!,
                           style: TextStyle(
-                            fontSize: 11,
+                            fontSize: 11.sp,
                             color: AppTheme.primaryLight,
                           ),
                         ),
@@ -427,8 +427,8 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
                     value: 'view',
                     child: Row(
                       children: [
-                        Icon(Icons.visibility, size: 16),
-                        SizedBox(width: 8),
+                        Icon(Icons.visibility, size: 16.sp),
+                        SizedBox(width: 8.sp),
                         const Text("Xem hồ sơ"),
                       ],
                     ),
@@ -439,8 +439,8 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
                       child: Row(
                         children: [
                           Icon(Icons.check_circle,
-                              size: 16, color: AppTheme.successLight),
-                          SizedBox(width: 8),
+                              size: 16.sp, color: AppTheme.successLight),
+                          SizedBox(width: 8.sp),
                           const Text("Duyệt"),
                         ],
                       ),
@@ -450,8 +450,8 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
                     child: Row(
                       children: [
                         Icon(Icons.remove_circle,
-                            size: 16, color: AppTheme.errorLight),
-                        SizedBox(width: 8),
+                            size: 16.sp, color: AppTheme.errorLight),
+                        SizedBox(width: 8.sp),
                         const Text("Loại bỏ"),
                       ],
                     ),
@@ -493,15 +493,15 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
     }
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: EdgeInsets.symmetric(horizontal: 6.sp, vertical: 2.sp),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(8.sp),
       ),
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 10,
+          fontSize: 10.sp,
           fontWeight: FontWeight.w500,
           color: color,
         ),
@@ -511,13 +511,13 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
 
   Widget _buildStatisticsTab() {
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.sp),
       child: Column(
         children: [
           _buildRegistrationChart(),
-          SizedBox(height: 16),
+          SizedBox(height: 16.sp),
           _buildRankDistribution(),
-          SizedBox(height: 16),
+          SizedBox(height: 16.sp),
           _buildClubRepresentation(),
         ],
       ),
@@ -526,10 +526,10 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
 
   Widget _buildRegistrationChart() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.sp),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.sp),
         border: Border.all(color: AppTheme.dividerLight),
       ),
       child: Column(
@@ -538,16 +538,16 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
           Text(
             "Đăng ký theo thời gian",
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 16.sp,
               fontWeight: FontWeight.bold,
               color: AppTheme.textPrimaryLight,
             ),
           ),
-          SizedBox(height: 16),
+          SizedBox(height: 16.sp),
           
           // Mock chart representation
           SizedBox(
-            height: 120,
+            height: 120.sp,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -557,18 +557,18 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Container(
-                      width: 20,
+                      width: 20.sp,
                       height: height,
                       decoration: BoxDecoration(
                         color: AppTheme.primaryLight,
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(4.sp),
                       ),
                     ),
-                    SizedBox(height: 4),
+                    SizedBox(height: 4.sp),
                     Text(
                       'T${index + 2}',
                       style: TextStyle(
-                          fontSize: 10, color: AppTheme.textSecondaryLight),
+                          fontSize: 10.sp, color: AppTheme.textSecondaryLight),
                     ),
                   ],
                 );
@@ -589,10 +589,10 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
     ];
 
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.sp),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.sp),
         border: Border.all(color: AppTheme.dividerLight),
       ),
       child: Column(
@@ -601,39 +601,39 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
           Text(
             "Phân bổ theo rank",
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 16.sp,
               fontWeight: FontWeight.bold,
               color: AppTheme.textPrimaryLight,
             ),
           ),
-          SizedBox(height: 12),
+          SizedBox(height: 12.sp),
           
           ...rankData.map((data) => Padding(
-            padding: EdgeInsets.only(bottom: 8),
+            padding: EdgeInsets.only(bottom: 8.sp),
             child: Row(
               children: [
                 Container(
-                  width: 12,
-                  height: 12,
+                  width: 12.sp,
+                  height: 12.sp,
                   decoration: BoxDecoration(
                     color: data['color'] as Color,
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: BorderRadius.circular(2.sp),
                   ),
                 ),
-                SizedBox(width: 8),
+                SizedBox(width: 8.sp),
                 
                 Expanded(
                   child: Text(
                     data['range'] as String,
                     style: TextStyle(
-                        fontSize: 13, color: AppTheme.textSecondaryLight),
+                        fontSize: 13.sp, color: AppTheme.textSecondaryLight),
                   ),
                 ),
                 
                 Text(
                   "${data['count']} người",
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.textPrimaryLight,
                   ),
@@ -655,10 +655,10 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
     ];
 
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.sp),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.sp),
         border: Border.all(color: AppTheme.dividerLight),
       ),
       child: Column(
@@ -667,28 +667,28 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
           Text(
             "Đại diện các club",
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 16.sp,
               fontWeight: FontWeight.bold,
               color: AppTheme.textPrimaryLight,
             ),
           ),
-          SizedBox(height: 12),
+          SizedBox(height: 12.sp),
           
           ...clubData.map((club) => Padding(
-            padding: EdgeInsets.only(bottom: 8),
+            padding: EdgeInsets.only(bottom: 8.sp),
             child: Row(
               children: [
                 Expanded(
                   child: Text(
                     club['name'] as String,
                     style: TextStyle(
-                        fontSize: 13, color: AppTheme.textSecondaryLight),
+                        fontSize: 13.sp, color: AppTheme.textSecondaryLight),
                   ),
                 ),
                 Text(
                   "${club['count']} người",
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.primaryLight,
                   ),
@@ -705,7 +705,7 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
     final activities = _getMockActivities();
     
     return ListView.builder(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.sp),
       itemCount: activities.length,
       itemBuilder: (context, index) {
         final activity = activities[index];
@@ -716,22 +716,22 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
 
   Widget _buildActivityItem(Map<String, dynamic> activity) {
     return Container(
-      margin: EdgeInsets.only(bottom: 12),
-      padding: EdgeInsets.all(12),
+      margin: EdgeInsets.only(bottom: 12.sp),
+      padding: EdgeInsets.all(12.sp),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(8.sp),
         border: Border.all(color: AppTheme.dividerLight),
       ),
       child: Row(
         children: [
           CircleAvatar(
-            radius: 16,
+            radius: 16.sp,
             backgroundImage: NetworkImage(activity['avatar']),
             backgroundColor: AppTheme.backgroundLight,
           ),
 
-          SizedBox(width: 12),
+          SizedBox(width: 12.sp),
 
           Expanded(
             child: Column(
@@ -740,7 +740,7 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
                 RichText(
                   text: TextSpan(
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 13.sp,
                       color: AppTheme.textSecondaryLight,
                       fontFamily: 'Roboto',
                     ),
@@ -752,11 +752,11 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
                     ],
                   ),
                 ),
-                SizedBox(height: 2),
+                SizedBox(height: 2.sp),
                 Text(
                   activity['time'],
                   style: TextStyle(
-                    fontSize: 11,
+                    fontSize: 11.sp,
                     color: AppTheme.textDisabledLight,
                   ),
                 ),
@@ -773,13 +773,13 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.group_off, size: 64, color: AppTheme.textDisabledLight),
-          SizedBox(height: 16),
+          Icon(Icons.group_off, size: 64.sp, color: AppTheme.textDisabledLight),
+          SizedBox(height: 16.sp),
           Text(
             "Không tìm thấy người chơi",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
           ),
-          SizedBox(height: 8),
+          SizedBox(height: 8.sp),
           Text(
             "Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.",
             textAlign: TextAlign.center,

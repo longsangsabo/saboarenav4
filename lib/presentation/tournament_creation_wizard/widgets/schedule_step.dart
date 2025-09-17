@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-
-// import 'package:sabo_arena/core/app_export.dart';
+import 'package:sabo_arena/core/app_export.dart';
+import 'package:sabo_arena/theme/theme_extensions.dart';
+import 'package:sabo_arena/utils/size_extensions.dart';
 
 class ScheduleStep extends StatefulWidget {
   final Map<String, dynamic> data;
@@ -30,7 +31,7 @@ class _ScheduleStepState extends State<ScheduleStep>
   int _matchDuration = 60;
   int _breakTime = 15;
   int _dailyMatches = 3;
-  // Removed _useTimeSlots flag; derive from _timeSlots.isNotEmpty when needed
+  bool _useTimeSlots = false;
   List<TimeSlot> _timeSlots = [];
 
   final List<int> _matchDurationOptions = [30, 45, 60, 90, 120];
@@ -69,6 +70,7 @@ class _ScheduleStepState extends State<ScheduleStep>
     _dailyMatches = widget.data['dailyMatches'] ?? 3;
     _timeSlots = (widget.data['timeSlots'] as List<dynamic>?)?.map((slot) => 
         TimeSlot.fromMap(slot as Map<String, dynamic>)).toList() ?? [];
+    _useTimeSlots = _timeSlots.isNotEmpty;
 
     if (_timeSlots.isEmpty) {
       _initializeDefaultTimeSlots();
@@ -118,37 +120,37 @@ class _ScheduleStepState extends State<ScheduleStep>
         return Opacity(
           opacity: _fadeAnimation.value,
           child: SingleChildScrollView(
-            padding: EdgeInsets.all(20),
+            padding: EdgeInsets.all(20.h),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildSectionTitle("Thời gian đăng ký", Icons.how_to_reg_outlined),
-                SizedBox(height: 16),
+                SizedBox(height: 16.v),
                 _buildRegistrationPeriod(),
                 
-                SizedBox(height: 24),
+                SizedBox(height: 24.v),
                 _buildSectionTitle("Thời gian thi đấu", Icons.event_outlined),
-                SizedBox(height: 16),
+                SizedBox(height: 16.v),
                 _buildTournamentPeriod(),
                 
-                SizedBox(height: 24),
+                SizedBox(height: 24.v),
                 _buildSectionTitle("Lịch trình thi đấu", Icons.schedule_outlined),
-                SizedBox(height: 16),
+                SizedBox(height: 16.v),
                 _buildMatchSchedulingOptions(),
                 
-                SizedBox(height: 24),
+                SizedBox(height: 24.v),
                 _buildSectionTitle("Cài đặt trận đấu", Icons.settings_outlined),
-                SizedBox(height: 16),
+                SizedBox(height: 16.v),
                 _buildMatchSettings(),
                 
                 if (_matchScheduling == 'fixed') ...[
-                  SizedBox(height: 24),
+                  SizedBox(height: 24.v),
                   _buildSectionTitle("Khung giờ thi đấu", Icons.access_time_outlined),
-                  SizedBox(height: 16),
+                  SizedBox(height: 16.v),
                   _buildTimeSlots(),
                 ],
                 
-                SizedBox(height: 100), // Space for navigation buttons
+                SizedBox(height: 100.v), // Space for navigation buttons
               ],
             ),
           ),
@@ -161,24 +163,24 @@ class _ScheduleStepState extends State<ScheduleStep>
     return Row(
       children: [
         Container(
-          padding: EdgeInsets.all(8),
+          padding: EdgeInsets.all(8.h),
           decoration: BoxDecoration(
-            color: Colors.blue[50] ?? Colors.blue,
-            borderRadius: BorderRadius.circular(8),
+            color: appTheme.blue50,
+            borderRadius: BorderRadius.circular(8.h),
           ),
           child: Icon(
             icon,
-            color: Colors.blue[600] ?? Colors.blue,
-            size: 20,
+            color: appTheme.blue600,
+            size: 20.adaptSize,
           ),
         ),
-        SizedBox(width: 12),
+        SizedBox(width: 12.h),
         Text(
           title,
           style: TextStyle(
-            fontSize: 18,
+            fontSize: 18.fSize,
             fontWeight: FontWeight.bold,
-            color: Colors.grey[900] ?? Colors.black,
+            color: appTheme.gray900,
           ),
         ),
       ],
@@ -187,13 +189,13 @@ class _ScheduleStepState extends State<ScheduleStep>
 
   Widget _buildRegistrationPeriod() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.h),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.h),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey[900] ?? Colors.black.withOpacity(0.06),
+            color: appTheme.black900.withOpacity(0.06),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -217,7 +219,7 @@ class _ScheduleStepState extends State<ScheduleStep>
             minDate: DateTime.now(),
           ),
           
-          SizedBox(height: 16),
+          SizedBox(height: 16.v),
           
           _buildDateSelector(
             label: "Đóng đăng ký",
@@ -235,28 +237,28 @@ class _ScheduleStepState extends State<ScheduleStep>
             minDate: _registrationStartDate.add(Duration(days: 1)),
           ),
           
-          SizedBox(height: 12),
+          SizedBox(height: 12.v),
           
           Container(
-            padding: EdgeInsets.all(12),
+            padding: EdgeInsets.all(12.h),
             decoration: BoxDecoration(
-              color: Colors.blue[50] ?? Colors.blue,
-              borderRadius: BorderRadius.circular(8),
+              color: appTheme.blue50,
+              borderRadius: BorderRadius.circular(8.h),
             ),
             child: Row(
               children: [
                 Icon(
                   Icons.info_outline,
-                  color: Colors.blue[600] ?? Colors.blue,
-                  size: 16,
+                  color: appTheme.blue600,
+                  size: 16.adaptSize,
                 ),
-                SizedBox(width: 8),
+                SizedBox(width: 8.h),
                 Expanded(
                   child: Text(
                     "Thời gian đăng ký: ${_registrationEndDate.difference(_registrationStartDate).inDays} ngày",
                     style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.blue[600] ?? Colors.blue,
+                      fontSize: 12.fSize,
+                      color: appTheme.blue600,
                     ),
                   ),
                 ),
@@ -270,13 +272,13 @@ class _ScheduleStepState extends State<ScheduleStep>
 
   Widget _buildTournamentPeriod() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.h),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.h),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey[900] ?? Colors.black.withOpacity(0.06),
+            color: appTheme.black900.withOpacity(0.06),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -300,7 +302,7 @@ class _ScheduleStepState extends State<ScheduleStep>
             minDate: _registrationEndDate.add(Duration(days: 1)),
           ),
           
-          SizedBox(height: 16),
+          SizedBox(height: 16.v),
           
           _buildDateSelector(
             label: "Kết thúc giải đấu",
@@ -314,28 +316,28 @@ class _ScheduleStepState extends State<ScheduleStep>
             minDate: _tournamentStartDate.add(Duration(days: 1)),
           ),
           
-          SizedBox(height: 12),
+          SizedBox(height: 12.v),
           
           Container(
-            padding: EdgeInsets.all(12),
+            padding: EdgeInsets.all(12.h),
             decoration: BoxDecoration(
-              color: Colors.green[50] ?? Colors.green,
-              borderRadius: BorderRadius.circular(8),
+              color: appTheme.green50,
+              borderRadius: BorderRadius.circular(8.h),
             ),
             child: Row(
               children: [
                 Icon(
                   Icons.timer_outlined,
-                  color: Colors.green[600]!,
-                  size: 16,
+                  color: appTheme.green600,
+                  size: 16.adaptSize,
                 ),
-                SizedBox(width: 8),
+                SizedBox(width: 8.h),
                 Expanded(
                   child: Text(
                     "Thời gian thi đấu: ${_tournamentEndDate.difference(_tournamentStartDate).inDays} ngày",
                     style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.green[600]!,
+                      fontSize: 12.fSize,
+                      color: appTheme.green600,
                     ),
                   ),
                 ),
@@ -356,21 +358,21 @@ class _ScheduleStepState extends State<ScheduleStep>
   }) {
     return InkWell(
       onTap: () => _selectDate(date, onDateChanged, minDate, maxDate),
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(8.h),
       child: Container(
-        padding: EdgeInsets.all(12),
+        padding: EdgeInsets.all(12.h),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey[300] ?? Colors.grey),
-          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: appTheme.gray300),
+          borderRadius: BorderRadius.circular(8.h),
         ),
         child: Row(
           children: [
             Icon(
               Icons.calendar_today_outlined,
-              color: Colors.grey[600] ?? Colors.grey,
-              size: 20,
+              color: appTheme.gray600,
+              size: 20.adaptSize,
             ),
-            SizedBox(width: 12),
+            SizedBox(width: 12.h),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -378,16 +380,16 @@ class _ScheduleStepState extends State<ScheduleStep>
                   Text(
                     label,
                     style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600] ?? Colors.grey,
+                      fontSize: 12.fSize,
+                      color: appTheme.gray600,
                     ),
                   ),
                   Text(
                     "${date.day}/${date.month}/${date.year}",
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 16.fSize,
                       fontWeight: FontWeight.w600,
-                      color: Colors.grey[900] ?? Colors.black,
+                      color: appTheme.gray900,
                     ),
                   ),
                 ],
@@ -395,8 +397,8 @@ class _ScheduleStepState extends State<ScheduleStep>
             ),
             Icon(
               Icons.arrow_forward_ios,
-              color: Colors.grey[400] ?? Colors.grey,
-              size: 16,
+              color: appTheme.gray400,
+              size: 16.adaptSize,
             ),
           ],
         ),
@@ -406,13 +408,13 @@ class _ScheduleStepState extends State<ScheduleStep>
 
   Widget _buildMatchSchedulingOptions() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.h),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.h),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey[900] ?? Colors.black.withOpacity(0.06),
+            color: appTheme.black900.withOpacity(0.06),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -424,12 +426,12 @@ class _ScheduleStepState extends State<ScheduleStep>
           Text(
             "Chọn cách sắp xếp lịch thi đấu:",
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 14.fSize,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[700] ?? Colors.grey,
+              color: appTheme.gray700,
             ),
           ),
-          SizedBox(height: 16),
+          SizedBox(height: 16.v),
           
           _buildSchedulingOption(
             value: 'flexible',
@@ -440,7 +442,7 @@ class _ScheduleStepState extends State<ScheduleStep>
             cons: ['Có thể kéo dài thời gian', 'Khó kiểm soát tiến độ'],
           ),
           
-          SizedBox(height: 12),
+          SizedBox(height: 12.v),
           
           _buildSchedulingOption(
             value: 'fixed',
@@ -472,14 +474,14 @@ class _ScheduleStepState extends State<ScheduleStep>
         });
         _updateData();
       },
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(8.h),
       child: Container(
-        padding: EdgeInsets.all(12),
+        padding: EdgeInsets.all(12.h),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.blue[50] ?? Colors.blue : Colors.grey[50] ?? Colors.grey,
-          borderRadius: BorderRadius.circular(8),
+          color: isSelected ? appTheme.blue50 : appTheme.gray50,
+          borderRadius: BorderRadius.circular(8.h),
           border: Border.all(
-            color: isSelected ? Colors.blue[600] ?? Colors.blue : Colors.grey[200] ?? Colors.grey,
+            color: isSelected ? appTheme.blue600 : appTheme.gray200,
           ),
         ),
         child: Column(
@@ -487,18 +489,18 @@ class _ScheduleStepState extends State<ScheduleStep>
             Row(
               children: [
                 Container(
-                  padding: EdgeInsets.all(8),
+                  padding: EdgeInsets.all(8.h),
                   decoration: BoxDecoration(
-                    color: (isSelected ? Colors.blue[600] ?? Colors.blue : Colors.grey[600] ?? Colors.grey).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(6),
+                    color: (isSelected ? appTheme.blue600 : appTheme.gray600).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(6.h),
                   ),
                   child: Icon(
                     icon,
-                    color: isSelected ? Colors.blue[600] ?? Colors.blue : Colors.grey[600] ?? Colors.grey,
-                    size: 20,
+                    color: isSelected ? appTheme.blue600 : appTheme.gray600,
+                    size: 20.adaptSize,
                   ),
                 ),
-                SizedBox(width: 12),
+                SizedBox(width: 12.h),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -506,16 +508,16 @@ class _ScheduleStepState extends State<ScheduleStep>
                       Text(
                         title,
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 16.fSize,
                           fontWeight: FontWeight.bold,
-                          color: Colors.grey[900] ?? Colors.black,
+                          color: appTheme.gray900,
                         ),
                       ),
                       Text(
                         description,
                         style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[600] ?? Colors.grey,
+                          fontSize: 13.fSize,
+                          color: appTheme.gray600,
                         ),
                       ),
                     ],
@@ -523,21 +525,21 @@ class _ScheduleStepState extends State<ScheduleStep>
                 ),
                 if (isSelected)
                   Container(
-                    padding: EdgeInsets.all(4),
+                    padding: EdgeInsets.all(4.h),
                     decoration: BoxDecoration(
-                      color: Colors.blue[600] ?? Colors.blue,
+                      color: appTheme.blue600,
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.check,
                       color: Colors.white,
-                      size: 16,
+                      size: 16.adaptSize,
                     ),
                   ),
               ],
             ),
             
-            SizedBox(height: 12),
+            SizedBox(height: 12.v),
             
             Row(
               children: [
@@ -548,22 +550,22 @@ class _ScheduleStepState extends State<ScheduleStep>
                       Text(
                         "Ưu điểm:",
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 11.fSize,
                           fontWeight: FontWeight.w600,
-                          color: Colors.green[600]!,
+                          color: appTheme.green600,
                         ),
                       ),
                       ...pros.map((pro) => Text(
                         "• $pro",
                         style: TextStyle(
-                          fontSize: 10,
-                          color: Colors.grey[600] ?? Colors.grey,
+                          fontSize: 10.fSize,
+                          color: appTheme.gray600,
                         ),
                       )),
                     ],
                   ),
                 ),
-                SizedBox(width: 12),
+                SizedBox(width: 12.h),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -571,16 +573,16 @@ class _ScheduleStepState extends State<ScheduleStep>
                       Text(
                         "Nhược điểm:",
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 11.fSize,
                           fontWeight: FontWeight.w600,
-                          color: Colors.orange[600] ?? Colors.orange,
+                          color: appTheme.orange600,
                         ),
                       ),
                       ...cons.map((con) => Text(
                         "• $con",
                         style: TextStyle(
-                          fontSize: 10,
-                          color: Colors.grey[600] ?? Colors.grey,
+                          fontSize: 10.fSize,
+                          color: appTheme.gray600,
                         ),
                       )),
                     ],
@@ -596,13 +598,13 @@ class _ScheduleStepState extends State<ScheduleStep>
 
   Widget _buildMatchSettings() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.h),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.h),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey[900] ?? Colors.black.withOpacity(0.06),
+            color: appTheme.black900.withOpacity(0.06),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -623,7 +625,7 @@ class _ScheduleStepState extends State<ScheduleStep>
             },
           ),
           
-          SizedBox(height: 20),
+          SizedBox(height: 20.v),
           
           _buildSettingsSelector(
             title: "Thời gian nghỉ giữa các trận",
@@ -638,7 +640,7 @@ class _ScheduleStepState extends State<ScheduleStep>
             },
           ),
           
-          SizedBox(height: 20),
+          SizedBox(height: 20.v),
           
           _buildSettingsSelector(
             title: "Số trận tối đa mỗi ngày",
@@ -670,32 +672,32 @@ class _ScheduleStepState extends State<ScheduleStep>
         Text(
           title,
           style: TextStyle(
-            fontSize: 14,
+            fontSize: 14.fSize,
             fontWeight: FontWeight.w600,
-            color: Colors.grey[700] ?? Colors.grey,
+            color: appTheme.gray700,
           ),
         ),
-        SizedBox(height: 8),
+        SizedBox(height: 8.v),
         
         Wrap(
-          spacing: 8,
+          spacing: 8.h,
           children: options.map((option) {
             final isSelected = value == option;
             return InkWell(
               onTap: () => onChanged(option),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(20.h),
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: EdgeInsets.symmetric(horizontal: 16.h, vertical: 8.v),
                 decoration: BoxDecoration(
-                  color: isSelected ? Colors.blue[600] ?? Colors.blue : Colors.grey[100] ?? Colors.grey,
-                  borderRadius: BorderRadius.circular(20),
+                  color: isSelected ? appTheme.blue600 : appTheme.gray100,
+                  borderRadius: BorderRadius.circular(20.h),
                 ),
                 child: Text(
                   "$option $subtitle",
                   style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.grey[700] ?? Colors.grey,
+                    color: isSelected ? Colors.white : appTheme.gray700,
                     fontWeight: FontWeight.w600,
-                    fontSize: 13,
+                    fontSize: 13.fSize,
                   ),
                 ),
               ),
@@ -708,13 +710,13 @@ class _ScheduleStepState extends State<ScheduleStep>
 
   Widget _buildTimeSlots() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.h),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.h),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey[900] ?? Colors.black.withOpacity(0.06),
+            color: appTheme.black900.withOpacity(0.06),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -729,36 +731,36 @@ class _ScheduleStepState extends State<ScheduleStep>
               Text(
                 "Khung giờ thi đấu trong ngày",
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 14.fSize,
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey[700] ?? Colors.grey,
+                  color: appTheme.gray700,
                 ),
               ),
               TextButton.icon(
                 onPressed: _addTimeSlot,
-                icon: Icon(Icons.add, size: 16),
+                icon: Icon(Icons.add, size: 16.adaptSize),
                 label: Text("Thêm"),
                 style: TextButton.styleFrom(
-                  foregroundColor: Colors.blue[600] ?? Colors.blue,
+                  foregroundColor: appTheme.blue600,
                 ),
               ),
             ],
           ),
           
-          SizedBox(height: 12),
+          SizedBox(height: 12.v),
           
           ...(_timeSlots.asMap().entries.map((entry) {
             final index = entry.key;
             final slot = entry.value;
             
             return Container(
-              margin: EdgeInsets.only(bottom: 12),
-              padding: EdgeInsets.all(12),
+              margin: EdgeInsets.only(bottom: 12.v),
+              padding: EdgeInsets.all(12.h),
               decoration: BoxDecoration(
-                color: slot.enabled ? Colors.blue[50] ?? Colors.blue : Colors.grey[50] ?? Colors.grey,
-                borderRadius: BorderRadius.circular(8),
+                color: slot.enabled ? appTheme.blue50 : appTheme.gray50,
+                borderRadius: BorderRadius.circular(8.h),
                 border: Border.all(
-                  color: slot.enabled ? Colors.blue[200] ?? Colors.blue : Colors.grey[200] ?? Colors.grey,
+                  color: slot.enabled ? appTheme.blue200 : appTheme.gray200,
                 ),
               ),
               child: Row(
@@ -771,10 +773,10 @@ class _ScheduleStepState extends State<ScheduleStep>
                       });
                       _updateData();
                     },
-                    activeThumbColor: Colors.blue[600] ?? Colors.blue,
+                    activeThumbColor: appTheme.blue600,
                   ),
                   
-                  SizedBox(width: 12),
+                  SizedBox(width: 12.h),
                   
                   Expanded(
                     child: Column(
@@ -783,16 +785,16 @@ class _ScheduleStepState extends State<ScheduleStep>
                         Text(
                           slot.label,
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 14.fSize,
                             fontWeight: FontWeight.w600,
-                            color: slot.enabled ? Colors.grey[900] ?? Colors.black : Colors.grey[50] ?? Colors.grey[50]!,
+                            color: slot.enabled ? appTheme.gray900 : appTheme.gray500,
                           ),
                         ),
                         Text(
                           "${slot.start} - ${slot.end} (${slot.maxMatches} trận)",
                           style: TextStyle(
-                            fontSize: 12,
-                            color: slot.enabled ? Colors.grey[600] ?? Colors.grey : Colors.grey[400] ?? Colors.grey,
+                            fontSize: 12.fSize,
+                            color: slot.enabled ? appTheme.gray600 : appTheme.gray400,
                           ),
                         ),
                       ],
@@ -802,15 +804,15 @@ class _ScheduleStepState extends State<ScheduleStep>
                   IconButton(
                     onPressed: () => _editTimeSlot(index),
                     icon: Icon(Icons.edit_outlined),
-                    iconSize: 20,
-                    color: Colors.grey[600] ?? Colors.grey,
+                    iconSize: 20.adaptSize,
+                    color: appTheme.gray600,
                   ),
                   
                   IconButton(
                     onPressed: () => _removeTimeSlot(index),
                     icon: Icon(Icons.delete_outline),
-                    iconSize: 20,
-                    color: Colors.red[600] ?? Colors.red,
+                    iconSize: 20.adaptSize,
+                    color: appTheme.red600,
                   ),
                 ],
               ),
@@ -819,13 +821,13 @@ class _ScheduleStepState extends State<ScheduleStep>
           
           if (_timeSlots.isEmpty)
             Container(
-              padding: EdgeInsets.all(20),
+              padding: EdgeInsets.all(20.h),
               child: Center(
                 child: Text(
                   "Chưa có khung giờ nào. Nhấn 'Thêm' để tạo khung giờ mới.",
                   style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[50] ?? Colors.grey[50]!,
+                    fontSize: 14.fSize,
+                    color: appTheme.gray500,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -851,7 +853,7 @@ class _ScheduleStepState extends State<ScheduleStep>
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: Colors.blue[600] ?? Colors.blue,
+              primary: appTheme.blue600,
             ),
           ),
           child: child!,
@@ -1018,7 +1020,7 @@ class _TimeSlotDialogState extends State<TimeSlotDialog> {
               border: OutlineInputBorder(),
             ),
           ),
-          SizedBox(height: 16),
+          SizedBox(height: 16.v),
           
           Row(
             children: [
@@ -1026,36 +1028,36 @@ class _TimeSlotDialogState extends State<TimeSlotDialog> {
                 child: InkWell(
                   onTap: () => _selectTime(true),
                   child: Container(
-                    padding: EdgeInsets.all(12),
+                    padding: EdgeInsets.all(12.h),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey[300] ?? Colors.grey),
-                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: appTheme.gray300),
+                      borderRadius: BorderRadius.circular(4.h),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Từ", style: TextStyle(fontSize: 12)),
-                        Text(_startTime, style: TextStyle(fontSize: 16)),
+                        Text("Từ", style: TextStyle(fontSize: 12.fSize)),
+                        Text(_startTime, style: TextStyle(fontSize: 16.fSize)),
                       ],
                     ),
                   ),
                 ),
               ),
-              SizedBox(width: 16),
+              SizedBox(width: 16.h),
               Expanded(
                 child: InkWell(
                   onTap: () => _selectTime(false),
                   child: Container(
-                    padding: EdgeInsets.all(12),
+                    padding: EdgeInsets.all(12.h),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey[300] ?? Colors.grey),
-                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: appTheme.gray300),
+                      borderRadius: BorderRadius.circular(4.h),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Đến", style: TextStyle(fontSize: 12)),
-                        Text(_endTime, style: TextStyle(fontSize: 16)),
+                        Text("Đến", style: TextStyle(fontSize: 12.fSize)),
+                        Text(_endTime, style: TextStyle(fontSize: 16.fSize)),
                       ],
                     ),
                   ),
@@ -1064,7 +1066,7 @@ class _TimeSlotDialogState extends State<TimeSlotDialog> {
             ],
           ),
           
-          SizedBox(height: 16),
+          SizedBox(height: 16.v),
           
           TextField(
             keyboardType: TextInputType.number,
@@ -1093,8 +1095,8 @@ class _TimeSlotDialogState extends State<TimeSlotDialog> {
   }
 
   void _selectTime(bool isStart) async {
-  final currentTime = isStart ? _startTime : _endTime;
-  final timeParts = currentTime.split(':');
+    final currentTime = isStart ? _startTime : _endTime;
+    final timeParts = currentTime.split(':');
     
     final TimeOfDay? picked = await showTimePicker(
       context: context,

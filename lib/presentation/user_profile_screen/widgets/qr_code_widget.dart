@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
+import 'package:sizer/sizer.dart';
 
 import '../../../core/app_export.dart';
 
@@ -27,7 +27,7 @@ class QRCodeWidget extends StatelessWidget {
         children: [
           // Handle Bar
           Container(
-            margin: EdgeInsets.only(top: 2),
+            margin: EdgeInsets.only(top: 2.h),
             width: 12.w,
             height: 4,
             decoration: BoxDecoration(
@@ -133,7 +133,7 @@ class QRCodeWidget extends StatelessWidget {
                   ],
                 ),
 
-                SizedBox(height: 4),
+                SizedBox(height: 4.h),
 
                 // QR Code Placeholder (In real app, use qr_flutter package)
                 Container(
@@ -156,11 +156,11 @@ class QRCodeWidget extends StatelessWidget {
                   ),
                 ),
 
-                SizedBox(height: 3),
+                SizedBox(height: 3.h),
 
                 // User ID
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1),
+                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
                   decoration: BoxDecoration(
                     color: AppTheme.lightTheme.colorScheme.primary
                         .withValues(alpha: 0.1),
@@ -179,7 +179,7 @@ class QRCodeWidget extends StatelessWidget {
             ),
           ),
 
-          SizedBox(height: 3),
+          SizedBox(height: 3.h),
 
           // Action Buttons
           Padding(
@@ -196,7 +196,7 @@ class QRCodeWidget extends StatelessWidget {
                     ),
                     label: Text('Chia sẻ'),
                     style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 2),
+                      padding: EdgeInsets.symmetric(vertical: 2.h),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -214,7 +214,7 @@ class QRCodeWidget extends StatelessWidget {
                     ),
                     label: Text('Lưu ảnh'),
                     style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 2),
+                      padding: EdgeInsets.symmetric(vertical: 2.h),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -225,7 +225,7 @@ class QRCodeWidget extends StatelessWidget {
             ),
           ),
 
-          SizedBox(height: 2),
+          SizedBox(height: 2.h),
 
           // Instructions
           Padding(
@@ -239,7 +239,7 @@ class QRCodeWidget extends StatelessWidget {
             ),
           ),
 
-          SizedBox(height: 4),
+          SizedBox(height: 4.h),
         ],
       ),
     );

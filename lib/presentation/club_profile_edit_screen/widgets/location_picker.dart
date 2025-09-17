@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-// import 'package:sabo_arena/core/app_export.dart';
+import 'package:sabo_arena/core/app_export.dart';
 
 class LocationPicker extends StatefulWidget {
   final Map<String, double> initialLocation;
@@ -59,11 +59,11 @@ class _LocationPickerState extends State<LocationPicker>
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12)),
+        borderRadius: BorderRadius.circular(12.h),
+        border: Border.all(color: appTheme.gray200),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey[900] ?? Colors.black.withOpacity(0.04),
+            color: appTheme.black900.withOpacity(0.04),
             blurRadius: 8,
             offset: Offset(0, 2),
           ),
@@ -94,24 +94,24 @@ class _LocationPickerState extends State<LocationPicker>
           _animationController.reverse();
         }
       },
-      borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(12.h)),
       child: Container(
-        padding: EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.h),
         child: Row(
           children: [
             Container(
-              padding: EdgeInsets.all(8),
+              padding: EdgeInsets.all(8.h),
               decoration: BoxDecoration(
-                color: Colors.green[50] ?? Colors.green,
-                borderRadius: BorderRadius.circular(8),
+                color: appTheme.green50,
+                borderRadius: BorderRadius.circular(8.h),
               ),
               child: Icon(
                 Icons.location_on_outlined,
-                color: Colors.green[600] ?? Colors.green,
-                size: 20,
+                color: appTheme.green600,
+                size: 20.adaptSize,
               ),
             ),
-            SizedBox(width: 12),
+            SizedBox(width: 12.h),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,16 +119,16 @@ class _LocationPickerState extends State<LocationPicker>
                   Text(
                     "Vị trí trên bản đồ",
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 16.fSize,
                       fontWeight: FontWeight.w600,
-                      color: Colors.grey[900],
+                      color: appTheme.gray900,
                     ),
                   ),
                   Text(
                     _getLocationSummary(),
                     style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: 12.fSize,
+                      color: appTheme.gray600,
                     ),
                   ),
                 ],
@@ -139,8 +139,8 @@ class _LocationPickerState extends State<LocationPicker>
               duration: Duration(milliseconds: 300),
               child: Icon(
                 Icons.expand_more,
-                color: Theme.of(context).colorScheme.onSurface,
-                size: 24,
+                color: appTheme.gray600,
+                size: 24.adaptSize,
               ),
             ),
           ],
@@ -151,29 +151,29 @@ class _LocationPickerState extends State<LocationPicker>
 
   Widget _buildCollapsedContent() {
     return Container(
-      padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
+      padding: EdgeInsets.fromLTRB(16.h, 0, 16.h, 16.v),
       child: Row(
         children: [
           Icon(
             Icons.my_location,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-            size: 16,
+            color: appTheme.gray500,
+            size: 16.adaptSize,
           ),
-          SizedBox(width: 8),
+          SizedBox(width: 8.h),
           Expanded(
             child: Text(
               "Lat: ${_currentLocation['lat']?.toStringAsFixed(4)}, Lng: ${_currentLocation['lng']?.toStringAsFixed(4)}",
               style: TextStyle(
-                fontSize: 13,
-                color: Theme.of(context).colorScheme.onSurface,
+                fontSize: 13.fSize,
+                color: appTheme.gray600,
               ),
             ),
           ),
           Text(
             "Nhấn để chỉnh sửa",
             style: TextStyle(
-              fontSize: 12,
-              color: Theme.of(context).colorScheme.primary,
+              fontSize: 12.fSize,
+              color: appTheme.blue600,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -189,15 +189,15 @@ class _LocationPickerState extends State<LocationPicker>
         return Transform.scale(
           scale: _scaleAnimation.value,
           child: Container(
-            padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
+            padding: EdgeInsets.fromLTRB(16.h, 0, 16.h, 16.v),
             child: Column(
               children: [
                 _buildSearchSection(),
-                SizedBox(height: 16),
+                SizedBox(height: 16.v),
                 _buildMapPreview(),
-                SizedBox(height: 16),
+                SizedBox(height: 16.v),
                 _buildCoordinatesInput(),
-                SizedBox(height: 16),
+                SizedBox(height: 16.v),
                 _buildQuickActions(),
               ],
             ),
@@ -210,9 +210,9 @@ class _LocationPickerState extends State<LocationPicker>
   Widget _buildSearchSection() {
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12)),
+        color: appTheme.gray50,
+        borderRadius: BorderRadius.circular(8.h),
+        border: Border.all(color: appTheme.gray200),
       ),
       child: Column(
         children: [
@@ -220,21 +220,21 @@ class _LocationPickerState extends State<LocationPicker>
             controller: _searchController,
             decoration: InputDecoration(
               hintText: "Tìm kiếm địa điểm...",
-              prefixIcon: Icon(Icons.search, color: Theme.of(context).colorScheme.onSurface),
+              prefixIcon: Icon(Icons.search, color: appTheme.gray600),
               suffixIcon: _isLoading 
                   ? Padding(
-                      padding: EdgeInsets.all(12),
+                      padding: EdgeInsets.all(12.h),
                       child: SizedBox(
-                        width: 20,
-                        height: 20,
+                        width: 20.adaptSize,
+                        height: 20.adaptSize,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Theme.of(context).colorScheme.primary,
+                          color: appTheme.blue600,
                         ),
                       ),
                     )
                   : IconButton(
-                      icon: Icon(Icons.clear, color: Theme.of(context).colorScheme.onSurface),
+                      icon: Icon(Icons.clear, color: appTheme.gray600),
                       onPressed: () {
                         _searchController.clear();
                         setState(() {
@@ -243,7 +243,7 @@ class _LocationPickerState extends State<LocationPicker>
                       },
                     ),
               border: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding: EdgeInsets.symmetric(horizontal: 16.h, vertical: 12.v),
             ),
             onChanged: _onSearchChanged,
           ),
@@ -251,7 +251,7 @@ class _LocationPickerState extends State<LocationPicker>
           if (_searchResults.isNotEmpty) ...[
             Container(
               height: 1,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
+              color: appTheme.gray200,
             ),
             ListView.builder(
               shrinkWrap: true,
@@ -262,15 +262,15 @@ class _LocationPickerState extends State<LocationPicker>
                 return InkWell(
                   onTap: () => _selectSearchResult(result),
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: EdgeInsets.symmetric(horizontal: 16.h, vertical: 12.v),
                     child: Row(
                       children: [
                         Icon(
                           Icons.location_on,
-                          color: Theme.of(context).colorScheme.onSurface,
-                          size: 20,
+                          color: appTheme.gray600,
+                          size: 20.adaptSize,
                         ),
-                        SizedBox(width: 12),
+                        SizedBox(width: 12.h),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -278,16 +278,16 @@ class _LocationPickerState extends State<LocationPicker>
                               Text(
                                 result['name'],
                                 style: TextStyle(
-                                  fontSize: 14,
+                                  fontSize: 14.fSize,
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.grey[900],
+                                  color: appTheme.gray900,
                                 ),
                               ),
                               Text(
                                 result['address'],
                                 style: TextStyle(
-                                  fontSize: 12,
-                                  color: Theme.of(context).colorScheme.onSurface,
+                                  fontSize: 12.fSize,
+                                  color: appTheme.gray600,
                                 ),
                               ),
                             ],
@@ -307,21 +307,21 @@ class _LocationPickerState extends State<LocationPicker>
 
   Widget _buildMapPreview() {
     return Container(
-      height: 200,
+      height: 200.v,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[300] ?? Colors.grey),
-        color: Theme.of(context).colorScheme.surfaceVariant,
+        borderRadius: BorderRadius.circular(8.h),
+        border: Border.all(color: appTheme.gray300),
+        color: appTheme.gray100,
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(8.h),
         child: Stack(
           fit: StackFit.expand,
           children: [
             // Map placeholder with pattern
             Container(
               decoration: BoxDecoration(
-                color: Colors.blue[50],
+                color: appTheme.blue50,
                 image: DecorationImage(
                   image: AssetImage('assets/images/map_pattern.png'),
                   repeat: ImageRepeat.repeat,
@@ -333,13 +333,13 @@ class _LocationPickerState extends State<LocationPicker>
             // Center marker
             Center(
               child: Container(
-                padding: EdgeInsets.all(8),
+                padding: EdgeInsets.all(8.h),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.error,
-                  borderRadius: BorderRadius.circular(20),
+                  color: appTheme.red600,
+                  borderRadius: BorderRadius.circular(20.h),
                   boxShadow: [
                     BoxShadow(
-                      color: Theme.of(context).colorScheme.error.withOpacity(0.3),
+                      color: appTheme.red600.withOpacity(0.3),
                       blurRadius: 8,
                       spreadRadius: 2,
                     ),
@@ -348,26 +348,26 @@ class _LocationPickerState extends State<LocationPicker>
                 child: Icon(
                   Icons.location_on,
                   color: Colors.white,
-                  size: 24,
+                  size: 24.adaptSize,
                 ),
               ),
             ),
             
             // Coordinates overlay
             Positioned(
-              top: 8,
-              left: 8,
+              top: 8.v,
+              left: 8.h,
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: EdgeInsets.symmetric(horizontal: 8.h, vertical: 4.v),
                 decoration: BoxDecoration(
                   color: Colors.black.withOpacity(0.7),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.h),
                 ),
                 child: Text(
                   "${_currentLocation['lat']?.toStringAsFixed(4)}, ${_currentLocation['lng']?.toStringAsFixed(4)}",
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 10,
+                    fontSize: 10.fSize,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -382,12 +382,12 @@ class _LocationPickerState extends State<LocationPicker>
                   onTap: _onMapTapped,
                   child: Container(
                     alignment: Alignment.bottomCenter,
-                    padding: EdgeInsets.all(16),
+                    padding: EdgeInsets.all(16.h),
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: EdgeInsets.symmetric(horizontal: 12.h, vertical: 6.v),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
-                        borderRadius: BorderRadius.circular(16),
+                        color: appTheme.blue600,
+                        borderRadius: BorderRadius.circular(16.h),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -395,14 +395,14 @@ class _LocationPickerState extends State<LocationPicker>
                           Icon(
                             Icons.touch_app,
                             color: Colors.white,
-                            size: 16,
+                            size: 16.adaptSize,
                           ),
-                          SizedBox(width: 6),
+                          SizedBox(width: 6.h),
                           Text(
                             "Nhấn để chọn vị trí",
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 12,
+                              fontSize: 12.fSize,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -421,10 +421,10 @@ class _LocationPickerState extends State<LocationPicker>
 
   Widget _buildCoordinatesInput() {
     return Container(
-      padding: EdgeInsets.all(12),
+      padding: EdgeInsets.all(12.h),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(8),
+        color: appTheme.gray50,
+        borderRadius: BorderRadius.circular(8.h),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -432,12 +432,12 @@ class _LocationPickerState extends State<LocationPicker>
           Text(
             "Tọa độ chính xác",
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 14.fSize,
               fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: appTheme.gray700,
             ),
           ),
-          SizedBox(height: 12),
+          SizedBox(height: 12.v),
           Row(
             children: [
               Expanded(
@@ -447,7 +447,7 @@ class _LocationPickerState extends State<LocationPicker>
                   (value) => _updateCoordinate('lat', value),
                 ),
               ),
-              SizedBox(width: 12),
+              SizedBox(width: 12.h),
               Expanded(
                 child: _buildCoordinateField(
                   "Kinh độ",
@@ -471,28 +471,28 @@ class _LocationPickerState extends State<LocationPicker>
         Text(
           label,
           style: TextStyle(
-            fontSize: 12,
-            color: Theme.of(context).colorScheme.onSurface,
+            fontSize: 12.fSize,
+            color: appTheme.gray600,
           ),
         ),
-        SizedBox(height: 4),
+        SizedBox(height: 4.v),
         TextField(
           controller: controller,
           keyboardType: TextInputType.numberWithOptions(decimal: true),
           decoration: InputDecoration(
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6),
-              borderSide: BorderSide(color: Colors.grey[300] ?? Colors.grey),
+              borderRadius: BorderRadius.circular(6.h),
+              borderSide: BorderSide(color: appTheme.gray300),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6),
-              borderSide: BorderSide(color: Colors.grey[300] ?? Colors.grey),
+              borderRadius: BorderRadius.circular(6.h),
+              borderSide: BorderSide(color: appTheme.gray300),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6),
-              borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
+              borderRadius: BorderRadius.circular(6.h),
+              borderSide: BorderSide(color: appTheme.blue600),
             ),
-            contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            contentPadding: EdgeInsets.symmetric(horizontal: 8.h, vertical: 8.v),
             isDense: true,
           ),
           onChanged: (text) {
@@ -514,16 +514,16 @@ class _LocationPickerState extends State<LocationPicker>
             "Vị trí hiện tại",
             Icons.my_location,
             _getCurrentLocation,
-            Colors.green[600] ?? Colors.green,
+            appTheme.green600,
           ),
         ),
-        SizedBox(width: 12),
+        SizedBox(width: 12.h),
         Expanded(
           child: _buildActionButton(
             "Đặt lại",
             Icons.refresh,
             _resetLocation,
-            Theme.of(context).colorScheme.onSurface,
+            appTheme.gray600,
           ),
         ),
       ],
@@ -533,14 +533,14 @@ class _LocationPickerState extends State<LocationPicker>
   Widget _buildActionButton(String label, IconData icon, VoidCallback onPressed, Color color) {
     return OutlinedButton.icon(
       onPressed: onPressed,
-      icon: Icon(icon, size: 18),
+      icon: Icon(icon, size: 18.adaptSize),
       label: Text(label),
       style: OutlinedButton.styleFrom(
         foregroundColor: color,
         side: BorderSide(color: color),
-        padding: EdgeInsets.symmetric(vertical: 8),
+        padding: EdgeInsets.symmetric(vertical: 8.v),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(6.h),
         ),
       ),
     );
@@ -599,8 +599,8 @@ class _LocationPickerState extends State<LocationPicker>
         'lng': 106.7218,
       },
     ].where((item) => 
-      (item['name'] as String?)?.toLowerCase().contains(query.toLowerCase()) ?? false ||
-  (((item['address'] as String?) ?? '').toLowerCase()).contains(query.toLowerCase())
+      item['name'].toLowerCase().contains(query.toLowerCase()) ||
+      item['address'].toLowerCase().contains(query.toLowerCase())
     ).take(3).toList();
   }
 
@@ -660,7 +660,7 @@ class _LocationPickerState extends State<LocationPicker>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Đã cập nhật vị trí hiện tại"),
-          backgroundColor: Colors.green[600] ?? Colors.green,
+          backgroundColor: appTheme.green600,
         ),
       );
     }

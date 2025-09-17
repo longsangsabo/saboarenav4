@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:sizer/sizer.dart';
 
 class QuickActionCard extends StatefulWidget {
   final String title;
@@ -39,10 +39,10 @@ class _QuickActionCardState extends State<QuickActionCard> {
         duration: const Duration(milliseconds: 150),
         transform: Matrix4.identity()..scale(_isPressed ? 0.98 : 1.0),
         child: Container(
-          padding: EdgeInsets.all(16),
+          padding: EdgeInsets.all(16.sp),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.sp),
             border: Border.all(
               color: widget.color.withValues(alpha: 0.2),
               width: 1,
@@ -62,38 +62,38 @@ class _QuickActionCardState extends State<QuickActionCard> {
               Row(
                 children: [
                   Container(
-                    padding: EdgeInsets.all(8),
+                    padding: EdgeInsets.all(8.sp),
                     decoration: BoxDecoration(
                       color: widget.color.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(8.sp),
                     ),
                     child: Icon(
                       widget.icon,
                       color: widget.color,
-                      size: 20,
+                      size: 20.sp,
                     ),
                   ),
                   const Spacer(),
                   if (widget.badge != null)
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: EdgeInsets.symmetric(horizontal: 8.sp, vertical: 4.sp),
                       decoration: BoxDecoration(
                         color: Colors.red,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12.sp),
                       ),
                       child: Text(
                         '${widget.badge}',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 12,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
                   if (widget.isLoading)
                     SizedBox(
-                      width: 16,
-                      height: 16,
+                      width: 16.sp,
+                      height: 16.sp,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
                         valueColor: AlwaysStoppedAnimation<Color>(widget.color),
@@ -101,20 +101,20 @@ class _QuickActionCardState extends State<QuickActionCard> {
                     ),
                 ],
               ),
-              SizedBox(height: 12),
+              SizedBox(height: 12.h),
               Text(
                 widget.title,
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
                   color: Colors.grey[900],
                 ),
               ),
-              SizedBox(height: 4),
+              SizedBox(height: 4.h),
               Text(
                 widget.subtitle,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 12.sp,
                   color: Colors.grey[600],
                 ),
               ),

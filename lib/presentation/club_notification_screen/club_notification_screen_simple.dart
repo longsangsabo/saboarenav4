@@ -160,7 +160,7 @@ class _ClubNotificationScreenSimpleState extends State<ClubNotificationScreenSim
                 });
               },
             ),
-          ),
+          ).toList(),
         ],
       ),
     );

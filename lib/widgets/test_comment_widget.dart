@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:sabo_arena/repositories/comment_repository.dart';
 
 class TestCommentWidget extends StatefulWidget {
-  const TestCommentWidget({super.key});
-
   @override
   _TestCommentWidgetState createState() => _TestCommentWidgetState();
 }

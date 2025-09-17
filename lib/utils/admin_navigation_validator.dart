@@ -1,6 +1,7 @@
 // Admin Navigation Flow Validation Test
 // Run this manually to check navigation flow
 
+import 'package:flutter/material.dart';
 import '../routes/app_routes.dart';
 import '../services/auth_service.dart';
 
@@ -56,8 +57,7 @@ class AdminNavigationValidator {
   static bool _checkAuthServiceMethods() {
     try {
       // Check if AuthService has the required methods
-      // Accessing the instance ensures the class is available
-      AuthService.instance;
+      final authService = AuthService.instance;
       
       // These methods should exist (will throw if they don't)
       // We can't call them without proper setup, but we can check they exist

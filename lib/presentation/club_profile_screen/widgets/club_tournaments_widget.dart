@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:sizer/sizer.dart';
 
 import '../../../core/app_export.dart';
 
@@ -22,7 +22,7 @@ class ClubTournamentsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(12),
+      padding: EdgeInsets.all(4.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -56,7 +56,7 @@ class ClubTournamentsWidget extends StatelessWidget {
             ],
           ),
           
-          SizedBox(height: 2),
+          SizedBox(height: 2.h),
           
           if (tournaments.isEmpty)
             _buildEmptyState()
@@ -70,7 +70,7 @@ class ClubTournamentsWidget extends StatelessWidget {
   Widget _buildEmptyState() {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(12),
+      padding: EdgeInsets.all(6.w),
       decoration: BoxDecoration(
         color: AppTheme.lightTheme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
@@ -82,17 +82,17 @@ class ClubTournamentsWidget extends StatelessWidget {
         children: [
           Icon(
             Icons.emoji_events_outlined,
-            size: 24,
+            size: 12.w,
             color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
           ),
-          SizedBox(height: 2),
+          SizedBox(height: 2.h),
           Text(
             'Chưa có giải đấu nào',
             style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
           ),
-          SizedBox(height: 1),
+          SizedBox(height: 1.h),
           Text(
             isOwner 
                 ? 'Tạo giải đấu đầu tiên cho câu lạc bộ của bạn'
@@ -103,7 +103,7 @@ class ClubTournamentsWidget extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           if (isOwner) ...[
-            SizedBox(height: 3),
+            SizedBox(height: 3.h),
             ElevatedButton(
               onPressed: onCreateTournament,
               child: Text('Tạo giải đấu'),
@@ -122,7 +122,7 @@ class ClubTournamentsWidget extends StatelessWidget {
       itemBuilder: (context, index) {
         final tournament = tournaments[index];
         return Container(
-          margin: EdgeInsets.only(bottom: 2),
+          margin: EdgeInsets.only(bottom: 2.h),
           decoration: BoxDecoration(
             color: AppTheme.lightTheme.colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
@@ -134,7 +134,7 @@ class ClubTournamentsWidget extends StatelessWidget {
             onTap: () => onTournamentTap(tournament),
             borderRadius: BorderRadius.circular(12),
             child: Padding(
-              padding: EdgeInsets.all(12),
+              padding: EdgeInsets.all(4.w),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -142,8 +142,8 @@ class ClubTournamentsWidget extends StatelessWidget {
                     children: [
                       Container(
                         padding: EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 1,
+                          horizontal: 3.w,
+                          vertical: 1.h,
                         ),
                         decoration: BoxDecoration(
                           color: _getStatusColor(tournament["status"]).withOpacity(0.1),
@@ -160,13 +160,13 @@ class ClubTournamentsWidget extends StatelessWidget {
                       Spacer(),
                       Icon(
                         Icons.arrow_forward_ios,
-                        size: 14,
+                        size: 4.w,
                         color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
                       ),
                     ],
                   ),
                   
-                  SizedBox(height: 2),
+                  SizedBox(height: 2.h),
                   
                   Text(
                     tournament["name"] ?? "Unknown Tournament",
@@ -175,16 +175,16 @@ class ClubTournamentsWidget extends StatelessWidget {
                     ),
                   ),
                   
-                  SizedBox(height: 1),
+                  SizedBox(height: 1.h),
                   
                   Row(
                     children: [
                       Icon(
                         Icons.group,
-                        size: 16,
+                        size: 4.w,
                         color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
                       ),
-                      SizedBox(width: 6),
+                      SizedBox(width: 2.w),
                       Text(
                         '${tournament["participants"] ?? 0}/${tournament["maxParticipants"] ?? 0} người tham gia',
                         style: AppTheme.lightTheme.textTheme.bodySmall,
@@ -192,16 +192,16 @@ class ClubTournamentsWidget extends StatelessWidget {
                     ],
                   ),
                   
-                  SizedBox(height: 0.5),
+                  SizedBox(height: 0.5.h),
                   
                   Row(
                     children: [
                       Icon(
                         Icons.calendar_today,
-                        size: 16,
+                        size: 4.w,
                         color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
                       ),
-                      SizedBox(width: 6),
+                      SizedBox(width: 2.w),
                       Text(
                         _formatDate(tournament["startDate"]),
                         style: AppTheme.lightTheme.textTheme.bodySmall,
@@ -210,15 +210,15 @@ class ClubTournamentsWidget extends StatelessWidget {
                   ),
                   
                   if (tournament["prizePool"] != null) ...[
-                    SizedBox(height: 0.5),
+                    SizedBox(height: 0.5.h),
                     Row(
                       children: [
                         Icon(
                           Icons.emoji_events,
-                          size: 16,
+                          size: 4.w,
                           color: AppTheme.lightTheme.colorScheme.primary,
                         ),
-                        SizedBox(width: 6),
+                        SizedBox(width: 2.w),
                         Text(
                           'Giải thưởng: ${_formatPrize(tournament["prizePool"])}',
                           style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(

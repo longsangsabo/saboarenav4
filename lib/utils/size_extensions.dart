@@ -4,4 +4,6 @@ extension NumSizeExtensions on num {
   double get w => toDouble();
   double get h => toDouble();
   double get v => toDouble();
+  double get fSize => toDouble();
+  double get adaptSize => toDouble();
 }

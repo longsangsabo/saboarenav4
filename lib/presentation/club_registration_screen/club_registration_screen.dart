@@ -24,7 +24,6 @@ class _ClubRegistrationScreenState extends State<ClubRegistrationScreen> {
   // State variables
   bool _isLoading = false;
   String? _selectedCity;
-  // ignore: unused_field
   String? _selectedDistrict;
   final List<String> _selectedAmenities = [];
   final Map<String, String> _operatingHours = {

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-
+import 'package:sizer/sizer.dart';
 
 import '../../../models/user_profile.dart';
 import '../../../services/user_service.dart';
 import '../../../theme/app_theme.dart';
 import '../../../widgets/custom_icon_widget.dart';
-import '../../../core/app_export.dart';
 
 class StatisticsCardsWidget extends StatefulWidget {
   final String userId;
@@ -93,7 +92,7 @@ class _StatisticsCardsWidgetState extends State<StatisticsCardsWidget> {
               color: AppTheme.lightTheme.colorScheme.onSurface,
             ),
           ),
-          SizedBox(height: 2),
+          SizedBox(height: 2.h),
           Row(
             children: [
               Expanded(
@@ -228,7 +227,7 @@ class _StatisticsCardsWidgetState extends State<StatisticsCardsWidget> {
                   ),
                 ],
               ),
-              SizedBox(height: 1),
+              SizedBox(height: 1.h),
               Text(
                 'Chưa đăng ký',
                 style: AppTheme.lightTheme.textTheme.headlineSmall?.copyWith(
@@ -236,7 +235,7 @@ class _StatisticsCardsWidgetState extends State<StatisticsCardsWidget> {
                   color: Colors.grey.shade600,
                 ),
               ),
-              SizedBox(height: 0.5),
+              SizedBox(height: 0.5.h),
               Text(
                 'Nhấn để đăng ký',
                 style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
@@ -278,7 +277,7 @@ class _StatisticsCardsWidgetState extends State<StatisticsCardsWidget> {
               'Bạn chưa có rank chính thức. Để xem thống kê xếp hạng chính xác và tham gia các trận đấu ranked, hãy đăng ký rank ngay!',
               style: AppTheme.lightTheme.textTheme.bodyMedium,
             ),
-            SizedBox(height: 2),
+            SizedBox(height: 2.h),
             Container(
               padding: EdgeInsets.all(3.w),
               decoration: BoxDecoration(
@@ -328,11 +327,12 @@ class _StatisticsCardsWidgetState extends State<StatisticsCardsWidget> {
   }
 
   void _navigateToRankRegistration() {
-    // TODO: Implement navigation to rank registration screen
+    // Since this is user profile, we need to show club selection first
+    // For now show a placeholder message
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Chức năng đăng ký rank sẽ được triển khai sớm!'),
-        backgroundColor: AppTheme.lightTheme.colorScheme.primary,
+        content: Text('Vui lòng vào trang club cụ thể để đăng ký rank'),
+        backgroundColor: Colors.blue,
       ),
     );
   }
@@ -381,7 +381,7 @@ class _StatisticsCardsWidgetState extends State<StatisticsCardsWidget> {
               ),
             ],
           ),
-          SizedBox(height: 1),
+          SizedBox(height: 1.h),
           Text(
             value,
             style: AppTheme.lightTheme.textTheme.headlineSmall?.copyWith(
@@ -389,7 +389,7 @@ class _StatisticsCardsWidgetState extends State<StatisticsCardsWidget> {
               color: color,
             ),
           ),
-          SizedBox(height: 0.5),
+          SizedBox(height: 0.5.h),
           Text(
             subtitle,
             style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(

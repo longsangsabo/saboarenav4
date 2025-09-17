@@ -7,6 +7,7 @@ import 'member_state_management.dart';
 /// Combines state management, real-time updates, and business logic
 class MemberController extends ChangeNotifier {
   final MemberRealtimeService _realtimeService;
+  final MemberManagementService _apiService;
   
   MemberState _state = const MemberState();
   MemberState get state => _state;
@@ -14,7 +15,7 @@ class MemberController extends ChangeNotifier {
   String? _clubId;
   String? _userId;
 
-  MemberController(this._realtimeService) {
+  MemberController(this._realtimeService, this._apiService) {
     _initializeController();
   }
 
@@ -26,8 +27,8 @@ class MemberController extends ChangeNotifier {
     _realtimeService.activitiesStream.listen(_handleActivitiesUpdate);
     _realtimeService.chatMessagesStream.listen(_handleChatMessagesUpdate);
 
-    // Connection status
-    _realtimeService.connectionStream.listen(_handleConnectionStatusUpdate);
+    // Listen to connection status
+    _realtimeService.connectionStatusStream.listen(_handleConnectionStatusUpdate);
   }
 
   /// Initialize controller with club and user context
@@ -41,11 +42,8 @@ class MemberController extends ChangeNotifier {
 
       dispatch(const SetLoadingAction(true));
 
-      // Initialize real-time service (club + user streams)
-      try {
-        await _realtimeService.initializeForClub(clubId);
-        await _realtimeService.initializeForUser(userId);
-      } catch (_) {}
+      // Initialize real-time service
+      await _realtimeService.initialize(clubId: clubId, userId: userId);
 
       // Load initial data in parallel
       await Future.wait([
@@ -90,7 +88,7 @@ class MemberController extends ChangeNotifier {
     try {
       if (refresh) dispatch(const SetLoadingAction(true));
 
-  final members = await MemberManagementService.getClubMembers(clubId: _clubId!);
+      final members = await _apiService.getClubMembers(_clubId!);
       dispatch(SetMembersAction(members));
 
       if (refresh) dispatch(const SetLoadingAction(false));
@@ -110,24 +108,27 @@ class MemberController extends ChangeNotifier {
     try {
       dispatch(const SetLoadingAction(true));
 
-      final member = await MemberManagementService.addClubMember(
+      final member = await _apiService.addClubMember(
         clubId: _clubId!,
         userId: userId,
         membershipType: membershipType,
+        additionalData: additionalData,
       );
 
-      dispatch(AddMemberAction(member));
-      
-      // Create activity log
-      await _logActivity(
-        action: 'member_added',
-        description: 'New member added to club',
-        metadata: {'member_id': member['id'], 'membership_type': membershipType},
-      );
+      if (member != null) {
+        dispatch(AddMemberAction(member));
+        
+        // Create activity log
+        await _logActivity(
+          action: 'member_added',
+          description: 'New member added to club',
+          metadata: {'member_id': member['id'], 'membership_type': membershipType},
+        );
 
-      dispatch(const SetLoadingAction(false));
-      return true;
-        } catch (e) {
+        dispatch(const SetLoadingAction(false));
+        return true;
+      }
+    } catch (e) {
       dispatch(SetErrorAction('Failed to add member: ${e.toString()}'));
     }
 
@@ -143,16 +144,9 @@ class MemberController extends ChangeNotifier {
     try {
       dispatch(const SetLoadingAction(true));
 
-      final updated = await MemberManagementService.updateClubMember(
-        membershipId: memberId,
-        membershipType: updates['membership_type'],
-        status: updates['status'],
-        autoRenewal: updates['auto_renewal'],
-        permissions: updates['permissions'],
-        adminNotes: updates['admin_notes'],
-      );
+      final success = await _apiService.updateClubMember(memberId, updates);
       
-      if (updated.isNotEmpty) {
+      if (success) {
         dispatch(UpdateMemberAction(memberId, updates));
         
         // Create activity log
@@ -178,9 +172,9 @@ class MemberController extends ChangeNotifier {
     try {
       dispatch(const SetLoadingAction(true));
 
-      await MemberManagementService.removeClubMember(memberId);
+      final success = await _apiService.removeClubMember(memberId, reason: reason);
       
-      {
+      if (success) {
         dispatch(RemoveMemberAction(memberId));
         
         // Create activity log
@@ -209,8 +203,9 @@ class MemberController extends ChangeNotifier {
     try {
       dispatch(const SetLoadingAction(true));
 
-      // Not supported by API; emulate success by updating locally
-      if (memberIds.isNotEmpty) {
+      final results = await _apiService.bulkUpdateMembers(memberIds, updates);
+      
+      if (results.isNotEmpty) {
         dispatch(BulkUpdateMembersAction(memberIds, updates));
         
         // Create activity log
@@ -242,7 +237,7 @@ class MemberController extends ChangeNotifier {
     try {
       if (refresh) dispatch(const SetLoadingAction(true));
 
-  final requests = await MemberManagementService.getMembershipRequests(clubId: _clubId!);
+      final requests = await _apiService.getMembershipRequests(_clubId!);
       dispatch(SetRequestsAction(requests));
 
       if (refresh) dispatch(const SetLoadingAction(false));
@@ -263,20 +258,29 @@ class MemberController extends ChangeNotifier {
     try {
       dispatch(const SetLoadingAction(true));
 
-      final request = await MemberManagementService.createMembershipRequest(
+      final request = await _apiService.createMembershipRequest(
         clubId: _clubId!,
-        userId: requestedBy,
+        requestedBy: requestedBy,
+        membershipType: membershipType,
         message: message,
+        additionalData: additionalData,
       );
 
-      dispatch(AddRequestAction(request));
-      
-      // Send notification to club admins
-      // Notification APIs not implemented here; skipping
+      if (request != null) {
+        dispatch(AddRequestAction(request));
+        
+        // Send notification to club admins
+        await _sendNotification(
+          type: 'membership_request',
+          title: 'New Membership Request',
+          message: 'A new membership request has been submitted',
+          metadata: {'request_id': request['id']},
+        );
 
-      dispatch(const SetLoadingAction(false));
-      return true;
-        } catch (e) {
+        dispatch(const SetLoadingAction(false));
+        return true;
+      }
+    } catch (e) {
       dispatch(SetErrorAction('Failed to create request: ${e.toString()}'));
     }
 
@@ -294,12 +298,14 @@ class MemberController extends ChangeNotifier {
     try {
       dispatch(const SetLoadingAction(true));
 
-      final updated = await MemberManagementService.approveMembershipRequest(
-        requestId: requestId,
+      final success = await _apiService.updateMembershipRequestStatus(
+        requestId,
+        'approved',
         processedBy: _userId!,
+        notes: notes,
       );
 
-      if (updated.isNotEmpty) {
+      if (success) {
         dispatch(ApproveRequestAction(requestId, _userId!));
         
         // Create activity log
@@ -331,13 +337,14 @@ class MemberController extends ChangeNotifier {
     try {
       dispatch(const SetLoadingAction(true));
 
-      final updated = await MemberManagementService.rejectMembershipRequest(
-        requestId: requestId,
+      final success = await _apiService.updateMembershipRequestStatus(
+        requestId,
+        'rejected',
         processedBy: _userId!,
-        rejectReason: reason,
+        notes: notes,
       );
 
-      if (updated.isNotEmpty) {
+      if (success) {
         dispatch(RejectRequestAction(requestId, _userId!, reason));
         
         // Create activity log
@@ -369,8 +376,7 @@ class MemberController extends ChangeNotifier {
     try {
       if (refresh) dispatch(const SetLoadingAction(true));
 
-  // Notification fetch not implemented in service in this code; skip
-  final notifications = <Map<String, dynamic>>[];
+      final notifications = await _apiService.getUserNotifications(_userId!);
       dispatch(SetNotificationsAction(notifications));
 
       if (refresh) dispatch(const SetLoadingAction(false));
@@ -382,8 +388,9 @@ class MemberController extends ChangeNotifier {
   /// Mark notification as read
   Future<bool> markNotificationRead(String notificationId) async {
     try {
-      await MemberManagementService.markNotificationAsRead(notificationId);
-      {
+      final success = await _apiService.markNotificationRead(notificationId);
+      
+      if (success) {
         dispatch(MarkNotificationReadAction(notificationId));
         return true;
       }
@@ -401,9 +408,12 @@ class MemberController extends ChangeNotifier {
     if (_userId == null) return false;
 
     try {
-      // Not implemented; mark local state as read
-      dispatch(const MarkAllNotificationsReadAction());
-      return true;
+      final success = await _apiService.markAllNotificationsRead(_userId!);
+      
+      if (success) {
+        dispatch(const MarkAllNotificationsReadAction());
+        return true;
+      }
     } catch (e) {
       if (kDebugMode) {
         print('❌ Failed to mark all notifications read: $e');
@@ -414,7 +424,30 @@ class MemberController extends ChangeNotifier {
   }
 
   /// Send notification to users
-  // Removed: use MemberManagementService.createNotification(userId: ..., title: ..., content: ..., type: ..., actionData: ...) when needed.
+  Future<void> _sendNotification({
+    required String type,
+    required String title,
+    required String message,
+    Map<String, dynamic>? metadata,
+    List<String>? recipientIds,
+  }) async {
+    if (_clubId == null) return;
+
+    try {
+      await _apiService.createNotification(
+        clubId: _clubId!,
+        type: type,
+        title: title,
+        message: message,
+        metadata: metadata,
+        recipientIds: recipientIds,
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Failed to send notification: $e');
+      }
+    }
+  }
 
   // =============================================================================
   // ACTIVITIES
@@ -422,15 +455,12 @@ class MemberController extends ChangeNotifier {
 
   /// Load activities for current club
   Future<void> loadActivities({bool refresh = false}) async {
-    if (_clubId == null || _userId == null) return;
+    if (_clubId == null) return;
 
     try {
       if (refresh) dispatch(const SetLoadingAction(true));
 
-      final activities = await MemberManagementService.getMemberActivities(
-        userId: _userId!,
-        clubId: _clubId!,
-      );
+      final activities = await _apiService.getMemberActivities(_clubId!);
       dispatch(SetActivitiesAction(activities));
 
       if (refresh) dispatch(const SetLoadingAction(false));
@@ -448,14 +478,12 @@ class MemberController extends ChangeNotifier {
     if (_clubId == null || _userId == null) return;
 
     try {
-      await MemberManagementService.logMemberActivity(
-        userId: _userId!,
+      await _apiService.createMemberActivity(
         clubId: _clubId!,
-        activityType: action,
-        title: description,
+        userId: _userId!,
+        action: action,
         description: description,
-        relatedData: metadata,
-        points: 0,
+        metadata: metadata,
       );
     } catch (e) {
       if (kDebugMode) {
@@ -475,7 +503,7 @@ class MemberController extends ChangeNotifier {
     try {
       if (refresh) dispatch(const SetLoadingAction(true));
 
-      final analytics = await MemberManagementService.getClubAnalytics(_clubId!);
+      final analytics = await _apiService.getMemberAnalytics(_clubId!);
       dispatch(SetAnalyticsAction(analytics));
 
       if (refresh) dispatch(const SetLoadingAction(false));

@@ -191,7 +191,7 @@ class CustomTabBar extends StatelessWidget {
         overlayColor: WidgetStateProperty.all(
           colorScheme.primary.withValues(alpha: 0.1),
         ),
-  splashFactory: InkRipple.splashFactory,
+        splashFactory: InkRipple.splashFactory,
         onTap: onTabSelected,
         tabAlignment: isScrollable ? TabAlignment.start : TabAlignment.fill,
       ),

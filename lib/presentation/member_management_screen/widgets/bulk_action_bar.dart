@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-// import '../../../core/app_export.dart';
+import '../../../core/app_export.dart';
 
 class BulkActionBar extends StatelessWidget {
   final int selectedCount;
@@ -7,11 +7,11 @@ class BulkActionBar extends StatelessWidget {
   final VoidCallback onClear;
 
   const BulkActionBar({
-    super.key,
+    Key? key,
     required this.selectedCount,
     required this.onAction,
     required this.onClear,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

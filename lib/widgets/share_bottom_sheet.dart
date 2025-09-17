@@ -9,12 +9,12 @@ class ShareBottomSheet extends StatelessWidget {
   final String? postImageUrl;
 
   const ShareBottomSheet({
-    super.key,
+    Key? key,
     required this.postId,
     required this.postTitle,
     this.postContent,
     this.postImageUrl,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
 import '../../routes/app_routes.dart';
@@ -99,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SizedBox(height: 8),
+              SizedBox(height: 8.h),
 
               // Logo and title
               Center(
@@ -118,7 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: Colors.white,
                       ),
                     ),
-                    SizedBox(height: 3),
+                    SizedBox(height: 3.h),
                     Text(
                       'SABO Arena',
                       style: theme.textTheme.headlineMedium?.copyWith(
@@ -126,7 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: theme.primaryColor,
                       ),
                     ),
-                    SizedBox(height: 1),
+                    SizedBox(height: 1.h),
                     Text(
                       'Chào mừng trở lại!',
                       style: theme.textTheme.bodyLarge?.copyWith(
@@ -137,7 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
 
-              SizedBox(height: 6),
+              SizedBox(height: 6.h),
 
               // Login form
               Form(
@@ -167,7 +167,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                     ),
 
-                    SizedBox(height: 3),
+                    SizedBox(height: 3.h),
 
                     // Password field
                     TextFormField(
@@ -199,7 +199,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                     ),
 
-                    SizedBox(height: 2),
+                    SizedBox(height: 2.h),
 
                     // Remember login checkbox
                     Row(
@@ -218,7 +218,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             'Ghi nhớ đăng nhập',
                             style: TextStyle(
                               color: Colors.grey[700],
-                              fontSize: 14,
+                              fontSize: 14.sp,
                             ),
                           ),
                         ),
@@ -231,12 +231,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
 
-                    SizedBox(height: 4),
+                    SizedBox(height: 4.h),
 
                     // Login button
                     SizedBox(
                       width: double.infinity,
-                      height: 6,
+                      height: 6.h,
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _signIn,
                         style: ElevatedButton.styleFrom(
@@ -252,14 +252,14 @@ class _LoginScreenState extends State<LoginScreen> {
                             : Text(
                                 'Đăng nhập',
                                 style: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 16.sp,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
                       ),
                     ),
 
-                    SizedBox(height: 4),
+                    SizedBox(height: 4.h),
 
                     // Sign up link
                     Row(
@@ -275,7 +275,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
 
-                    SizedBox(height: 6),
+                    SizedBox(height: 6.h),
 
                     // Demo credentials section
                     Container(
@@ -298,12 +298,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.blue[700],
-                                  fontSize: 14,
+                                  fontSize: 14.sp,
                                 ),
                               ),
                             ],
                           ),
-                          SizedBox(height: 2),
+                          SizedBox(height: 2.h),
                           _buildDemoCredential(
                             'Admin',
                             'admin@saboarena.com',
@@ -311,7 +311,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             Icons.admin_panel_settings,
                             Colors.red[700]!,
                           ),
-                          SizedBox(height: 1),
+                          SizedBox(height: 1.h),
                           _buildDemoCredential(
                             'Người chơi 1',
                             'player1@example.com',
@@ -319,7 +319,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             Icons.person,
                             Colors.green[700]!,
                           ),
-                          SizedBox(height: 1),
+                          SizedBox(height: 1.h),
                           _buildDemoCredential(
                             'Người chơi 2',
                             'player2@example.com',
@@ -327,7 +327,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             Icons.person_outline,
                             Colors.blue[700]!,
                           ),
-                          SizedBox(height: 1),
+                          SizedBox(height: 1.h),
                           _buildDemoCredential(
                             'Chủ câu lạc bộ',
                             'owner@club.com',
@@ -358,7 +358,7 @@ class _LoginScreenState extends State<LoginScreen> {
       },
       borderRadius: BorderRadius.circular(1.w),
       child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 1, horizontal: 2.w),
+        padding: EdgeInsets.symmetric(vertical: 1.h, horizontal: 2.w),
         child: Row(
           children: [
             Icon(icon, color: color, size: 4.w),
@@ -372,13 +372,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       color: color,
-                      fontSize: 12,
+                      fontSize: 12.sp,
                     ),
                   ),
                   Text(
                     '$email / $password',
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: 11.sp,
                       color: Colors.grey[600],
                     ),
                   ),

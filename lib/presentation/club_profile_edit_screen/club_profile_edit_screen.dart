@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-
+import 'package:sabo_arena/core/app_export.dart';
+import 'package:sabo_arena/widgets/custom_app_bar.dart';
+import 'widgets/operating_hours_editor_simple.dart';
+import 'widgets/location_picker_simple.dart';
 import 'widgets/image_upload_section_simple.dart';
 
 class ClubProfileEditScreen extends StatefulWidget {
@@ -39,7 +41,7 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
   bool _hasUnsavedChanges = false;
   String _coverImageUrl = '';
   String _logoImageUrl = '';
-  // Map<String, String> _operatingHours = {};  // Temporarily disabled
+  Map<String, String> _operatingHours = {};
   Map<String, double> _location = {'lat': 0.0, 'lng': 0.0};
   List<String> _selectedFacilities = [];
   List<String> _tableTypes = [];
@@ -84,15 +86,15 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
     _coverImageUrl = 'https://images.unsplash.com/photo-1574631806042-182f10c4a017?w=800&h=400&fit=crop';
     _logoImageUrl = 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=200&fit=crop';
     
-    // _operatingHours = {
-    //   'monday': '08:00-24:00',
-    //   'tuesday': '08:00-24:00',
-    //   'wednesday': '08:00-24:00',
-    //   'thursday': '08:00-24:00',
-    //   'friday': '08:00-24:00',
-    //   'saturday': '08:00-24:00',
-    //   'sunday': '08:00-24:00',
-    // };
+    _operatingHours = {
+      'monday': '08:00-24:00',
+      'tuesday': '08:00-24:00',
+      'wednesday': '08:00-24:00',
+      'thursday': '08:00-24:00',
+      'friday': '08:00-24:00',
+      'saturday': '08:00-24:00',
+      'sunday': '08:00-24:00',
+    };
     
     _location = {'lat': 10.7769, 'lng': 106.7009};
     _selectedFacilities = ['Bàn 8 bi', 'Bàn 9 bi', 'Cafeteria', 'WiFi miễn phí'];
@@ -128,7 +130,7 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
-        backgroundColor: Colors.grey[50]!,
+        backgroundColor: appTheme.gray50,
         appBar: _buildAppBar(),
         body: AnimatedBuilder(
           animation: _fadeAnimation,
@@ -168,14 +170,14 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
       title: Text(
         "Chỉnh sửa hồ sơ",
         style: TextStyle(
-          fontSize: 18,
+          fontSize: 18.fSize,
           fontWeight: FontWeight.bold,
-          color: Colors.grey[900]!,
+          color: appTheme.gray900,
         ),
       ),
       centerTitle: true,
       leading: IconButton(
-        icon: Icon(Icons.close, color: Colors.grey[700]!),
+        icon: Icon(Icons.close, color: appTheme.gray700),
         onPressed: _onClosePressed,
       ),
       actions: [
@@ -185,8 +187,8 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
             child: Text(
               "Lưu",
               style: TextStyle(
-                color: Colors.blue[600]!,
-                fontSize: 16,
+                color: appTheme.blue600,
+                fontSize: 16.fSize,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -196,7 +198,7 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
         preferredSize: Size.fromHeight(1),
         child: Container(
           height: 1,
-          color: Colors.grey[200]!,
+          color: appTheme.gray200,
         ),
       ),
     );
@@ -207,11 +209,11 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
       color: Colors.white,
       child: TabBar(
         controller: _tabController,
-        indicatorColor: Colors.blue[600]!,
-        labelColor: Colors.blue[600]!,
-        unselectedLabelColor: Colors.grey[600]!,
+        indicatorColor: appTheme.blue600,
+        labelColor: appTheme.blue600,
+        unselectedLabelColor: appTheme.gray600,
         labelStyle: TextStyle(
-          fontSize: 14,
+          fontSize: 14.fSize,
           fontWeight: FontWeight.w600,
         ),
         tabs: [
@@ -227,7 +229,7 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
   Widget _buildBasicInfoTab() {
     return SingleChildScrollView(
       controller: _scrollController,
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.h),
       child: Form(
         key: _formKey,
         child: Column(
@@ -251,11 +253,11 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
               },
             ),
             
-            SizedBox(height: 24),
+            SizedBox(height: 24.v),
             
             // Basic Information
             _buildSectionTitle("Thông tin cơ bản"),
-            SizedBox(height: 16),
+            SizedBox(height: 16.v),
             
             _buildTextField(
               controller: _nameController,
@@ -271,7 +273,7 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
               },
             ),
             
-            SizedBox(height: 16),
+            SizedBox(height: 16.v),
             
             _buildTextField(
               controller: _usernameController,
@@ -291,7 +293,7 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
               },
             ),
             
-            SizedBox(height: 16),
+            SizedBox(height: 16.v),
             
             _buildTextField(
               controller: _descriptionController,
@@ -302,14 +304,14 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
               maxLength: 500,
             ),
             
-            SizedBox(height: 24),
+            SizedBox(height: 24.v),
             
             // Facilities Section
             _buildSectionTitle("Tiện ích"),
-            SizedBox(height: 16),
+            SizedBox(height: 16.v),
             _buildFacilitiesSelector(),
             
-            SizedBox(height: 100), // Space for floating button
+            SizedBox(height: 100.v), // Space for floating button
           ],
         ),
       ),
@@ -318,12 +320,12 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
 
   Widget _buildContactTab() {
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSectionTitle("Thông tin liên hệ"),
-          SizedBox(height: 16),
+          SizedBox(height: 16.v),
           
           _buildTextField(
             controller: _phoneController,
@@ -341,7 +343,7 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
             },
           ),
           
-          SizedBox(height: 16),
+          SizedBox(height: 16.v),
           
           _buildTextField(
             controller: _emailController,
@@ -359,7 +361,7 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
             },
           ),
           
-          SizedBox(height: 16),
+          SizedBox(height: 16.v),
           
           _buildTextField(
             controller: _websiteController,
@@ -369,10 +371,10 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
             keyboardType: TextInputType.url,
           ),
           
-          SizedBox(height: 24),
+          SizedBox(height: 24.v),
           
           _buildSectionTitle("Địa chỉ"),
-          SizedBox(height: 16),
+          SizedBox(height: 16.v),
           
           _buildTextField(
             controller: _addressController,
@@ -382,63 +384,20 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
             maxLines: 2,
           ),
           
-          SizedBox(height: 16),
+          SizedBox(height: 16.v),
           
           // Location Picker
-          // LocationPicker - Simplified to basic location display
-          Container(
-            padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.grey[50],
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey[300]!),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.location_on, color: Colors.blue[600]),
-                    SizedBox(width: 8),
-                    Text(
-                      "Vị trí club",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[800],
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 12),
-                Text(
-                  "Lat: ${_location['lat']?.toStringAsFixed(4)}, Lng: ${_location['lng']?.toStringAsFixed(4)}",
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                ),
-                SizedBox(height: 8),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    // Simplified: just show current location
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Location picker feature coming soon!")),
-                    );
-                  },
-                  icon: Icon(Icons.edit_location, size: 18),
-                  label: Text("Chỉnh sửa vị trí"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue[600],
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  ),
-                ),
-              ],
-            ),
+          LocationPicker(
+            initialLocation: _location,
+            onLocationChanged: (location) {
+              setState(() {
+                _location = location;
+                _hasUnsavedChanges = true;
+              });
+            },
           ),
           
-          SizedBox(height: 100),
+          SizedBox(height: 100.v),
         ],
       ),
     );
@@ -446,31 +405,27 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
 
   Widget _buildBusinessTab() {
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSectionTitle("Giờ hoạt động"),
-          SizedBox(height: 16),
+          SizedBox(height: 16.v),
           
-          // OperatingHoursEditor(
-          //   initialHours: _operatingHours,
-          //   onHoursChanged: (hours) {
-          //     setState(() {
-          //       _operatingHours = hours;
-          //       _hasUnsavedChanges = true;
-          //     });
-          //   },
-          // ),
-          Container(
-            padding: EdgeInsets.all(16),
-            child: Text("Operating Hours Editor - Temporarily Disabled"),
+          OperatingHoursEditor(
+            initialHours: _operatingHours,
+            onHoursChanged: (hours) {
+              setState(() {
+                _operatingHours = hours;
+                _hasUnsavedChanges = true;
+              });
+            },
           ),
           
-          SizedBox(height: 24),
+          SizedBox(height: 24.v),
           
           _buildSectionTitle("Thông tin bàn chơi"),
-          SizedBox(height: 16),
+          SizedBox(height: 16.v),
           
           Row(
             children: [
@@ -484,7 +439,7 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 ),
               ),
-              SizedBox(width: 16),
+              SizedBox(width: 16.h),
               Expanded(
                 child: _buildTextField(
                   controller: _maxPriceController,
@@ -498,11 +453,11 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
             ],
           ),
           
-          SizedBox(height: 16),
+          SizedBox(height: 16.v),
           
           _buildTableTypesSelector(),
           
-          SizedBox(height: 16),
+          SizedBox(height: 16.v),
           
           _buildNumberSelector(
             title: "Tổng số bàn",
@@ -515,7 +470,7 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
             },
           ),
           
-          SizedBox(height: 100),
+          SizedBox(height: 100.v),
         ],
       ),
     );
@@ -523,12 +478,12 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
 
   Widget _buildMediaTab() {
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSectionTitle("Mạng xã hội"),
-          SizedBox(height: 16),
+          SizedBox(height: 16.v),
           
           _buildTextField(
             controller: _facebookController,
@@ -538,7 +493,7 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
             prefix: "facebook.com/",
           ),
           
-          SizedBox(height: 16),
+          SizedBox(height: 16.v),
           
           _buildTextField(
             controller: _instagramController,
@@ -548,7 +503,7 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
             prefix: "@",
           ),
           
-          SizedBox(height: 16),
+          SizedBox(height: 16.v),
           
           _buildTextField(
             controller: _tiktokController,
@@ -558,14 +513,14 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
             prefix: "@",
           ),
           
-          SizedBox(height: 24),
+          SizedBox(height: 24.v),
           
           _buildSectionTitle("Thư viện ảnh"),
-          SizedBox(height: 16),
+          SizedBox(height: 16.v),
           
           _buildGalleryManager(),
           
-          SizedBox(height: 100),
+          SizedBox(height: 100.v),
         ],
       ),
     );
@@ -575,9 +530,9 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
     return Text(
       title,
       style: TextStyle(
-        fontSize: 18,
+        fontSize: 18.fSize,
         fontWeight: FontWeight.bold,
-        color: Colors.grey[900]!,
+        color: appTheme.gray900,
       ),
     );
   }
@@ -598,11 +553,11 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
+        borderRadius: BorderRadius.circular(12.h),
+        border: Border.all(color: appTheme.gray200),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey[900] ?? Colors.black.withOpacity(0.04),
+            color: appTheme.black900.withOpacity(0.04),
             blurRadius: 8,
             offset: Offset(0, 2),
           ),
@@ -623,17 +578,17 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
         decoration: InputDecoration(
           labelText: required ? "$label *" : label,
           hintText: hint,
-          prefixIcon: Icon(icon, color: Colors.grey[600]!),
+          prefixIcon: Icon(icon, color: appTheme.gray600),
           prefixText: prefix,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.h),
             borderSide: BorderSide.none,
           ),
           filled: true,
           fillColor: Colors.transparent,
-          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          labelStyle: TextStyle(color: Colors.grey[600]!),
-          hintStyle: TextStyle(color: Colors.grey[400] ?? Colors.grey),
+          contentPadding: EdgeInsets.symmetric(horizontal: 16.h, vertical: 16.v),
+          labelStyle: TextStyle(color: appTheme.gray600),
+          hintStyle: TextStyle(color: appTheme.gray400),
         ),
       ),
     );
@@ -647,11 +602,11 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
     ];
 
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.h),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
+        borderRadius: BorderRadius.circular(12.h),
+        border: Border.all(color: appTheme.gray200),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -659,15 +614,15 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
           Text(
             "Chọn tiện ích có sẵn",
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 14.fSize,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[700]!,
+              color: appTheme.gray700,
             ),
           ),
-          SizedBox(height: 12),
+          SizedBox(height: 12.v),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: 8.h,
+            runSpacing: 8.v,
             children: allFacilities.map((facility) {
               final isSelected = _selectedFacilities.contains(facility);
               return FilterChip(
@@ -684,14 +639,14 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
                   });
                 },
                 backgroundColor: Colors.white,
-                selectedColor: Colors.blue[50],
-                checkmarkColor: Colors.blue[600]!,
+                selectedColor: appTheme.blue50,
+                checkmarkColor: appTheme.blue600,
                 labelStyle: TextStyle(
-                  color: isSelected ? Colors.blue[600]! : Colors.grey[700]!,
+                  color: isSelected ? appTheme.blue600 : appTheme.gray700,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 ),
                 side: BorderSide(
-                  color: isSelected ? Colors.blue[600]! : Colors.grey[300] ?? Colors.grey,
+                  color: isSelected ? appTheme.blue600 : appTheme.gray300,
                 ),
               );
             }).toList(),
@@ -705,11 +660,11 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
     final allTypes = ["Pool", "Carom", "Snooker", "3-Cushion", "English"];
 
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.h),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
+        borderRadius: BorderRadius.circular(12.h),
+        border: Border.all(color: appTheme.gray200),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -717,15 +672,15 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
           Text(
             "Loại bàn bi-a",
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 14.fSize,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[700]!,
+              color: appTheme.gray700,
             ),
           ),
-          SizedBox(height: 12),
+          SizedBox(height: 12.v),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: 8.h,
+            runSpacing: 8.v,
             children: allTypes.map((type) {
               final isSelected = _tableTypes.contains(type);
               return FilterChip(
@@ -742,14 +697,14 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
                   });
                 },
                 backgroundColor: Colors.white,
-                selectedColor: Colors.green[50] ?? Colors.green,
-                checkmarkColor: Colors.green[600] ?? Colors.green,
+                selectedColor: appTheme.green50,
+                checkmarkColor: appTheme.green600,
                 labelStyle: TextStyle(
-                  color: isSelected ? Colors.green[600] ?? Colors.green : Colors.grey[700]!,
+                  color: isSelected ? appTheme.green600 : appTheme.gray700,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 ),
                 side: BorderSide(
-                  color: isSelected ? Colors.green[600] ?? Colors.green : Colors.grey[300] ?? Colors.grey,
+                  color: isSelected ? appTheme.green600 : appTheme.gray300,
                 ),
               );
             }).toList(),
@@ -767,11 +722,11 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
     int max = 100,
   }) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.h),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
+        borderRadius: BorderRadius.circular(12.h),
+        border: Border.all(color: appTheme.gray200),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -779,9 +734,9 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
           Text(
             title,
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 16.fSize,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[700]!,
+              color: appTheme.gray700,
             ),
           ),
           Row(
@@ -789,27 +744,27 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
               IconButton(
                 onPressed: value > min ? () => onChanged(value - 1) : null,
                 icon: Icon(Icons.remove_circle_outline),
-                color: value > min ? Colors.blue[600]! : Colors.grey[400] ?? Colors.grey,
+                color: value > min ? appTheme.blue600 : appTheme.gray400,
               ),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: EdgeInsets.symmetric(horizontal: 16.h, vertical: 8.v),
                 decoration: BoxDecoration(
-                  color: Colors.blue[50],
-                  borderRadius: BorderRadius.circular(8),
+                  color: appTheme.blue50,
+                  borderRadius: BorderRadius.circular(8.h),
                 ),
                 child: Text(
                   value.toString(),
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 18.fSize,
                     fontWeight: FontWeight.bold,
-                    color: Colors.blue[600]!,
+                    color: appTheme.blue600,
                   ),
                 ),
               ),
               IconButton(
                 onPressed: value < max ? () => onChanged(value + 1) : null,
                 icon: Icon(Icons.add_circle_outline),
-                color: value < max ? Colors.blue[600]! : Colors.grey[400] ?? Colors.grey,
+                color: value < max ? appTheme.blue600 : appTheme.gray400,
               ),
             ],
           ),
@@ -820,11 +775,11 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
 
   Widget _buildGalleryManager() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.h),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
+        borderRadius: BorderRadius.circular(12.h),
+        border: Border.all(color: appTheme.gray200),
       ),
       child: Column(
         children: [
@@ -834,67 +789,67 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
               Text(
                 "Ảnh hiện tại",
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 14.fSize,
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey[700]!,
+                  color: appTheme.gray700,
                 ),
               ),
               TextButton.icon(
                 onPressed: _onAddPhotos,
-                icon: Icon(Icons.add_photo_alternate_outlined, size: 20),
+                icon: Icon(Icons.add_photo_alternate_outlined, size: 20.adaptSize),
                 label: Text("Thêm ảnh"),
                 style: TextButton.styleFrom(
-                  foregroundColor: Colors.blue[600]!,
+                  foregroundColor: appTheme.blue600,
                   textStyle: TextStyle(fontWeight: FontWeight.w600),
                 ),
               ),
             ],
           ),
-          SizedBox(height: 12),
+          SizedBox(height: 12.v),
           GridView.builder(
             shrinkWrap: true,
             physics: NeverScrollableScrollPhysics(),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
+              crossAxisSpacing: 8.h,
+              mainAxisSpacing: 8.v,
             ),
             itemCount: 6, // Mock data
             itemBuilder: (context, index) {
               return Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  color: Colors.grey[100] ?? Colors.grey,
+                  borderRadius: BorderRadius.circular(8.h),
+                  color: appTheme.gray100,
                 ),
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(8.h),
                       child: Image.network(
                         'https://images.unsplash.com/photo-${1571019613454 + index}?w=200&h=200&fit=crop',
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => Container(
-                          color: Colors.grey[200]!,
-                          child: Icon(Icons.image, color: Colors.grey[600]!),
+                          color: appTheme.gray200,
+                          child: Icon(Icons.image, color: appTheme.gray600),
                         ),
                       ),
                     ),
                     Positioned(
-                      top: 4,
-                      right: 4,
+                      top: 4.v,
+                      right: 4.h,
                       child: GestureDetector(
                         onTap: () => _onRemovePhoto(index),
                         child: Container(
-                          padding: EdgeInsets.all(4),
+                          padding: EdgeInsets.all(4.h),
                           decoration: BoxDecoration(
                             color: Colors.black.withOpacity(0.7),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(12.h),
                           ),
                           child: Icon(
                             Icons.close,
                             color: Colors.white,
-                            size: 16,
+                            size: 16.adaptSize,
                           ),
                         ),
                       ),
@@ -911,10 +866,10 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
 
   Widget _buildBottomActions() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.h),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(top: BorderSide(color: Colors.grey[200]!)),
+        border: Border(top: BorderSide(color: appTheme.gray200)),
       ),
       child: Row(
         children: [
@@ -922,30 +877,30 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
             child: OutlinedButton(
               onPressed: _onPreviewPressed,
               style: OutlinedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 12),
-                side: BorderSide(color: Colors.blue[600]!),
+                padding: EdgeInsets.symmetric(vertical: 12.v),
+                side: BorderSide(color: appTheme.blue600),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(8.h),
                 ),
               ),
               child: Text(
                 "Xem trước",
                 style: TextStyle(
-                  color: Colors.blue[600]!,
+                  color: appTheme.blue600,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ),
           ),
-          SizedBox(width: 12),
+          SizedBox(width: 12.h),
           Expanded(
             child: ElevatedButton(
               onPressed: _isLoading ? null : _onResetPressed,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey[600]!,
-                padding: EdgeInsets.symmetric(vertical: 12),
+                backgroundColor: appTheme.gray600,
+                padding: EdgeInsets.symmetric(vertical: 12.v),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(8.h),
                 ),
               ),
               child: Text(
@@ -965,11 +920,11 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
   Widget _buildSaveButton() {
     return FloatingActionButton.extended(
       onPressed: _isLoading ? null : _onSavePressed,
-      backgroundColor: Colors.green[600] ?? Colors.green,
+      backgroundColor: appTheme.green600,
       label: _isLoading
           ? SizedBox(
-              width: 20,
-              height: 20,
+              width: 20.adaptSize,
+              height: 20.adaptSize,
               child: CircularProgressIndicator(
                 color: Colors.white,
                 strokeWidth: 2,
@@ -1039,7 +994,7 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Đã lưu thành công!"),
-          backgroundColor: Colors.green[600] ?? Colors.green,
+          backgroundColor: appTheme.green600,
         ),
       );
     }

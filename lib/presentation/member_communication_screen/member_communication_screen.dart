@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../core/app_export.dart';
 import '../../widgets/custom_app_bar.dart';
-// import '../../core/app_export.dart';
-// import '../member_management_screen/member_management_screen.dart';
+import '../member_management_screen/member_management_screen.dart';
 
 class MemberCommunicationScreen extends StatefulWidget {
-  const MemberCommunicationScreen({super.key});
+  const MemberCommunicationScreen({Key? key}) : super(key: key);
 
   @override
   _MemberCommunicationScreenState createState() => _MemberCommunicationScreenState();
@@ -1090,25 +1090,6 @@ enum ChatRoomType { general, tournament, private, announcement }
 enum AnnouncementPriority { low, normal, high, urgent }
 enum NotificationType { message, tournament, system, achievement }
 
-// Minimal UI-only models to satisfy references
-enum RankType { beginner, amateur, intermediate, advanced, professional }
-
-class User {
-  final String id;
-  final String displayName;
-  final String email;
-  final String avatar;
-  final RankType rank;
-
-  const User({
-    required this.id,
-    required this.displayName,
-    required this.email,
-    required this.avatar,
-    required this.rank,
-  });
-}
-
 class ChatRoom {
   final String id;
   final String name;
@@ -1203,7 +1184,7 @@ class Notification {
 class ChatRoomScreen extends StatelessWidget {
   final ChatRoom room;
 
-  const ChatRoomScreen({super.key, required this.room});
+  const ChatRoomScreen({Key? key, required this.room}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -1217,7 +1198,7 @@ class ChatRoomScreen extends StatelessWidget {
 class AnnouncementDetailScreen extends StatelessWidget {
   final Announcement announcement;
 
-  const AnnouncementDetailScreen({super.key, required this.announcement});
+  const AnnouncementDetailScreen({Key? key, required this.announcement}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -1229,8 +1210,6 @@ class AnnouncementDetailScreen extends StatelessWidget {
 }
 
 class CreateChatRoomDialog extends StatelessWidget {
-  const CreateChatRoomDialog({super.key});
-
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -1247,8 +1226,6 @@ class CreateChatRoomDialog extends StatelessWidget {
 }
 
 class CreateAnnouncementDialog extends StatelessWidget {
-  const CreateAnnouncementDialog({super.key});
-
   @override
   Widget build(BuildContext context) {
     return AlertDialog(

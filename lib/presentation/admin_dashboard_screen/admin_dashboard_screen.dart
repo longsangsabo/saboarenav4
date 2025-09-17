@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:sizer/sizer.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:sabo_arena/theme/app_theme.dart';
 
 import '../../core/app_export.dart';
 import '../../services/admin_service.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/custom_app_bar.dart';
+import '../../routes/app_routes.dart';
 import './club_approval_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
@@ -321,7 +325,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final clubStats = _stats!['clubs'] as Map<String, dynamic>;
     final userStats = _stats!['users'] as Map<String, dynamic>;
     final tournamentStats = _stats!['tournaments'] as Map<String, dynamic>;
-    // final matchStats = _stats!['matches'] as Map<String, dynamic>;
+    final matchStats = _stats!['matches'] as Map<String, dynamic>;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../core/app_export.dart';
-
+import 'package:sizer/sizer.dart';
 import '../../services/auth_service.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
@@ -72,13 +71,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SizedBox(height: 4),
+                SizedBox(height: 4.h),
                 Icon(
                   Icons.lock_reset,
                   size: 20.w,
                   color: theme.primaryColor,
                 ),
-                SizedBox(height: 3),
+                SizedBox(height: 3.h),
                 Text(
                   'Đặt lại mật khẩu',
                   textAlign: TextAlign.center,
@@ -86,7 +85,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 2),
+                SizedBox(height: 2.h),
                 Text(
                   'Nhập email đã đăng ký của bạn. Chúng tôi sẽ gửi cho bạn một liên kết để đặt lại mật khẩu.',
                   textAlign: TextAlign.center,
@@ -94,7 +93,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     color: Colors.grey[600],
                   ),
                 ),
-                SizedBox(height: 6),
+                SizedBox(height: 6.h),
                 TextFormField(
                   controller: _emailController,
                   decoration: InputDecoration(
@@ -116,10 +115,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     return null;
                   },
                 ),
-                SizedBox(height: 4),
+                SizedBox(height: 4.h),
                 SizedBox(
                   width: double.infinity,
-                  height: 6,
+                  height: 6.h,
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _sendResetLink,
                     style: ElevatedButton.styleFrom(
@@ -134,7 +133,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         : Text(
                             'Gửi liên kết',
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
                             ),
                           ),

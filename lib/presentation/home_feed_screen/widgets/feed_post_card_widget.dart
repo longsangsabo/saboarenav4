@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:sizer/sizer.dart';
 
 import '../../../core/app_export.dart';
 import '../../../widgets/custom_image_widget.dart';
@@ -99,7 +99,7 @@ class _FeedPostCardWidgetState extends State<FeedPostCardWidget>
     final colorScheme = theme.colorScheme;
 
     return Container(
-      margin: EdgeInsets.only(bottom: 1),
+      margin: EdgeInsets.only(bottom: 1.h),
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
@@ -178,7 +178,7 @@ class _FeedPostCardWidgetState extends State<FeedPostCardWidget>
                           widget.post['userRank'].toString().substring(0, 1).toUpperCase(),
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 8,
+                            fontSize: 8.sp,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -198,19 +198,19 @@ class _FeedPostCardWidgetState extends State<FeedPostCardWidget>
                   child: Text(
                     widget.post['userName']?.toString() ?? 'Unknown User',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
                       color: colorScheme.onSurface,
                     ),
                   ),
                 ),
-                SizedBox(height: 0.5),
+                SizedBox(height: 0.5.h),
                 Text(
                   widget.post['timestamp'] != null
                       ? _formatTime(widget.post['timestamp'] as DateTime)
                       : 'Vừa xong',
                   style: TextStyle(
-                    fontSize: 10,
+                    fontSize: 10.sp,
                     color: Colors.grey[600],
                   ),
                 ),
@@ -225,7 +225,7 @@ class _FeedPostCardWidgetState extends State<FeedPostCardWidget>
             icon: Icon(
               Icons.more_horiz,
               color: Colors.grey[600],
-              size: 20,
+              size: 20.sp,
             ),
           ),
         ],
@@ -242,12 +242,12 @@ class _FeedPostCardWidgetState extends State<FeedPostCardWidget>
           Text(
             widget.post['content'].toString(),
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 12.sp,
               color: theme.colorScheme.onSurface,
               height: 1.4,
             ),
           ),
-          SizedBox(height: 2),
+          SizedBox(height: 2.h),
         ],
       ),
     );
@@ -284,7 +284,7 @@ class _FeedPostCardWidgetState extends State<FeedPostCardWidget>
               children: [
                 Icon(
                   Icons.location_on,
-                  size: 14,
+                  size: 14.sp,
                   color: Colors.grey[600],
                 ),
                 SizedBox(width: 1.w),
@@ -292,7 +292,7 @@ class _FeedPostCardWidgetState extends State<FeedPostCardWidget>
                   child: Text(
                     widget.post['location'].toString(),
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 10.sp,
                       color: Colors.grey[600],
                     ),
                   ),
@@ -303,7 +303,7 @@ class _FeedPostCardWidgetState extends State<FeedPostCardWidget>
           // Hashtags
           if ((widget.post['hashtags'] as List?)?.isNotEmpty == true)
             Padding(
-              padding: EdgeInsets.only(top: 1),
+              padding: EdgeInsets.only(top: 1.h),
               child: Wrap(
                 spacing: 2.w,
                 runSpacing: 1.w,
@@ -311,7 +311,7 @@ class _FeedPostCardWidgetState extends State<FeedPostCardWidget>
                   return Text(
                     '#$hashtag',
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 10.sp,
                       color: theme.colorScheme.primary,
                       fontWeight: FontWeight.w500,
                     ),
@@ -342,14 +342,14 @@ class _FeedPostCardWidgetState extends State<FeedPostCardWidget>
                 if (likeCount > 0) ...[
                   Icon(
                     Icons.favorite,
-                    size: 14,
+                    size: 14.sp,
                     color: Colors.red,
                   ),
                   SizedBox(width: 1.w),
                   Text(
                     '$likeCount',
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 10.sp,
                       color: Colors.grey[600],
                     ),
                   ),
@@ -359,7 +359,7 @@ class _FeedPostCardWidgetState extends State<FeedPostCardWidget>
                   Text(
                     '${commentCount > 0 ? '$commentCount bình luận' : ''}${commentCount > 0 && shareCount > 0 ? ' • ' : ''}${shareCount > 0 ? '$shareCount lượt chia sẻ' : ''}',
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 10.sp,
                       color: Colors.grey[600],
                     ),
                   ),
@@ -437,14 +437,14 @@ class _FeedPostCardWidgetState extends State<FeedPostCardWidget>
           children: [
             Icon(
               icon,
-              size: 18,
+              size: 18.sp,
               color: color,
             ),
             SizedBox(width: 2.w),
             Text(
               label,
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 11.sp,
                 color: color,
                 fontWeight: FontWeight.w500,
               ),
@@ -505,7 +505,7 @@ class _FeedPostCardWidgetState extends State<FeedPostCardWidget>
                   );
                 },
               ),
-              SizedBox(height: 2),
+              SizedBox(height: 2.h),
             ],
           ),
         );

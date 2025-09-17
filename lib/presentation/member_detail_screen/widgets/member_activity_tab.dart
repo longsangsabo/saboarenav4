@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-// import '../../../core/app_export.dart';
+import '../../../core/app_export.dart';
 import '../../member_management_screen/member_management_screen.dart';
 
 class MemberActivityTab extends StatefulWidget {
   final MemberData memberData;
 
   const MemberActivityTab({
-    super.key,
+    Key? key,
     required this.memberData,
-  });
+  }) : super(key: key);
 
   @override
   _MemberActivityTabState createState() => _MemberActivityTabState();
@@ -187,7 +187,7 @@ class _MemberActivityTabState extends State<MemberActivityTab>
             Container(
               height: 200,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Center(

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:sizer/sizer.dart';
 
 class AnimatedStatsCard extends StatefulWidget {
   final String title;
@@ -73,10 +73,10 @@ class _AnimatedStatsCardState extends State<AnimatedStatsCard>
             child: Opacity(
               opacity: _opacityAnimation.value,
               child: Container(
-                padding: EdgeInsets.all(16),
+                padding: EdgeInsets.all(16.sp),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(16.sp),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.05),
@@ -93,22 +93,22 @@ class _AnimatedStatsCardState extends State<AnimatedStatsCard>
                     Row(
                       children: [
                         Container(
-                          padding: EdgeInsets.all(8),
+                          padding: EdgeInsets.all(8.sp),
                           decoration: BoxDecoration(
                             color: widget.color.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(8.sp),
                           ),
                           child: Icon(
                             widget.icon,
                             color: widget.color,
-                            size: 24,
+                            size: 24.sp,
                           ),
                         ),
                         const Spacer(),
                         if (widget.isLoading)
                           SizedBox(
-                            width: 16,
-                            height: 16,
+                            width: 16.sp,
+                            height: 16.sp,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation<Color>(widget.color),
@@ -116,20 +116,20 @@ class _AnimatedStatsCardState extends State<AnimatedStatsCard>
                           ),
                       ],
                     ),
-                    SizedBox(height: 16),
+                    SizedBox(height: 16.h),
                     Text(
                       widget.value,
                       style: TextStyle(
-                        fontSize: 24,
+                        fontSize: 24.sp,
                         fontWeight: FontWeight.bold,
                         color: Colors.grey[900],
                       ),
                     ),
-                    SizedBox(height: 4),
+                    SizedBox(height: 4.h),
                     Text(
                       widget.title,
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 14.sp,
                         color: Colors.grey[600],
                       ),
                     ),
