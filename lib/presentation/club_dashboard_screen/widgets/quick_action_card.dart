@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:sizer/sizer.dart';
 import 'package:sabo_arena/core/app_export.dart';
+import 'package:sabo_arena/theme/theme_extensions.dart';
+import 'package:sabo_arena/theme/app_colors_styles.dart';
 
 class QuickActionCard extends StatefulWidget {
   final String title;
@@ -152,7 +155,7 @@ class _QuickActionCardState extends State<QuickActionCard>
                     spreadRadius: -2,
                   ),
                   BoxShadow(
-                    color: appTheme.black900.withOpacity(0.05 * _shadowAnimation.value),
+                    color: AppTheme.onBackgroundLight.withOpacity(0.05 * _shadowAnimation.value),
                     blurRadius: 8 * _shadowAnimation.value,
                     offset: Offset(0, 2 * _shadowAnimation.value),
                   ),
@@ -173,7 +176,7 @@ class _QuickActionCardState extends State<QuickActionCard>
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         _buildHeader(),
-                        SizedBox(height: 16.v),
+                        SizedBox(height: 16.h),
                         _buildContent(),
                       ],
                     ),
@@ -221,8 +224,8 @@ class _QuickActionCardState extends State<QuickActionCard>
       ),
       child: widget.isLoading
           ? SizedBox(
-              width: 20.adaptSize,
-              height: 20.adaptSize,
+              width: 20.sp,
+              height: 20.sp,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
@@ -231,7 +234,7 @@ class _QuickActionCardState extends State<QuickActionCard>
           : Icon(
               widget.icon,
               color: Colors.white,
-              size: 20.adaptSize,
+              size: 20.sp,
             ),
     );
   }
@@ -243,12 +246,12 @@ class _QuickActionCardState extends State<QuickActionCard>
         return Transform.scale(
           scale: _badgeAnimation.value,
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 8.h, vertical: 4.v),
+            padding: EdgeInsets.symmetric(horizontal: 8.h, vertical: 4.h),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
                   appTheme.red600,
-                  appTheme.red700,
+                  AppTheme.errorLight,
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -266,7 +269,7 @@ class _QuickActionCardState extends State<QuickActionCard>
               widget.badge! > 99 ? '99+' : widget.badge.toString(),
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 11.fSize,
+                fontSize: 11.sp,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -283,18 +286,18 @@ class _QuickActionCardState extends State<QuickActionCard>
         Text(
           widget.title,
           style: TextStyle(
-            fontSize: 16.fSize,
+            fontSize: 16.sp,
             fontWeight: FontWeight.bold,
-            color: appTheme.gray900,
+            color: AppTheme.onBackgroundLight,
             letterSpacing: 0.2,
           ),
         ),
-        SizedBox(height: 6.v),
+        SizedBox(height: 6.h),
         Text(
           widget.subtitle,
           style: TextStyle(
-            fontSize: 13.fSize,
-            color: appTheme.gray600,
+            fontSize: 13.sp,
+            color: AppTheme.onSurfaceLight,
             height: 1.3,
           ),
         ),
@@ -313,7 +316,7 @@ class CreateTournamentCard extends QuickActionCard {
           title: "Tạo giải đấu",
           subtitle: "Tổ chức giải đấu mới cho thành viên",
           icon: Icons.add_circle_outline_rounded,
-          color: AppColors.primary,
+          color: AppColors.primaryColor,
         );
 }
 
@@ -354,7 +357,7 @@ class SendNotificationCard extends QuickActionCard {
           title: "Thông báo",
           subtitle: "Gửi thông báo đến tất cả thành viên",
           icon: Icons.notifications_outlined,
-          color: AppColors.purple,
+          color: AppColors.blue,
         );
 }
 
@@ -388,7 +391,7 @@ class QuickActionsGrid extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        SizedBox(height: 16.v),
+        SizedBox(height: 16.h),
         Row(
           children: [
             Expanded(
@@ -407,7 +410,7 @@ class QuickActionsGrid extends StatelessWidget {
             ),
           ],
         ),
-        SizedBox(height: 12.v),
+        SizedBox(height: 12.h),
         Row(
           children: [
             Expanded(

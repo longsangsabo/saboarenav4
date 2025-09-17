@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:sizer/sizer.dart';
 import 'package:sabo_arena/core/app_export.dart';
+import 'package:sabo_arena/theme/theme_extensions.dart';
 
 class AnimatedStatsCard extends StatefulWidget {
   final String title;
@@ -164,9 +166,9 @@ class _AnimatedStatsCardState extends State<AnimatedStatsCard>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       _buildHeader(),
-                      SizedBox(height: 16.v),
+                      SizedBox(height: 16.h),
                       _buildValue(),
-                      SizedBox(height: 8.v),
+                      SizedBox(height: 8.h),
                       _buildTitle(),
                     ],
                   ),
@@ -210,7 +212,7 @@ class _AnimatedStatsCardState extends State<AnimatedStatsCard>
                 child: Icon(
                   widget.icon,
                   color: Colors.white,
-                  size: 24.adaptSize,
+                  size: 24.sp,
                 ),
               ),
             );
@@ -232,7 +234,7 @@ class _AnimatedStatsCardState extends State<AnimatedStatsCard>
     final backgroundColor = isUp ? appTheme.green50 : appTheme.red50;
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.h, vertical: 4.v),
+      padding: EdgeInsets.symmetric(horizontal: 8.h, vertical: 4.h),
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(16.h),
@@ -246,14 +248,14 @@ class _AnimatedStatsCardState extends State<AnimatedStatsCard>
           Icon(
             isUp ? Icons.trending_up_rounded : Icons.trending_down_rounded,
             color: trendColor,
-            size: 16.adaptSize,
+            size: 16.sp,
           ),
           SizedBox(width: 4.h),
           Text(
             widget.trendValue ?? "",
             style: TextStyle(
               color: trendColor,
-              fontSize: 12.fSize,
+              fontSize: 12.sp,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -278,9 +280,9 @@ class _AnimatedStatsCardState extends State<AnimatedStatsCard>
               child: Text(
                 displayValue,
                 style: TextStyle(
-                  fontSize: 32.fSize,
+                  fontSize: 32.sp,
                   fontWeight: FontWeight.bold,
-                  color: appTheme.gray900,
+                  color: appTheme.onBackgroundLight,
                   letterSpacing: -0.5,
                 ),
                 overflow: TextOverflow.ellipsis,
@@ -289,12 +291,12 @@ class _AnimatedStatsCardState extends State<AnimatedStatsCard>
             if (widget.subtitle != null) ...[
               SizedBox(width: 4.h),
               Padding(
-                padding: EdgeInsets.only(bottom: 4.v),
+                padding: EdgeInsets.only(bottom: 4.h),
                 child: Text(
                   widget.subtitle!,
                   style: TextStyle(
-                    fontSize: 14.fSize,
-                    color: appTheme.gray600,
+                    fontSize: 14.sp,
+                    color: appTheme.onSurfaceLight,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -310,8 +312,8 @@ class _AnimatedStatsCardState extends State<AnimatedStatsCard>
     return Text(
       widget.title,
       style: TextStyle(
-        fontSize: 14.fSize,
-        color: appTheme.gray700,
+        fontSize: 14.sp,
+        color: appTheme.onBackgroundLight,
         fontWeight: FontWeight.w600,
         letterSpacing: 0.2,
       ),

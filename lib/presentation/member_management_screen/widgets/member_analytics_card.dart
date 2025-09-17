@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/app_export.dart';
+import '../../../models/member_analytics.dart';
 
 class MemberAnalyticsCard extends StatefulWidget {
   final MemberAnalytics analytics;

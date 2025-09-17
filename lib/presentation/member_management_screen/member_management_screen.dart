@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import '../../core/app_export.dart';
 import '../../widgets/custom_app_bar.dart';
-import '../../widgets/custom_bottom_bar.dart';
+import '../../models/member_analytics.dart';
+import '../../theme/app_theme.dart';
+import '../../services/member_management_service.dart';
+import '../tournament_create_screen/tournament_create_screen_simple.dart';
+import '../club_settings_screen/club_settings_screen.dart';
 import 'widgets/member_search_bar.dart';
 import 'widgets/member_filter_section.dart';
 import 'widgets/member_list_view.dart';
-import 'widgets/member_analytics_card.dart';
+import 'widgets/member_analytics_card_simple.dart';
 import 'widgets/bulk_action_bar.dart';
 import 'widgets/add_member_dialog.dart';
 
@@ -36,10 +40,11 @@ class _MemberManagementScreenState extends State<MemberManagementScreen>
   // Mock data - replace with actual API calls
   List<MemberData> _allMembers = [];
   List<MemberData> _filteredMembers = [];
-  MemberAnalytics _analytics = MemberAnalytics(
-    memberGrowth: GrowthData(thisMonth: 15, lastMonth: 12, growthRate: 25.0),
-    activityRate: ActivityRate(active: 78, inactive: 22, percentage: 78.0),
-    retentionRate: RetentionRate(rate: 85.5, trend: 'up'),
+  MemberAnalytics _analytics = const MemberAnalytics(
+    totalMembers: 100,
+    activeMembers: 78,
+    newThisMonth: 15,
+    growthRate: 25.0,
   );
   
   bool _isLoading = true;
@@ -69,16 +74,34 @@ class _MemberManagementScreenState extends State<MemberManagementScreen>
   }
 
   Future<void> _loadMemberData() async {
-    // Simulate loading
-    await Future.delayed(Duration(milliseconds: 800));
-    
-    setState(() {
-      _allMembers = _generateMockMembers();
-      _filteredMembers = _allMembers;
-      _isLoading = false;
-    });
-    
-    _animationController.forward();
+    try {
+      // Fetch real member data from the service
+      final membersData = await MemberManagementService.getClubMembers(
+        clubId: widget.clubId,
+        status: 'active',
+      );
+      
+      setState(() {
+        _allMembers = _convertToMemberData(membersData);
+        _filteredMembers = _allMembers;
+        _isLoading = false;
+      });
+      
+      _animationController.forward();
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        // Fallback to empty list or show error
+        _allMembers = [];
+        _filteredMembers = [];
+      });
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi tải dữ liệu thành viên: $e')),
+        );
+      }
+    }
   }
 
   @override
@@ -87,10 +110,7 @@ class _MemberManagementScreenState extends State<MemberManagementScreen>
       backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
       appBar: _buildAppBar(),
       body: _isLoading ? _buildLoadingState() : _buildMainContent(),
-      bottomNavigationBar: CustomBottomBar(
-        currentRoute: '/member-management',
-        onTap: _handleBottomNavTap,
-      ),
+      bottomNavigationBar: _buildClubBottomNavigationBar(),
       floatingActionButton: _buildFloatingActionButton(),
     );
   }
@@ -101,23 +121,34 @@ class _MemberManagementScreenState extends State<MemberManagementScreen>
       actions: [
         Badge(
           isLabelVisible: _selectedMembers.isNotEmpty,
-          label: Text('${_selectedMembers.length}'),
+          label: Text(
+            '${_selectedMembers.length}',
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: AppTheme.onPrimaryLight,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           child: IconButton(
-            icon: Icon(Icons.checklist),
+            icon: const Icon(Icons.checklist),
             onPressed: () => setState(() => _selectedMembers.clear()),
-            tooltip: 'Clear selection',
+            tooltip: 'Xóa lựa chọn',
           ),
         ),
         PopupMenuButton<String>(
-          icon: Icon(Icons.more_vert),
+          icon: const Icon(Icons.more_vert),
           itemBuilder: (context) => [
             PopupMenuItem(
               value: 'export',
               child: Row(
                 children: [
-                  Icon(Icons.file_download, size: 20),
-                  SizedBox(width: 8),
-                  Text('Xuất danh sách'),
+                  Icon(Icons.file_download, size: 20, color: AppTheme.textSecondaryLight),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Xuất danh sách',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppTheme.textPrimaryLight,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -125,9 +156,14 @@ class _MemberManagementScreenState extends State<MemberManagementScreen>
               value: 'import',
               child: Row(
                 children: [
-                  Icon(Icons.file_upload, size: 20),
-                  SizedBox(width: 8),
-                  Text('Nhập thành viên'),
+                  Icon(Icons.file_upload, size: 20, color: AppTheme.textSecondaryLight),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Nhập thành viên',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppTheme.textPrimaryLight,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -135,9 +171,14 @@ class _MemberManagementScreenState extends State<MemberManagementScreen>
               value: 'settings',
               child: Row(
                 children: [
-                  Icon(Icons.settings, size: 20),
-                  SizedBox(width: 8),
-                  Text('Cài đặt'),
+                  Icon(Icons.settings, size: 20, color: AppTheme.textSecondaryLight),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Cài đặt',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppTheme.textPrimaryLight,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -154,13 +195,15 @@ class _MemberManagementScreenState extends State<MemberManagementScreen>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircularProgressIndicator(
-            color: AppTheme.lightTheme.colorScheme.primary,
+            color: AppTheme.primaryLight,
+            strokeWidth: 3,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 24),
           Text(
             'Đang tải danh sách thành viên...',
-            style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-              color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: AppTheme.textSecondaryLight,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -178,19 +221,20 @@ class _MemberManagementScreenState extends State<MemberManagementScreen>
             children: [
               // Analytics section
               Container(
-                padding: EdgeInsets.all(16),
-                color: AppTheme.lightTheme.colorScheme.surface,
-                child: MemberAnalyticsCard(analytics: _analytics),
+                padding: const EdgeInsets.all(20),
+                color: AppTheme.surfaceLight,
+                child: MemberAnalyticsCardSimple(analytics: _analytics),
               ),
               
               // Search and filter section
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 decoration: BoxDecoration(
-                  color: AppTheme.lightTheme.colorScheme.surface,
+                  color: AppTheme.surfaceLight,
                   border: Border(
                     bottom: BorderSide(
-                      color: AppTheme.lightTheme.colorScheme.outline.withOpacity(0.2),
+                      color: AppTheme.dividerLight,
+                      width: 1,
                     ),
                   ),
                 ),
@@ -203,7 +247,7 @@ class _MemberManagementScreenState extends State<MemberManagementScreen>
                       showFilterIndicator: _showAdvancedFilters,
                     ),
                     
-                    SizedBox(height: 12),
+                    const SizedBox(height: 16),
                     
                     MemberFilterSection(
                       controller: _filterTabController,
@@ -438,10 +482,133 @@ class _MemberManagementScreenState extends State<MemberManagementScreen>
     Navigator.pushNamed(context, '/member-settings');
   }
 
-  void _handleBottomNavTap(String route) {
-    if (route != '/member-management') {
-      Navigator.pushReplacementNamed(context, route);
+  Widget _buildClubBottomNavigationBar() {
+    return BottomNavigationBar(
+      type: BottomNavigationBarType.fixed,
+      selectedItemColor: AppTheme.primaryLight,
+      unselectedItemColor: Colors.grey[600],
+      backgroundColor: Colors.white,
+      elevation: 8,
+      items: const [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.dashboard),
+          label: 'Dashboard',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.people),
+          label: 'Thành viên',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.emoji_events),
+          label: 'Giải đấu',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.settings),
+          label: 'Cài đặt',
+        ),
+      ],
+      currentIndex: 1, // Current tab is "Thành viên"
+      onTap: (index) {
+        switch (index) {
+          case 0:
+            Navigator.pop(context); // Go back to dashboard
+            break;
+          case 1:
+            // Already on member management
+            break;
+          case 2:
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TournamentCreateScreenSimple(clubId: widget.clubId),
+              ),
+            );
+            break;
+          case 3:
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ClubSettingsScreen(clubId: widget.clubId),
+              ),
+            );
+            break;
+        }
+      },
+    );
+  }
+
+  List<MemberData> _convertToMemberData(List<Map<String, dynamic>> apiData) {
+    return apiData.map((data) {
+      final userProfile = data['user_profiles'] as Map<String, dynamic>? ?? {};
+      final joinedAt = DateTime.tryParse(data['joined_at'] ?? '') ?? DateTime.now();
+      final lastActivityAt = DateTime.tryParse(data['last_activity_at'] ?? '') ?? DateTime.now();
+      
+      return MemberData(
+        id: data['id']?.toString() ?? '',
+        user: UserInfo(
+          avatar: userProfile['avatar_url'] ?? '',
+          name: userProfile['full_name'] ?? 'Unknown User',
+          username: userProfile['username'] ?? 'unknown',
+          rank: _parseRankType(userProfile['rank'] ?? 'beginner'),
+          elo: userProfile['elo'] ?? 1000,
+          isOnline: _calculateIsOnline(lastActivityAt),
+        ),
+        membershipInfo: MembershipInfo(
+          type: _parseMembershipType(data['membership_type'] ?? 'regular'),
+          status: _parseMemberStatus(data['status'] ?? 'active'),
+          joinDate: joinedAt,
+          membershipId: data['id']?.toString() ?? '',
+          expiryDate: data['expires_at'] != null ? DateTime.tryParse(data['expires_at']) : null,
+          autoRenewal: data['auto_renewal'] ?? false,
+        ),
+        activityStats: ActivityStats(
+          lastActive: lastActivityAt,
+          totalMatches: data['total_matches'] ?? 0,
+          tournamentsJoined: data['tournaments_joined'] ?? 0,
+          winRate: (data['win_rate'] ?? 0).toDouble(),
+          activityScore: data['activity_score'] ?? 0,
+        ),
+        engagement: EngagementStats(
+          postsCount: data['posts_count'] ?? 0,
+          commentsCount: data['comments_count'] ?? 0,
+          likesReceived: data['likes_received'] ?? 0,
+          socialScore: data['social_score'] ?? 0,
+        ),
+      );
+    }).toList();
+  }
+
+  RankType _parseRankType(String rank) {
+    switch (rank.toLowerCase()) {
+      case 'amateur': return RankType.amateur;
+      case 'intermediate': return RankType.intermediate;
+      case 'advanced': return RankType.advanced;
+      case 'professional': return RankType.professional;
+      default: return RankType.beginner;
     }
+  }
+
+  MembershipType _parseMembershipType(String type) {
+    switch (type.toLowerCase()) {
+      case 'vip': return MembershipType.vip;
+      case 'premium': return MembershipType.premium;
+      default: return MembershipType.regular;
+    }
+  }
+
+  MemberStatus _parseMemberStatus(String status) {
+    switch (status.toLowerCase()) {
+      case 'inactive': return MemberStatus.inactive;
+      case 'suspended': return MemberStatus.suspended;
+      case 'pending': return MemberStatus.pending;
+      default: return MemberStatus.active;
+    }
+  }
+
+  bool _calculateIsOnline(DateTime lastActivity) {
+    final now = DateTime.now();
+    final difference = now.difference(lastActivity);
+    return difference.inMinutes <= 15; // Consider online if active within 15 minutes
   }
 
   List<MemberData> _generateMockMembers() {
@@ -570,51 +737,7 @@ class EngagementStats {
   });
 }
 
-class MemberAnalytics {
-  final GrowthData memberGrowth;
-  final ActivityRate activityRate;
-  final RetentionRate retentionRate;
 
-  MemberAnalytics({
-    required this.memberGrowth,
-    required this.activityRate,
-    required this.retentionRate,
-  });
-}
-
-class GrowthData {
-  final int thisMonth;
-  final int lastMonth;
-  final double growthRate;
-
-  GrowthData({
-    required this.thisMonth,
-    required this.lastMonth,
-    required this.growthRate,
-  });
-}
-
-class ActivityRate {
-  final int active;
-  final int inactive;
-  final double percentage;
-
-  ActivityRate({
-    required this.active,
-    required this.inactive,
-    required this.percentage,
-  });
-}
-
-class RetentionRate {
-  final double rate;
-  final String trend;
-
-  RetentionRate({
-    required this.rate,
-    required this.trend,
-  });
-}
 
 class AdvancedFilters {
   final List<MembershipType> membershipTypes;

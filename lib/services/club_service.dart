@@ -264,4 +264,46 @@ class ClubService {
       throw Exception('Failed to get user clubs: $error');
     }
   }
+
+  /// Check if current user is owner of a specific club
+  Future<bool> isClubOwner(String clubId) async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) return false;
+
+      final response = await _supabase
+          .from('clubs')
+          .select('owner_id')
+          .eq('id', clubId)
+          .maybeSingle();
+
+      return response != null && response['owner_id'] == user.id;
+    } catch (error) {
+      print('Error checking club ownership: $error');
+      return false;
+    }
+  }
+
+  /// Get current user's primary club (first approved club they own)
+  Future<Club?> getCurrentUserClub() async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) return null;
+
+      final response = await _supabase
+          .from('clubs')
+          .select('*')
+          .eq('owner_id', user.id)
+          .eq('approval_status', 'approved')
+          .eq('is_active', true)
+          .order('created_at', ascending: true)
+          .limit(1)
+          .maybeSingle();
+
+      return response != null ? Club.fromJson(response) : null;
+    } catch (error) {
+      print('Error getting current user club: $error');
+      return null;
+    }
+  }
 }

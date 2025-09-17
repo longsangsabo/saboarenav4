@@ -10,6 +10,7 @@ import '../../services/auth_service.dart';
 import '../../services/user_service.dart';
 import '../../services/storage_service.dart';
 import '../../services/permission_service.dart';
+import '../club_dashboard_screen/club_dashboard_screen_simple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import './widgets/achievements_section_widget.dart';
@@ -1811,9 +1812,47 @@ class _UserProfileScreenState extends State<UserProfileScreen>
     );
   }
 
-  void _navigateToClubManagement() {
-    // Navigate to club management interface
-    Navigator.pushNamed(context, AppRoutes.clubDashboardScreen);
+  void _navigateToClubManagement() async {
+    try {
+      // Get current user ID
+      final currentUserId = _authService.currentUser?.id;
+      if (currentUserId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Vui lòng đăng nhập lại')),
+        );
+        return;
+      }
+
+      // Find club owned by current user
+      final supabase = Supabase.instance.client;
+      final response = await supabase
+          .from('clubs')
+          .select('id, name')
+          .eq('owner_id', currentUserId)
+          .eq('approval_status', 'approved')
+          .maybeSingle();
+
+      if (response == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Bạn chưa có club nào được phê duyệt')),
+        );
+        return;
+      }
+
+      // Navigate with actual club ID
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ClubDashboardScreenSimple(
+            clubId: response['id'],
+          ),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi: $e')),
+      );
+    }
   }
 
   void _openPaymentHistory() {

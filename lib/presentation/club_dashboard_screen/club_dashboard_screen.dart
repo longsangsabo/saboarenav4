@@ -4,6 +4,14 @@ import 'package:sabo_arena/widgets/custom_app_bar.dart';
 import 'package:sizer/sizer.dart';
 import 'package:sabo_arena/theme/app_theme.dart';
 import 'package:sabo_arena/widgets/custom_image_widget.dart';
+import 'package:sabo_arena/routes/app_routes.dart';
+import '../member_management_screen/member_management_screen.dart';
+import '../tournament_create_screen/tournament_create_screen.dart';
+import '../club_notification_screen/club_notification_screen.dart';
+import '../../services/club_service.dart';
+import '../../services/auth_service.dart';
+import '../../services/club_dashboard_service.dart';
+import '../../models/club.dart';
 
 class ClubDashboardScreen extends StatefulWidget {
   const ClubDashboardScreen({super.key});
@@ -13,8 +21,82 @@ class ClubDashboardScreen extends StatefulWidget {
 }
 
 class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
+  Club? _currentClub;
+  bool _isLoading = true;
+  bool _hasPermission = false;
+  String? _errorMessage;
+  
+  // Dashboard Data
+  ClubDashboardStats? _dashboardStats;
+  List<ClubActivity> _recentActivities = [];
+  bool _isLoadingData = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeDashboard();
+  }
+
+  Future<void> _initializeDashboard() async {
+    await _verifyClubOwnership();
+    if (_hasPermission && _currentClub != null) {
+      await _loadDashboardData();
+    }
+  }
+
+  Future<void> _verifyClubOwnership() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      // Check if user is authenticated
+      if (!AuthService.instance.isAuthenticated) {
+        setState(() {
+          _hasPermission = false;
+          _errorMessage = 'Vui lòng đăng nhập để truy cập';
+          _isLoading = false;
+        });
+        return;
+      }
+
+      // Get current user's club
+      final currentClub = await ClubService.instance.getCurrentUserClub();
+      
+      if (currentClub == null) {
+        setState(() {
+          _hasPermission = false;
+          _errorMessage = 'Bạn chưa có câu lạc bộ nào được duyệt. Vui lòng đăng ký câu lạc bộ trước.';
+          _isLoading = false;
+        });
+        return;
+      }
+
+      setState(() {
+        _currentClub = currentClub;
+        _hasPermission = true;
+        _isLoading = false;
+      });
+
+    } catch (error) {
+      setState(() {
+        _hasPermission = false;
+        _errorMessage = 'Có lỗi xảy ra khi kiểm tra quyền truy cập: $error';
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return _buildLoadingScreen();
+    }
+
+    if (!_hasPermission) {
+      return _buildPermissionDeniedScreen();
+    }
     return Scaffold(
       backgroundColor: AppTheme.backgroundLight,
       appBar: _buildAppBar(),
@@ -59,19 +141,20 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
           Row(
             children: [
               Text(
-                "SABO Arena Central",
+                _currentClub?.name ?? "CLB của tôi",
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               SizedBox(width: 4.h),
-              Icon(
-                Icons.verified,
-                color: AppTheme.primaryLight,
-                size: 20.sp,
-              ),
+              if (_currentClub?.isVerified == true)
+                Icon(
+                  Icons.verified,
+                  color: AppTheme.primaryLight,
+                  size: 20.sp,
+                ),
             ],
           ),
           Text(
-            "@saboarena_central",
+            "@${_currentClub?.name.toLowerCase().replaceAll(' ', '_') ?? 'club'}",
             style: const TextStyle(
               fontSize: 12,
               color: AppTheme.textSecondaryLight,
@@ -134,55 +217,73 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
           ),
         ),
         SizedBox(height: 16.h),
-        Row(
-          children: [
-            Expanded(
-              child: _buildStatsCard(
-                title: "Thành viên",
-                value: "156",
-                trend: "up",
-                trendValue: "+12",
-                icon: Icons.people_outline,
-                color: AppTheme.successLight,
+        if (_isLoadingData)
+          Row(
+            children: [
+              Expanded(child: _buildLoadingStatsCard()),
+              SizedBox(width: 12.h),
+              Expanded(child: _buildLoadingStatsCard()),
+            ],
+          )
+        else if (_dashboardStats != null) ...[
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatsCard(
+                  title: "Thành viên",
+                  value: "${_dashboardStats!.activeMembers}",
+                  trend: _dashboardStats!.activeMembers > 0 ? "up" : null,
+                  trendValue: _dashboardStats!.activeMembers > 0 ? "+${_dashboardStats!.activeMembers}" : null,
+                  icon: Icons.people_outline,
+                  color: AppTheme.successLight,
+                ),
               ),
-            ),
-            SizedBox(width: 12.h),
-            Expanded(
-              child: _buildStatsCard(
-                title: "Giải đấu hoạt động",
-                value: "3",
-                icon: Icons.emoji_events_outlined,
-                color: AppTheme.accentLight,
+              SizedBox(width: 12.h),
+              Expanded(
+                child: _buildStatsCard(
+                  title: "Giải đấu",
+                  value: "${_dashboardStats!.tournaments}",
+                  icon: Icons.emoji_events_outlined,
+                  color: AppTheme.accentLight,
+                ),
               ),
-            ),
-          ],
-        ),
-        SizedBox(height: 12.h),
-        Row(
-          children: [
-            Expanded(
-              child: _buildStatsCard(
-                title: "Doanh thu tháng",
-                value: "45.2M",
-                trend: "up",
-                trendValue: "+8.5%",
-                icon: Icons.attach_money_outlined,
-                color: AppTheme.primaryLight,
-                subtitle: "VND",
+            ],
+          ),
+          SizedBox(height: 12.h),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatsCard(
+                  title: "Doanh thu tháng",
+                  value: _formatCurrency(_dashboardStats!.monthlyRevenue),
+                  trend: _dashboardStats!.monthlyRevenue > 0 ? "up" : null,
+                  trendValue: _dashboardStats!.monthlyRevenue > 0 ? "+${_formatCurrency(_dashboardStats!.monthlyRevenue)}" : null,
+                  icon: Icons.attach_money_outlined,
+                  color: AppTheme.primaryLight,
+                  subtitle: "VND",
+                ),
               ),
-            ),
-            SizedBox(width: 12.h),
-            Expanded(
-              child: _buildStatsCard(
-                title: "Xếp hạng CLB",
-                value: "#12",
-                icon: Icons.military_tech_outlined,
-                color: AppTheme.primaryLight,
-                subtitle: "Khu vực",
+              SizedBox(width: 12.h),
+              Expanded(
+                child: _buildStatsCard(
+                  title: "Xếp hạng CLB",
+                  value: _dashboardStats!.ranking > 0 ? "#${_dashboardStats!.ranking}" : "N/A",
+                  icon: Icons.military_tech_outlined,
+                  color: AppTheme.primaryLight,
+                  subtitle: "Khu vực",
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
+        ] else ...[
+          Row(
+            children: [
+              Expanded(child: _buildErrorStatsCard()),
+              SizedBox(width: 12.h),
+              Expanded(child: _buildErrorStatsCard()),
+            ],
+          ),
+        ],
       ],
     );
   }
@@ -290,45 +391,13 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
               ),
             ],
           ),
-          child: Column(
-            children: [
-              _buildActivityItem(
-                type: "member_joined",
-                title: "Nguyễn Văn Nam đã tham gia CLB",
-                subtitle: "Thành viên mới từ quận 1",
-                timestamp: DateTime.now().subtract(Duration(minutes: 15)),
-                avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&h=50&fit=crop&crop=face",
-                color: AppTheme.successLight,
-              ),
-              _buildDivider(),
-              _buildActivityItem(
-                type: "tournament_created",
-                title: "Giải đấu 'Golden Cup 2025' đã được tạo",
-                subtitle: "32 người tham gia • Bắt đầu 25/09",
-                timestamp: DateTime.now().subtract(Duration(hours: 2)),
-                icon: Icons.emoji_events,
-                color: AppTheme.accentLight,
-              ),
-              _buildDivider(),
-              _buildActivityItem(
-                type: "match_completed",
-                title: "Trận đấu giữa Mai và Long đã kết thúc",
-                subtitle: "Mai thắng 8-6 • Thời gian: 45 phút",
-                timestamp: DateTime.now().subtract(Duration(hours: 4)),
-                icon: Icons.sports_esports,
-                color: AppTheme.primaryLight,
-              ),
-              _buildDivider(),
-              _buildActivityItem(
-                type: "payment_received",
-                title: "Thanh toán từ Trần Thị Hương",
-                subtitle: "Phí thành viên tháng 9 • 200,000 VND",
-                timestamp: DateTime.now().subtract(Duration(days: 1)),
-                icon: Icons.payment,
-                color: AppTheme.primaryLight,
-              ),
-            ],
-          ),
+          child: _isLoadingData
+              ? _buildLoadingActivities()
+              : _recentActivities.isEmpty
+                  ? _buildEmptyActivities()
+                  : Column(
+                      children: _buildActivityList(),
+                    ),
         ),
       ],
     );
@@ -625,41 +694,522 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
     }
   }
 
-  int _getNotificationCount() => 5; // Mock data
+  int _getNotificationCount() => 5; // TODO: Connect to real notification service
 
   // Event Handlers
   void _onNotificationPressed() {
-    // Navigate to notifications screen
-    print('Notifications pressed');
+    // Navigate to notifications management screen
+    Navigator.pushNamed(context, AppRoutes.clubNotificationScreen);
   }
 
   void _onSettingsPressed() {
     // Navigate to settings screen
-    print('Settings pressed');
+    Navigator.pushNamed(context, AppRoutes.userProfileScreen);
   }
 
   void _onCreateTournament() {
     // Navigate to create tournament screen
-    print('Create tournament pressed');
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TournamentCreateScreen(
+          clubId: _getCurrentClubId(), // TODO: Get actual club ID
+        ),
+      ),
+    ).then((result) {
+      if (result == true) {
+        // Refresh dashboard if tournament was created successfully
+        _loadDashboardData();
+      }
+    });
   }
 
   void _onManageMembers() {
     // Navigate to manage members screen
-    print('Manage members pressed');
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MemberManagementScreen(
+          clubId: _getCurrentClubId(), // TODO: Get actual club ID
+        ),
+      ),
+    );
   }
 
   void _onEditProfile() {
     // Navigate to edit profile screen
-    print('Edit profile pressed');
+    Navigator.pushNamed(context, AppRoutes.clubProfileEditScreen).then((result) {
+      if (result == true) {
+        // Refresh dashboard if profile was updated
+        _loadDashboardData();
+      }
+    });
   }
 
   void _onSendNotification() {
     // Navigate to send notification screen
-    print('Send notification pressed');
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ClubNotificationScreen(
+          clubId: _getCurrentClubId(), // TODO: Get actual club ID
+        ),
+      ),
+    ).then((result) {
+      if (result == true) {
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Thông báo đã được gửi thành công!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    });
   }
 
   void _onViewAllActivity() {
-    // Navigate to all activity screen
-    print('View all activity pressed');
+    // Navigate to all activity screen - TODO: Create ActivityHistoryScreen
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Tính năng đang được phát triển')),
+    );
+  }
+
+  // Helper Methods
+  String _getCurrentClubId() {
+    return _currentClub?.id ?? '';
+  }
+
+  String _formatCurrency(double amount) {
+    if (amount >= 1000000) {
+      return "${(amount / 1000000).toStringAsFixed(1)}M";
+    } else if (amount >= 1000) {
+      return "${(amount / 1000).toStringAsFixed(1)}K";
+    } else {
+      return amount.toStringAsFixed(0);
+    }
+  }
+
+  Widget _buildLoadingStatsCard() {
+    return Container(
+      padding: EdgeInsets.all(16.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.textPrimaryLight.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40.sp,
+                height: 40.sp,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              const Spacer(),
+              Container(
+                width: 60,
+                height: 20,
+                color: Colors.grey.shade300,
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          Container(
+            width: double.infinity,
+            height: 16,
+            color: Colors.grey.shade300,
+          ),
+          SizedBox(height: 4.h),
+          Container(
+            width: 80,
+            height: 12,
+            color: Colors.grey.shade300,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorStatsCard() {
+    return Container(
+      padding: EdgeInsets.all(16.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.textPrimaryLight.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40.sp,
+                height: 40.sp,
+                decoration: BoxDecoration(
+                  color: Colors.red.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(Icons.error_outline, color: Colors.red.shade400),
+              ),
+              const Spacer(),
+              Text(
+                'N/A',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: AppTheme.errorLight,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          Text(
+            'Không thể tải',
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.textPrimaryLight,
+            ),
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            'Thử lại sau',
+            style: TextStyle(
+              fontSize: 12.sp,
+              color: AppTheme.textSecondaryLight,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _loadDashboardData() async {
+    if (_currentClub == null) return;
+    
+    setState(() {
+      _isLoadingData = true;
+    });
+
+    try {
+      // Load dashboard stats and recent activities in parallel
+      final results = await Future.wait([
+        ClubDashboardService.instance.getClubStats(_currentClub!.id),
+        ClubDashboardService.instance.getRecentActivities(_currentClub!.id, limit: 5),
+      ]);
+
+      if (mounted) {
+        setState(() {
+          _dashboardStats = results[0] as ClubDashboardStats;
+          _recentActivities = results[1] as List<ClubActivity>;
+          _isLoadingData = false;
+        });
+      }
+    } catch (error) {
+      print('Error loading dashboard data: $error');
+      if (mounted) {
+        setState(() {
+          _isLoadingData = false;
+        });
+      }
+    }
+  }
+
+  Widget _buildLoadingScreen() {
+    return Scaffold(
+      backgroundColor: AppTheme.backgroundLight,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(color: AppTheme.primaryLight),
+            SizedBox(height: 16.h),
+            Text(
+              'Đang tải dashboard...',
+              style: TextStyle(
+                fontSize: 16.sp,
+                color: AppTheme.textSecondaryLight,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPermissionDeniedScreen() {
+    return Scaffold(
+      backgroundColor: AppTheme.backgroundLight,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: AppTheme.textPrimaryLight),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'Không có quyền truy cập',
+          style: TextStyle(
+            color: AppTheme.textPrimaryLight,
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      body: Center(
+        child: Padding(
+          padding: EdgeInsets.all(24.w),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.lock_outlined,
+                size: 64.sp,
+                color: AppTheme.errorLight,
+              ),
+              SizedBox(height: 24.h),
+              Text(
+                'Truy cập bị từ chối',
+                style: TextStyle(
+                  fontSize: 24.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimaryLight,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 16.h),
+              Text(
+                _errorMessage ?? 'Bạn không có quyền truy cập vào trang này.',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  color: AppTheme.textSecondaryLight,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 32.h),
+              if (_errorMessage?.contains('đăng nhập') == true) ...[
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pushReplacementNamed(context, AppRoutes.loginScreen);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryLight,
+                    padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+                  ),
+                  icon: Icon(Icons.login, color: Colors.white),
+                  label: Text(
+                    'Đăng nhập',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ] else ...[
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pushNamed(context, AppRoutes.clubRegistrationScreen);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryLight,
+                    padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+                  ),
+                  icon: Icon(Icons.add_business, color: Colors.white),
+                  label: Text(
+                    'Đăng ký CLB',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 16.h),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, AppRoutes.myClubsScreen);
+                  },
+                  child: Text(
+                    'Xem CLB của tôi',
+                    style: TextStyle(
+                      color: AppTheme.primaryLight,
+                      fontSize: 16.sp,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingActivities() {
+    return Column(
+      children: List.generate(3, (index) => 
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 8.h),
+          child: Row(
+            children: [
+              Container(
+                width: 40.sp,
+                height: 40.sp,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              SizedBox(width: 12.h),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      height: 14,
+                      color: Colors.grey.shade300,
+                    ),
+                    SizedBox(height: 4.h),
+                    Container(
+                      width: 200,
+                      height: 12,
+                      color: Colors.grey.shade300,
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                width: 60,
+                height: 11,
+                color: Colors.grey.shade300,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyActivities() {
+    return Padding(
+      padding: EdgeInsets.all(24.h),
+      child: Column(
+        children: [
+          Icon(
+            Icons.timeline,
+            size: 48.sp,
+            color: AppTheme.textSecondaryLight,
+          ),
+          SizedBox(height: 16.h),
+          Text(
+            'Chưa có hoạt động nào',
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textPrimaryLight,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            'Các hoạt động gần đây của CLB sẽ hiển thị ở đây',
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: AppTheme.textSecondaryLight,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildActivityList() {
+    List<Widget> widgets = [];
+    
+    for (int i = 0; i < _recentActivities.length; i++) {
+      final activity = _recentActivities[i];
+      
+      widgets.add(_buildActivityItemFromData(activity));
+      
+      // Add divider except for last item
+      if (i < _recentActivities.length - 1) {
+        widgets.add(_buildDivider());
+      }
+    }
+    
+    return widgets;
+  }
+
+  Widget _buildActivityItemFromData(ClubActivity activity) {
+    Color color;
+    IconData? iconData;
+    
+    switch (activity.type) {
+      case 'member_joined':
+        color = AppTheme.successLight;
+        iconData = Icons.person_add;
+        break;
+      case 'tournament_created':
+        color = AppTheme.accentLight;
+        iconData = Icons.emoji_events;
+        break;
+      case 'match_completed':
+        color = AppTheme.primaryLight;
+        iconData = Icons.sports_esports;
+        break;
+      case 'payment_received':
+        color = AppTheme.primaryLight;
+        iconData = Icons.payment;
+        break;
+      default:
+        color = AppTheme.primaryLight;
+        iconData = Icons.info;
+    }
+
+    return _buildActivityItem(
+      type: activity.type,
+      title: activity.title,
+      subtitle: activity.subtitle,
+      timestamp: activity.timestamp,
+      avatar: activity.avatar,
+      icon: activity.icon != null ? _getIconFromString(activity.icon!) : iconData,
+      color: color,
+    );
+  }
+
+  IconData _getIconFromString(String iconString) {
+    switch (iconString) {
+      case 'emoji_events':
+        return Icons.emoji_events;
+      case 'sports_esports':
+        return Icons.sports_esports;
+      case 'payment':
+        return Icons.payment;
+      case 'person_add':
+        return Icons.person_add;
+      default:
+        return Icons.info;
+    }
   }
 }

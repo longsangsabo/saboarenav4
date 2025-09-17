@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sabo_arena/core/app_export.dart';
 import 'package:sabo_arena/widgets/custom_app_bar.dart';
-import 'widgets/operating_hours_editor.dart';
-import 'widgets/location_picker.dart';
-import 'widgets/image_upload_section.dart';
+import 'widgets/operating_hours_editor_simple.dart';
+import 'widgets/location_picker_simple.dart';
+import 'widgets/image_upload_section_simple.dart';
 
 class ClubProfileEditScreen extends StatefulWidget {
   const ClubProfileEditScreen({super.key});

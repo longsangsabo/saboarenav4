@@ -8,7 +8,7 @@ import '../presentation/find_opponents_screen/find_opponents_screen.dart';
 import '../presentation/club_main_screen/club_main_screen.dart';
 import '../presentation/club_profile_screen/club_profile_screen.dart';
 import '../presentation/club_registration_screen/club_registration_screen.dart';
-import '../presentation/club_dashboard_screen/club_dashboard_screen.dart';
+import '../presentation/club_selection_screen/club_selection_screen.dart';
 import 'package:sabo_arena/presentation/user_profile_screen/user_profile_screen.dart';
 import '../presentation/tournament_detail_screen/tournament_detail_screen.dart';
 import '../presentation/login_screen.dart';
@@ -17,7 +17,6 @@ import '../presentation/forgot_password_screen.dart';
 import '../presentation/admin_dashboard_screen/admin_dashboard_screen.dart';
 import '../presentation/admin_dashboard_screen/club_approval_screen.dart';
 import '../presentation/my_clubs_screen/my_clubs_screen.dart';
-import '../presentation/club_selection_screen/club_selection_screen.dart';
 
 class AppRoutes {
   static const String splashScreen = '/splash';
@@ -58,7 +57,7 @@ class AppRoutes {
         adminDashboardScreen: (context) => const AdminDashboardScreen(),
         clubApprovalScreen: (context) => const ClubApprovalScreen(),
         myClubsScreen: (context) => const MyClubsScreen(),
-        clubDashboardScreen: (context) => const ClubDashboardScreen(),
         clubSelectionScreen: (context) => ClubSelectionScreen(),
+        // clubDashboardScreen: (context) => const ClubDashboardScreenSimple(clubId: ''),
       };
 }

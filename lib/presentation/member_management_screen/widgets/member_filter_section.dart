@@ -126,7 +126,7 @@ class _MemberFilterSectionState extends State<MemberFilterSection>
                         text: ' ($count)',
                         style: TextStyle(
                           fontSize: 12,
-                          opacity: 0.8,
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
                         ),
                       ),
                     ],
