@@ -1,21 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import '../../../services/tournament_service.dart';
 
 class PaymentOptionsDialog extends StatefulWidget {
   final String tournamentId;
   final String tournamentName;
   final double entryFee;
-  final VoidCallback? onPayAtVenue;
-  final VoidCallback? onPayWithQR;
+  final Function(String paymentMethod)? onPaymentConfirmed;
 
   const PaymentOptionsDialog({
     super.key,
     required this.tournamentId,
     required this.tournamentName,
     required this.entryFee,
-    this.onPayAtVenue,
-    this.onPayWithQR,
+    this.onPaymentConfirmed,
   });
 
   @override
@@ -24,7 +21,6 @@ class PaymentOptionsDialog extends StatefulWidget {
 
 class _PaymentOptionsDialogState extends State<PaymentOptionsDialog> {
   int selectedPaymentMethod = 0; // 0: at venue, 1: QR code
-  final TournamentService _tournamentService = TournamentService.instance;
   
   @override
   Widget build(BuildContext context) {
@@ -264,7 +260,7 @@ class _PaymentOptionsDialogState extends State<PaymentOptionsDialog> {
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
-              widget.onPayAtVenue?.call();
+              widget.onPaymentConfirmed?.call('0'); // 0 = pay at venue
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
@@ -365,7 +361,7 @@ class _PaymentOptionsDialogState extends State<PaymentOptionsDialog> {
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.of(context).pop();
-                        widget.onPayWithQR?.call();
+                        widget.onPaymentConfirmed?.call('1'); // 1 = QR payment
                         _showPaymentPendingDialog(context);
                       },
                       style: ElevatedButton.styleFrom(

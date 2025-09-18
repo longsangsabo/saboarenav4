@@ -253,12 +253,8 @@ class RegistrationWidget extends StatelessWidget {
         tournamentId: tournament["id"] as String,
         tournamentName: tournament["title"] as String,
         entryFee: entryFee,
-        onPayAtVenue: () {
-          // Handle pay at venue
-          onRegisterTap?.call();
-        },
-        onPayWithQR: () {
-          // Handle QR payment
+        onPaymentConfirmed: (paymentMethod) {
+          // Handle payment confirmation with payment method
           onRegisterTap?.call();
         },
       ),

@@ -23,15 +23,15 @@ class NotificationService {
 
       // Get user details
       final userResponse = await _supabase
-          .from('user_profiles')
-          .select('full_name, phone, email')
+          .from('users')
+          .select('display_name, email')
           .eq('id', userId)
           .single();
 
       // Get club admin
       final clubAdminResponse = await _supabase
           .from('club_members')
-          .select('user_id, user_profiles!inner(full_name)')
+          .select('user_id, users!inner(display_name)')
           .eq('club_id', tournamentResponse['club_id'])
           .eq('role', 'admin')
           .limit(1)
@@ -47,9 +47,8 @@ class NotificationService {
 🎱 Đăng ký giải đấu mới!
 
 Giải đấu: ${tournamentResponse['title']}
-Người đăng ký: ${userResponse['full_name']}
+Người đăng ký: ${userResponse['display_name']}
 Phương thức thanh toán: ${paymentMethod == '0' ? 'Đóng tại quán' : 'Chuyển khoản QR'}
-Điện thoại: ${userResponse['phone'] ?? 'Chưa cập nhật'}
 Email: ${userResponse['email'] ?? 'Chưa cập nhật'}
 
 Vui lòng xác nhận thanh toán khi thành viên đến thi đấu.
@@ -57,11 +56,11 @@ Vui lòng xác nhận thanh toán khi thành viên đến thi đấu.
 
       // Insert notification to database
       await _supabase.from('notifications').insert({
-        'recipient_id': clubAdminResponse['user_id'],
+        'user_id': clubAdminResponse['user_id'],
         'title': 'Đăng ký giải đấu mới',
         'message': message,
         'type': 'tournament_registration',
-        'related_id': tournamentId,
+        'data': {'tournament_id': tournamentId, 'user_id': userId},
         'created_at': DateTime.now().toIso8601String(),
         'is_read': false,
       });
@@ -84,7 +83,7 @@ Vui lòng xác nhận thanh toán khi thành viên đến thi đấu.
       var query = _supabase
           .from('notifications')
           .select('*')
-          .eq('recipient_id', user.id);
+          .eq('user_id', user.id);
 
       if (isRead != null) {
         query = query.eq('is_read', isRead);

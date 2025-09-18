@@ -12,6 +12,7 @@ import 'widgets/tournament_bracket_view.dart';
 import 'widgets/participant_management_view.dart';
 import 'widgets/match_management_view.dart';
 import 'widgets/tournament_stats_view.dart';
+import 'widgets/payment_options_dialog.dart';
 import '../../widgets/custom_bottom_bar.dart';
 import './widgets/participants_list_widget.dart';
 import './widgets/prize_pool_widget.dart';
@@ -479,109 +480,66 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
   }
 
   void _handleRegistration() {
-    // Show success dialog directly without confirmation
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    
+    // Show payment options dialog
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        contentPadding: const EdgeInsets.all(24),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: Colors.green,
-                borderRadius: BorderRadius.circular(30),
+      builder: (dialogContext) => PaymentOptionsDialog(
+        tournamentId: _tournamentData['id'],
+        tournamentName: _tournamentData['title'],
+        entryFee: double.parse(_tournamentData['entryFee'].toString().replaceAll(',', '').replaceAll(' VNĐ', '')),
+        onPaymentConfirmed: (paymentMethod) async {
+          // Close dialog first
+          Navigator.of(dialogContext).pop();
+          
+          try {
+            // Show loading
+            scaffoldMessenger.showSnackBar(
+              const SnackBar(
+                content: Text('Đang xử lý đăng ký...'),
+                duration: Duration(seconds: 1),
               ),
-              child: const Icon(
-                Icons.store,
-                color: Colors.white,
-                size: 30,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Đăng ký thành công!',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Bạn đã đăng ký thành công. Vui lòng thanh toán lệ phí tại quán khi đến thi đấu.',
-              style: Theme.of(context).textTheme.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                'Lệ phí: ${_tournamentData["entryFee"]}',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.green,
-                  fontWeight: FontWeight.w600,
+            );
+            
+            // Call actual registration service with selected payment method
+            await _tournamentService.registerForTournament(
+              _tournamentData['id'],
+              paymentMethod: paymentMethod,
+            );
+            
+            // Update UI state
+            if (mounted) {
+              setState(() {
+                _isRegistered = true;
+              });
+              
+              // Reload tournament data to get updated participant count
+              await _loadTournamentData();
+              
+              // Show success message
+              scaffoldMessenger.showSnackBar(
+                SnackBar(
+                  content: Text(
+                    paymentMethod == '0' 
+                      ? 'Đăng ký thành công! Vui lòng thanh toán tại quán.'
+                      : 'Đăng ký thành công! Vui lòng chuyển khoản theo QR code.',
+                  ),
+                  backgroundColor: Colors.green,
                 ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () async {
-                  try {
-                    Navigator.pop(context);
-                    // Show loading
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Đang xử lý đăng ký...'),
-                        duration: Duration(seconds: 1),
-                      ),
-                    );
-                    
-                    // Call actual registration service with payment method
-                    await _tournamentService.registerForTournament(
-                      _tournamentData['id'],
-                      paymentMethod: '0', // 0: at venue, 1: QR code
-                    );
-                    
-                    // Update UI state
-                    setState(() {
-                      _isRegistered = true;
-                    });
-                    
-                    // Reload tournament data to get updated participant count
-                    await _loadTournamentData();
-                    
-                    // Show success message
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Đăng ký thành công! Chúc bạn thi đấu tốt.'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  } catch (error) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Đăng ký thất bại: $error'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                },
-                child: const Text('Xác nhận'),
-              ),
-            ),
-          ],
-        ),
+              );
+            }
+          } catch (error) {
+            if (mounted) {
+              scaffoldMessenger.showSnackBar(
+                SnackBar(
+                  content: Text('Đăng ký thất bại: $error'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          }
+        },
       ),
     );
   }
@@ -612,22 +570,25 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
           ),
           ElevatedButton(
             onPressed: () {
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
               Navigator.pop(context);
-              setState(() {
-                _isRegistered = false;
-              });
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Đã rút lui khỏi giải đấu thành công',
-                    style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-                      color: AppTheme.lightTheme.colorScheme.onInverseSurface,
+              if (mounted) {
+                setState(() {
+                  _isRegistered = false;
+                });
+                scaffoldMessenger.showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Đã rút lui khỏi giải đấu thành công',
+                      style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.lightTheme.colorScheme.onInverseSurface,
+                      ),
                     ),
+                    backgroundColor:
+                        AppTheme.lightTheme.colorScheme.inverseSurface,
                   ),
-                  backgroundColor:
-                      AppTheme.lightTheme.colorScheme.inverseSurface,
-                ),
-              );
+                );
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.lightTheme.colorScheme.error,

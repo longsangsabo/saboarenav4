@@ -267,7 +267,8 @@ class TournamentService {
         'tournament_id': tournamentId,
         'user_id': user.id,
         'payment_status': 'pending',
-        'payment_method': paymentMethod,
+        'status': 'registered',
+        'notes': paymentMethod == '0' ? 'Thanh toán tại quán' : 'Thanh toán QR code',
         'registered_at': DateTime.now().toIso8601String(),
       });
 

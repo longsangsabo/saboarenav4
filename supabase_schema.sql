@@ -89,11 +89,14 @@ CREATE TABLE tournaments (
   title VARCHAR(200) NOT NULL,
   description TEXT,
   format VARCHAR(20) NOT NULL, -- 8-Ball, 9-Ball, 10-Ball
+  tournament_type VARCHAR(20) NOT NULL, -- Additional field found in actual schema
+  cover_image TEXT, -- Changed from cover_image_url
   cover_image_url TEXT,
   
   -- Tournament Details
   entry_fee DECIMAL(10,2) DEFAULT 0.00,
   prize_pool DECIMAL(12,2),
+  prize_distribution JSONB, -- Additional field found in actual schema
   max_participants INTEGER NOT NULL,
   current_participants INTEGER DEFAULT 0,
   
@@ -101,21 +104,24 @@ CREATE TABLE tournaments (
   start_date TIMESTAMPTZ NOT NULL,
   end_date TIMESTAMPTZ,
   registration_deadline TIMESTAMPTZ,
+  registration_end_time TIMESTAMPTZ, -- Additional field found in actual schema
   
   -- Tournament Settings
-  skill_level VARCHAR(20), -- beginner, intermediate, advanced, professional
+  skill_level_required VARCHAR(20), -- Changed from skill_level to match actual schema
+  requirements JSONB, -- Additional field found in actual schema
   has_live_stream BOOLEAN DEFAULT false,
   live_stream_url TEXT,
+  is_public BOOLEAN DEFAULT true, -- Additional field found in actual schema
   
   -- Status
   status VARCHAR(20) DEFAULT 'upcoming', -- upcoming, live, completed, cancelled
   
   -- Rules and Notes
-  rules TEXT[],
+  rules JSONB, -- Changed from TEXT[] to JSONB to match actual schema
   notes TEXT,
   
   -- Metadata
-  created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  organizer_id UUID REFERENCES users(id) ON DELETE SET NULL, -- Changed from created_by to match actual schema
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -127,10 +133,13 @@ CREATE TABLE tournament_participants (
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
   
   -- Registration Info
-  registration_date TIMESTAMPTZ DEFAULT NOW(),
+  registered_at TIMESTAMPTZ DEFAULT NOW(), -- Changed from registration_date to match actual schema
   payment_status VARCHAR(20) DEFAULT 'pending', -- pending, paid, refunded
+  status VARCHAR(20) DEFAULT 'registered', -- Additional field found in actual schema (registered, confirmed, cancelled)
+  seed_number INTEGER, -- Additional field found in actual schema for tournament seeding
+  notes TEXT, -- Additional field found in actual schema for payment method and other notes
   
-  -- Tournament Performance
+  -- Tournament Performance (kept as they might be used later)
   final_position INTEGER,
   matches_played INTEGER DEFAULT 0,
   matches_won INTEGER DEFAULT 0,
@@ -473,6 +482,40 @@ CREATE POLICY "Club owners can manage tournaments" ON tournaments FOR ALL USING 
     AND clubs.owner_id = auth.uid()
   )
 );
+CREATE POLICY "Tournament organizers can manage tournaments" ON tournaments FOR ALL USING (auth.uid() = organizer_id);
+
+-- Tournament Participants: Users can register and view participants
+CREATE POLICY "Tournament participants are publicly readable" ON tournament_participants FOR SELECT USING (true);
+CREATE POLICY "Users can register for tournaments" ON tournament_participants FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own participation" ON tournament_participants FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can withdraw from tournaments" ON tournament_participants FOR DELETE USING (auth.uid() = user_id);
+CREATE POLICY "Tournament organizers can manage participants" ON tournament_participants FOR ALL USING (
+  EXISTS (
+    SELECT 1 FROM tournaments t
+    WHERE t.id = tournament_participants.tournament_id 
+    AND t.organizer_id = auth.uid()
+  )
+);
+
+-- Club Members: Club-specific access
+CREATE POLICY "Club members are readable by club members" ON club_members FOR SELECT USING (
+  auth.uid() = user_id OR 
+  EXISTS (
+    SELECT 1 FROM club_members cm 
+    WHERE cm.club_id = club_members.club_id 
+    AND cm.user_id = auth.uid()
+  )
+);
+CREATE POLICY "Users can join clubs" ON club_members FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can leave clubs" ON club_members FOR DELETE USING (auth.uid() = user_id);
+CREATE POLICY "Club admins can manage members" ON club_members FOR ALL USING (
+  EXISTS (
+    SELECT 1 FROM club_members cm
+    WHERE cm.club_id = club_members.club_id 
+    AND cm.user_id = auth.uid() 
+    AND cm.role IN ('owner', 'admin')
+  )
+);
 
 -- Notifications: Users can only see their own
 CREATE POLICY "Users can view own notifications" ON notifications FOR SELECT USING (auth.uid() = user_id);
@@ -582,6 +625,36 @@ CREATE TRIGGER update_stats_after_match
   AFTER UPDATE ON matches 
   FOR EACH ROW 
   EXECUTE FUNCTION update_user_stats_after_match();
+
+-- ========================================
+-- TOURNAMENT PARTICIPANT MANAGEMENT FUNCTIONS
+-- ========================================
+
+-- Function to increment tournament participants
+CREATE OR REPLACE FUNCTION increment_tournament_participants(tournament_id UUID)
+RETURNS void 
+LANGUAGE sql
+AS $$
+  UPDATE tournaments 
+  SET current_participants = current_participants + 1,
+      updated_at = NOW()
+  WHERE id = tournament_id;
+$$;
+
+-- Function to decrement tournament participants
+CREATE OR REPLACE FUNCTION decrement_tournament_participants(tournament_id UUID)
+RETURNS void
+LANGUAGE sql  
+AS $$
+  UPDATE tournaments 
+  SET current_participants = GREATEST(current_participants - 1, 0),
+      updated_at = NOW()
+  WHERE id = tournament_id;
+$$;
+
+-- Grant permissions for tournament functions
+GRANT EXECUTE ON FUNCTION increment_tournament_participants(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION decrement_tournament_participants(UUID) TO authenticated;
 
 -- ========================================
 -- VIEWS FOR COMMON QUERIES
