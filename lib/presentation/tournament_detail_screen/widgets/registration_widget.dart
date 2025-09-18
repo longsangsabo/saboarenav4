@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/layout/responsive.dart';
 
 import '../../../core/app_export.dart';
+import 'payment_options_dialog.dart';
 
 class RegistrationWidget extends StatelessWidget {
   final Map<String, dynamic> tournament;
@@ -104,7 +105,7 @@ class RegistrationWidget extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             height: 56,
-            child: _buildActionButton(canRegister, isDeadlinePassed),
+            child: _buildActionButton(context, canRegister, isDeadlinePassed),
           ),
         ],
       ),
@@ -141,7 +142,7 @@ class RegistrationWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButton(bool canRegister, bool isDeadlinePassed) {
+  Widget _buildActionButton(BuildContext context, bool canRegister, bool isDeadlinePassed) {
     if (isDeadlinePassed) {
       return ElevatedButton(
         onPressed: null,
@@ -214,7 +215,7 @@ class RegistrationWidget extends StatelessWidget {
     }
 
     return ElevatedButton(
-      onPressed: onRegisterTap,
+      onPressed: () => _showPaymentOptions(context),
       style: ElevatedButton.styleFrom(
         backgroundColor: AppTheme.lightTheme.colorScheme.primary,
         shape: RoundedRectangleBorder(
@@ -238,6 +239,28 @@ class RegistrationWidget extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showPaymentOptions(BuildContext context) {
+    final entryFeeText = tournament["entryFee"] as String;
+    final entryFee = double.tryParse(entryFeeText.replaceAll(RegExp(r'[^\d.]'), '')) ?? 0.0;
+    
+    showDialog(
+      context: context,
+      builder: (context) => PaymentOptionsDialog(
+        tournamentId: tournament["id"] as String,
+        tournamentName: tournament["title"] as String,
+        entryFee: entryFee,
+        onPayAtVenue: () {
+          // Handle pay at venue
+          onRegisterTap?.call();
+        },
+        onPayWithQR: () {
+          // Handle QR payment
+          onRegisterTap?.call();
+        },
       ),
     );
   }

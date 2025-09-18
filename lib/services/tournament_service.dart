@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/tournament.dart';
 import '../models/user_profile.dart';
 import '../core/constants/tournament_constants.dart';
+import 'notification_service.dart';
 import 'dart:math' as math;
 
 class TournamentService {
@@ -172,7 +173,69 @@ class TournamentService {
     }
   }
 
-  Future<bool> registerForTournament(String tournamentId) async {
+  Future<List<Map<String, dynamic>>> getTournamentMatches(String tournamentId) async {
+    try {
+      // First get matches
+      final matches = await _supabase
+          .from('matches')
+          .select('*')
+          .eq('tournament_id', tournamentId)
+          .order('round_number')
+          .order('match_number');
+
+      // Then get user profiles separately for better reliability
+      List<String> playerIds = [];
+      for (var match in matches) {
+        if (match['player1_id'] != null) playerIds.add(match['player1_id']);
+        if (match['player2_id'] != null) playerIds.add(match['player2_id']);
+      }
+
+      Map<String, dynamic> userProfiles = {};
+      if (playerIds.isNotEmpty) {
+        final profiles = await _supabase
+            .from('user_profiles')
+            .select('id, full_name, avatar_url, elo_rating, rank')
+            .inFilter('id', playerIds.toSet().toList());
+        
+        for (var profile in profiles) {
+          userProfiles[profile['id']] = profile;
+        }
+      }
+
+      return matches.map<Map<String, dynamic>>((match) {
+        final player1Profile = match['player1_id'] != null ? userProfiles[match['player1_id']] : null;
+        final player2Profile = match['player2_id'] != null ? userProfiles[match['player2_id']] : null;
+        
+        return {
+          "matchId": match['id'],
+          "round": match['round_number'],
+          "player1": player1Profile != null ? {
+            "id": player1Profile['id'],
+            "name": player1Profile['full_name'] ?? 'Player 1',
+            "avatar": player1Profile['avatar_url'] ?? 
+                "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png",
+            "rank": player1Profile['rank'] ?? player1Profile['elo_rating']?.toString() ?? "Chưa xếp hạng",
+            "score": match['player1_score'] ?? 0
+          } : null,
+          "player2": player2Profile != null ? {
+            "id": player2Profile['id'],
+            "name": player2Profile['full_name'] ?? 'Player 2',
+            "avatar": player2Profile['avatar_url'] ?? 
+                "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png",
+            "rank": player2Profile['rank'] ?? player2Profile['elo_rating']?.toString() ?? "Chưa xếp hạng",
+            "score": match['player2_score'] ?? 0
+          } : null,
+          "winner": match['winner_id'] != null ? 
+              (match['winner_id'] == match['player1_id'] ? "player1" : "player2") : null,
+          "status": match['status'] ?? "pending"
+        };
+      }).toList();
+    } catch (error) {
+      throw Exception('Failed to get tournament matches: $error');
+    }
+  }
+
+  Future<bool> registerForTournament(String tournamentId, {String paymentMethod = '0'}) async {
     try {
       final user = _supabase.auth.currentUser;
       if (user == null) throw Exception('User not authenticated');
@@ -204,12 +267,24 @@ class TournamentService {
         'tournament_id': tournamentId,
         'user_id': user.id,
         'payment_status': 'pending',
+        'payment_method': paymentMethod,
         'registered_at': DateTime.now().toIso8601String(),
       });
 
       // Update participant count
       await _supabase.rpc('increment_tournament_participants',
           params: {'tournament_id': tournamentId});
+
+      // Send notification to club admin (fire and forget)
+      try {
+        NotificationService.instance.sendRegistrationNotification(
+          tournamentId: tournamentId,
+          userId: user.id,
+          paymentMethod: paymentMethod,
+        );
+      } catch (e) {
+        print('⚠️ Failed to send notification: $e');
+      }
 
       return true;
     } catch (error) {

@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import '../../core/layout/responsive.dart';
 
 import 'package:sabo_arena/core/app_export.dart';
+import '../../services/tournament_service.dart';
+import '../../models/tournament.dart';
+import '../../models/user_profile.dart';
 
 import 'widgets/tournament_management_panel.dart';
 import 'widgets/tournament_bracket_view.dart';
@@ -30,37 +33,20 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
   late ScrollController _scrollController;
   late TabController _tabController;
   bool _isRegistered = false;
-
-  // Mock tournament data
-  final Map<String, dynamic> _tournamentData = {
-    "id": "tournament_001",
-    "title": "Giải Billiards Mùa Thu 2024",
-    "format": "9-ball",
-    "coverImage":
-        "https://images.unsplash.com/photo-1578662996442-48f60103fc96?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
-    "location": "Câu lạc bộ Billiards Sài Gòn, Quận 1, TP.HCM",
-    "startDate": "15/10/2024",
-    "endDate": "20/10/2024",
-    "registrationDeadline": "10/10/2024 23:59",
-    "currentParticipants": 24,
-    "maxParticipants": 32,
-    "eliminationType": "Loại trực tiếp",
-    "status": "Đang mở đăng ký",
-    "entryFee": "500.000 VNĐ",
-    "rankRequirement": "Rank C trở lên",
-    "description":
-        """Giải đấu Billiards 9-ball chuyên nghiệp dành cho các tay cơ có trình độ từ Rank C trở lên. 
-    
-Giải đấu được tổ chức tại Câu lạc bộ Billiards Sài Gòn với hệ thống bàn cơ chuyên nghiệp và không gian thi đấu rộng rãi, thoáng mát.
-
-Đây là cơ hội tuyệt vời để các tay cơ thể hiện kỹ năng, giao lưu học hỏi và tranh tài giành những phần thưởng hấp dẫn.""",
-    "prizePool": {
-      "total": "10.000.000 VNĐ",
-      "first": "5.000.000 VNĐ",
-      "second": "3.000.000 VNĐ",
-      "third": "2.000.000 VNĐ"
-    }
-  };
+  
+  // Service instances
+  final TournamentService _tournamentService = TournamentService.instance;
+  
+  // State variables
+  Tournament? _tournament;
+  List<UserProfile> _participants = [];
+  List<Map<String, dynamic>> _matches = [];
+  bool _isLoading = true;
+  String? _error;
+  String? _tournamentId;
+  
+  // Tournament data for UI (converted from Tournament model)
+  Map<String, dynamic> _tournamentData = {};
 
   // Mock tournament rules
   final List<String> _tournamentRules = [
@@ -150,103 +136,121 @@ Giải đấu được tổ chức tại Câu lạc bộ Billiards Sài Gòn v�
     }
   ];
 
-  // Mock bracket data
-  final List<Map<String, dynamic>> _bracketData = [
-    {
-      "matchId": "match_001",
-      "round": 1,
-      "player1": {
-        "id": "player_001",
-        "name": "Nguyễn Văn Minh",
-        "avatar":
-            "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png",
-        "rank": "A",
-        "score": 7
-      },
-      "player2": {
-        "id": "player_008",
-        "name": "Ngô Thị Linh",
-        "avatar":
-            "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png",
-        "rank": "C",
-        "score": 3
-      },
-      "winner": "player1",
-      "status": "completed"
-    },
-    {
-      "matchId": "match_002",
-      "round": 1,
-      "player1": {
-        "id": "player_002",
-        "name": "Trần Thị Hương",
-        "avatar":
-            "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png",
-        "rank": "B",
-        "score": 5
-      },
-      "player2": {
-        "id": "player_007",
-        "name": "Bùi Văn Đức",
-        "avatar":
-            "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png",
-        "rank": "A",
-        "score": 7
-      },
-      "winner": "player2",
-      "status": "completed"
-    },
-    {
-      "matchId": "match_003",
-      "round": 1,
-      "player1": {
-        "id": "player_003",
-        "name": "Lê Hoàng Nam",
-        "avatar":
-            "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png",
-        "rank": "A",
-        "score": 4
-      },
-      "player2": {
-        "id": "player_006",
-        "name": "Đặng Thị Mai",
-        "avatar":
-            "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png",
-        "rank": "B",
-        "score": 6
-      },
-      "winner": null,
-      "status": "live"
-    },
-    {
-      "matchId": "match_004",
-      "round": 1,
-      "player1": {
-        "id": "player_004",
-        "name": "Phạm Thị Lan",
-        "avatar":
-            "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png",
-        "rank": "B",
-        "score": null
-      },
-      "player2": {
-        "id": "player_005",
-        "name": "Võ Minh Tuấn",
-        "avatar":
-            "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png",
-        "rank": "C",
-        "score": null
-      },
-      "winner": null,
-      "status": "upcoming"
-    }
-  ];
-
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
     _tabController = TabController(length: 4, vsync: this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_tournamentId == null) {
+      final String? id = ModalRoute.of(context)?.settings.arguments as String?;
+      if (id != null) {
+        _tournamentId = id;
+        _loadTournamentData();
+      }
+    }
+  }
+
+  Future<void> _loadTournamentData() async {
+    if (_tournamentId == null) return;
+    
+    try {
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+
+      // Load tournament details
+      _tournament = await _tournamentService.getTournamentById(_tournamentId!);
+      
+      // Load participants
+      _participants = await _tournamentService.getTournamentParticipants(_tournamentId!);
+      
+      // Load matches
+      _matches = await _tournamentService.getTournamentMatches(_tournamentId!);
+      
+      // Check if user is already registered
+      _isRegistered = await _tournamentService.isRegisteredForTournament(_tournamentId!);
+      
+      // Convert tournament model to UI data format
+      _convertTournamentToUIData();
+      
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _error = e.toString();
+      });
+    }
+  }
+
+  void _convertTournamentToUIData() {
+    if (_tournament == null) return;
+    
+    _tournamentData = {
+      "id": _tournament!.id,
+      "title": _tournament!.title,
+      "format": _tournament!.tournamentType,
+      "coverImage": _tournament!.coverImageUrl ?? 
+          "https://images.unsplash.com/photo-1578662996442-48f60103fc96?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
+      "location": "Từ dữ liệu CLB", // TODO: Get from club data
+      "startDate": _formatDate(_tournament!.startDate),
+      "endDate": _tournament!.endDate != null ? _formatDate(_tournament!.endDate!) : null,
+      "registrationDeadline": _formatDate(_tournament!.registrationDeadline),
+      "currentParticipants": _tournament!.currentParticipants,
+      "maxParticipants": _tournament!.maxParticipants,
+      "eliminationType": _tournament!.tournamentType,
+      "status": _getStatusText(_tournament!.status),
+      "entryFee": _tournament!.entryFee > 0 ? "${_tournament!.entryFee.toStringAsFixed(0)} VNĐ" : "Miễn phí",
+      "rankRequirement": _tournament!.skillLevelRequired ?? "Tất cả",
+      "description": _tournament!.description,
+      "prizePool": {
+        "total": "${_tournament!.prizePool.toStringAsFixed(0)} VNĐ",
+        // TODO: Parse prize distribution if available
+        "first": "${(_tournament!.prizePool * 0.5).toStringAsFixed(0)} VNĐ",
+        "second": "${(_tournament!.prizePool * 0.3).toStringAsFixed(0)} VNĐ",
+        "third": "${(_tournament!.prizePool * 0.2).toStringAsFixed(0)} VNĐ"
+      }
+    };
+  }
+
+  List<Map<String, dynamic>> _convertParticipantsToUIData() {
+    return _participants.map((participant) {
+      return {
+        "id": participant.id,
+        "name": participant.fullName,
+        "avatar": participant.avatarUrl ?? 
+            "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png",
+        "rank": participant.rank ?? participant.skillLevel,
+        "elo": participant.eloRating,
+        "registrationDate": _formatDate(participant.createdAt)
+      };
+    }).toList();
+  }
+
+  String _formatDate(DateTime date) {
+    return "${date.day}/${date.month}/${date.year}";
+  }
+
+  String _getStatusText(String status) {
+    switch (status.toLowerCase()) {
+      case 'upcoming':
+        return 'Sắp diễn ra';
+      case 'registration_open':
+        return 'Đang mở đăng ký';
+      case 'ongoing':
+        return 'Đang diễn ra';
+      case 'completed':
+        return 'Đã kết thúc';
+      default:
+        return status;
+    }
   }
 
   @override
@@ -258,6 +262,60 @@ Giải đấu được tổ chức tại Câu lạc bộ Billiards Sài Gòn v�
 
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
+      body: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    if (_error != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Không thể tải thông tin giải đấu',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _error!,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Colors.grey[500],
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _loadTournamentData,
+              child: const Text('Thử lại'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_tournament == null) {
+      return const Center(
+        child: Text('Không tìm thấy giải đấu'),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
       body: NestedScrollView(
@@ -334,27 +392,46 @@ Giải đấu được tổ chức tại Câu lạc bộ Billiards Sài Gòn v�
 
   Widget _buildBracketTab() {
     return SingleChildScrollView(
-  padding: const EdgeInsets.only(bottom: Gaps.lg),
+      padding: const EdgeInsets.only(bottom: Gaps.lg),
       child: Column(
         children: [
           const SizedBox(height: Gaps.lg),
           TournamentBracketWidget(
             tournament: _tournamentData,
-            bracketData: _bracketData,
+            bracketData: _matches.isNotEmpty ? _matches : _getDefaultBracketData(),
           ),
         ],
       ),
     );
   }
 
+  List<Map<String, dynamic>> _getDefaultBracketData() {
+    // Return empty or placeholder bracket data when no matches exist
+    if (_participants.isEmpty) {
+      return [];
+    }
+    
+    // Generate placeholder matches from participants if tournament hasn't started
+    return [
+      {
+        "matchId": "placeholder_001",
+        "round": 1,
+        "player1": null,
+        "player2": null,
+        "winner": null,
+        "status": "pending"
+      }
+    ];
+  }
+
   Widget _buildParticipantsTab() {
     return SingleChildScrollView(
-  padding: const EdgeInsets.only(bottom: Gaps.lg),
+      padding: const EdgeInsets.only(bottom: Gaps.lg),
       child: Column(
         children: [
           const SizedBox(height: Gaps.lg),
           ParticipantsListWidget(
-            participants: _participantsData,
+            participants: _convertParticipantsToUIData(),
             onViewAllTap: _handleViewAllParticipants,
           ),
         ],
@@ -363,12 +440,20 @@ Giải đấu được tổ chức tại Câu lạc bộ Billiards Sài Gòn v�
   }
 
   Widget _buildRulesTab() {
+    List<String> rules = [];
+    if (_tournament?.rules != null && _tournament!.rules!.isNotEmpty) {
+      // Split rules if they're in a single string
+      rules = _tournament!.rules!.split('\n').where((rule) => rule.trim().isNotEmpty).toList();
+    } else {
+      rules = _tournamentRules; // Fallback to default rules
+    }
+    
     return SingleChildScrollView(
-  padding: const EdgeInsets.only(bottom: Gaps.lg),
+      padding: const EdgeInsets.only(bottom: Gaps.lg),
       child: Column(
         children: [
           const SizedBox(height: Gaps.lg),
-          TournamentRulesWidget(rules: _tournamentRules),
+          TournamentRulesWidget(rules: rules),
         ],
       ),
     );
@@ -394,11 +479,110 @@ Giải đấu được tổ chức tại Câu lạc bộ Billiards Sài Gòn v�
   }
 
   void _handleRegistration() {
-    showModalBottomSheet(
+    // Show success dialog directly without confirmation
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _buildRegistrationBottomSheet(),
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        contentPadding: const EdgeInsets.all(24),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: Colors.green,
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: const Icon(
+                Icons.store,
+                color: Colors.white,
+                size: 30,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Đăng ký thành công!',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Bạn đã đăng ký thành công. Vui lòng thanh toán lệ phí tại quán khi đến thi đấu.',
+              style: Theme.of(context).textTheme.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.green.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                'Lệ phí: ${_tournamentData["entryFee"]}',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: Colors.green,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () async {
+                  try {
+                    Navigator.pop(context);
+                    // Show loading
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Đang xử lý đăng ký...'),
+                        duration: Duration(seconds: 1),
+                      ),
+                    );
+                    
+                    // Call actual registration service with payment method
+                    await _tournamentService.registerForTournament(
+                      _tournamentData['id'],
+                      paymentMethod: '0', // 0: at venue, 1: QR code
+                    );
+                    
+                    // Update UI state
+                    setState(() {
+                      _isRegistered = true;
+                    });
+                    
+                    // Reload tournament data to get updated participant count
+                    await _loadTournamentData();
+                    
+                    // Show success message
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Đăng ký thành công! Chúc bạn thi đấu tốt.'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  } catch (error) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Đăng ký thất bại: $error'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                child: const Text('Xác nhận'),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -460,140 +644,7 @@ Giải đấu được tổ chức tại Câu lạc bộ Billiards Sài Gòn v�
     );
   }
 
-  Widget _buildRegistrationBottomSheet() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.lightTheme.colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-  padding: const EdgeInsets.all(Gaps.xl),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 70,
-            height: 4,
-            decoration: BoxDecoration(
-              color: AppTheme.lightTheme.colorScheme.outline
-                  .withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(height: Gaps.lg),
-          Text(
-            'Xác nhận đăng ký',
-            style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: Gaps.lg),
-          Container(
-            padding: const EdgeInsets.all(Gaps.lg),
-            decoration: BoxDecoration(
-              color: AppTheme.lightTheme.colorScheme.primary
-                  .withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Lệ phí tham gia:',
-                      style: AppTheme.lightTheme.textTheme.bodyLarge,
-                    ),
-                    Text(
-                      _tournamentData["entryFee"] as String,
-                      style:
-                          AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.lightTheme.colorScheme.primary,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: Gaps.sm),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Phí xử lý:',
-                      style: AppTheme.lightTheme.textTheme.bodyLarge,
-                    ),
-                    Text(
-                      '25.000 VNĐ',
-                      style: AppTheme.lightTheme.textTheme.bodyLarge,
-                    ),
-                  ],
-                ),
-                const Divider(height: Gaps.lg),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Tổng cộng:',
-                      style:
-                          AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      '525.000 VNĐ',
-                      style:
-                          AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.lightTheme.colorScheme.primary,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: Gaps.lg),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text('Hủy'),
-                ),
-              ),
-              const SizedBox(width: Gaps.lg),
-              Expanded(
-                flex: 2,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    setState(() {
-                      _isRegistered = true;
-                    });
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Đăng ký thành công! Chúc bạn thi đấu tốt.',
-                          style: AppTheme.lightTheme.textTheme.bodyMedium
-                              ?.copyWith(
-                            color: AppTheme
-                                .lightTheme.colorScheme.onInverseSurface,
-                          ),
-                        ),
-                        backgroundColor:
-                            AppTheme.lightTheme.colorScheme.inverseSurface,
-                      ),
-                    );
-                  },
-                  child: Text('Thanh toán'),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
-        ],
-      ),
-    );
-  }
+
 
   void _handleViewAllParticipants() {
     showModalBottomSheet(
