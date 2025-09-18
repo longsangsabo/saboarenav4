@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../core/app_export.dart';
+import '../../../services/challenge_service.dart';
+import '../../../services/challenge_service_extensions.dart';
+import '../../../services/challenge_rules_service.dart';
 
 class ChallengeModalWidget extends StatefulWidget {
   final Map<String, dynamic> player;
@@ -27,8 +30,9 @@ class _ChallengeModalWidgetState extends State<ChallengeModalWidget> {
   TimeOfDay _selectedTime = TimeOfDay.now();
   String _selectedLocation = '';
   
+  // Challenge validation and handicap info
+  ChallengeHandicapResult? _handicapPreview;
 
-  
   final List<String> _gameTypes = ['8-ball', '9-ball', '10-ball'];
   final List<String> _locations = [
     'Billiards Club Sài Gòn',
@@ -42,6 +46,30 @@ class _ChallengeModalWidgetState extends State<ChallengeModalWidget> {
   void initState() {
     super.initState();
     _selectedLocation = _locations.first;
+  }
+
+  /// Update handicap preview when SPA points change
+  Future<void> _updateHandicapPreview() async {
+    if (_spaPoints == 0 || widget.challengeType != 'thach_dau') {
+      _handicapPreview = null;
+      return;
+    }
+
+    try {
+      final playerId = widget.player['user_id'] as String?;
+      if (playerId == null) return;
+
+      final handicapResult = await ChallengeService.instance.previewChallengeHandicap(
+        challengerId: '', // Will be filled by service from current user
+        challengedId: playerId,
+        spaBetAmount: _spaPoints,
+      );
+
+      _handicapPreview = handicapResult;
+    } catch (error) {
+      print('❌ Error updating handicap preview: $error');
+      _handicapPreview = null;
+    }
   }
 
   @override
@@ -204,39 +232,76 @@ class _ChallengeModalWidgetState extends State<ChallengeModalWidget> {
         Row(
           children: [
             Text(
-              'Handicap',
+              'Handicap (Tự động tính)',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
             const Spacer(),
-            Text(
-              _handicapValue == 0 ? 'Không' : '$_handicapValue bàn',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.w600,
+            // Show handicap preview if available
+            if (_handicapPreview != null && _handicapPreview!.isValid) ...[
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  _handicapPreview!.explanation.isNotEmpty
+                      ? _getHandicapDisplayText()
+                      : 'Không handicap',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onPrimaryContainer,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
-            ),
+            ] else ...[
+              Text(
+                'Chọn SPA để tính',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
           ],
         ),
-        SizedBox(height: 1.h),
-        Slider(
-          value: _handicapValue.toDouble(),
-          min: 0,
-          max: 5,
-          divisions: 5,
-          onChanged: (value) {
-            setState(() {
-              _handicapValue = value.round();
-            });
-          },
-        ),
+        if (_handicapPreview != null && _handicapPreview!.isValid && _handicapPreview!.explanation.isNotEmpty) ...[
+          SizedBox(height: 1.h),
+          Container(
+            padding: EdgeInsets.all(2.w),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              _handicapPreview!.explanation,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }
 
+  String _getHandicapDisplayText() {
+    if (_handicapPreview == null || !_handicapPreview!.isValid) return 'Không handicap';
+    
+    if (_handicapPreview!.challengerHandicap > 0) {
+      return '+${_handicapPreview!.challengerHandicap} bàn';
+    } else if (_handicapPreview!.challengedHandicap > 0) {
+      return 'Đối thủ +${_handicapPreview!.challengedHandicap} bàn';
+    } else {
+      return 'Không handicap';
+    }
+  }
+
   Widget _buildSpaPointsSelection() {
     final theme = Theme.of(context);
+    final spaBettingOptions = ChallengeService.instance.getSpaBettingOptions();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -263,20 +328,42 @@ class _ChallengeModalWidgetState extends State<ChallengeModalWidget> {
         Wrap(
           spacing: 2.w,
           runSpacing: 1.h,
-          children: [0, 10, 20, 50, 100, 200].map((points) {
-            final isSelected = _spaPoints == points;
-            return ChoiceChip(
-              label: Text(points == 0 ? 'Không' : '$points'),
-              selected: isSelected,
+          children: [
+            // No bet option
+            ChoiceChip(
+              label: const Text('Không cược'),
+              selected: _spaPoints == 0,
               onSelected: (selected) {
                 if (selected) {
                   setState(() {
-                    _spaPoints = points;
+                    _spaPoints = 0;
+                    _handicapPreview = null;
                   });
                 }
               },
-            );
-          }).toList(),
+            ),
+            // SPA betting options from rules service
+            ...spaBettingOptions.map((option) {
+              final points = option['amount'] as int;
+              final raceTo = option['raceTo'] as int;
+              final isSelected = _spaPoints == points;
+              
+              return ChoiceChip(
+                label: Text('$points (R-$raceTo)'),
+                selected: isSelected,
+                onSelected: (selected) async {
+                  if (selected) {
+                    setState(() {
+                      _spaPoints = points;
+                    });
+                    
+                    // Calculate handicap preview
+                    await _updateHandicapPreview();
+                  }
+                },
+              );
+            }).toList(),
+          ],
         ),
       ],
     );
@@ -424,23 +511,83 @@ class _ChallengeModalWidgetState extends State<ChallengeModalWidget> {
     }
   }
 
-  void _sendChallenge() {
-    // Handle challenge sending logic here
-    if (widget.onSendChallenge != null) {
-      widget.onSendChallenge!();
-    }
-    Navigator.of(context).pop();
+  void _sendChallenge() async {
+    try {
+      final challengeService = ChallengeService.instance;
+      final playerId = widget.player['id'] ?? widget.player['user_id'] ?? '';
+      
+      // 🔍 STEP 1: Validate challenge before sending
+      if (widget.challengeType == 'thach_dau' && _spaPoints > 0) {
+        final validationResult = await challengeService.validateChallengeBeforeSending(
+          challengedId: playerId,
+          challengeType: widget.challengeType,
+          spaBetAmount: _spaPoints,
+        );
 
-    // Show success message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          widget.challengeType == 'thach_dau'
-              ? 'Đã gửi thách đấu đến ${widget.player["name"]}'
-              : 'Đã gửi lời mời giao lưu đến ${widget.player["name"]}',
-        ),
-        backgroundColor: AppTheme.successLight,
-      ),
-    );
+        if (!validationResult.isValid) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('❌ ${validationResult.errorMessage}'),
+                backgroundColor: Theme.of(context).colorScheme.error,
+              ),
+            );
+          }
+          return;
+        }
+      }
+      
+      // Combine date and time for scheduled time
+      final scheduledDateTime = DateTime(
+        _selectedDate.year,
+        _selectedDate.month,
+        _selectedDate.day,
+        _selectedTime.hour,
+        _selectedTime.minute,
+      );
+
+      // 🚀 STEP 2: Send challenge with validation passed
+      await challengeService.sendChallenge(
+        challengedUserId: playerId,
+        challengeType: widget.challengeType,
+        gameType: _selectedGameType,
+        scheduledTime: scheduledDateTime,
+        location: _selectedLocation,
+        handicap: _handicapValue,
+        spaPoints: _spaPoints,
+        message: 'Thách đấu từ ứng dụng SABO ARENA',
+      );
+
+      if (widget.onSendChallenge != null) {
+        widget.onSendChallenge!();
+      }
+      
+      if (mounted) {
+        Navigator.of(context).pop();
+
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              widget.challengeType == 'thach_dau'
+                  ? 'Đã gửi thách đấu đến ${widget.player["name"]} thành công! 🎯'
+                  : 'Đã gửi lời mời giao lưu đến ${widget.player["name"]} thành công! 🎱',
+            ),
+            backgroundColor: AppTheme.successLight,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi: ${error.toString().replaceAll('Exception: ', '')}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    }
   }
 }

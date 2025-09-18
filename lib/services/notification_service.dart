@@ -108,4 +108,30 @@ Vui lòng xác nhận thanh toán khi thành viên đến thi đấu.
       throw Exception('Failed to mark notification as read: $error');
     }
   }
+
+  /// Send a general notification to a user
+  Future<void> sendNotification({
+    required String userId,
+    required String title,
+    required String message,
+    required String type,
+    Map<String, dynamic>? data,
+  }) async {
+    try {
+      await _supabase.from('notifications').insert({
+        'user_id': userId,
+        'title': title,
+        'message': message,
+        'type': type,
+        'data': data,
+        'created_at': DateTime.now().toIso8601String(),
+        'is_read': false,
+      });
+
+      print('✅ Notification sent successfully to user: $userId');
+    } catch (error) {
+      print('❌ Failed to send notification: $error');
+      throw Exception('Failed to send notification: $error');
+    }
+  }
 }

@@ -122,6 +122,8 @@ class CompetitivePlayTab extends StatelessWidget {
                   itemBuilder: (context, index) {
                     return PlayerCardWidget(
                       player: players[index],
+                      isCompetitiveMode: true,
+                      challengeInfo: _getChallengeInfo(players[index]),
                     );
                   },
                 ),
@@ -239,5 +241,49 @@ class CompetitivePlayTab extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Map<String, dynamic> _getChallengeInfo(UserProfile player) {
+    // Generate dynamic challenge info based on player stats
+    final spaBet = _calculateSpaBet(player.eloRating);
+    final raceTo = _calculateRaceTo(player.eloRating);
+    final playTime = _getAvailablePlayTime();
+    final availability = _getPlayerAvailability();
+
+    return {
+      'spaBet': spaBet,
+      'raceTo': raceTo,
+      'playTime': playTime,
+      'availability': availability,
+    };
+  }
+
+  int _calculateSpaBet(int eloRating) {
+    // SPA bet based on ELO rating
+    if (eloRating >= 2000) return 1000;
+    if (eloRating >= 1800) return 800;
+    if (eloRating >= 1600) return 600;
+    if (eloRating >= 1400) return 500;
+    return 300;
+  }
+
+  int _calculateRaceTo(int eloRating) {
+    // Race to based on skill level
+    if (eloRating >= 2000) return 9;
+    if (eloRating >= 1800) return 8;
+    if (eloRating >= 1600) return 7;
+    return 5;
+  }
+
+  String _getAvailablePlayTime() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return '14:00-16:00';
+    if (hour < 17) return '19:00-21:00';
+    return '21:00-23:00';
+  }
+
+  String _getPlayerAvailability() {
+    final availabilities = ['Rảnh', 'Bận', 'Có thể', 'Hẹn sau'];
+    return availabilities[DateTime.now().millisecond % availabilities.length];
   }
 }
