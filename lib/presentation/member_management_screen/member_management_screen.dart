@@ -5,7 +5,7 @@ import '../../models/member_analytics.dart';
 import '../../models/member_data.dart';
 import '../../theme/app_theme.dart';
 import '../../services/member_management_service.dart';
-import '../tournament_create_screen/tournament_create_screen_simple.dart';
+import '../tournament_management_screen/tournament_management_screen.dart';
 import '../club_settings_screen/club_settings_screen.dart';
 import 'widgets/member_search_bar.dart';
 import 'widgets/member_filter_section.dart';
@@ -522,7 +522,7 @@ class _MemberManagementScreenState extends State<MemberManagementScreen>
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => TournamentCreateScreenSimple(clubId: widget.clubId),
+                builder: (context) => TournamentManagementScreen(clubId: widget.clubId),
               ),
             );
             break;

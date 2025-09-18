@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:sabo_arena/core/app_export.dart';
 import 'package:sabo_arena/theme/theme_extensions.dart';
 import 'package:sabo_arena/utils/size_extensions.dart';
+import '../../services/tournament_service.dart';
+import '../../core/constants/ranking_constants.dart';
 
 class TournamentCreationWizard extends StatefulWidget {
   final String? clubId;
@@ -20,6 +21,28 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
   
   late PageController _pageController;
   int _currentStep = 0;
+  bool _isCreating = false;
+  
+  // Form keys for validation
+  final _basicInfoFormKey = GlobalKey<FormState>();
+  final _scheduleFormKey = GlobalKey<FormState>();
+  final _financialFormKey = GlobalKey<FormState>();
+  final _reviewFormKey = GlobalKey<FormState>();
+  
+  // Text controllers
+  final _nameController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  final _venueController = TextEditingController();
+  final _entryFeeController = TextEditingController();
+  final _prizePoolController = TextEditingController();
+  final _rulesController = TextEditingController();
+  final _contactInfoController = TextEditingController();
+  
+  // Services
+  final _tournamentService = TournamentService.instance;
+  
+  // Validation errors
+  Map<String, String> _errors = {};
   
   // Tournament data with comprehensive fields
   Map<String, dynamic> _tournamentData = {
@@ -96,10 +119,28 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
   @override
   void dispose() {
     _pageController.dispose();
+    _nameController.dispose();
+    _descriptionController.dispose();
+    _venueController.dispose();
+    _entryFeeController.dispose();
+    _prizePoolController.dispose();
+    _rulesController.dispose();
+    _contactInfoController.dispose();
     super.dispose();
   }
 
   void _nextStep() {
+    // Validate current step before proceeding
+    if (!_validateCurrentStep()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Vui lòng điền đầy đủ thông tin bắt buộc'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     if (_currentStep < _stepTitles.length - 1) {
       setState(() {
         _currentStep++;
@@ -254,7 +295,9 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
     
     return SingleChildScrollView(
       padding: EdgeInsets.all(20.h),
-      child: Column(
+      child: Form(
+        key: _basicInfoFormKey,
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
@@ -267,6 +310,7 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
           
           // Tournament name (3-100 chars, required)
           TextFormField(
+            controller: _nameController,
             maxLength: 100,
             decoration: InputDecoration(
               labelText: 'Tên giải đấu *',
@@ -287,6 +331,7 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
           
           // Description (10-1000 chars, optional)
           TextFormField(
+            controller: _descriptionController,
             maxLines: 3,
             maxLength: 1000,
             decoration: InputDecoration(
@@ -376,7 +421,7 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
           ),
         ],
       ),
-    );
+    ));
   }
 
   Widget _buildScheduleVenueStep(BuildContext context) {
@@ -384,7 +429,9 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
     
     return SingleChildScrollView(
       padding: EdgeInsets.all(20.h),
-      child: Column(
+      child: Form(
+        key: _scheduleFormKey,
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
@@ -433,6 +480,7 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
           
           // Venue Address
           TextFormField(
+            controller: _venueController,
             maxLength: 200,
             decoration: InputDecoration(
               labelText: 'Địa chỉ tổ chức *',
@@ -450,7 +498,7 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
           ),
         ],
       ),
-    );
+    ));
   }
 
   Widget _buildFinancialRequirementsStep(BuildContext context) {
@@ -458,7 +506,9 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
     
     return SingleChildScrollView(
       padding: EdgeInsets.all(20.h),
-      child: Column(
+      child: Form(
+        key: _financialFormKey,
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
@@ -471,6 +521,7 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
           
           // Entry Fee
           TextFormField(
+            controller: _entryFeeController,
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
               labelText: 'Phí đăng ký (VNĐ) *',
@@ -487,6 +538,7 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
           
           // Prize Pool
           TextFormField(
+            controller: _prizePoolController,
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
               labelText: 'Tổng giải thưởng (VNĐ) *',
@@ -542,7 +594,7 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
           ),
         ],
       ),
-    );
+    ));
   }
 
   Widget _buildRulesReviewStep(BuildContext context) {
@@ -550,7 +602,9 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
     
     return SingleChildScrollView(
       padding: EdgeInsets.all(20.h),
-      child: Column(
+      child: Form(
+        key: _reviewFormKey,
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
@@ -563,6 +617,7 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
           
           // Tournament Rules
           TextFormField(
+            controller: _rulesController,
             maxLines: 5,
             maxLength: 2000,
             decoration: InputDecoration(
@@ -580,6 +635,7 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
           
           // Contact Info
           TextFormField(
+            controller: _contactInfoController,
             maxLength: 200,
             decoration: InputDecoration(
               labelText: 'Thông tin liên hệ',
@@ -603,24 +659,47 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: _validateAndPublish,
+              onPressed: _isCreating ? null : _validateAndPublish,
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(vertical: 16.h),
-                backgroundColor: appTheme.green600,
+                backgroundColor: context.appTheme.primary,
               ),
-              child: Text(
-                'Tạo giải đấu',
-                style: TextStyle(
-                  fontSize: 16.fSize,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
+              child: _isCreating
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        ),
+                        SizedBox(width: 12),
+                        Text(
+                          'Đang tạo giải đấu...',
+                          style: TextStyle(
+                            fontSize: 16.fSize,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    )
+                  : Text(
+                      'Tạo giải đấu',
+                      style: TextStyle(
+                        fontSize: 16.fSize,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
             ),
           ),
         ],
       ),
-    );
+    ));
   }
 
   Widget _buildDateTimePicker({
@@ -691,7 +770,8 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
   }
 
   List<DropdownMenuItem<String>> _getRankOptions() {
-    final ranks = ['K', 'J', 'I', 'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A', 'E+'];
+    // Vietnamese billiards ranking system (12 tiers) from RankingConstants
+    final ranks = RankingConstants.RANK_ORDER;
     return ranks.map((rank) => 
       DropdownMenuItem(
         value: rank,
@@ -747,18 +827,160 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
     );
   }
 
-  void _validateAndPublish() {
-    // TODO: Add comprehensive validation
-    if (_tournamentData['name']?.isEmpty == true) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Vui lòng nhập tên giải đấu')),
-      );
+  void _validateAndPublish() async {
+    print('🔍 Tournament creation validation started');
+    
+    // Validate all forms
+    bool isValid = true;
+    _errors.clear();
+
+    // Validate current step form
+    if (!_validateCurrentStep()) {
+      print('❌ Current step validation failed');
+      isValid = false;
+    }
+
+    // Manual validation of required fields - check from controllers
+    print('🔍 Validating fields:');
+    print('  Name: "${_nameController.text}"');
+    print('  Venue: "${_venueController.text}"');
+    print('  Registration Start: ${_tournamentData['registrationStartDate']}');
+    print('  Tournament Start: ${_tournamentData['tournamentStartDate']}');
+    
+    if (_nameController.text.isEmpty) {
+      _errors['name'] = 'Vui lòng nhập tên giải đấu';
+      isValid = false;
+      print('❌ Name validation failed');
+    }
+
+    if (_venueController.text.isEmpty) {
+      _errors['venue'] = 'Vui lòng nhập địa chỉ tổ chức';
+      isValid = false;
+      print('❌ Venue validation failed');
+    }
+
+    if (_tournamentData['registrationStartDate'] == null) {
+      _errors['registrationStartDate'] = 'Vui lòng chọn thời gian mở đăng ký';
+      isValid = false;
+    }
+
+    if (_tournamentData['tournamentStartDate'] == null) {
+      _errors['tournamentStartDate'] = 'Vui lòng chọn thời gian bắt đầu giải';
+      isValid = false;
+    }
+
+    if (!isValid) {
+      print('❌ Validation failed with errors: $_errors');
+      _showValidationErrors();
       return;
     }
     
-    // TODO: Validate all required fields and business logic
-    
-    Navigator.of(context).pop(_tournamentData);
+    print('✅ All validation passed, creating tournament...');
+
+    // Sync final data from controllers
+    _tournamentData['name'] = _nameController.text;
+    _tournamentData['description'] = _descriptionController.text;
+    _tournamentData['venue'] = _venueController.text;
+    _tournamentData['entryFee'] = double.tryParse(_entryFeeController.text) ?? 0.0;
+    _tournamentData['prizePool'] = double.tryParse(_prizePoolController.text) ?? 0.0;
+    _tournamentData['rules'] = _rulesController.text;
+    _tournamentData['contactInfo'] = _contactInfoController.text;
+
+    // Set loading state
+    setState(() => _isCreating = true);
+
+    try {
+      // Create tournament using service with proper parameters
+      final tournament = await _tournamentService.createTournament(
+        clubId: widget.clubId ?? '',
+        title: _tournamentData['name'] ?? '',
+        description: _tournamentData['description'] ?? '',
+        startDate: _tournamentData['tournamentStartDate'] ?? DateTime.now(),
+        registrationDeadline: _tournamentData['registrationEndDate'] ?? DateTime.now(),
+        maxParticipants: _tournamentData['maxParticipants'] ?? 16,
+        entryFee: _tournamentData['entryFee'] ?? 0.0,
+        prizePool: _tournamentData['prizePool'] ?? 0.0,
+        // skillLevelRequired: removed - không dùng nữa
+        rules: _tournamentData['rules'],
+        requirements: _buildRequirements(),
+      );
+      
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Giải đấu "${tournament.title}" đã được tạo thành công!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      
+      // Return tournament data to parent
+      Navigator.of(context).pop(tournament);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Lỗi khi tạo giải đấu: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() => _isCreating = false);
+    }
   }
+
+  String _buildRequirements() {
+    List<String> requirements = [];
+    
+    if (_tournamentData['minRank']?.isNotEmpty == true) {
+      requirements.add('Hạng tối thiểu: ${_tournamentData['minRank']}');
+    }
+    
+    if (_tournamentData['maxRank']?.isNotEmpty == true) {
+      requirements.add('Hạng tối đa: ${_tournamentData['maxRank']}');
+    }
+    
+    if (_tournamentData['gameType']?.isNotEmpty == true) {
+      requirements.add('Môn thi đấu: ${_tournamentData['gameType']}');
+    }
+    
+    if (_tournamentData['format']?.isNotEmpty == true) {
+      requirements.add('Hình thức: ${_tournamentData['format']}');
+    }
+    
+    return requirements.join('; ');
+  }
+
+  bool _validateCurrentStep() {
+    switch (_currentStep) {
+      case 0:
+        return _basicInfoFormKey.currentState?.validate() ?? false;
+      case 1:
+        return _scheduleFormKey.currentState?.validate() ?? false;
+      case 2:
+        return _financialFormKey.currentState?.validate() ?? false;
+      case 3:
+        return _reviewFormKey.currentState?.validate() ?? false;
+      default:
+        return true;
+    }
+  }
+
+  void _showValidationErrors() {
+    final errorMessages = _errors.values.join('\n');
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Lỗi validation'),
+        content: Text(errorMessages),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+
 
 }

@@ -282,17 +282,17 @@ class _MemberFilterSectionState extends State<MemberFilterSection>
       child: Row(
         children: [
           Expanded(
-            child: DropdownButtonFormField<RankType>(
+            child: DropdownButtonFormField<String>(
               value: _currentFilters.minRank,
               decoration: InputDecoration(
                 labelText: 'Từ',
                 border: OutlineInputBorder(),
                 contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
-              items: RankType.values.map((rank) {
+              items: ['beginner', 'amateur', 'intermediate', 'advanced', 'professional'].map((rank) {
                 return DropdownMenuItem(
                   value: rank,
-                  child: Text(_getRankLabel(rank)),
+                  child: Text(_getRankLabelFromString(rank)),
                 );
               }).toList(),
               onChanged: (value) {
@@ -315,17 +315,17 @@ class _MemberFilterSectionState extends State<MemberFilterSection>
           Text('đến'),
           SizedBox(width: 8),
           Expanded(
-            child: DropdownButtonFormField<RankType>(
+            child: DropdownButtonFormField<String>(
               value: _currentFilters.maxRank,
               decoration: InputDecoration(
                 labelText: 'Đến',
                 border: OutlineInputBorder(),
                 contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
-              items: RankType.values.map((rank) {
+              items: ['beginner', 'amateur', 'intermediate', 'advanced', 'professional'].map((rank) {
                 return DropdownMenuItem(
                   value: rank,
-                  child: Text(_getRankLabel(rank)),
+                  child: Text(_getRankLabelFromString(rank)),
                 );
               }).toList(),
               onChanged: (value) {
@@ -571,6 +571,23 @@ class _MemberFilterSectionState extends State<MemberFilterSection>
         return 'Nâng cao';
       case RankType.professional:
         return 'Chuyên nghiệp';
+    }
+  }
+
+  String _getRankLabelFromString(String rank) {
+    switch (rank) {
+      case 'beginner':
+        return 'Mới bắt đầu';
+      case 'amateur':
+        return 'Nghiệp dư';
+      case 'intermediate':
+        return 'Trung bình';
+      case 'advanced':  
+        return 'Nâng cao';
+      case 'professional':
+        return 'Chuyên nghiệp';
+      default:
+        return 'Không xác định';
     }
   }
 }

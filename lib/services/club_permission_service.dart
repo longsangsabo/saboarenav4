@@ -43,40 +43,120 @@ enum ClubPermission {
   moderateComments,
 }
 
+/// Cached role with timestamp for expiry
+class _CachedRole {
+  final ClubRole role;
+  final DateTime timestamp;
+
+  _CachedRole(this.role, this.timestamp);
+}
+
 class ClubPermissionService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
-  // Cache for user's club roles
-  final Map<String, ClubRole> _roleCache = {};
+  // Cache for user's club roles with timestamp
+  final Map<String, _CachedRole> _roleCache = {};
+  
+  // Cache duration (5 minutes)
+  static const Duration _cacheDuration = Duration(minutes: 5);
 
-  /// Get user's role in a specific club
-  Future<ClubRole> getUserRoleInClub(String clubId, {String? userId}) async {
+  /// Clear cache for specific user/club combination
+  void clearCache({String? clubId, String? userId}) {
+    if (clubId != null && userId != null) {
+      _roleCache.remove('${clubId}_$userId');
+    } else {
+      _roleCache.clear();
+    }
+  }
+
+  /// Force refresh user role by clearing cache and fetching fresh data
+  Future<ClubRole> refreshUserRole(String clubId, {String? userId}) async {
+    userId ??= _supabase.auth.currentUser?.id;
+    if (userId != null) {
+      clearCache(clubId: clubId, userId: userId);
+    }
+    return await getUserRoleInClub(clubId, userId: userId);
+  }
+
+  /// Debug method to check membership details
+  Future<Map<String, dynamic>> debugMembership(String clubId, {String? userId}) async {
     try {
       userId ??= _supabase.auth.currentUser?.id;
-      if (userId == null) return ClubRole.none;
+      if (userId == null) return {'error': 'No user ID'};
 
-      // Check cache first
-      final cacheKey = '${clubId}_$userId';
-      if (_roleCache.containsKey(cacheKey)) {
-        return _roleCache[cacheKey]!;
-      }
+      print('🔍 DEBUG: Checking membership for user $userId in club $clubId');
 
-      // Query database for user's role in this club
+      // Query all membership data
       final response = await _supabase
           .from('club_members')
-          .select('role, status')
+          .select('*')
           .eq('club_id', clubId)
           .eq('user_id', userId)
           .maybeSingle();
 
       if (response == null) {
-        _roleCache[cacheKey] = ClubRole.none;
+        print('❌ DEBUG: No membership record found');
+        return {'error': 'No membership record found'};
+      }
+
+      print('✅ DEBUG: Membership data: $response');
+      return response;
+    } catch (e) {
+      print('❌ DEBUG: Error querying membership: $e');
+      return {'error': e.toString()};
+    }
+  }
+
+  /// Get user's role in a specific club with improved caching and error handling
+  Future<ClubRole> getUserRoleInClub(String clubId, {String? userId}) async {
+    try {
+      userId ??= _supabase.auth.currentUser?.id;
+      if (userId == null) {
+        print('❌ ClubPermissionService: No user ID available');
+        return ClubRole.none;
+      }
+
+      final cacheKey = '${clubId}_$userId';
+      print('🔍 ClubPermissionService: Checking role for user $userId in club $clubId');
+
+      // Check cache first and validate expiry
+      if (_roleCache.containsKey(cacheKey)) {
+        final cached = _roleCache[cacheKey]!;
+        if (DateTime.now().difference(cached.timestamp) < _cacheDuration) {
+          print('✅ ClubPermissionService: Using cached role: ${cached.role}');
+          return cached.role;
+        } else {
+          print('⏰ ClubPermissionService: Cache expired, removing entry');
+          _roleCache.remove(cacheKey);
+        }
+      }
+
+      print('🔄 ClubPermissionService: Querying database for role...');
+
+      // Query database with timeout
+      final response = await _supabase
+          .from('club_members')
+          .select('role, status')
+          .eq('club_id', clubId)
+          .eq('user_id', userId)
+          .maybeSingle()
+          .timeout(Duration(seconds: 10), onTimeout: () {
+            print('⚠️ ClubPermissionService: Database query timeout');
+            return null;
+          });
+
+      if (response == null) {
+        print('❌ ClubPermissionService: User not found in club members');
+        final cached = _CachedRole(ClubRole.none, DateTime.now());
+        _roleCache[cacheKey] = cached;
         return ClubRole.none;
       }
 
       // Check if membership is active
       if (response['status'] != 'active') {
-        _roleCache[cacheKey] = ClubRole.none;
+        print('❌ ClubPermissionService: User membership is not active: ${response['status']}');
+        final cached = _CachedRole(ClubRole.none, DateTime.now());
+        _roleCache[cacheKey] = cached;
         return ClubRole.none;
       }
 
@@ -96,11 +176,15 @@ class ClubPermissionService {
           role = ClubRole.none;
       }
 
-      // Cache the result
-      _roleCache[cacheKey] = role;
+      print('✅ ClubPermissionService: Found role: $role (status: ${response['status']})');
+
+      // Cache the result with timestamp
+      final cached = _CachedRole(role, DateTime.now());
+      _roleCache[cacheKey] = cached;
       return role;
     } catch (e) {
-      print('Error getting user role in club: $e');
+      print('❌ ClubPermissionService: Error getting user role in club: $e');
+      // Don't cache errors, allow retry
       return ClubRole.none;
     }
   }

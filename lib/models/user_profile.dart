@@ -25,6 +25,9 @@ class UserProfile {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  // Getter for compatibility
+  int get rankingPoints => eloRating;
+
   const UserProfile({
     required this.id,
     required this.email,

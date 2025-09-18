@@ -852,17 +852,112 @@ class _ClubDashboardScreenSimpleState extends State<ClubDashboardScreenSimple> {
   }
 
   void _navigateToTournamentCreate() async {
-    // Check permission first
-    final canCreate = await _permissionService.canManageTournaments(widget.clubId);
-    
-    if (!canCreate) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Bạn không có quyền tạo giải đấu trong club này'),
-          backgroundColor: Colors.red,
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
         ),
       );
-      return;
+
+      print('🔍 Checking tournament creation permission for club: ${widget.clubId}');
+      
+      // Get current user ID
+      final currentUser = AuthService.instance.currentUser;
+      if (currentUser == null) {
+        Navigator.pop(context); // Close loading dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Vui lòng đăng nhập để tiếp tục'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+      
+      print('🔍 Current user ID: ${currentUser.id}');
+      
+      // Debug membership first
+      final membershipDebug = await _permissionService.debugMembership(widget.clubId);
+      print('🔍 Membership debug: $membershipDebug');
+
+      // Force refresh user role to get latest data from database
+      final userRole = await _permissionService.refreshUserRole(widget.clubId);
+      print('🔍 User role in club (refreshed): $userRole');
+      
+      Navigator.pop(context); // Close loading dialog
+      
+      // Check if user has permission to create tournaments
+      bool hasPermission = false;
+      String errorMessage = '';
+      
+      switch (userRole) {
+        case ClubRole.owner:
+        case ClubRole.admin:
+          hasPermission = true;
+          break;
+        case ClubRole.member:
+          // Members can create tournaments too based on permissions
+          hasPermission = await _permissionService.canManageTournaments(widget.clubId);
+          errorMessage = 'Thành viên thường không có quyền tạo giải đấu';
+          break;
+        case ClubRole.none:
+          hasPermission = false;
+          errorMessage = 'Bạn không phải là thành viên của club này';
+          break;
+      }
+      
+      if (!hasPermission) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('$errorMessage. Role hiện tại: $userRole'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 4),
+            action: SnackBarAction(
+              label: 'Thử lại',
+              onPressed: () => _navigateToTournamentCreate(),
+            ),
+          ),
+        );
+        return;
+      }
+      
+      print('✅ User has permission - navigating to tournament creation');
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => TournamentCreationWizard(
+            clubId: widget.clubId,
+          ),
+        ),
+      ).then((result) {
+        if (result != null && result is Map<String, dynamic>) {
+          // Refresh dashboard if tournament was created successfully
+          _loadData();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Giải đấu đã được tạo thành công!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      });
+      
+    } catch (e) {
+      Navigator.pop(context); // Close loading dialog if still open
+      print('❌ Error checking permissions: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Lỗi kiểm tra quyền: ${e.toString()}'),
+          backgroundColor: Colors.red,
+          action: SnackBarAction(
+            label: 'Thử lại',
+            onPressed: () => _navigateToTournamentCreate(),
+          ),
+        ),
+      );
     }
 
     Navigator.push(

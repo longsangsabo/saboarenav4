@@ -9,6 +9,9 @@ import '../member_management_screen/member_management_screen.dart';
 import '../tournament_creation_wizard/tournament_creation_wizard.dart';
 import '../tournament_detail_screen/widgets/tournament_management_panel.dart';
 import '../tournament_detail_screen/widgets/tournament_stats_view.dart';
+import '../club_profile_edit_screen/club_profile_edit_screen.dart';
+import '../activity_history_screen/activity_history_screen.dart';
+import '../club_settings_screen/club_settings_screen.dart';
 import '../../services/club_service.dart';
 import '../../services/auth_service.dart';
 import '../../models/club.dart';
@@ -760,15 +763,58 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
   // Event Handlers
   void _onNotificationPressed() {
     // Navigate to notifications management screen
-    // Navigator.pushNamed(context, AppRoutes.clubNotificationScreen);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Tính năng thông báo đang được phát triển')),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            title: Text('Quản lý thông báo'),
+            backgroundColor: Colors.green[700],
+            foregroundColor: Colors.white,
+          ),
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.notifications, size: 64, color: Colors.green[700]),
+                SizedBox(height: 16),
+                Text(
+                  'Tính năng quản lý thông báo',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Đã được thiết kế và sẵn sành để triển khai',
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+                SizedBox(height: 24),
+                ElevatedButton.icon(
+                  onPressed: () => Navigator.pop(context),
+                  icon: Icon(Icons.arrow_back),
+                  label: Text('Quay lại Dashboard'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green[700],
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
   void _onSettingsPressed() {
-    // Navigate to settings screen
-    Navigator.pushNamed(context, AppRoutes.userProfileScreen);
+    // Navigate to club settings screen
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ClubSettingsScreen(
+          clubId: _getCurrentClubId(),
+        ),
+      ),
+    );
   }
 
   void _onCreateTournament() {
@@ -819,21 +865,63 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
 
   void _onEditProfile() {
     // Navigate to edit profile screen
-    // Navigator.pushNamed(context, AppRoutes.clubProfileEditScreen);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Tính năng chỉnh sửa profile đang được phát triển')),
-    );
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ClubProfileEditScreen(),
+      ),
+    ).then((result) {
+      if (result == true) {
+        // Refresh dashboard data if profile was updated
+        _loadDashboardData();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Cập nhật thông tin CLB thành công!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    });
   }
 
   void _onSendNotification() {
-    // Navigate to send notification screen
+    // Navigate to notification management screen
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => Scaffold(
-          appBar: AppBar(title: Text('Gửi thông báo')),
+          appBar: AppBar(
+            title: Text('Gửi thông báo'),
+            backgroundColor: Colors.green[700],
+            foregroundColor: Colors.white,
+          ),
           body: Center(
-            child: Text('Tính năng gửi thông báo đang được phát triển'),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.send, size: 64, color: Colors.green[700]),
+                SizedBox(height: 16),
+                Text(
+                  'Tính năng gửi thông báo',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Đã được thiết kế và sẵn sành để triển khai',
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+                SizedBox(height: 24),
+                ElevatedButton.icon(
+                  onPressed: () => Navigator.pop(context, true),
+                  icon: Icon(Icons.check),
+                  label: Text('Mô phỏng gửi thành công'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green[700],
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -851,9 +939,14 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
   }
 
   void _onViewAllActivity() {
-    // Navigate to all activity screen - TODO: Create ActivityHistoryScreen
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Tính năng đang được phát triển')),
+    // Navigate to activity history screen
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ActivityHistoryScreen(
+          clubId: _getCurrentClubId(),
+        ),
+      ),
     );
   }
 

@@ -166,7 +166,6 @@ class _TournamentOverviewTab extends StatelessWidget {
   final VoidCallback? onStatusChanged;
 
   const _TournamentOverviewTab({
-    super.key,
     required this.tournamentId,
     required this.tournamentStatus,
     this.onStatusChanged,
@@ -607,7 +606,7 @@ class _TournamentOverviewTab extends StatelessWidget {
 class _ParticipantManagementTab extends StatelessWidget {
   final String tournamentId;
 
-  const _ParticipantManagementTab({super.key, required this.tournamentId});
+  const _ParticipantManagementTab({required this.tournamentId});
 
   @override
   Widget build(BuildContext context) {
@@ -651,7 +650,7 @@ class _BracketManagementTab extends StatelessWidget {
 class _MatchManagementTab extends StatelessWidget {
   final String tournamentId;
 
-  const _MatchManagementTab({super.key, required this.tournamentId});
+  const _MatchManagementTab({required this.tournamentId});
 
   @override
   Widget build(BuildContext context) {
@@ -675,7 +674,6 @@ class _TournamentSettingsTab extends StatelessWidget {
   final VoidCallback? onStatusChanged;
 
   const _TournamentSettingsTab({
-    super.key,
     required this.tournamentId,
     this.onStatusChanged,
   });

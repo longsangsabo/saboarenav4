@@ -625,32 +625,27 @@ class _AddMemberDialogState extends State<AddMemberDialog>
     return MemberData(
       id: 'new_member_${now.millisecondsSinceEpoch}',
       user: UserInfo(
+        id: 'user_${now.millisecondsSinceEpoch}',
         avatar: 'https://images.unsplash.com/photo-1580000000000?w=100&h=100&fit=crop&crop=face',
         name: _nameController.text.isNotEmpty ? _nameController.text : _usernameController.text,
         username: _usernameController.text,
-        rank: RankType.beginner,
+        rank: 'beginner',
         elo: 1000,
         isOnline: false,
       ),
       membershipInfo: MembershipInfo(
-        type: _selectedMembershipType,
-        status: MemberStatus.pending,
-        joinDate: now,
         membershipId: 'MB${1000 + now.millisecond}',
+        joinDate: now,
+        status: 'pending',
+        type: _selectedMembershipType.toString().split('.').last,
         autoRenewal: false,
       ),
       activityStats: ActivityStats(
-        lastActive: now,
-        totalMatches: 0,
-        tournamentsJoined: 0,
-        winRate: 0.0,
         activityScore: 0,
-      ),
-      engagement: EngagementStats(
-        postsCount: 0,
-        commentsCount: 0,
-        likesReceived: 0,
-        socialScore: 0,
+        winRate: 0.0,
+        totalMatches: 0,
+        lastActive: now,
+        tournamentsJoined: 0,
       ),
     );
   }

@@ -413,23 +413,23 @@ class _MemberListItemState extends State<MemberListItem>
   }
 
   Widget _buildStatusBadge() {
-    Color statusColor;
-    IconData statusIcon;
+    Color statusColor = Colors.grey;
+    IconData statusIcon = Icons.help;
     
     switch (widget.member.membershipInfo.status) {
-      case MemberStatus.active:
+      case 'active':
         statusColor = Colors.green;
         statusIcon = Icons.check_circle;
         break;
-      case MemberStatus.inactive:
+      case 'inactive':
         statusColor = Colors.grey;
         statusIcon = Icons.pause_circle;
         break;
-      case MemberStatus.suspended:
+      case 'suspended':
         statusColor = Colors.orange;
         statusIcon = Icons.block;
         break;
-      case MemberStatus.pending:
+      case 'pending':
         statusColor = Colors.blue;
         statusIcon = Icons.pending;
         break;
@@ -451,53 +451,61 @@ class _MemberListItemState extends State<MemberListItem>
 
   Color _getMembershipColor() {
     switch (widget.member.membershipInfo.type) {
-      case MembershipType.regular:
+      case 'regular':
         return Colors.grey;
-      case MembershipType.vip:
+      case 'vip':
         return Colors.amber;
-      case MembershipType.premium:
+      case 'premium':
         return Colors.purple;
+      default:
+        return Colors.grey;
     }
   }
 
   String _getMembershipLabel() {
     switch (widget.member.membershipInfo.type) {
-      case MembershipType.regular:
+      case 'regular':
         return 'REG';
-      case MembershipType.vip:
+      case 'vip':
         return 'VIP';
-      case MembershipType.premium:
+      case 'premium':
         return 'PRE';
+      default:
+        return 'REG';
     }
   }
 
   Color _getRankColor() {
     switch (widget.member.user.rank) {
-      case RankType.beginner:
+      case 'beginner':
         return Colors.green;
-      case RankType.amateur:
+      case 'amateur':
         return Colors.blue;
-      case RankType.intermediate:
+      case 'intermediate':
         return Colors.orange;
-      case RankType.advanced:
+      case 'advanced':
         return Colors.red;
-      case RankType.professional:
+      case 'professional':
         return Colors.purple;
+      default:
+        return Colors.grey;
     }
   }
 
   String _getRankLabel() {
     switch (widget.member.user.rank) {
-      case RankType.beginner:
+      case 'beginner':
         return 'Mới';
-      case RankType.amateur:
+      case 'amateur':
         return 'Nghiệp dư';
-      case RankType.intermediate:
+      case 'intermediate':
         return 'Trung bình';
-      case RankType.advanced:
+      case 'advanced':
         return 'Nâng cao';
-      case RankType.professional:
+      case 'professional':
         return 'Chuyên nghiệp';
+      default:
+        return 'Không xác định';
     }
   }
 

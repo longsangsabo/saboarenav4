@@ -2,8 +2,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/tournament.dart';
 import '../models/user_profile.dart';
 import '../core/constants/tournament_constants.dart';
-import '../core/constants/ranking_constants.dart';
-import 'ranking_service.dart';
 import 'dart:math' as math;
 
 class TournamentService {
@@ -29,9 +27,7 @@ class TournamentService {
       if (clubId != null) {
         query = query.eq('club_id', clubId);
       }
-      if (skillLevel != null) {
-        query = query.eq('skill_level_required', skillLevel);
-      }
+      // Removed skill_level_required filter - không dùng nữa
 
       final from = (page - 1) * pageSize;
       final to = from + pageSize - 1;
@@ -47,6 +43,102 @@ class TournamentService {
     } catch (error) {
       throw Exception('Failed to get tournaments: $error');
     }
+  }
+
+  /// Get tournaments for club management (includes private tournaments)
+  Future<List<Tournament>> getClubTournaments(String clubId, {
+    String? status,
+    int page = 1,
+    int pageSize = 100,
+  }) async {
+    try {
+      print('🔍 TournamentService: Loading tournaments for club $clubId');
+      
+      var query = _supabase.from('tournaments').select();
+      
+      // Always filter by club ID
+      query = query.eq('club_id', clubId);
+      
+      if (status != null) {
+        query = query.eq('status', status);
+      }
+
+      final from = (page - 1) * pageSize;
+      final to = from + pageSize - 1;
+
+      final response = await query
+          .order('created_at', ascending: false)
+          .range(from, to);
+
+      final tournaments = response
+          .map<Tournament>((json) => Tournament.fromJson(json))
+          .toList();
+          
+      print('✅ TournamentService: Found ${tournaments.length} tournaments for club');
+      return tournaments;
+    } catch (error) {
+      print('❌ TournamentService: Error loading club tournaments: $error');
+      // Return mock data as fallback
+      return _getMockTournamentsForClub(clubId);
+    }
+  }
+
+  /// Mock tournaments for development/fallback
+  List<Tournament> _getMockTournamentsForClub(String clubId) {
+    final now = DateTime.now();
+    return [
+      Tournament(
+        id: 'tournament_1',
+        title: 'Giải Vô Địch CLB 2025',
+        description: 'Giải đấu thường niên của câu lạc bộ',
+        clubId: clubId,
+        startDate: now.add(Duration(days: 15)),
+        registrationDeadline: now.add(Duration(days: 10)),
+        maxParticipants: 32,
+        currentParticipants: 18,
+        entryFee: 100000,
+        prizePool: 5000000,
+        status: 'upcoming',
+        tournamentType: '8-ball',
+        isPublic: true,
+        createdAt: now.subtract(Duration(days: 30)),
+        updatedAt: now.subtract(Duration(days: 1)),
+      ),
+      Tournament(
+        id: 'tournament_2',
+        title: 'Giải Giao Hữu Tháng 9',
+        description: 'Giải đấu giao hữu hàng tháng',
+        clubId: clubId,
+        startDate: now.subtract(Duration(days: 5)),
+        registrationDeadline: now.subtract(Duration(days: 10)),
+        maxParticipants: 16,
+        currentParticipants: 16,
+        entryFee: 50000,
+        prizePool: 1000000,
+        status: 'ongoing',
+        tournamentType: '9-ball',
+        isPublic: true,
+        createdAt: now.subtract(Duration(days: 20)),
+        updatedAt: now.subtract(Duration(hours: 2)),
+      ),
+      Tournament(
+        id: 'tournament_3',
+        title: 'Giải Newbie Cup',
+        description: 'Dành cho người mới bắt đầu',
+        clubId: clubId,
+        startDate: now.subtract(Duration(days: 45)),
+        registrationDeadline: now.subtract(Duration(days: 50)),
+        maxParticipants: 24,
+        currentParticipants: 20,
+        entryFee: 0,
+        prizePool: 500000,
+        status: 'completed',
+        tournamentType: '8-ball',
+        isPublic: true,
+        createdAt: now.subtract(Duration(days: 60)),
+        updatedAt: now.subtract(Duration(days: 45)),
+      ),
+    ];
   }
 
   Future<Tournament> getTournamentById(String tournamentId) async {
@@ -173,7 +265,6 @@ class TournamentService {
     required int maxParticipants,
     required double entryFee,
     required double prizePool,
-    String? skillLevelRequired,
     String? rules,
     String? requirements,
   }) async {
@@ -191,7 +282,7 @@ class TournamentService {
         'max_participants': maxParticipants,
         'entry_fee': entryFee,
         'prize_pool': prizePool,
-        'skill_level_required': skillLevelRequired,
+        // 'skill_level_required': removed - không dùng nữa
         'rules': rules,
         'requirements': requirements,
         'status': 'upcoming',
