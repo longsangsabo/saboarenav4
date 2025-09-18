@@ -1,13 +1,11 @@
-﻿impor# Supabase configuration
-SUPABASE_URL = "https://mogjjvscxjwvhtpkrlqr.supabase.co"
-SERVICE_ROLE_KEY = "sb_secret_07Grp_TTwr21BjtBKc_gtw_5qx7UPFE"equests
+﻿import requests
 import json
 import uuid
 from datetime import datetime, timezone
 
 # Supabase configuration
 SUPABASE_URL = "https://mogjjvscxjwvhtpkrlqr.supabase.co"
-SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3UiOiJzdXBhYmFzZSIsInJlZiI6Im1vZ2pqdnNjeGp3dmh0cGtybHFyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NzkxOTU4MCwiZXhwIjoyMDczNDk1NTgwfQ.T2ntQv-z2EL4mkGb9b3QyXM3dT8pAOFSPKvqWPd7Xoo"
+SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vZ2pqdnNjeGp3dmh0cGtybHFyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NzkxOTU4MCwiZXhwIjoyMDczNDk1NTgwfQ.T2ntQv-z2EL4mkGb9b3QyXM3dT8pAOFSPKvqWPd7Xoo"
 
 def execute_sql_direct(sql_query, description="SQL Query"):
     """Execute SQL directly using Supabase REST API"""

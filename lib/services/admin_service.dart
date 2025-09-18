@@ -272,6 +272,216 @@ class AdminService {
   }
 
   // ==========================================
+  // TOURNAMENT MANAGEMENT
+  // ==========================================
+
+  /// Add all users to a tournament (for testing purposes)
+  Future<Map<String, dynamic>> addAllUsersToTournament(String tournamentId) async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) throw Exception('Admin not authenticated');
+
+      // Check if user is admin
+      final isAdmin = await isCurrentUserAdmin();
+      if (!isAdmin) throw Exception('Only admins can perform this action');
+
+      // Get tournament details
+      final tournament = await _supabase
+          .from('tournaments')
+          .select('id, title, max_participants, current_participants, status')
+          .eq('id', tournamentId)
+          .single();
+
+      if (tournament['status'] != 'upcoming') {
+        throw Exception('Tournament must be in upcoming status');
+      }
+
+      // Get all users except the current admin
+      final allUsers = await _supabase
+          .from('users')
+          .select('id, username, display_name')
+          .neq('id', user.id)
+          .order('created_at', ascending: true);
+
+      // Get existing participants
+      final existingParticipants = await _supabase
+          .from('tournament_participants')
+          .select('user_id')
+          .eq('tournament_id', tournamentId);
+
+      final existingUserIds = existingParticipants.map((p) => p['user_id']).toSet();
+      
+      int addedCount = 0;
+      int alreadyJoinedCount = existingUserIds.length;
+      int maxParticipants = tournament['max_participants'] ?? 100;
+      int currentParticipants = tournament['current_participants'] ?? 0;
+
+      // Add users to tournament
+      final usersToAdd = <Map<String, dynamic>>[];
+      
+      for (final userRecord in allUsers) {
+        if (existingUserIds.contains(userRecord['id'])) {
+          continue; // Skip if already joined
+        }
+        
+        if (currentParticipants >= maxParticipants) {
+          break; // Tournament is full
+        }
+
+        usersToAdd.add({
+          'tournament_id': tournamentId,
+          'user_id': userRecord['id'],
+          'registered_at': DateTime.now().toIso8601String(),
+          'status': 'registered',
+          'payment_status': 'completed',
+        });
+
+        addedCount++;
+        currentParticipants++;
+      }
+
+      // Insert participants in batch
+      if (usersToAdd.isNotEmpty) {
+        await _supabase.from('tournament_participants').insert(usersToAdd);
+
+        // Update tournament participant count
+        await _supabase
+            .from('tournaments')
+            .update({
+              'current_participants': currentParticipants,
+              'updated_at': DateTime.now().toIso8601String(),
+            })
+            .eq('id', tournamentId);
+      }
+
+      // Log admin action
+      await _logAdminAction(
+        adminId: user.id,
+        action: 'add_all_users_to_tournament',
+        targetId: tournamentId,
+        details: {
+          'users_added': addedCount,
+          'already_joined': alreadyJoinedCount,
+          'total_participants': currentParticipants,
+        },
+      );
+
+      return {
+        'success': true,
+        'tournament_id': tournamentId,
+        'tournament_title': tournament['title'],
+        'users_added': addedCount,
+        'already_joined': alreadyJoinedCount,
+        'total_participants': currentParticipants,
+        'max_participants': maxParticipants,
+        'is_full': currentParticipants >= maxParticipants,
+      };
+    } catch (error) {
+      throw Exception('Failed to add all users to tournament: $error');
+    }
+  }
+
+  /// Remove all users from a tournament (for testing cleanup)
+  Future<Map<String, dynamic>> removeAllUsersFromTournament(String tournamentId) async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) throw Exception('Admin not authenticated');
+
+      // Check if user is admin
+      final isAdmin = await isCurrentUserAdmin();
+      if (!isAdmin) throw Exception('Only admins can perform this action');
+
+      // Get tournament details
+      final tournament = await _supabase
+          .from('tournaments')
+          .select('id, title')
+          .eq('id', tournamentId)
+          .single();
+
+      // Count participants before removal
+      final participantsBefore = await _supabase
+          .from('tournament_participants')
+          .select('count')
+          .eq('tournament_id', tournamentId)
+          .count();
+
+      // Remove all participants except admin
+      await _supabase
+          .from('tournament_participants')
+          .delete()
+          .eq('tournament_id', tournamentId)
+          .neq('user_id', user.id);
+
+      // Update tournament participant count
+      final remainingParticipants = await _supabase
+          .from('tournament_participants')
+          .select('count')
+          .eq('tournament_id', tournamentId)
+          .count();
+
+      await _supabase
+          .from('tournaments')
+          .update({
+            'current_participants': remainingParticipants.count,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', tournamentId);
+
+      final removedCount = participantsBefore.count - remainingParticipants.count;
+
+      // Log admin action
+      await _logAdminAction(
+        adminId: user.id,
+        action: 'remove_all_users_from_tournament',
+        targetId: tournamentId,
+        details: {
+          'users_removed': removedCount,
+          'remaining_participants': remainingParticipants.count,
+        },
+      );
+
+      return {
+        'success': true,
+        'tournament_id': tournamentId,
+        'tournament_title': tournament['title'],
+        'users_removed': removedCount,
+        'remaining_participants': remainingParticipants.count,
+      };
+    } catch (error) {
+      throw Exception('Failed to remove all users from tournament: $error');
+    }
+  }
+
+  /// Get tournaments for admin management
+  Future<List<Map<String, dynamic>>> getTournamentsForAdmin({
+    String? status,
+    int limit = 50,
+    int offset = 0,
+  }) async {
+    try {
+      var query = _supabase
+          .from('tournaments')
+          .select('''
+            *,
+            club:clubs (name, id),
+            participants_count:tournament_participants(count)
+          ''');
+
+      if (status != null) {
+        query = query.eq('status', status);
+      }
+
+      final response = await query
+          .order('created_at', ascending: false)
+          .range(offset, offset + limit - 1);
+
+      return response;
+    } catch (error) {
+      throw Exception('Failed to get tournaments for admin: $error');
+    }
+  }
+
+  // ==========================================
   // USER MANAGEMENT (FUTURE)
   // ==========================================
 
