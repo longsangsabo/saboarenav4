@@ -9,6 +9,8 @@ import '../../services/auth_service.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../routes/app_routes.dart';
 import './club_approval_screen.dart';
+import './widgets/admin_navigation_drawer.dart';
+import './widgets/admin_bottom_navigation.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -24,6 +26,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   List<Map<String, dynamic>> _recentActivities = [];
   bool _isLoading = true;
   String? _errorMessage;
+  int _currentNavIndex = 0;
 
   @override
   void initState() {
@@ -217,11 +220,20 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ),
         ],
       ),
+      drawer: const AdminNavigationDrawer(),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null
               ? _buildErrorState()
               : _buildDashboardContent(),
+      bottomNavigationBar: AdminBottomNavigation(
+        currentIndex: _currentNavIndex,
+        onTap: (index) {
+          setState(() {
+            _currentNavIndex = index;
+          });
+        },
+      ),
     );
   }
 
