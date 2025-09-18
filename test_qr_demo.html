@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo QR Code cho Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .qr-container {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+        }
+        .instructions {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .user-info {
+            background: #f0f8f0;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Demo QR Code Test</h1>
+        
+        <div class="instructions">
+            <h3>📋 Hướng dẫn test:</h3>
+            <ol>
+                <li>Mở app Flutter trên Chrome</li>
+                <li>Chuyển đến tab "Đối thủ" (Find Opponents)</li>
+                <li>Nhấn nút QR scanner (floating action button)</li>
+                <li>Cho phép truy cập camera khi được hỏi</li>
+                <li>Quét QR code dưới đây</li>
+            </ol>
+        </div>
+
+        <div class="qr-container">
+            <h3>QR Code Demo User</h3>
+            <div id="qrcode"></div>
+            <p><em>Quét mã này để test chức năng</em></p>
+        </div>
+
+        <div class="user-info">
+            <h4>👤 QR Test Formats:</h4>
+            <p><strong>User Code:</strong> SABO123456</p>
+            <p><strong>User ID:</strong> demo-user-123</p>
+            <p><strong>URL:</strong> https://saboarena.com/user/demo-user-123</p>
+            <p><em>QR scanner sẽ thử tất cả các format này</em></p>
+        </div>
+        
+        <div class="user-info">
+            <h4>👤 Expected User Data:</h4>
+            <p><strong>ID:</strong> demo-user-123</p>
+            <p><strong>Tên:</strong> Nguyễn Văn Demo</p>
+            <p><strong>Email:</strong> demo@saboarena.com</p>
+            <p><strong>Rank:</strong> Intermediate</p>
+        </div>
+
+        <div class="instructions">
+            <h3>⚠️ Lưu ý:</h3>
+            <ul>
+                <li>Cần cho phép camera truy cập trên Chrome</li>
+                <li>QR code này chỉ để test, không phải user thật</li>
+                <li>Database migration cần được chạy để lưu dữ liệu QR</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script>
+        // Create multiple QR test formats that the scanner can handle
+        
+        // Test 1: User code format (SABO123456)
+        const userCodeQR = "SABO123456";
+        
+        // Test 2: User ID format  
+        const userIdQR = "demo-user-123";
+        
+        // Test 3: URL format
+        const urlQR = "https://saboarena.com/user/demo-user-123?user_code=SABO123456";
+        
+        // Use the user code format as primary test
+        const qrData = userCodeQR;
+        QRCode.toCanvas(document.getElementById('qrcode'), qrData, {
+            width: 256,
+            height: 256,
+            margin: 2,
+            color: {
+                dark: '#000000',
+                light: '#FFFFFF'
+            }
+        }, function (error) {
+            if (error) {
+                console.error('Error generating QR code:', error);
+                document.getElementById('qrcode').innerHTML = '<p>Lỗi tạo QR code</p>';
+            }
+        });
+    </script>
+</body>
+</html>

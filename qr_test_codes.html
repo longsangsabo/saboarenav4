@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SABO Arena QR Test Codes</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .qr-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        .qr-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            min-width: 250px;
+        }
+        .qr-code {
+            margin: 15px 0;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .user-info {
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎯 SABO Arena QR Test Codes</h1>
+    <p style="text-align: center;">Scan these QR codes with the Flutter app to test user lookup</p>
+    
+    <div class="qr-container">
+        <div class="qr-card">
+            <h3>QR Test User</h3>
+            <div class="qr-code" id="qr1"></div>
+            <div class="user-info">
+                <strong>SABO123456</strong><br>
+                Skill: Intermediate<br>
+                ELO: 1500
+            </div>
+        </div>
+        
+        <div class="qr-card">
+            <h3>Nguyễn Văn A</h3>
+            <div class="qr-code" id="qr2"></div>
+            <div class="user-info">
+                <strong>SABO111111</strong><br>
+                Skill: Beginner<br>
+                ELO: 1200
+            </div>
+        </div>
+        
+        <div class="qr-card">
+            <h3>Trần Thị B</h3>
+            <div class="qr-code" id="qr3"></div>
+            <div class="user-info">
+                <strong>SABO222222</strong><br>
+                Skill: Advanced<br>
+                ELO: 1800
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Generate QR codes
+        QRCode.toCanvas(document.getElementById('qr1'), 'SABO123456', function (error) {
+            if (error) console.error(error);
+            console.log('QR1 generated successfully!');
+        });
+        
+        QRCode.toCanvas(document.getElementById('qr2'), 'SABO111111', function (error) {
+            if (error) console.error(error);
+            console.log('QR2 generated successfully!');
+        });
+        
+        QRCode.toCanvas(document.getElementById('qr3'), 'SABO222222', function (error) {
+            if (error) console.error(error);
+            console.log('QR3 generated successfully!');
+        });
+        
+        console.log('🎯 QR codes ready for testing!');
+    </script>
+</body>
+</html>

@@ -101,6 +101,7 @@ class SocialPlayTab extends StatelessWidget {
                   itemBuilder: (context, index) {
                     return PlayerCardWidget(
                       player: players[index],
+                      mode: 'giao_luu',
                     );
                   },
                 ),

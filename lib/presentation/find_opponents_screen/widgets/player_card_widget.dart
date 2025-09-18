@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 
 import '../../../models/user_profile.dart';
-import '../../../services/mock_player_service.dart';
-import '../../../services/challenge_service.dart';
-import './challenge_modal_widget.dart';
+import '../../../services/opponent_club_service.dart';
+// import '../../../services/challenge_service.dart';
+import './simple_challenge_modal_widget.dart';
 
 class PlayerCardWidget extends StatelessWidget {
   final UserProfile player;
-  final bool isCompetitiveMode;
+  final String mode; // 'giao_luu' or 'thach_dau'
   final Map<String, dynamic>? challengeInfo;
 
   const PlayerCardWidget({
     super.key, 
     required this.player,
-    this.isCompetitiveMode = false,
+    this.mode = 'giao_luu', // Default to friendly mode
     this.challengeInfo,
   });
 
@@ -78,14 +78,19 @@ class PlayerCardWidget extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 2),
-                      // Club name instead of username
-                      Text(
-                        MockPlayerService.getRandomClubName(),
-                        style: TextStyle(
-                          fontSize: isTablet ? 14 : 12,
-                          color: Colors.grey[600],
-                          fontWeight: FontWeight.w500,
-                        ),
+                      // Club name from real Supabase data
+                      FutureBuilder<String>(
+                        future: OpponentClubService.instance.getRandomClubName(),
+                        builder: (context, snapshot) {
+                          return Text(
+                            snapshot.data ?? 'CLB SABO ARENA',
+                            style: TextStyle(
+                              fontSize: isTablet ? 14 : 12,
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          );
+                        },
                       ),
                       const SizedBox(height: 6),
 
@@ -153,7 +158,7 @@ class PlayerCardWidget extends StatelessWidget {
             ),
 
             // Challenge Mode Extra Info
-            if (isCompetitiveMode) ...[
+            if (mode == 'thach_dau') ...[
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.all(12),
@@ -211,18 +216,18 @@ class PlayerCardWidget extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              // Action Buttons Row
+              // Action Buttons Row - Challenge Mode
               Row(
                 children: [
                   Expanded(
                     flex: 2,
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.green,
+                        color: Colors.red,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: ElevatedButton.icon(
-                        onPressed: () => _showChallengeModal(context),
+                        onPressed: () => _showChallengeModal(context, 'thach_dau'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,
@@ -283,17 +288,51 @@ class PlayerCardWidget extends StatelessWidget {
               ),
             ] else ...[
               const SizedBox(height: 12),
-              // Simple Challenge Button for non-competitive mode
+              // Friendly Mode Action Buttons
               Row(
                 children: [
                   Expanded(
+                    flex: 2,
                     child: Container(
                       decoration: BoxDecoration(
                         color: Colors.green,
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: ElevatedButton(
-                        onPressed: () => _showChallengeModal(context),
+                      child: ElevatedButton.icon(
+                        onPressed: () => _showChallengeModal(context, 'giao_luu'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isTablet ? 16 : 12,
+                            vertical: isTablet ? 10 : 8,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        icon: Icon(Icons.handshake, size: 16, color: Colors.white),
+                        label: Text(
+                          'Giao lưu',
+                          style: TextStyle(
+                            fontSize: isTablet ? 13 : 11,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    flex: 1,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.blue,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: ElevatedButton.icon(
+                        onPressed: () => _showScheduleModal(context),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,
@@ -305,10 +344,11 @@ class PlayerCardWidget extends StatelessWidget {
                             borderRadius: BorderRadius.circular(20),
                           ),
                         ),
-                        child: Text(
-                          'Thách đấu',
+                        icon: Icon(Icons.schedule, size: 16, color: Colors.white),
+                        label: Text(
+                          'Hẹn lịch',
                           style: TextStyle(
-                            fontSize: isTablet ? 14 : 12,
+                            fontSize: isTablet ? 13 : 11,
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
                           ),
@@ -429,20 +469,25 @@ class PlayerCardWidget extends StatelessWidget {
     );
   }
 
-  void _showChallengeModal(BuildContext context) {
+  void _showChallengeModal(BuildContext context, String challengeType) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => ChallengeModalWidget(
+      builder: (context) => SimpleChallengeModalWidget(
         player: {
+          'id': player.id,
           'name': player.fullName,
+          'display_name': player.fullName,
           'username': player.username,
-          'skillLevel': player.skillLevel,
+          'user_id': player.id,
+          'ranking': player.displayRank,
+          'elo_rating': player.eloRating,
+          'avatar_url': player.avatarUrl,
         },
-        challengeType: 'thach_dau',
+        challengeType: challengeType,
       ),
     );
   }
@@ -843,14 +888,17 @@ class PlayerCardWidget extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: selectedTimeSlot != null ? () async {
                         try {
-                          final challengeService = ChallengeService.instance;
+                          // TODO: Implement schedule request with simple service
+                          // final challengeService = ChallengeService.instance;
+                          // 
+                          // await challengeService.sendScheduleRequest(
+                          //   targetUserId: player.id,
+                          //   scheduledDate: selectedDate,
+                          //   timeSlot: selectedTimeSlot!,
+                          //   message: 'Lời mời hẹn lịch chơi bida từ ứng dụng SABO ARENA',
+                          // );
                           
-                          await challengeService.sendScheduleRequest(
-                            targetUserId: player.id,
-                            scheduledDate: selectedDate,
-                            timeSlot: selectedTimeSlot!,
-                            message: 'Lời mời hẹn lịch chơi bida từ ứng dụng SABO ARENA',
-                          );
+                          print('📅 Schedule request - Player: ${player.fullName}, Date: $selectedDate, Slot: $selectedTimeSlot');
 
                           Navigator.pop(context);
                           final dateStr = _isToday(selectedDate) 

@@ -598,7 +598,6 @@ class _MembershipTypeDialog extends StatelessWidget {
   final Function(MembershipType) onChanged;
 
   const _MembershipTypeDialog({
-    super.key,
     required this.currentType,
     required this.onChanged,
   });

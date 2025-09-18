@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../core/app_export.dart';
 import '../../widgets/custom_app_bar.dart';
-import '../member_management_screen/member_management_screen.dart';
+import '../../models/member_data.dart';
+import '../chat_room_screen/chat_room_screen.dart';
 
 class MemberCommunicationScreen extends StatefulWidget {
   const MemberCommunicationScreen({super.key});
@@ -1090,6 +1090,22 @@ enum ChatRoomType { general, tournament, private, announcement }
 enum AnnouncementPriority { low, normal, high, urgent }
 enum NotificationType { message, tournament, system, achievement }
 
+class User {
+  final String id;
+  final String displayName;
+  final String email;
+  final String avatar;
+  final RankType rank;
+
+  const User({
+    required this.id,
+    required this.displayName,
+    required this.email,
+    required this.avatar,
+    required this.rank,
+  });
+}
+
 class ChatRoom {
   final String id;
   final String name;
@@ -1181,19 +1197,7 @@ class Notification {
 }
 
 // Placeholder screens for navigation
-class ChatRoomScreen extends StatelessWidget {
-  final ChatRoom room;
-
-  const ChatRoomScreen({super.key, required this.room});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(room.name)),
-      body: Center(child: Text('Chat Room Screen - Coming Soon')),
-    );
-  }
-}
+// ChatRoomScreen moved to separate file
 
 class AnnouncementDetailScreen extends StatelessWidget {
   final Announcement announcement;

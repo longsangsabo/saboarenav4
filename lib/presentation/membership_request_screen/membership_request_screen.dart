@@ -772,7 +772,7 @@ class MembershipRequest {
 class _RequestDetailDialog extends StatelessWidget {
   final MembershipRequest request;
 
-  const _RequestDetailDialog({super.key, required this.request});
+  const _RequestDetailDialog({required this.request});
 
   @override
   Widget build(BuildContext context) {

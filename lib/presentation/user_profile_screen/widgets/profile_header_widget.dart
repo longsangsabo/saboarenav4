@@ -4,6 +4,9 @@ import 'dart:io';
 
 import '../../../core/app_export.dart';
 import '../../../core/utils/sabo_rank_system.dart';
+import '../../../models/user_profile.dart';
+import '../../../services/share_service.dart';
+import '../../../widgets/user_qr_code_widget.dart';
 
 import './rank_registration_info_modal.dart';
 
@@ -117,11 +120,11 @@ class ProfileHeaderWidget extends StatelessWidget {
             child: _buildAvatarSection(context),
           ),
 
-          // Edit Profile Button
+          // Action Buttons (QR, Share, Edit)
           Positioned(
             bottom: 1.h,
             right: 4.w,
-            child: _buildEditButton(context),
+            child: _buildActionButtons(context),
           ),
         ],
       ),
@@ -186,18 +189,61 @@ class ProfileHeaderWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildEditButton(BuildContext context) {
+  Widget _buildActionButtons(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // QR Code Button
+        _buildActionButton(
+          context: context,
+          icon: 'qr_code',
+          label: 'QR',
+          onTap: () => _showQRCode(context),
+          backgroundColor: AppTheme.lightTheme.colorScheme.secondary,
+        ),
+        
+        SizedBox(width: 2.w),
+        
+        // Share Button
+        _buildActionButton(
+          context: context,
+          icon: 'share',
+          label: 'Chia sẻ',
+          onTap: () => _shareProfile(context),
+          backgroundColor: AppTheme.lightTheme.colorScheme.tertiary,
+        ),
+        
+        SizedBox(width: 2.w),
+        
+        // Edit Button
+        _buildActionButton(
+          context: context,
+          icon: 'edit',
+          label: 'Sửa',
+          onTap: onEditProfile,
+          backgroundColor: AppTheme.lightTheme.colorScheme.primary,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButton({
+    required BuildContext context,
+    required String icon,
+    required String label,
+    required VoidCallback? onTap,
+    required Color backgroundColor,
+  }) {
     return GestureDetector(
-      onTap: onEditProfile,
+      onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+        padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
         decoration: BoxDecoration(
-          color: AppTheme.lightTheme.colorScheme.primary,
+          color: backgroundColor,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: AppTheme.lightTheme.colorScheme.primary
-                  .withValues(alpha: 0.3),
+              color: backgroundColor.withValues(alpha: 0.3),
               blurRadius: 8,
               offset: Offset(0, 2),
             ),
@@ -207,14 +253,14 @@ class ProfileHeaderWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             CustomIconWidget(
-              iconName: 'edit',
+              iconName: icon,
               color: AppTheme.lightTheme.colorScheme.onPrimary,
               size: 16,
             ),
-            SizedBox(width: 2.w),
+            SizedBox(width: 1.w),
             Text(
-              'Chỉnh sửa',
-              style: AppTheme.lightTheme.textTheme.labelMedium?.copyWith(
+              label,
+              style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
                 color: AppTheme.lightTheme.colorScheme.onPrimary,
                 fontWeight: FontWeight.w600,
               ),
@@ -223,6 +269,100 @@ class ProfileHeaderWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _showQRCode(BuildContext context) {
+    try {
+      // Convert userData to UserProfile
+      final userProfile = UserProfile(
+        id: userData['id'] ?? '',
+        email: userData['email'] ?? '',
+        fullName: userData['displayName'] ?? userData['full_name'] ?? 'Unknown User',
+        username: userData['username'],
+        bio: userData['bio'],
+        avatarUrl: userData['avatar'],
+        coverPhotoUrl: userData['coverPhoto'],
+        phone: userData['phone'],
+        dateOfBirth: userData['dateOfBirth'] != null 
+            ? DateTime.tryParse(userData['dateOfBirth']) 
+            : null,
+        role: userData['role'] ?? 'player',
+        skillLevel: userData['skillLevel'] ?? 'beginner',
+        rank: userData['rank'],
+        totalWins: userData['totalWins'] ?? 0,
+        totalLosses: userData['totalLosses'] ?? 0,
+        totalTournaments: userData['totalTournaments'] ?? 0,
+        eloRating: userData['eloRating'] ?? 1200,
+        spaPoints: userData['spaPoints'] ?? 0,
+        totalPrizePool: (userData['totalPrizePool'] ?? 0.0).toDouble(),
+        isVerified: userData['isVerified'] ?? false,
+        isActive: userData['isActive'] ?? true,
+        location: userData['location'],
+        createdAt: userData['createdAt'] != null 
+            ? DateTime.tryParse(userData['createdAt']) ?? DateTime.now()
+            : DateTime.now(),
+        updatedAt: userData['updatedAt'] != null 
+            ? DateTime.tryParse(userData['updatedAt']) ?? DateTime.now()
+            : DateTime.now(),
+      );
+
+      // Show QR Code bottom sheet
+      UserQRCodeBottomSheet.show(context, userProfile);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Lỗi hiển thị QR Code: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _shareProfile(BuildContext context) async {
+    try {
+      // Convert userData to UserProfile for sharing
+      final userProfile = UserProfile(
+        id: userData['id'] ?? '',
+        email: userData['email'] ?? '',
+        fullName: userData['displayName'] ?? userData['full_name'] ?? 'Unknown User',
+        username: userData['username'],
+        bio: userData['bio'],
+        avatarUrl: userData['avatar'],
+        coverPhotoUrl: userData['coverPhoto'],
+        phone: userData['phone'],
+        dateOfBirth: userData['dateOfBirth'] != null 
+            ? DateTime.tryParse(userData['dateOfBirth']) 
+            : null,
+        role: userData['role'] ?? 'player',
+        skillLevel: userData['skillLevel'] ?? 'beginner',
+        rank: userData['rank'],
+        totalWins: userData['totalWins'] ?? 0,
+        totalLosses: userData['totalLosses'] ?? 0,
+        totalTournaments: userData['totalTournaments'] ?? 0,
+        eloRating: userData['eloRating'] ?? 1200,
+        spaPoints: userData['spaPoints'] ?? 0,
+        totalPrizePool: (userData['totalPrizePool'] ?? 0.0).toDouble(),
+        isVerified: userData['isVerified'] ?? false,
+        isActive: userData['isActive'] ?? true,
+        location: userData['location'],
+        createdAt: userData['createdAt'] != null 
+            ? DateTime.tryParse(userData['createdAt']) ?? DateTime.now()
+            : DateTime.now(),
+        updatedAt: userData['updatedAt'] != null 
+            ? DateTime.tryParse(userData['updatedAt']) ?? DateTime.now()
+            : DateTime.now(),
+      );
+
+      // Share user profile
+      await ShareService.shareUserProfile(userProfile);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Lỗi chia sẻ hồ sơ: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Widget _buildProfileInfoSection(BuildContext context) {

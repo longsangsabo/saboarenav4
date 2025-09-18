@@ -122,7 +122,7 @@ class CompetitivePlayTab extends StatelessWidget {
                   itemBuilder: (context, index) {
                     return PlayerCardWidget(
                       player: players[index],
-                      isCompetitiveMode: true,
+                      mode: 'thach_dau',
                       challengeInfo: _getChallengeInfo(players[index]),
                     );
                   },

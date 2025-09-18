@@ -8,6 +8,7 @@ import '../../routes/app_routes.dart';
 import './widgets/filter_bottom_sheet.dart';
 import './widgets/competitive_play_tab.dart';
 import './widgets/social_play_tab.dart';
+import '../../widgets/qr_scanner_widget.dart';
 
 class FindOpponentsScreen extends StatefulWidget {
   const FindOpponentsScreen({super.key});
@@ -119,6 +120,31 @@ class _FindOpponentsScreenState extends State<FindOpponentsScreen>
     }
   }
 
+  void _showQRScanner() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => QRScannerWidget(
+          onUserFound: (Map<String, dynamic> userData) {
+            Navigator.pop(context);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Đã tìm thấy người chơi: ${userData['fullName'] ?? 'Không rõ tên'}'),
+                duration: Duration(seconds: 3),
+              ),
+            );
+            // Optionally navigate to user profile or add to opponents list
+            Navigator.pushNamed(
+              context, 
+              AppRoutes.userProfileScreen,
+              arguments: {'userId': userData['id']},
+            );
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -179,6 +205,12 @@ class _FindOpponentsScreenState extends State<FindOpponentsScreen>
             onRefresh: _loadPlayers,
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showQRScanner,
+        backgroundColor: Theme.of(context).primaryColor,
+        child: Icon(Icons.qr_code_scanner, color: Colors.white),
+        tooltip: 'Quét QR để tìm người chơi',
       ),
       bottomNavigationBar: SafeArea(
         child: Container(

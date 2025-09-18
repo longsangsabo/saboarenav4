@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../core/app_export.dart';
-import '../../../services/challenge_service.dart';
-import '../../../services/challenge_service_extensions.dart';
-import '../../../services/challenge_rules_service.dart';
+import '../../../services/simple_challenge_service.dart';
+// import '../../../services/challenge_service.dart';
+// import '../../../services/challenge_service_extensions.dart';
+// import '../../../services/challenge_rules_service.dart';
 
 class ChallengeModalWidget extends StatefulWidget {
   final Map<String, dynamic> player;
@@ -31,7 +32,7 @@ class _ChallengeModalWidgetState extends State<ChallengeModalWidget> {
   String _selectedLocation = '';
   
   // Challenge validation and handicap info
-  ChallengeHandicapResult? _handicapPreview;
+  // ChallengeHandicapResult? _handicapPreview;
 
   final List<String> _gameTypes = ['8-ball', '9-ball', '10-ball'];
   final List<String> _locations = [

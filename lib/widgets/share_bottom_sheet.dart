@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-// import 'package:share_plus/share_plus.dart' as SharePlus;
+import 'package:sabo_arena/services/share_service.dart';
 
 class ShareBottomSheet extends StatelessWidget {
   final String postId;
@@ -172,12 +172,18 @@ class ShareBottomSheet extends StatelessWidget {
   void _shareGeneric(BuildContext context) async {
     try {
       final shareText = _buildShareText();
-      // TODO: Implement share functionality when share_plus is available
-      // await SharePlus.Share.share(shareText);
+      // Use ShareService for actual sharing
+      await ShareService.shareCustom(
+        text: shareText,
+        subject: 'Chia sẻ từ SABO ARENA',
+      );
       if (context.mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Chia sẻ: $shareText')),
+          const SnackBar(
+            content: Text('Đã chia sẻ thành công!'),
+            backgroundColor: Colors.green,
+          ),
         );
       }
     } catch (e) {
@@ -206,12 +212,18 @@ class ShareBottomSheet extends StatelessWidget {
 
   void _shareAsText(BuildContext context) async {
     try {
-      // TODO: Implement share functionality when share_plus is available
       final shareText = _buildShareText();
+      await ShareService.shareCustom(
+        text: shareText,
+        subject: 'Post từ SABO ARENA',
+      );
       if (context.mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Chia sẻ text: $shareText')),
+          const SnackBar(
+            content: Text('Đã chia sẻ text thành công!'),
+            backgroundColor: Colors.green,
+          ),
         );
       }
     } catch (e) {
@@ -225,12 +237,18 @@ class ShareBottomSheet extends StatelessWidget {
     if (postImageUrl == null) return;
 
     try {
-      // TODO: Implement share functionality when share_plus is available
-      final shareText = _buildShareText();
+      final shareText = _buildShareText() + '\n\n🖼️ Hình ảnh: $postImageUrl';
+      await ShareService.shareCustom(
+        text: shareText,
+        subject: 'Post với hình ảnh từ SABO ARENA',
+      );
       if (context.mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Chia sẻ hình ảnh: $shareText\nHình: $postImageUrl')),
+          const SnackBar(
+            content: Text('Đã chia sẻ bài viết với hình ảnh!'),
+            backgroundColor: Colors.green,
+          ),
         );
       }
     } catch (e) {

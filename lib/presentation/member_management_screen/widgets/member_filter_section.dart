@@ -605,7 +605,6 @@ class _FilterGroup extends StatelessWidget {
   final Widget child;
 
   const _FilterGroup({
-    super.key,
     required this.title,
     required this.child,
   });

@@ -264,7 +264,6 @@ class _DetailedAnalyticsDialog extends StatelessWidget {
   final MemberAnalytics analytics;
 
   const _DetailedAnalyticsDialog({
-    super.key,
     required this.analytics,
   });
 

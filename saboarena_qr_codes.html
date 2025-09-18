@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SABO Arena QR Codes - Professional Format</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .qr-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            justify-content: center;
+        }
+        
+        .qr-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            text-align: center;
+            min-width: 280px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .qr-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.2);
+        }
+        
+        .qr-card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .qr-code {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .qr-code canvas {
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .user-info {
+            color: #666;
+            font-size: 14px;
+            margin-top: 15px;
+            line-height: 1.6;
+        }
+        
+        .url-display {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #495057;
+            margin-top: 10px;
+            word-break: break-all;
+            border: 1px solid #dee2e6;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            margin: 2px;
+        }
+        
+        .badge-beginner { background: #d4edda; color: #155724; }
+        .badge-intermediate { background: #fff3cd; color: #856404; }
+        .badge-advanced { background: #d1ecf1; color: #0c5460; }
+        
+        .instructions {
+            background: rgba(255,255,255,0.95);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .instructions h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .instructions ol {
+            color: #555;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 SABO Arena QR Codes</h1>
+        <p class="subtitle">Professional URL Format - Scan với ứng dụng Flutter</p>
+        
+        <div class="qr-container">
+            <div class="qr-card">
+                <h3>👤 Đào Giang</h3>
+                <div class="qr-code" id="qr1"></div>
+                <div class="user-info">
+                    <strong>SABO123456</strong><br>
+                    <span class="badge badge-beginner">Beginner</span><br>
+                    ELO: 1200 | SPA: 200
+                </div>
+                <div class="url-display">
+                    https://saboarena.com/user/SABO123456
+                </div>
+            </div>
+            
+            <div class="qr-card">
+                <h3>👤 Nguyễn Văn A</h3>
+                <div class="qr-code" id="qr2"></div>
+                <div class="user-info">
+                    <strong>SABO111111</strong><br>
+                    <span class="badge badge-intermediate">Intermediate</span><br>
+                    ELO: 1450 | SPA: 350
+                </div>
+                <div class="url-display">
+                    https://saboarena.com/profile/SABO111111
+                </div>
+            </div>
+            
+            <div class="qr-card">
+                <h3>👤 Trần Thị B</h3>
+                <div class="qr-code" id="qr3"></div>
+                <div class="user-info">
+                    <strong>SABO222222</strong><br>
+                    <span class="badge badge-advanced">Advanced</span><br>
+                    ELO: 1800 | SPA: 650
+                </div>
+                <div class="url-display">
+                    https://saboarena.com/?user_code=SABO222222
+                </div>
+            </div>
+            
+            <!-- Additional QR formats for testing -->
+            <div class="qr-card">
+                <h3>🧪 Test Format 1</h3>
+                <div class="qr-code" id="qr4"></div>
+                <div class="user-info">
+                    <strong>Direct Code</strong><br>
+                    <span class="badge badge-beginner">Test</span><br>
+                    Format: Plain SABO code
+                </div>
+                <div class="url-display">
+                    SABO123456
+                </div>
+            </div>
+            
+            <div class="qr-card">
+                <h3>🧪 Test Format 2</h3>
+                <div class="qr-code" id="qr5"></div>
+                <div class="user-info">
+                    <strong>Query Param</strong><br>
+                    <span class="badge badge-intermediate">Test</span><br>
+                    Format: ?code parameter
+                </div>
+                <div class="url-display">
+                    https://saboarena.com/?code=SABO123456
+                </div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>📱 Hướng dẫn test QR Scanner:</h3>
+            <ol>
+                <li><strong>Mở Chrome app</strong> - đã chạy tại localhost:58476</li>
+                <li><strong>Click nút QR scanner</strong> (floating action button màu xanh)</li>
+                <li><strong>Allow camera permission</strong> khi browser hỏi</li>
+                <li><strong>Scan QR codes</strong> - thử tất cả các format khác nhau</li>
+                <li><strong>Kiểm tra kết quả</strong> - app sẽ hiển thị thông tin user</li>
+            </ol>
+            
+            <p><strong>🎯 Supported QR Formats:</strong></p>
+            <ul>
+                <li>📍 <code>https://saboarena.com/user/SABO123456</code></li>
+                <li>📍 <code>https://saboarena.com/profile/SABO123456</code></li>
+                <li>📍 <code>https://saboarena.com/?user_code=SABO123456</code></li>
+                <li>📍 <code>https://saboarena.com/?code=SABO123456</code></li>
+                <li>📍 <code>SABO123456</code> (direct code)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // QR Code generation with different URL formats
+        const qrOptions = {
+            width: 200,
+            height: 200,
+            colorDark: "#000000",
+            colorLight: "#FFFFFF",
+            correctLevel: QRCode.CorrectLevel.M
+        };
+        
+        // Generate QR codes
+        QRCode.toCanvas(
+            document.getElementById('qr1'), 
+            'https://saboarena.com/user/SABO123456', 
+            qrOptions,
+            function (error) {
+                if (error) console.error('QR1 error:', error);
+                else console.log('✅ QR1 generated: /user/ format');
+            }
+        );
+        
+        QRCode.toCanvas(
+            document.getElementById('qr2'), 
+            'https://saboarena.com/profile/SABO111111', 
+            qrOptions,
+            function (error) {
+                if (error) console.error('QR2 error:', error);
+                else console.log('✅ QR2 generated: /profile/ format');
+            }
+        );
+        
+        QRCode.toCanvas(
+            document.getElementById('qr3'), 
+            'https://saboarena.com/?user_code=SABO222222', 
+            qrOptions,
+            function (error) {
+                if (error) console.error('QR3 error:', error);
+                else console.log('✅ QR3 generated: ?user_code= format');
+            }
+        );
+        
+        QRCode.toCanvas(
+            document.getElementById('qr4'), 
+            'SABO123456', 
+            qrOptions,
+            function (error) {
+                if (error) console.error('QR4 error:', error);
+                else console.log('✅ QR4 generated: direct code format');
+            }
+        );
+        
+        QRCode.toCanvas(
+            document.getElementById('qr5'), 
+            'https://saboarena.com/?code=SABO123456', 
+            qrOptions,
+            function (error) {
+                if (error) console.error('QR5 error:', error);
+                else console.log('✅ QR5 generated: ?code= format');
+            }
+        );
+        
+        console.log('🎯 All QR codes generated with saboarena.com URLs!');
+        console.log('📱 Ready for professional QR testing!');
+    </script>
+</body>
+</html>
