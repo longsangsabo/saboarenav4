@@ -14,9 +14,12 @@ import '../presentation/tournament_detail_screen/tournament_detail_screen.dart';
 import '../presentation/login_screen.dart';
 import '../presentation/register_screen.dart';
 import '../presentation/forgot_password_screen.dart';
-import '../presentation/admin_dashboard_screen/admin_dashboard_screen.dart';
 import '../presentation/admin_dashboard_screen/admin_main_screen.dart';
-import '../presentation/admin_dashboard_screen/club_approval_screen.dart';
+import '../presentation/admin_dashboard_screen/admin_dashboard_main_screen.dart';
+import '../presentation/admin_dashboard_screen/admin_club_approval_main_screen.dart';
+import '../presentation/admin_dashboard_screen/admin_tournament_main_screen.dart';
+import '../presentation/admin_dashboard_screen/admin_user_management_main_screen.dart';
+import '../presentation/admin_dashboard_screen/admin_more_main_screen.dart';
 import '../presentation/my_clubs_screen/my_clubs_screen.dart';
 
 class AppRoutes {
@@ -36,6 +39,9 @@ class AppRoutes {
   static const String adminDashboardScreen = '/admin_dashboard';
   static const String adminMainScreen = '/admin_main';
   static const String clubApprovalScreen = '/admin_club_approval';
+  static const String adminTournamentScreen = '/admin_tournament';
+  static const String adminUserManagementScreen = '/admin_user_management';
+  static const String adminMoreScreen = '/admin_more';
   static const String myClubsScreen = '/my_clubs';
   static const String clubDashboardScreen = '/club_dashboard';
   static const String clubSelectionScreen = '/club_selection_screen';
@@ -58,7 +64,10 @@ class AppRoutes {
         forgotPasswordScreen: (context) => const ForgotPasswordScreen(),
         adminDashboardScreen: (context) => const AdminDashboardScreen(),
         adminMainScreen: (context) => const AdminMainScreen(),
-        clubApprovalScreen: (context) => const ClubApprovalScreen(),
+        clubApprovalScreen: (context) => const AdminClubApprovalMainScreen(),
+        adminTournamentScreen: (context) => const AdminTournamentMainScreen(),
+        adminUserManagementScreen: (context) => const AdminUserManagementMainScreen(),
+        adminMoreScreen: (context) => const AdminMoreMainScreen(),
         myClubsScreen: (context) => const MyClubsScreen(),
         clubSelectionScreen: (context) => ClubSelectionScreen(),
         // clubDashboardScreen: (context) => const ClubDashboardScreenSimple(clubId: ''),

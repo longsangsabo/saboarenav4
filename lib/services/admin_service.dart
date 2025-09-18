@@ -276,6 +276,7 @@ class AdminService {
   // ==========================================
 
   /// Add all users to a tournament (for testing purposes)
+  /// Uses RPC function to bypass RLS restrictions
   Future<Map<String, dynamic>> addAllUsersToTournament(String tournamentId) async {
     try {
       final user = _supabase.auth.currentUser;
@@ -285,103 +286,42 @@ class AdminService {
       final isAdmin = await isCurrentUserAdmin();
       if (!isAdmin) throw Exception('Only admins can perform this action');
 
-      // Get tournament details
-      final tournament = await _supabase
-          .from('tournaments')
-          .select('id, title, max_participants, current_participants, status')
-          .eq('id', tournamentId)
-          .single();
+      print('🚀 AdminService: Calling RPC function admin_add_all_users_to_tournament');
+      print('   Tournament ID: $tournamentId');
+      print('   Admin ID: ${user.id}');
 
-      if (tournament['status'] != 'upcoming') {
-        throw Exception('Tournament must be in upcoming status');
-      }
-
-      // Get all users except the current admin
-      final allUsers = await _supabase
-          .from('users')
-          .select('id, username, display_name')
-          .neq('id', user.id)
-          .order('created_at', ascending: true);
-
-      // Get existing participants
-      final existingParticipants = await _supabase
-          .from('tournament_participants')
-          .select('user_id')
-          .eq('tournament_id', tournamentId);
-
-      final existingUserIds = existingParticipants.map((p) => p['user_id']).toSet();
-      
-      int addedCount = 0;
-      int alreadyJoinedCount = existingUserIds.length;
-      int maxParticipants = tournament['max_participants'] ?? 100;
-      int currentParticipants = tournament['current_participants'] ?? 0;
-
-      // Add users to tournament
-      final usersToAdd = <Map<String, dynamic>>[];
-      
-      for (final userRecord in allUsers) {
-        if (existingUserIds.contains(userRecord['id'])) {
-          continue; // Skip if already joined
-        }
-        
-        if (currentParticipants >= maxParticipants) {
-          break; // Tournament is full
-        }
-
-        usersToAdd.add({
-          'tournament_id': tournamentId,
-          'user_id': userRecord['id'],
-          'registered_at': DateTime.now().toIso8601String(),
-          'status': 'registered',
-          'payment_status': 'completed',
-        });
-
-        addedCount++;
-        currentParticipants++;
-      }
-
-      // Insert participants in batch
-      if (usersToAdd.isNotEmpty) {
-        await _supabase.from('tournament_participants').insert(usersToAdd);
-
-        // Update tournament participant count
-        await _supabase
-            .from('tournaments')
-            .update({
-              'current_participants': currentParticipants,
-              'updated_at': DateTime.now().toIso8601String(),
-            })
-            .eq('id', tournamentId);
-      }
-
-      // Log admin action
-      await _logAdminAction(
-        adminId: user.id,
-        action: 'add_all_users_to_tournament',
-        targetId: tournamentId,
-        details: {
-          'users_added': addedCount,
-          'already_joined': alreadyJoinedCount,
-          'total_participants': currentParticipants,
+      // Call RPC function instead of direct table operations
+      final result = await _supabase.rpc(
+        'admin_add_all_users_to_tournament',
+        params: {
+          'p_tournament_id': tournamentId,
         },
       );
 
-      return {
-        'success': true,
-        'tournament_id': tournamentId,
-        'tournament_title': tournament['title'],
-        'users_added': addedCount,
-        'already_joined': alreadyJoinedCount,
-        'total_participants': currentParticipants,
-        'max_participants': maxParticipants,
-        'is_full': currentParticipants >= maxParticipants,
-      };
+      print('✅ AdminService: RPC call successful');
+      print('   Result: $result');
+
+      // The RPC function returns a JSON object with all necessary information
+      if (result is Map<String, dynamic>) {
+        return Map<String, dynamic>.from(result);
+      } else {
+        // Handle case where result might be a JSON string
+        return {
+          'success': true,
+          'tournament_id': tournamentId,
+          'message': 'Users added successfully via RPC',
+          'raw_result': result,
+        };
+      }
     } catch (error) {
+      print('❌ AdminService: RPC call failed');
+      print('   Error: $error');
       throw Exception('Failed to add all users to tournament: $error');
     }
   }
 
   /// Remove all users from a tournament (for testing cleanup)
+  /// Uses RPC function to bypass RLS restrictions  
   Future<Map<String, dynamic>> removeAllUsersFromTournament(String tournamentId) async {
     try {
       final user = _supabase.auth.currentUser;
@@ -391,63 +331,36 @@ class AdminService {
       final isAdmin = await isCurrentUserAdmin();
       if (!isAdmin) throw Exception('Only admins can perform this action');
 
-      // Get tournament details
-      final tournament = await _supabase
-          .from('tournaments')
-          .select('id, title')
-          .eq('id', tournamentId)
-          .single();
+      print('🚀 AdminService: Calling RPC function admin_remove_all_users_from_tournament');
+      print('   Tournament ID: $tournamentId');
+      print('   Admin ID: ${user.id}');
 
-      // Count participants before removal
-      final participantsBefore = await _supabase
-          .from('tournament_participants')
-          .select('count')
-          .eq('tournament_id', tournamentId)
-          .count();
-
-      // Remove all participants except admin
-      await _supabase
-          .from('tournament_participants')
-          .delete()
-          .eq('tournament_id', tournamentId)
-          .neq('user_id', user.id);
-
-      // Update tournament participant count
-      final remainingParticipants = await _supabase
-          .from('tournament_participants')
-          .select('count')
-          .eq('tournament_id', tournamentId)
-          .count();
-
-      await _supabase
-          .from('tournaments')
-          .update({
-            'current_participants': remainingParticipants.count,
-            'updated_at': DateTime.now().toIso8601String(),
-          })
-          .eq('id', tournamentId);
-
-      final removedCount = participantsBefore.count - remainingParticipants.count;
-
-      // Log admin action
-      await _logAdminAction(
-        adminId: user.id,
-        action: 'remove_all_users_from_tournament',
-        targetId: tournamentId,
-        details: {
-          'users_removed': removedCount,
-          'remaining_participants': remainingParticipants.count,
+      // Call RPC function instead of direct table operations
+      final result = await _supabase.rpc(
+        'admin_remove_all_users_from_tournament',
+        params: {
+          'p_tournament_id': tournamentId,
         },
       );
 
-      return {
-        'success': true,
-        'tournament_id': tournamentId,
-        'tournament_title': tournament['title'],
-        'users_removed': removedCount,
-        'remaining_participants': remainingParticipants.count,
-      };
+      print('✅ AdminService: RPC call successful');
+      print('   Result: $result');
+
+      // The RPC function returns a JSON object with all necessary information
+      if (result is Map<String, dynamic>) {
+        return Map<String, dynamic>.from(result);
+      } else {
+        // Handle case where result might be a JSON string
+        return {
+          'success': true,
+          'tournament_id': tournamentId,
+          'message': 'Users removed successfully via RPC',
+          'raw_result': result,
+        };
+      }
     } catch (error) {
+      print('❌ AdminService: RPC call failed');
+      print('   Error: $error');
       throw Exception('Failed to remove all users from tournament: $error');
     }
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import 'package:sabo_arena/core/app_export.dart';
 import 'package:sabo_arena/theme/app_theme.dart';
+import 'package:sabo_arena/services/tournament_service.dart';
 
 class TournamentManagementPanel extends StatefulWidget {
   final String tournamentId;
@@ -602,23 +603,530 @@ class _TournamentOverviewTab extends StatelessWidget {
   }
 }
 
-// Placeholder tabs for other management functions
-class _ParticipantManagementTab extends StatelessWidget {
+// Functional participant management tab for club owners
+class _ParticipantManagementTab extends StatefulWidget {
   final String tournamentId;
 
   const _ParticipantManagementTab({required this.tournamentId});
 
   @override
+  _ParticipantManagementTabState createState() => _ParticipantManagementTabState();
+}
+
+class _ParticipantManagementTabState extends State<_ParticipantManagementTab> {
+  final TournamentService _tournamentService = TournamentService.instance;
+  List<Map<String, dynamic>> _participants = [];
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadParticipants();
+  }
+
+  Future<void> _loadParticipants() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final participants = await _tournamentService
+          .getTournamentParticipantsWithPaymentStatus(widget.tournamentId);
+      setState(() {
+        _participants = participants;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(color: AppTheme.primaryLight),
+            SizedBox(height: 16.sp),
+            Text("Đang tải danh sách người chơi...", 
+                style: TextStyle(color: AppTheme.textSecondaryLight)),
+          ],
+        ),
+      );
+    }
+
+    if (_errorMessage != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 64.sp, color: AppTheme.errorLight),
+            SizedBox(height: 16.sp),
+            Text("Lỗi tải dữ liệu", 
+                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600)),
+            SizedBox(height: 8.sp),
+            Text(_errorMessage!, 
+                style: TextStyle(color: AppTheme.textSecondaryLight),
+                textAlign: TextAlign.center),
+            SizedBox(height: 16.sp),
+            ElevatedButton(
+              onPressed: _loadParticipants,
+              child: Text("Thử lại"),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        // Header with stats
+        Container(
+          padding: EdgeInsets.all(16.sp),
+          margin: EdgeInsets.all(16.sp),
+          decoration: BoxDecoration(
+            color: AppTheme.primaryLight.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12.sp),
+            border: Border.all(color: AppTheme.primaryLight.withOpacity(0.3)),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.people, color: AppTheme.primaryLight, size: 24.sp),
+              SizedBox(width: 12.sp),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Tổng số người chơi: ${_participants.length}",
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textPrimaryLight,
+                    ),
+                  ),
+                  Text(
+                    "Đã thanh toán: ${_participants.where((p) => p['payment_status'] == 'completed' || p['payment_status'] == 'confirmed').length}",
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: AppTheme.textSecondaryLight,
+                    ),
+                  ),
+                ],
+              ),
+              Spacer(),
+              IconButton(
+                onPressed: _loadParticipants,
+                icon: Icon(Icons.refresh, color: AppTheme.primaryLight),
+                tooltip: "Làm mới",
+              ),
+            ],
+          ),
+        ),
+
+        // Participants list
+        Expanded(
+          child: _participants.isEmpty
+              ? _buildEmptyState()
+              : ListView.builder(
+                  padding: EdgeInsets.symmetric(horizontal: 16.sp),
+                  itemCount: _participants.length,
+                  itemBuilder: (context, index) {
+                    final participant = _participants[index];
+                    return _buildParticipantCard(participant);
+                  },
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyState() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.people_outline, size: 64.sp, color: AppTheme.dividerLight),
           SizedBox(height: 16.sp),
-          Text("Quản lý người chơi", style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600)),
+          Text("Chưa có người chơi nào đăng ký", 
+               style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600)),
           SizedBox(height: 8.sp),
-          Text("Tính năng đang được phát triển", style: TextStyle(color: AppTheme.textSecondaryLight)),
+          Text("Người chơi đăng ký sẽ hiển thị ở đây", 
+               style: TextStyle(color: AppTheme.textSecondaryLight)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildParticipantCard(Map<String, dynamic> participant) {
+    final user = participant['user'];
+    final paymentStatus = participant['payment_status'] ?? 'pending';
+    final registeredAt = participant['registered_at'];
+    final notes = participant['notes'];
+
+    return Container(
+      margin: EdgeInsets.only(bottom: 12.sp),
+      padding: EdgeInsets.all(16.sp),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.sp),
+        border: Border.all(color: AppTheme.dividerLight),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              // Avatar
+              CircleAvatar(
+                radius: 24.sp,
+                backgroundImage: user['avatar_url'] != null
+                    ? NetworkImage(user['avatar_url'])
+                    : null,
+                child: user['avatar_url'] == null
+                    ? Icon(Icons.person, size: 24.sp)
+                    : null,
+              ),
+              SizedBox(width: 12.sp),
+              
+              // User info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      user['full_name'] ?? 'Unknown Player',
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.textPrimaryLight,
+                      ),
+                    ),
+                    Text(
+                      "ELO: ${user['elo_rating']} - ${user['rank']}",
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: AppTheme.textSecondaryLight,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Payment status badge
+              _buildPaymentStatusBadge(paymentStatus),
+            ],
+          ),
+
+          if (notes != null && notes.isNotEmpty) ...[
+            SizedBox(height: 8.sp),
+            Text(
+              "Ghi chú: $notes",
+              style: TextStyle(
+                fontSize: 12.sp,
+                color: AppTheme.textSecondaryLight,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
+
+          SizedBox(height: 12.sp),
+          
+          // Action buttons
+          Row(
+            children: [
+              Text(
+                _formatRegistrationDate(registeredAt),
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  color: AppTheme.textSecondaryLight,
+                ),
+              ),
+              Spacer(),
+              
+              // Payment confirmation button
+              if (paymentStatus == 'pending') ...[
+                TextButton.icon(
+                  onPressed: () => _confirmPayment(participant),
+                  icon: Icon(Icons.check_circle_outline, size: 16.sp),
+                  label: Text("Xác nhận TT"),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppTheme.successLight,
+                    padding: EdgeInsets.symmetric(horizontal: 8.sp, vertical: 4.sp),
+                  ),
+                ),
+                SizedBox(width: 8.sp),
+              ],
+              
+              // More actions button
+              PopupMenuButton<String>(
+                icon: Icon(Icons.more_vert, size: 20.sp),
+                onSelected: (value) => _handleParticipantAction(value, participant),
+                itemBuilder: (context) => [
+                  if (paymentStatus != 'pending')
+                    PopupMenuItem(
+                      value: 'reset_payment',
+                      child: Row(
+                        children: [
+                          Icon(Icons.payment, size: 16.sp),
+                          SizedBox(width: 8.sp),
+                          Text('Đặt lại thanh toán'),
+                        ],
+                      ),
+                    ),
+                  PopupMenuItem(
+                    value: 'add_note',
+                    child: Row(
+                      children: [
+                        Icon(Icons.note_add, size: 16.sp),
+                        SizedBox(width: 8.sp),
+                        Text('Thêm ghi chú'),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'remove',
+                    child: Row(
+                      children: [
+                        Icon(Icons.remove_circle_outline, size: 16.sp, color: AppTheme.errorLight),
+                        SizedBox(width: 8.sp),
+                        Text('Loại bỏ', style: TextStyle(color: AppTheme.errorLight)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPaymentStatusBadge(String status) {
+    Color backgroundColor;
+    Color textColor;
+    String text;
+    IconData icon;
+
+    switch (status) {
+      case 'completed':
+      case 'confirmed':
+        backgroundColor = AppTheme.successLight.withOpacity(0.1);
+        textColor = AppTheme.successLight;
+        text = 'Đã thanh toán';
+        icon = Icons.check_circle;
+        break;
+      case 'pending':
+      default:
+        backgroundColor = AppTheme.warningLight.withOpacity(0.1);
+        textColor = AppTheme.warningLight;
+        text = 'Chưa thanh toán';
+        icon = Icons.pending;
+        break;
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.sp, vertical: 4.sp),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12.sp),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14.sp, color: textColor),
+          SizedBox(width: 4.sp),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 12.sp,
+              color: textColor,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatRegistrationDate(String? dateStr) {
+    if (dateStr == null) return '';
+    try {
+      final date = DateTime.parse(dateStr);
+      return 'Đăng ký: ${date.day}/${date.month}/${date.year}';
+    } catch (e) {
+      return '';
+    }
+  }
+
+  Future<void> _confirmPayment(Map<String, dynamic> participant) async {
+    try {
+      await _tournamentService.updateParticipantPaymentStatus(
+        tournamentId: widget.tournamentId,
+        userId: participant['user_id'],
+        paymentStatus: 'confirmed',
+        notes: 'Đã xác nhận thanh toán bởi quản lý CLB',
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Đã xác nhận thanh toán cho ${participant['user']['full_name']}'),
+          backgroundColor: AppTheme.successLight,
+        ),
+      );
+
+      _loadParticipants(); // Refresh list
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Lỗi xác nhận thanh toán: ${e.toString()}'),
+          backgroundColor: AppTheme.errorLight,
+        ),
+      );
+    }
+  }
+
+  void _handleParticipantAction(String action, Map<String, dynamic> participant) {
+    switch (action) {
+      case 'reset_payment':
+        _resetPaymentStatus(participant);
+        break;
+      case 'add_note':
+        _showAddNoteDialog(participant);
+        break;
+      case 'remove':
+        _showRemoveParticipantDialog(participant);
+        break;
+    }
+  }
+
+  Future<void> _resetPaymentStatus(Map<String, dynamic> participant) async {
+    try {
+      await _tournamentService.updateParticipantPaymentStatus(
+        tournamentId: widget.tournamentId,
+        userId: participant['user_id'],
+        paymentStatus: 'pending',
+        notes: 'Đặt lại trạng thái thanh toán bởi quản lý CLB',
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Đã đặt lại trạng thái thanh toán cho ${participant['user']['full_name']}'),
+          backgroundColor: AppTheme.warningLight,
+        ),
+      );
+
+      _loadParticipants();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Lỗi đặt lại thanh toán: ${e.toString()}'),
+          backgroundColor: AppTheme.errorLight,
+        ),
+      );
+    }
+  }
+
+  void _showAddNoteDialog(Map<String, dynamic> participant) {
+    final noteController = TextEditingController(text: participant['notes'] ?? '');
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Ghi chú cho ${participant['user']['full_name']}'),
+        content: TextField(
+          controller: noteController,
+          decoration: InputDecoration(
+            labelText: 'Ghi chú',
+            border: OutlineInputBorder(),
+          ),
+          maxLines: 3,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Hủy'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              try {
+                await _tournamentService.updateParticipantPaymentStatus(
+                  tournamentId: widget.tournamentId,
+                  userId: participant['user_id'],
+                  paymentStatus: participant['payment_status'],
+                  notes: noteController.text,
+                );
+                _loadParticipants();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Đã cập nhật ghi chú')),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Lỗi cập nhật ghi chú: ${e.toString()}'),
+                    backgroundColor: AppTheme.errorLight,
+                  ),
+                );
+              }
+            },
+            child: Text('Lưu'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showRemoveParticipantDialog(Map<String, dynamic> participant) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Loại bỏ người chơi'),
+        content: Text('Bạn có chắc chắn muốn loại bỏ ${participant['user']['full_name']} khỏi giải đấu?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Hủy'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              try {
+                await _tournamentService.removeParticipant(
+                  tournamentId: widget.tournamentId,
+                  userId: participant['user_id'],
+                  reason: 'Loại bỏ bởi quản lý CLB',
+                );
+                _loadParticipants();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Đã loại bỏ người chơi')),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Lỗi loại bỏ người chơi: ${e.toString()}'),
+                    backgroundColor: AppTheme.errorLight,
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.errorLight),
+            child: Text('Loại bỏ'),
+          ),
         ],
       ),
     );

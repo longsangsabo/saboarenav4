@@ -77,21 +77,82 @@ class _AdminTournamentManagementScreenState extends State<AdminTournamentManagem
       final result = await _adminService.addAllUsersToTournament(tournamentId);
 
       setState(() {
-        _operationMessage = 'Success! Added ${result['users_added']} users to "$tournamentTitle". '
+        _operationMessage = '🎉 Success! Added ${result['users_added']} users to "$tournamentTitle". '
             'Total participants: ${result['total_participants']}/${result['max_participants']}';
       });
 
-      // Reload tournaments to show updated participant counts
+      // Reload tournaments to show updated participant counts  
       await _loadTournaments();
+
+      // Show success snackbar
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text('Successfully added ${result['users_added']} users to tournament!'),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
 
     } catch (e) {
       setState(() {
-        _operationMessage = 'Error: $e';
+        // More user-friendly error messages for adding users
+        String errorMsg = e.toString();
+        if (errorMsg.contains('PostgrestException')) {
+          _operationMessage = '❌ Database error: Please try again or contact support.';
+        } else if (errorMsg.contains('Access denied')) {
+          _operationMessage = '❌ Access denied: You do not have permission to perform this action.';
+        } else if (errorMsg.contains('Tournament not found')) {
+          _operationMessage = '❌ Tournament not found. Please refresh and try again.';
+        } else if (errorMsg.contains('Tournament must be in upcoming status')) {
+          _operationMessage = '❌ Can only add users to upcoming tournaments.';
+        } else {
+          _operationMessage = '❌ Failed to add users to tournament. Please try again.';
+        }
       });
+
+      // Show error snackbar
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.error_outline, color: Colors.white),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text('Failed to add users: ${_extractErrorMessage(e.toString())}'),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 4),
+          ),
+        );
+      }
     } finally {
       setState(() {
         _isOperationInProgress = false;
       });
+      
+      // Auto-hide operation message after 5 seconds
+      if (_operationMessage != null) {
+        Future.delayed(Duration(seconds: 5), () {
+          if (mounted) {
+            setState(() {
+              _operationMessage = null;
+            });
+          }
+        });
+      }
     }
   }
 
@@ -105,21 +166,69 @@ class _AdminTournamentManagementScreenState extends State<AdminTournamentManagem
       final result = await _adminService.removeAllUsersFromTournament(tournamentId);
 
       setState(() {
-        _operationMessage = 'Success! Removed ${result['users_removed']} users from "$tournamentTitle". '
-            'Remaining participants: ${result['remaining_participants']}';
+        _operationMessage = '🗑️ Success! Removed ${result['users_removed']} users from "$tournamentTitle".';
       });
 
       // Reload tournaments to show updated participant counts
       await _loadTournaments();
 
+      // Show success snackbar
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text('Successfully removed ${result['users_removed']} users from tournament!'),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+
     } catch (e) {
       setState(() {
-        _operationMessage = 'Error: $e';
+        _operationMessage = '❌ Failed to remove users from tournament. ${_extractErrorMessage(e.toString())}';
       });
+
+      // Show error snackbar
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.error_outline, color: Colors.white),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text('Failed to remove users: ${_extractErrorMessage(e.toString())}'),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 4),
+          ),
+        );
+      }
     } finally {
       setState(() {
         _isOperationInProgress = false;
       });
+      
+      // Auto-hide operation message after 5 seconds
+      if (_operationMessage != null) {
+        Future.delayed(Duration(seconds: 5), () {
+          if (mounted) {
+            setState(() {
+              _operationMessage = null;
+            });
+          }
+        });
+      }
     }
   }
 
@@ -133,6 +242,25 @@ class _AdminTournamentManagementScreenState extends State<AdminTournamentManagem
     );
   }
 
+  String _extractErrorMessage(String fullError) {
+    // Extract user-friendly error message from technical error
+    if (fullError.contains('PostgrestException')) {
+      if (fullError.contains('row violates row-level security')) {
+        return 'Permission denied - RLS policy violation';
+      } else if (fullError.contains('column') && fullError.contains('GROUP BY')) {
+        return 'Database query error';
+      } else {
+        return 'Database operation failed';
+      }
+    } else if (fullError.contains('Access denied')) {
+      return 'Insufficient permissions';
+    } else if (fullError.contains('Tournament not found')) {
+      return 'Tournament no longer exists';
+    } else {
+      return 'Unexpected error occurred';
+    }
+  }
+
   void _showConfirmDialog({
     required String title,
     required String content,
@@ -140,13 +268,43 @@ class _AdminTournamentManagementScreenState extends State<AdminTournamentManagem
   }) {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(content),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Icon(
+              title.contains('Add') ? Icons.group_add : Icons.warning,
+              color: title.contains('Add') ? Colors.green : Colors.orange,
+            ),
+            SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          content,
+          style: TextStyle(fontSize: 14.sp),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
@@ -154,9 +312,16 @@ class _AdminTournamentManagementScreenState extends State<AdminTournamentManagem
               onConfirm();
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
+              backgroundColor: title.contains('Add') ? Colors.green : Colors.orange,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
-            child: const Text('Confirm'),
+            child: Text(
+              'Confirm',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
           ),
         ],
       ),
@@ -251,12 +416,47 @@ class _AdminTournamentManagementScreenState extends State<AdminTournamentManagem
             ),
           ),
 
-        // Progress Indicator
+        // Enhanced Progress Indicator
         if (_isOperationInProgress)
           Container(
             width: double.infinity,
+            margin: EdgeInsets.all(2.w),
             padding: EdgeInsets.all(3.w),
-            child: const LinearProgressIndicator(),
+            decoration: BoxDecoration(
+              color: Colors.blue[50],
+              border: Border.all(color: Colors.blue),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Text(
+                      'Processing tournament operation...',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: Colors.blue[800],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8),
+                LinearProgressIndicator(
+                  backgroundColor: Colors.blue[100],
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                ),
+              ],
+            ),
           ),
 
         // Tournament List
@@ -390,19 +590,28 @@ class _AdminTournamentManagementScreenState extends State<AdminTournamentManagem
                   child: ElevatedButton.icon(
                     onPressed: canAddUsers && !_isOperationInProgress
                         ? () => _showConfirmDialog(
-                              title: 'Add All Users',
-                              content: 'Are you sure you want to add all users to "$title"?',
+                              title: '👥 Add All Users',
+                              content: 'Are you sure you want to add all users to "$title"?\n\nThis action will add all registered users to the tournament.',
                               onConfirm: () => _addAllUsersToTournament(
                                 tournament['id'],
                                 title,
                               ),
                             )
                         : null,
-                    icon: const Icon(Icons.group_add, size: 16),
-                    label: const Text('Add All Users'),
+                    icon: Icon(
+                      _isOperationInProgress ? Icons.hourglass_empty : Icons.group_add, 
+                      size: 16
+                    ),
+                    label: Text(
+                      _isOperationInProgress ? 'Processing...' : 'Add All Users',
+                      style: TextStyle(fontSize: 11.sp),
+                    ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+                      backgroundColor: canAddUsers && !_isOperationInProgress 
+                          ? Colors.green 
+                          : Colors.grey,
                       foregroundColor: Colors.white,
+                      elevation: canAddUsers && !_isOperationInProgress ? 2 : 0,
                     ),
                   ),
                 ),
@@ -411,19 +620,28 @@ class _AdminTournamentManagementScreenState extends State<AdminTournamentManagem
                   child: ElevatedButton.icon(
                     onPressed: canRemoveUsers && !_isOperationInProgress
                         ? () => _showConfirmDialog(
-                              title: 'Remove All Users',
-                              content: 'Are you sure you want to remove all users from "$title"?',
+                              title: '🗑️ Remove All Users',
+                              content: 'Are you sure you want to remove ALL users from "$title"?\n\n⚠️ This action cannot be undone.',
                               onConfirm: () => _removeAllUsersFromTournament(
                                 tournament['id'],
                                 title,
                               ),
                             )
                         : null,
-                    icon: const Icon(Icons.group_remove, size: 16),
-                    label: const Text('Remove All'),
+                    icon: Icon(
+                      _isOperationInProgress ? Icons.hourglass_empty : Icons.group_remove, 
+                      size: 16
+                    ),
+                    label: Text(
+                      _isOperationInProgress ? 'Processing...' : 'Remove All',
+                      style: TextStyle(fontSize: 11.sp),
+                    ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
+                      backgroundColor: canRemoveUsers && !_isOperationInProgress 
+                          ? Colors.orange 
+                          : Colors.grey,
                       foregroundColor: Colors.white,
+                      elevation: canRemoveUsers && !_isOperationInProgress ? 2 : 0,
                     ),
                   ),
                 ),

@@ -463,6 +463,118 @@ class TournamentService {
     }
   }
 
+  // ==================== PARTICIPANT MANAGEMENT ====================
+
+  /// Get tournament participants with payment status for club management
+  Future<List<Map<String, dynamic>>> getTournamentParticipantsWithPaymentStatus(
+      String tournamentId) async {
+    try {
+      final response = await _supabase
+          .from('tournament_participants')
+          .select('''
+            *,
+            users!tournament_participants_user_id_fkey (
+              id,
+              email,
+              full_name,
+              avatar_url,
+              elo_rating,
+              rank
+            )
+          ''')
+          .eq('tournament_id', tournamentId)
+          .order('registered_at', ascending: true);
+
+      return response.map<Map<String, dynamic>>((json) {
+        final user = json['users'];
+        return {
+          'id': json['id'],
+          'tournament_id': json['tournament_id'],
+          'user_id': json['user_id'],
+          'payment_status': json['payment_status'] ?? 'pending',
+          'status': json['status'] ?? 'registered', 
+          'notes': json['notes'],
+          'registered_at': json['registered_at'],
+          'user': {
+            'id': user['id'],
+            'email': user['email'],
+            'full_name': user['full_name'] ?? 'Unknown Player',
+            'avatar_url': user['avatar_url'],
+            'elo_rating': user['elo_rating'] ?? 1200,
+            'rank': user['rank'] ?? 'Unranked',
+          },
+        };
+      }).toList();
+    } catch (error) {
+      print('❌ Error getting participants with payment status: $error');
+      throw Exception('Failed to get tournament participants: $error');
+    }
+  }
+
+  /// Update payment status for a tournament participant (club owner only)
+  Future<bool> updateParticipantPaymentStatus({
+    required String tournamentId,
+    required String userId,
+    required String paymentStatus, // 'pending', 'confirmed', 'completed'
+    String? notes,
+  }) async {
+    try {
+      final currentUser = _supabase.auth.currentUser;
+      if (currentUser == null) throw Exception('User not authenticated');
+
+      // Validate payment status
+      if (!['pending', 'confirmed', 'completed'].contains(paymentStatus)) {
+        throw Exception('Invalid payment status');
+      }
+
+      // Update the participant record
+      await _supabase
+          .from('tournament_participants')
+          .update({
+            'payment_status': paymentStatus,
+            'notes': notes,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('tournament_id', tournamentId)
+          .eq('user_id', userId);
+
+      print('✅ Updated payment status for user $userId to $paymentStatus');
+      return true;
+    } catch (error) {
+      print('❌ Error updating payment status: $error');
+      throw Exception('Failed to update payment status: $error');
+    }
+  }
+
+  /// Remove a participant from tournament (club owner only)
+  Future<bool> removeParticipant({
+    required String tournamentId,
+    required String userId,
+    String? reason,
+  }) async {
+    try {
+      final currentUser = _supabase.auth.currentUser;
+      if (currentUser == null) throw Exception('User not authenticated');
+
+      // Remove participant
+      await _supabase
+          .from('tournament_participants')
+          .delete()
+          .eq('tournament_id', tournamentId)
+          .eq('user_id', userId);
+
+      // Update participant count
+      await _supabase.rpc('decrement_tournament_participants',
+          params: {'tournament_id': tournamentId});
+
+      print('✅ Removed participant $userId from tournament $tournamentId');
+      return true;
+    } catch (error) {
+      print('❌ Error removing participant: $error');
+      throw Exception('Failed to remove participant: $error');
+    }
+  }
+
   // ==================== CORE TOURNAMENT LOGIC ====================
 
   /// Tạo tournament bracket dựa trên format và danh sách participants

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
 import '../../theme/app_theme.dart';
 import '../../services/admin_service.dart';
-import '../../services/auth_service.dart';
 import '../../routes/app_routes.dart';
-import './widgets/admin_navigation_drawer.dart';
-import './widgets/admin_bottom_navigation.dart';
+import './widgets/admin_scaffold_wrapper.dart';
 import '../admin_tournament_management_screen/admin_tournament_management_screen.dart';
 import './club_approval_screen.dart';
+import './admin_user_management_screen.dart';
+
 
 class AdminMainScreen extends StatefulWidget {
   final int initialIndex;
@@ -23,56 +22,24 @@ class AdminMainScreen extends StatefulWidget {
 
 class _AdminMainScreenState extends State<AdminMainScreen> {
   int _currentIndex = 0;
-  final PageController _pageController = PageController();
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _pageController.animateToPage(
-        _currentIndex,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    });
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.backgroundLight,
-      appBar: _buildAppBar(),
-      drawer: const AdminNavigationDrawer(),
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        children: [
-          _AdminDashboardTab(),
-          _AdminClubApprovalTab(),
-          _AdminTournamentTab(),
-          _AdminUserManagementTab(),
-          _AdminMoreTab(),
-        ],
-      ),
-      bottomNavigationBar: AdminBottomNavigation(
-        currentIndex: _currentIndex,
-        onTap: _onNavTap,
-      ),
+    return AdminScaffoldWrapper(
+      title: _getTitleForIndex(_currentIndex),
+      currentIndex: _currentIndex,
+      onBottomNavTap: _onNavTap,
+      body: _getCurrentScreen(),
     );
   }
 
-  PreferredSizeWidget _buildAppBar() {
+  String _getTitleForIndex(int index) {
     final titles = [
       'Dashboard',
       'Duyệt CLB',
@@ -80,190 +47,37 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
       'Quản lý Users',
       'Thêm tùy chọn',
     ];
-
-    return AppBar(
-      backgroundColor: Colors.white,
-      elevation: 2,
-      shadowColor: Colors.black.withOpacity(0.1),
-      leading: Builder(
-        builder: (context) => IconButton(
-          icon: Icon(Icons.menu, color: AppTheme.textPrimaryLight),
-          onPressed: () => Scaffold.of(context).openDrawer(),
-        ),
-      ),
-      title: Text(
-        titles[_currentIndex],
-        style: TextStyle(
-          color: AppTheme.textPrimaryLight,
-          fontSize: 18.sp,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      centerTitle: true,
-      actions: [
-        IconButton(
-          icon: Icon(Icons.switch_account, color: AppTheme.textPrimaryLight),
-          onPressed: _showAccountSwitchDialog,
-          tooltip: 'Chuyển đổi tài khoản',
-        ),
-        IconButton(
-          icon: Icon(Icons.refresh, color: AppTheme.textPrimaryLight),
-          onPressed: () {
-            // Refresh current page
-            setState(() {});
-          },
-          tooltip: 'Làm mới',
-        ),
-        PopupMenuButton<String>(
-          icon: Icon(Icons.more_vert, color: AppTheme.textPrimaryLight),
-          onSelected: _handleMenuAction,
-          itemBuilder: (BuildContext context) => [
-            const PopupMenuItem<String>(
-              value: 'switch_to_user',
-              child: ListTile(
-                leading: Icon(Icons.person),
-                title: Text('Chuyển sang giao diện người dùng'),
-                contentPadding: EdgeInsets.zero,
-              ),
-            ),
-            const PopupMenuItem<String>(
-              value: 'logout',
-              child: ListTile(
-                leading: Icon(Icons.logout, color: Colors.red),
-                title: Text('Đăng xuất', style: TextStyle(color: Colors.red)),
-                contentPadding: EdgeInsets.zero,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
+    return titles[index];
   }
+
+  Widget _getCurrentScreen() {
+    switch (_currentIndex) {
+      case 0:
+        return _AdminDashboardTab();
+      case 1:
+        return _AdminClubApprovalTab();
+      case 2:
+        return _AdminTournamentTab();
+      case 3:
+        return AdminUserManagementScreen();
+      case 4:
+        return _AdminMoreTab();
+      default:
+        return _AdminDashboardTab();
+    }
+  }
+
+
 
   void _onNavTap(int index) {
     if (index != _currentIndex) {
       setState(() {
         _currentIndex = index;
       });
-      _pageController.animateToPage(
-        index,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
     }
   }
 
-  void _handleMenuAction(String action) async {
-    switch (action) {
-      case 'switch_to_user':
-        _switchToUserMode();
-        break;
-      case 'logout':
-        _handleLogout();
-        break;
-    }
-  }
 
-  void _showAccountSwitchDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.0),
-          ),
-          title: Row(
-            children: [
-              Icon(Icons.switch_account, color: AppTheme.primaryLight),
-              SizedBox(width: 8.0),
-              Text('Chuyển đổi tài khoản'),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Bạn muốn chuyển sang chế độ nào?'),
-              SizedBox(height: 16.0),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        _switchToUserMode();
-                      },
-                      icon: Icon(Icons.person),
-                      label: Text('Người dùng'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryLight,
-                        foregroundColor: Colors.white,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 8.0),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        _handleLogout();
-                      },
-                      icon: Icon(Icons.logout),
-                      label: Text('Đăng xuất'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        foregroundColor: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  void _switchToUserMode() {
-    Navigator.of(context).pushReplacementNamed(AppRoutes.userProfileScreen);
-  }
-
-  void _handleLogout() async {
-    try {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            content: Row(
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(width: 16.0),
-                Text('Đang đăng xuất...'),
-              ],
-            ),
-          );
-        },
-      );
-
-      await AuthService.instance.signOut();
-
-      if (context.mounted) {
-        Navigator.of(context).pop(); // Close loading dialog
-        Navigator.of(context).pushReplacementNamed(AppRoutes.loginScreen);
-      }
-    } catch (e) {
-      if (context.mounted) {
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Lỗi đăng xuất: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
 }
 
 // Individual tab widgets
@@ -686,35 +500,7 @@ class _AdminTournamentTab extends StatelessWidget {
   }
 }
 
-class _AdminUserManagementTab extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.construction, size: 64, color: AppTheme.primaryLight),
-          SizedBox(height: 16),
-          Text(
-            'Quản lý Users',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.textPrimaryLight,
-            ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Tính năng đang được phát triển',
-            style: TextStyle(
-              color: AppTheme.textSecondaryLight,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+
 
 class _AdminMoreTab extends StatelessWidget {
   @override

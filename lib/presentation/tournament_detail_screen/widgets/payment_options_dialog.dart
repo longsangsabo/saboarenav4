@@ -112,11 +112,11 @@ class _PaymentOptionsDialogState extends State<PaymentOptionsDialog> {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.of(context).pop();
+                      // Don't pop yet - let confirmation dialogs handle it
                       if (selectedPaymentMethod == 0) {
-                        _showPayAtVenueConfirmation(context);
+                        _showPayAtVenueConfirmation();
                       } else {
-                        _showQRPayment(context);
+                        _showQRPayment();
                       }
                     },
                     style: ElevatedButton.styleFrom(
@@ -225,7 +225,10 @@ class _PaymentOptionsDialogState extends State<PaymentOptionsDialog> {
     );
   }
 
-  void _showPayAtVenueConfirmation(BuildContext context) {
+  void _showPayAtVenueConfirmation() {
+    // Close payment options dialog first
+    Navigator.of(context).pop();
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -273,7 +276,10 @@ class _PaymentOptionsDialogState extends State<PaymentOptionsDialog> {
     );
   }
 
-  void _showQRPayment(BuildContext context) {
+  void _showQRPayment() {
+    // Close payment options dialog first
+    Navigator.of(context).pop();
+    
     // Mock QR data - in real app, this would be generated from payment gateway
     final qrData = 'PAYMENT:${widget.tournamentName}:${widget.entryFee.toStringAsFixed(0)}';
     
@@ -362,7 +368,7 @@ class _PaymentOptionsDialogState extends State<PaymentOptionsDialog> {
                       onPressed: () {
                         Navigator.of(context).pop();
                         widget.onPaymentConfirmed?.call('1'); // 1 = QR payment
-                        _showPaymentPendingDialog(context);
+                        _showPaymentPendingDialog();
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
@@ -380,7 +386,7 @@ class _PaymentOptionsDialogState extends State<PaymentOptionsDialog> {
     );
   }
 
-  void _showPaymentPendingDialog(BuildContext context) {
+  void _showPaymentPendingDialog() {
     showDialog(
       context: context,
       barrierDismissible: false,

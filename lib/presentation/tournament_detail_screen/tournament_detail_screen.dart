@@ -12,7 +12,6 @@ import 'widgets/tournament_bracket_view.dart';
 import 'widgets/participant_management_view.dart';
 import 'widgets/match_management_view.dart';
 import 'widgets/tournament_stats_view.dart';
-import 'widgets/payment_options_dialog.dart';
 import '../../widgets/custom_bottom_bar.dart';
 import './widgets/participants_list_widget.dart';
 import './widgets/prize_pool_widget.dart';
@@ -157,7 +156,11 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
   }
 
   Future<void> _loadTournamentData() async {
-    if (_tournamentId == null) return;
+    print('📊 _loadTournamentData called with ID: $_tournamentId');
+    if (_tournamentId == null) {
+      print('❌ Tournament ID is null');
+      return;
+    }
     
     try {
       setState(() {
@@ -179,6 +182,9 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
       
       // Convert tournament model to UI data format
       _convertTournamentToUIData();
+      
+      print('✅ Tournament data loaded successfully');
+      print('Tournament data keys: ${_tournamentData.keys}');
       
       setState(() {
         _isLoading = false;
@@ -480,68 +486,114 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
   }
 
   void _handleRegistration() {
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    print('🎯 _handleRegistration called!');
+    print('Tournament data: $_tournamentData');
     
-    // Show payment options dialog
+    // Validation checks
+    if (_tournamentData.isEmpty) {
+      print('❌ Tournament data is empty');
+      _showMessage('Không thể tải thông tin giải đấu', isError: true);
+      return;
+    }
+    
+    // Show simple confirmation dialog
     showDialog(
       context: context,
-      builder: (dialogContext) => PaymentOptionsDialog(
-        tournamentId: _tournamentData['id'],
-        tournamentName: _tournamentData['title'],
-        entryFee: double.parse(_tournamentData['entryFee'].toString().replaceAll(',', '').replaceAll(' VNĐ', '')),
-        onPaymentConfirmed: (paymentMethod) async {
-          // Close dialog first
-          Navigator.of(dialogContext).pop();
-          
-          try {
-            // Show loading
-            scaffoldMessenger.showSnackBar(
-              const SnackBar(
-                content: Text('Đang xử lý đăng ký...'),
-                duration: Duration(seconds: 1),
-              ),
-            );
-            
-            // Call actual registration service with selected payment method
-            await _tournamentService.registerForTournament(
-              _tournamentData['id'],
-              paymentMethod: paymentMethod,
-            );
-            
-            // Update UI state
-            if (mounted) {
-              setState(() {
-                _isRegistered = true;
-              });
-              
-              // Reload tournament data to get updated participant count
-              await _loadTournamentData();
-              
-              // Show success message
-              scaffoldMessenger.showSnackBar(
-                SnackBar(
-                  content: Text(
-                    paymentMethod == '0' 
-                      ? 'Đăng ký thành công! Vui lòng thanh toán tại quán.'
-                      : 'Đăng ký thành công! Vui lòng chuyển khoản theo QR code.',
-                  ),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            }
-          } catch (error) {
-            if (mounted) {
-              scaffoldMessenger.showSnackBar(
-                SnackBar(
-                  content: Text('Đăng ký thất bại: $error'),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            }
-          }
-        },
+      builder: (context) => AlertDialog(
+        title: const Text('Xác nhận đăng ký'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Giải đấu: ${_tournamentData['title'] ?? 'Không rõ'}'),
+            const SizedBox(height: 8),
+            Text('Lệ phí: ${_tournamentData['entryFee'] ?? 'Miễn phí'}'),
+            const SizedBox(height: 16),
+            const Text('Bạn có chắc chắn muốn đăng ký tham gia giải đấu này?'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Hủy'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _performRegistration();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Đăng ký ngay'),
+          ),
+        ],
       ),
     );
+  }
+
+  Future<void> _performRegistration() async {
+    print('🚀 Performing registration...');
+    
+    try {
+      // Show loading message
+      _showMessage('Đang xử lý đăng ký...', duration: 2);
+      
+      // Call registration service
+      final success = await _tournamentService.registerForTournament(
+        _tournamentData['id'],
+        paymentMethod: '0', // Default to pay at venue
+      );
+      
+      print('Registration result: $success');
+      
+      if (success && mounted) {
+        // Update UI state
+        setState(() {
+          _isRegistered = true;
+        });
+        
+        // Reload tournament data
+        await _loadTournamentData();
+        
+        // Show success message
+        _showMessage(
+          'Đăng ký thành công! Vui lòng thanh toán tại quán khi đến thi đấu.',
+          isError: false,
+          duration: 5,
+        );
+        
+        print('✅ Registration completed successfully');
+      } else {
+        throw Exception('Registration service returned false');
+      }
+    } catch (error) {
+      print('❌ Registration failed: $error');
+      if (mounted) {
+        _showMessage(
+          'Đăng ký thất bại: ${error.toString()}',
+          isError: true,
+          duration: 5,
+        );
+      }
+    }
+  }
+
+  void _showMessage(String message, {bool isError = false, int duration = 3}) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: isError ? Colors.red : Colors.green,
+          duration: Duration(seconds: duration),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      );
+    }
   }
 
   void _handleWithdrawal() {

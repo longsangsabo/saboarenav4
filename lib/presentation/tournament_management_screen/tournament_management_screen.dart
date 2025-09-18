@@ -158,7 +158,7 @@ class _TournamentManagementScreenState extends State<TournamentManagementScreen>
   Widget _buildContent() {
     return Column(
       children: [
-        // Stats Overview
+        // Stats Overview - Fixed height section
         TournamentStatsOverview(
           totalTournaments: _allTournaments.length,
           upcomingCount: _upcomingTournaments.length,
@@ -166,7 +166,7 @@ class _TournamentManagementScreenState extends State<TournamentManagementScreen>
           completedCount: _completedTournaments.length,
         ),
 
-        // Quick Actions
+        // Quick Actions - Fixed height section
         if (_canCreateTournaments)
           TournamentQuickActions(
             onCreateTournament: _navigateToCreateTournament,
@@ -174,7 +174,7 @@ class _TournamentManagementScreenState extends State<TournamentManagementScreen>
             onViewReports: _showReports,
           ),
 
-        // Tab Bar
+        // Tab Bar - Fixed height
         Container(
           color: Colors.white,
           child: TabBar(
@@ -182,6 +182,7 @@ class _TournamentManagementScreenState extends State<TournamentManagementScreen>
             labelColor: AppTheme.primaryLight,
             unselectedLabelColor: AppTheme.textSecondaryLight,
             indicatorColor: AppTheme.primaryLight,
+            isScrollable: false,
             tabs: [
               Tab(text: 'Tất cả (${_allTournaments.length})'),
               Tab(text: 'Sắp tới (${_upcomingTournaments.length})'),
@@ -191,35 +192,30 @@ class _TournamentManagementScreenState extends State<TournamentManagementScreen>
           ),
         ),
 
-        // Tournament Lists
+        // Tournament Lists - Expandable scrollable section
         Expanded(
           child: TabBarView(
             controller: _tabController,
             children: [
-              TournamentListSection(
-                tournaments: _allTournaments,
-                onTournamentTap: _navigateToTournamentDetail,
-                canManage: _canCreateTournaments,
-              ),
-              TournamentListSection(
-                tournaments: _upcomingTournaments,
-                onTournamentTap: _navigateToTournamentDetail,
-                canManage: _canCreateTournaments,
-              ),
-              TournamentListSection(
-                tournaments: _ongoingTournaments,
-                onTournamentTap: _navigateToTournamentDetail,
-                canManage: _canCreateTournaments,
-              ),
-              TournamentListSection(
-                tournaments: _completedTournaments,
-                onTournamentTap: _navigateToTournamentDetail,
-                canManage: _canCreateTournaments,
-              ),
+              _buildScrollableTournamentList(_allTournaments),
+              _buildScrollableTournamentList(_upcomingTournaments),
+              _buildScrollableTournamentList(_ongoingTournaments),
+              _buildScrollableTournamentList(_completedTournaments),
             ],
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildScrollableTournamentList(List<Tournament> tournaments) {
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(16),
+      child: TournamentListSection(
+        tournaments: tournaments,
+        onTournamentTap: _navigateToTournamentDetail,
+        canManage: _canCreateTournaments,
+      ),
     );
   }
 
