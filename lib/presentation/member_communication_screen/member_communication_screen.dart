@@ -4,7 +4,7 @@ import '../../widgets/custom_app_bar.dart';
 import '../member_management_screen/member_management_screen.dart';
 
 class MemberCommunicationScreen extends StatefulWidget {
-  const MemberCommunicationScreen({Key? key}) : super(key: key);
+  const MemberCommunicationScreen({super.key});
 
   @override
   _MemberCommunicationScreenState createState() => _MemberCommunicationScreenState();
@@ -1184,7 +1184,7 @@ class Notification {
 class ChatRoomScreen extends StatelessWidget {
   final ChatRoom room;
 
-  const ChatRoomScreen({Key? key, required this.room}) : super(key: key);
+  const ChatRoomScreen({super.key, required this.room});
 
   @override
   Widget build(BuildContext context) {
@@ -1198,7 +1198,7 @@ class ChatRoomScreen extends StatelessWidget {
 class AnnouncementDetailScreen extends StatelessWidget {
   final Announcement announcement;
 
-  const AnnouncementDetailScreen({Key? key, required this.announcement}) : super(key: key);
+  const AnnouncementDetailScreen({super.key, required this.announcement});
 
   @override
   Widget build(BuildContext context) {
@@ -1210,6 +1210,8 @@ class AnnouncementDetailScreen extends StatelessWidget {
 }
 
 class CreateChatRoomDialog extends StatelessWidget {
+  const CreateChatRoomDialog({super.key});
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -1226,6 +1228,8 @@ class CreateChatRoomDialog extends StatelessWidget {
 }
 
 class CreateAnnouncementDialog extends StatelessWidget {
+  const CreateAnnouncementDialog({super.key});
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(

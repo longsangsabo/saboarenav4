@@ -563,7 +563,7 @@ class _ClubDetailSectionState extends State<ClubDetailSection>
   }
 
   Widget _buildTournamentsTab(ColorScheme colorScheme) {
-    final tournaments = _getMockTournaments();
+    final tournaments = <ClubTournament>[];
 
     return Column(
       children: [

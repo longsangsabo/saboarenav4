@@ -487,7 +487,7 @@ Future<void> _analyzeMatchRelationships(String serviceKey, String baseUrl) async
     print('   Γ¥î Error analyzing relationships: $e');
   }
   
-  print('\n' + '=' * 75);
+  print('\n${'=' * 75}');
   print('≡ƒÄë MATCH SYSTEM ANALYSIS COMPLETE!');
   print('Γ£à Multiple match types supported (tournament/friendly/challenge/league)');
   print('Γ£à Comprehensive game formats (8-ball/9-ball/straight-pool/custom)');

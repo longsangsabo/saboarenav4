@@ -72,7 +72,7 @@ COMMENT ON COLUMN tournaments.skill_level_required IS 'Required skill level: Vie
         migrationSuccess = true;
         break;
       } else {
-        print('   ❌ Failed: ${response.statusCode} - ${body.length > 100 ? body.substring(0, 100) + '...' : body}');
+        print('   ❌ Failed: ${response.statusCode} - ${body.length > 100 ? '${body.substring(0, 100)}...' : body}');
       }
     }
     

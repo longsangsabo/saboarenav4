@@ -7,9 +7,9 @@ class MemberProfileEditScreen extends StatefulWidget {
   final MemberData memberData;
 
   const MemberProfileEditScreen({
-    Key? key,
+    super.key,
     required this.memberData,
-  }) : super(key: key);
+  });
 
   @override
   _MemberProfileEditScreenState createState() => _MemberProfileEditScreenState();
@@ -593,7 +593,7 @@ class _MemberProfileEditScreenState extends State<MemberProfileEditScreen>
     required void Function(T?) onChanged,
   }) {
     return DropdownButtonFormField<T>(
-      value: value,
+      initialValue: value,
       onChanged: onChanged,
       decoration: InputDecoration(
         labelText: label,

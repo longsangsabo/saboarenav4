@@ -362,13 +362,13 @@ class BracketGeneratorService {
 
   /// Generate unique match ID
   static String _generateMatchId(String tournamentId, int round, int match) {
-    return '${tournamentId}_R${round}_M${match}';
+    return '${tournamentId}_R${round}_M$match';
   }
 
   /// Generate unique round ID
   static String _generateRoundId(String tournamentId, int round, [String? type]) {
     final typePrefix = type != null ? '${type}_' : '';
-    return '${tournamentId}_${typePrefix}R${round}';
+    return '${tournamentId}_${typePrefix}R$round';
   }
 
   /// Get seeding position for single elimination bracket
@@ -420,7 +420,7 @@ class BracketGeneratorService {
       case 5:
         return 'Vòng 32'; // Round of 32
       default:
-        return 'Vòng ${roundNumber}'; // Round N
+        return 'Vòng $roundNumber'; // Round N
     }
   }
 

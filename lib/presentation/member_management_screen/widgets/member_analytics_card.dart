@@ -6,9 +6,9 @@ class MemberAnalyticsCard extends StatefulWidget {
   final MemberAnalytics analytics;
   
   const MemberAnalyticsCard({
-    Key? key,
+    super.key,
     required this.analytics,
-  }) : super(key: key);
+  });
 
   @override
   _MemberAnalyticsCardState createState() => _MemberAnalyticsCardState();
@@ -264,9 +264,9 @@ class _DetailedAnalyticsDialog extends StatelessWidget {
   final MemberAnalytics analytics;
 
   const _DetailedAnalyticsDialog({
-    Key? key,
+    super.key,
     required this.analytics,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

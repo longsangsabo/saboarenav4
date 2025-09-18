@@ -3,7 +3,7 @@ import './widgets/admin_scaffold_wrapper.dart';
 import '../admin_tournament_management_screen/admin_tournament_management_screen.dart';
 
 class AdminTournamentMainScreen extends StatelessWidget {
-  const AdminTournamentMainScreen({Key? key}) : super(key: key);
+  const AdminTournamentMainScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -7,11 +7,11 @@ class BulkActionBar extends StatelessWidget {
   final VoidCallback onClear;
 
   const BulkActionBar({
-    Key? key,
+    super.key,
     required this.selectedCount,
     required this.onAction,
     required this.onClear,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -4,7 +4,7 @@ import '../../theme/app_theme.dart';
 import '../../services/admin_service.dart';
 
 class AdminUserManagementScreen extends StatefulWidget {
-  const AdminUserManagementScreen({Key? key}) : super(key: key);
+  const AdminUserManagementScreen({super.key});
 
   @override
   State<AdminUserManagementScreen> createState() => _AdminUserManagementScreenState();

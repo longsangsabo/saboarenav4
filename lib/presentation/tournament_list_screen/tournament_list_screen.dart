@@ -57,12 +57,12 @@ class _TournamentListScreenState extends State<TournamentListScreen>
         });
       }
     } catch (e) {
-      // Fallback to mock data for demonstration
+      // Show error if data loading fails
       if (mounted) {
         setState(() {
-          _allTournaments = _getMockTournaments();
+          _allTournaments = [];
           _isLoading = false;
-          _errorMessage = null; // Clear error message when using mock data
+          _errorMessage = 'Không thể tải dữ liệu giải đấu: $e';
         });
       }
     }

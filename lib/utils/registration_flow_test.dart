@@ -38,7 +38,7 @@ class RegistrationFlowTest {
       print('\n4️⃣ Testing Registration Validation...');
       _testRegistrationValidation(mockTournament);
       
-      print('\n' + '=' * 50);
+      print('\n${'=' * 50}');
       print('🏁 Registration flow test completed!');
     }
   }

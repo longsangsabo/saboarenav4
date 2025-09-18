@@ -308,7 +308,7 @@ class _QuickActionCardState extends State<QuickActionCard>
 
 // Specialized Quick Action Cards
 class CreateTournamentCard extends QuickActionCard {
-  CreateTournamentCard({
+  const CreateTournamentCard({
     super.key,
     required super.onPress,
     super.isLoading,
@@ -321,7 +321,7 @@ class CreateTournamentCard extends QuickActionCard {
 }
 
 class ManageMembersCard extends QuickActionCard {
-  ManageMembersCard({
+  const ManageMembersCard({
     super.key,
     required super.onPress,
     int? pendingRequests,
@@ -336,7 +336,7 @@ class ManageMembersCard extends QuickActionCard {
 }
 
 class EditProfileCard extends QuickActionCard {
-  EditProfileCard({
+  const EditProfileCard({
     super.key,
     required super.onPress,
     super.isLoading,
@@ -349,7 +349,7 @@ class EditProfileCard extends QuickActionCard {
 }
 
 class SendNotificationCard extends QuickActionCard {
-  SendNotificationCard({
+  const SendNotificationCard({
     super.key,
     required super.onPress,
     super.isLoading,

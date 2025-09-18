@@ -3,7 +3,7 @@ import '../../core/app_export.dart';
 import '../../widgets/custom_app_bar.dart';
 
 class MembershipRequestScreen extends StatefulWidget {
-  const MembershipRequestScreen({Key? key}) : super(key: key);
+  const MembershipRequestScreen({super.key});
 
   @override
   _MembershipRequestScreenState createState() => _MembershipRequestScreenState();
@@ -772,7 +772,7 @@ class MembershipRequest {
 class _RequestDetailDialog extends StatelessWidget {
   final MembershipRequest request;
 
-  const _RequestDetailDialog({Key? key, required this.request}) : super(key: key);
+  const _RequestDetailDialog({super.key, required this.request});
 
   @override
   Widget build(BuildContext context) {

@@ -6,9 +6,9 @@ class MemberTournamentsTab extends StatefulWidget {
   final MemberData memberData;
 
   const MemberTournamentsTab({
-    Key? key,
+    super.key,
     required this.memberData,
-  }) : super(key: key);
+  });
 
   @override
   _MemberTournamentsTabState createState() => _MemberTournamentsTabState();

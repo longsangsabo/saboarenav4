@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:sabo_arena/core/app_export.dart';
 
 import 'package:sizer/sizer.dart';
-import 'package:sabo_arena/theme/app_theme.dart';
-import 'package:sabo_arena/widgets/custom_image_widget.dart';
-import 'package:sabo_arena/routes/app_routes.dart';
 import '../member_management_screen/member_management_screen.dart';
 import '../tournament_creation_wizard/tournament_creation_wizard.dart';
 import '../tournament_detail_screen/widgets/tournament_management_panel.dart';

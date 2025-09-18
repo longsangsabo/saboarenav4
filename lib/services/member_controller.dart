@@ -115,20 +115,18 @@ class MemberController extends ChangeNotifier {
         additionalData: additionalData,
       );
 
-      if (member != null) {
-        dispatch(AddMemberAction(member));
-        
-        // Create activity log
-        await _logActivity(
-          action: 'member_added',
-          description: 'New member added to club',
-          metadata: {'member_id': member['id'], 'membership_type': membershipType},
-        );
+      dispatch(AddMemberAction(member));
+      
+      // Create activity log
+      await _logActivity(
+        action: 'member_added',
+        description: 'New member added to club',
+        metadata: {'member_id': member['id'], 'membership_type': membershipType},
+      );
 
-        dispatch(const SetLoadingAction(false));
-        return true;
-      }
-    } catch (e) {
+      dispatch(const SetLoadingAction(false));
+      return true;
+        } catch (e) {
       dispatch(SetErrorAction('Failed to add member: ${e.toString()}'));
     }
 

@@ -15,14 +15,14 @@ class AdminScaffoldWrapper extends StatelessWidget {
   final bool showBottomNavigation;
 
   const AdminScaffoldWrapper({
-    Key? key,
+    super.key,
     required this.body,
     required this.title,
     required this.currentIndex,
     required this.onBottomNavTap,
     this.actions,
     this.showBottomNavigation = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

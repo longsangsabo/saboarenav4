@@ -6,6 +6,7 @@ import '../../services/tournament_service.dart';
 import '../../services/club_permission_service.dart';
 import '../tournament_creation_wizard/tournament_creation_wizard.dart';
 import '../tournament_detail_screen/tournament_detail_screen.dart';
+import '../tournament_detail_screen/widgets/tournament_management_panel.dart';
 import '../member_management_screen/member_management_screen.dart';
 import '../club_settings_screen/club_settings_screen.dart';
 import 'widgets/tournament_stats_overview.dart';
@@ -16,9 +17,9 @@ class TournamentManagementScreen extends StatefulWidget {
   final String clubId;
 
   const TournamentManagementScreen({
-    Key? key,
+    super.key,
     required this.clubId,
-  }) : super(key: key);
+  });
 
   @override
   _TournamentManagementScreenState createState() => _TournamentManagementScreenState();
@@ -174,6 +175,10 @@ class _TournamentManagementScreenState extends State<TournamentManagementScreen>
             onViewReports: _showReports,
           ),
 
+        // Management Panel Quick Access
+        if (_canCreateTournaments && _ongoingTournaments.isNotEmpty)
+          _buildQuickManagementPanel(),
+
         // Tab Bar - Fixed height
         Container(
           color: Colors.white,
@@ -315,6 +320,108 @@ class _TournamentManagementScreenState extends State<TournamentManagementScreen>
   void _showReports() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Báo cáo giải đấu - Tính năng đang phát triển')),
+    );
+  }
+
+  Widget _buildQuickManagementPanel() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.primaryLight.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.primaryLight.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.flash_on, color: AppTheme.primaryLight, size: 20),
+              SizedBox(width: 8),
+              Text(
+                'Quản lý nhanh',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textPrimaryLight,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12),
+          Text(
+            'Bạn có ${_ongoingTournaments.length} giải đấu đang diễn ra cần quản lý',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppTheme.textSecondaryLight,
+            ),
+          ),
+          SizedBox(height: 12),
+          if (_ongoingTournaments.isNotEmpty)
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _ongoingTournaments.take(3).map((tournament) => 
+                InkWell(
+                  onTap: () => _showTournamentManagement(tournament),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppTheme.primaryLight.withOpacity(0.3)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.settings, size: 14, color: AppTheme.primaryLight),
+                        SizedBox(width: 4),
+                        Text(
+                          tournament.title.length > 15 
+                              ? '${tournament.title.substring(0, 15)}...'
+                              : tournament.title,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppTheme.primaryLight,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ).toList(),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _showTournamentManagement(Tournament tournament) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.9,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (context, scrollController) => Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: TournamentManagementPanel(
+            tournamentId: tournament.id,
+            tournamentStatus: tournament.status,
+            onStatusChanged: () {
+              _loadData(); // Refresh data after changes
+              Navigator.of(context).pop();
+            },
+          ),
+        ),
+      ),
     );
   }
 }

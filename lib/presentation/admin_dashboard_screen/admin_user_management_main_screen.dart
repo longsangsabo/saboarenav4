@@ -3,7 +3,7 @@ import './widgets/admin_scaffold_wrapper.dart';
 import './admin_user_management_screen.dart';
 
 class AdminUserManagementMainScreen extends StatelessWidget {
-  const AdminUserManagementMainScreen({Key? key}) : super(key: key);
+  const AdminUserManagementMainScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

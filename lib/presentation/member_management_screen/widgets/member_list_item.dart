@@ -11,13 +11,13 @@ class MemberListItem extends StatefulWidget {
   final bool showSelection;
 
   const MemberListItem({
-    Key? key,
+    super.key,
     required this.member,
     required this.isSelected,
     required this.onSelectionChanged,
     required this.onAction,
     this.showSelection = false,
-  }) : super(key: key);
+  });
 
   @override
   _MemberListItemState createState() => _MemberListItemState();

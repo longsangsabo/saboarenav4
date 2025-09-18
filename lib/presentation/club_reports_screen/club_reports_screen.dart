@@ -694,7 +694,7 @@ class _ClubReportsScreenState extends State<ClubReportsScreen>
                 ),
               ],
             ),
-          )).toList(),
+          )),
         ],
       ),
     );

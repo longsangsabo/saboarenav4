@@ -6,9 +6,9 @@ class ClubNotificationScreen extends StatefulWidget {
   final String? clubId;
 
   const ClubNotificationScreen({
-    Key? key,
+    super.key,
     this.clubId,
-  }) : super(key: key);
+  });
 
   @override
   _ClubNotificationScreenState createState() => _ClubNotificationScreenState();
@@ -192,7 +192,7 @@ class _ClubNotificationScreenState extends State<ClubNotificationScreen> {
           
           // Notification Type
           DropdownButtonFormField<String>(
-            value: _notificationType,
+            initialValue: _notificationType,
             decoration: InputDecoration(
               labelText: 'Loại thông báo',
               border: OutlineInputBorder(
@@ -229,7 +229,7 @@ class _ClubNotificationScreenState extends State<ClubNotificationScreen> {
           
           // Target Audience
           DropdownButtonFormField<String>(
-            value: _targetAudience,
+            initialValue: _targetAudience,
             decoration: InputDecoration(
               labelText: 'Đối tượng nhận',
               border: OutlineInputBorder(
@@ -279,7 +279,7 @@ class _ClubNotificationScreenState extends State<ClubNotificationScreen> {
                 _isUrgent = value;
               });
             },
-            activeColor: AppTheme.errorLight,
+            activeThumbColor: AppTheme.errorLight,
           ),
         ],
       ),

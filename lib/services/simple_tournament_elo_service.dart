@@ -85,7 +85,7 @@ class SimpleTournamentEloService {
     return {
       'totalParticipants': totalParticipants,
       'rewards': rewards,
-      'description': 'ELO rewards for ${totalParticipants}-player tournament',
+      'description': 'ELO rewards for $totalParticipants-player tournament',
     };
   }
 

@@ -7,10 +7,10 @@ class MemberSettingsTab extends StatefulWidget {
   final Function(MemberData) onMemberUpdated;
 
   const MemberSettingsTab({
-    Key? key,
+    super.key,
     required this.memberData,
     required this.onMemberUpdated,
-  }) : super(key: key);
+  });
 
   @override
   _MemberSettingsTabState createState() => _MemberSettingsTabState();
@@ -598,10 +598,10 @@ class _MembershipTypeDialog extends StatelessWidget {
   final Function(MembershipType) onChanged;
 
   const _MembershipTypeDialog({
-    Key? key,
+    super.key,
     required this.currentType,
     required this.onChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -12,13 +12,13 @@ class MemberListView extends StatefulWidget {
   final Future<void> Function() onRefresh;
 
   const MemberListView({
-    Key? key,
+    super.key,
     required this.members,
     required this.selectedMembers,
     required this.onMemberSelected,
     required this.onMemberAction,
     required this.onRefresh,
-  }) : super(key: key);
+  });
 
   @override
   _MemberListViewState createState() => _MemberListViewState();

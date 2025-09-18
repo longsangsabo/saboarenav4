@@ -142,7 +142,7 @@ Future<void> calculateEloChanges(List<Map<String, dynamic>> results) async {
     if (upsets > 0) {
       final upsetBonus = upsets * 5;
       bonuses += upsetBonus;
-      print('     💥 Upset bonus (${upsets}x): +${upsetBonus}');
+      print('     💥 Upset bonus (${upsets}x): +$upsetBonus');
     }
     
     // Performance modifier

@@ -1,5 +1,4 @@
 import 'lib/core/constants/ranking_constants.dart';
-import 'lib/core/constants/elo_constants.dart';
 import 'lib/services/simple_tournament_elo_service.dart';
 
 void main() {

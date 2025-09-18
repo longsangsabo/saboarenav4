@@ -5,7 +5,7 @@ import '../../routes/app_routes.dart';
 import './widgets/admin_scaffold_wrapper.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
-  const AdminDashboardScreen({Key? key}) : super(key: key);
+  const AdminDashboardScreen({super.key});
 
   @override
   State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();

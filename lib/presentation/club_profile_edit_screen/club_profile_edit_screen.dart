@@ -83,7 +83,7 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
     _instagramController.text = "saboarena_central";
     _tiktokController.text = "saboarena.official";
     
-    _coverImageUrl = 'https://images.unsplash.com/photo-1574631806042-182f10c4a017?w=800&h=400&fit=crop';
+    _coverImageUrl = 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=400&fit=crop';
     _logoImageUrl = 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=200&fit=crop';
     
     _operatingHours = {

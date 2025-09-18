@@ -375,7 +375,7 @@ Future<bool> _testUpdateCommentCount(String serviceKey, String baseUrl) async {
 }
 
 Future<void> _generateFinalTestReport(Map<String, bool> results) async {
-  print('\n' + '=' * 60);
+  print('\n${'=' * 60}');
   print('📊 FINAL BACKEND API TEST REPORT (NO EXEC_SQL)');
   print('=' * 60);
   

@@ -3,13 +3,13 @@ void main() {
   print('=== TEST SIMPLE ELO CALCULATIONS ===\n');
   
   // ELO Constants
-  const int ELO_1ST_PLACE = 75;
-  const int ELO_2ND_PLACE = 45;
-  const int ELO_3RD_PLACE = 30;
-  const int ELO_4TH_PLACE = 20;
-  const int ELO_TOP_5_8 = 10;
-  const int ELO_TOP_9_16 = 5;
-  const int ELO_OTHERS = 0;
+  const int elo1stPlace = 75;
+  const int elo2ndPlace = 45;
+  const int elo3rdPlace = 30;
+  const int elo4thPlace = 20;
+  const int eloTop58 = 10;
+  const int eloTop916 = 5;
+  const int eloOthers = 0;
   
   // Ranking data
   final Map<String, List<int>> rankEloRanges = {
@@ -29,13 +29,13 @@ void main() {
   
   // Calculate ELO change
   int calculateEloChange(int position) {
-    if (position == 1) return ELO_1ST_PLACE;
-    if (position == 2) return ELO_2ND_PLACE;
-    if (position == 3) return ELO_3RD_PLACE;
-    if (position == 4) return ELO_4TH_PLACE;
-    if (position >= 5 && position <= 8) return ELO_TOP_5_8;
-    if (position >= 9 && position <= 16) return ELO_TOP_9_16;
-    return ELO_OTHERS;
+    if (position == 1) return elo1stPlace;
+    if (position == 2) return elo2ndPlace;
+    if (position == 3) return elo3rdPlace;
+    if (position == 4) return elo4thPlace;
+    if (position >= 5 && position <= 8) return eloTop58;
+    if (position >= 9 && position <= 16) return eloTop916;
+    return eloOthers;
   }
   
   // Get rank from ELO

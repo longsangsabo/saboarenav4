@@ -3,7 +3,7 @@ import './widgets/admin_scaffold_wrapper.dart';
 import './club_approval_screen.dart';
 
 class AdminClubApprovalMainScreen extends StatelessWidget {
-  const AdminClubApprovalMainScreen({Key? key}) : super(key: key);
+  const AdminClubApprovalMainScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

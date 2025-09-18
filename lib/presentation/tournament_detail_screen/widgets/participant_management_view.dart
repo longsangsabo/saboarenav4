@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sabo_arena/core/app_export.dart';
 import 'package:sizer/sizer.dart';
 import 'package:sabo_arena/theme/app_theme.dart';
+import '../../../services/tournament_service.dart';
 
 // Define the missing data model for a tournament participant.
 class TournamentParticipant {
@@ -55,6 +56,7 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
   List<TournamentParticipant> _participants = [];
   List<TournamentParticipant> _filteredParticipants = [];
   bool _isLoading = true;
+  final _tournamentService = TournamentService.instance;
 
   @override
   void initState() {
@@ -86,11 +88,10 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
   }
 
   Future<void> _loadParticipants() async {
-    // Simulate data loading
-    await Future.delayed(Duration(milliseconds: 1000));
+    // Load real participants from database
+    await _loadRealParticipants();
     
     setState(() {
-      _participants = _generateMockParticipants();
       _filteredParticipants = _participants;
       _isLoading = false;
     });
@@ -98,20 +99,26 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
     _animationController.forward();
   }
 
-  // Add the missing mock data generation function.
-  List<TournamentParticipant> _generateMockParticipants() {
-    return List.generate(18, (index) {
-      final statuses = ['confirmed', 'pending', 'checked_in', 'eliminated'];
-      return TournamentParticipant(
-        id: 'user_$index',
-        name: 'Cơ thủ ${index + 1}',
-        avatarUrl: 'https://i.pravatar.cc/150?img=$index',
-        rank: 1200 + (index * 50),
-        status: statuses[index % statuses.length],
-        registeredAt: DateTime.now().subtract(Duration(days: index)),
-        club: index % 3 == 0 ? 'CLB Bida Sài Gòn' : null,
-      );
-    });
+  Future<void> _loadRealParticipants() async {
+    try {
+      final participantsData = await _tournamentService.getTournamentParticipants(widget.tournamentId);
+      
+      // Convert to TournamentParticipant objects
+      final participants = participantsData.map((user) => TournamentParticipant(
+        id: user.id,
+        name: user.fullName,
+        avatarUrl: user.avatarUrl ?? 'https://i.pravatar.cc/150?img=1',
+        rank: user.eloRating,
+        status: 'confirmed', // Default status
+        registeredAt: DateTime.now(),
+        club: null, // Will be populated if available
+      )).toList();
+      
+      _participants = participants;
+    } catch (e) {
+      print('Error loading participants: $e');
+      _participants = [];
+    }
   }
 
   @override
@@ -702,7 +709,7 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
   }
 
   Widget _buildActivityTab() {
-    final activities = _getMockActivities();
+    final activities = <Map<String, dynamic>>[];
     
     return ListView.builder(
       padding: EdgeInsets.all(16.sp),

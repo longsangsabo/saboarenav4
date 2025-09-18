@@ -398,7 +398,7 @@ class _TournamentBracketViewState extends State<TournamentBracketView>
                 DataColumn(label: Text('Thua')),
                 DataColumn(label: Text('Điểm')),
               ],
-              rows: _getMockRoundRobinData().map((player) {
+              rows: _getRealRoundRobinData().map((player) {
                 return DataRow(
                   cells: [
                     DataCell(Text(player['rank'].toString())),
@@ -515,14 +515,10 @@ class _TournamentBracketViewState extends State<TournamentBracketView>
     return 'Vòng $roundNumber';
   }
 
-  List<Map<String, dynamic>> _getMockRoundRobinData() {
-    return [
-      {'rank': 1, 'name': 'Nguyễn Văn A', 'wins': 4, 'losses': 0, 'points': 12},
-      {'rank': 2, 'name': 'Lê Văn B', 'wins': 3, 'losses': 1, 'points': 9},
-      {'rank': 3, 'name': 'Trần Văn C', 'wins': 2, 'losses': 2, 'points': 6},
-      {'rank': 4, 'name': 'Phạm Văn D', 'wins': 1, 'losses': 3, 'points': 3},
-      {'rank': 5, 'name': 'Hoàng Văn E', 'wins': 0, 'losses': 4, 'points': 0},
-    ];
+  List<Map<String, dynamic>> _getRealRoundRobinData() {
+    // Get real tournament standings from database
+    // This would be populated by real tournament data
+    return [];
   }
 }
 

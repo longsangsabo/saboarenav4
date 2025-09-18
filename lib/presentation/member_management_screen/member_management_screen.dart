@@ -18,9 +18,9 @@ class MemberManagementScreen extends StatefulWidget {
   final String clubId;
 
   const MemberManagementScreen({
-    Key? key,
+    super.key,
     required this.clubId,
-  }) : super(key: key);
+  });
 
   @override
   _MemberManagementScreenState createState() => _MemberManagementScreenState();
@@ -36,12 +36,12 @@ class _MemberManagementScreenState extends State<MemberManagementScreen>
   String _searchQuery = '';
   String _selectedFilter = 'all';
   bool _showAdvancedFilters = false;
-  List<String> _selectedMembers = [];
+  final List<String> _selectedMembers = [];
   
   // Mock data - replace with actual API calls
   List<MemberData> _allMembers = [];
   List<MemberData> _filteredMembers = [];
-  MemberAnalytics _analytics = const MemberAnalytics(
+  final MemberAnalytics _analytics = const MemberAnalytics(
     totalMembers: 100,
     activeMembers: 78,
     newThisMonth: 15,

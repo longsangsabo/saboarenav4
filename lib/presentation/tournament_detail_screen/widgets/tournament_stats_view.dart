@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
-import 'package:sabo_arena/core/app_export.dart';
-import 'package:sabo_arena/theme/app_theme.dart';
 
 class TournamentStatsView extends StatefulWidget {
   final String tournamentId;
@@ -866,7 +864,7 @@ class _TournamentStatsViewState extends State<TournamentStatsView>
   List<Map<String, dynamic>> _getTopPerformers() {
     return [
       {
-        'name': 'Nguyễn Văn A',
+        'name': 'Player 1',
         'achievement': 'Tỷ lệ thắng cao nhất',
         'stat': '100%',
         'avatar': 'https://images.unsplash.com/photo-1580000000001?w=100&h=100&fit=crop&crop=face',

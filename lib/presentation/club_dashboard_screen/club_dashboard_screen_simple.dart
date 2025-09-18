@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:sabo_arena/core/app_export.dart';
 import 'package:sabo_arena/widgets/custom_app_bar.dart';
 import 'package:sabo_arena/theme/app_theme.dart';
@@ -8,6 +9,7 @@ import 'package:sabo_arena/services/auth_service.dart';
 // import 'package:sabo_arena/services/club_dashboard_service.dart';
 import '../member_management_screen/member_management_screen.dart';
 import '../tournament_creation_wizard/tournament_creation_wizard.dart';
+import '../tournament_management_screen/tournament_management_screen.dart';
 import '../club_notification_screen/club_notification_screen_simple.dart';
 import '../club_settings_screen/club_settings_screen.dart';
 import '../club_reports_screen/club_reports_screen.dart';
@@ -84,7 +86,10 @@ class _ClubDashboardScreenSimpleState extends State<ClubDashboardScreenSimple> {
       final currentUserId = AuthService.instance.currentUser?.id;
       final isOwner = club.ownerId == currentUserId;
       
-      // Check user's role in this club for future use
+      // If user is club owner, ensure they have a membership record
+      if (isOwner && currentUserId != null) {
+        await _ensureOwnerMembership(widget.clubId, currentUserId);
+      }
       
       setState(() {
         _club = club;
@@ -140,6 +145,41 @@ class _ClubDashboardScreenSimpleState extends State<ClubDashboardScreenSimple> {
           SnackBar(content: Text('Lỗi tải dữ liệu: $e')),
         );
       }
+    }
+  }
+
+  /// Ensure club owner has membership record
+  Future<void> _ensureOwnerMembership(String clubId, String userId) async {
+    try {
+      final supabase = Supabase.instance.client;
+      
+      // Check if owner already has membership record
+      final existing = await supabase
+          .from('club_members')
+          .select('id')
+          .eq('club_id', clubId)
+          .eq('user_id', userId)
+          .maybeSingle();
+      
+      if (existing == null) {
+        // Add owner to club_members
+        await supabase.from('club_members').insert({
+          'club_id': clubId,
+          'user_id': userId,
+          'role': 'owner',
+          'status': 'active',
+          'joined_at': DateTime.now().toIso8601String(),
+        });
+        
+        print('✅ Added owner to club_members table');
+        
+        // Clear permission cache to force refresh
+        _permissionService.clearCache(clubId: clubId, userId: userId);
+      } else {
+        print('✅ Owner membership record already exists');
+      }
+    } catch (e) {
+      print('❌ Error ensuring owner membership: $e');
     }
   }
 
@@ -851,6 +891,15 @@ class _ClubDashboardScreenSimpleState extends State<ClubDashboardScreenSimple> {
     );
   }
 
+  void _navigateToTournamentManagement() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TournamentManagementScreen(clubId: widget.clubId),
+      ),
+    );
+  }
+
   void _navigateToTournamentCreate() async {
     try {
       // Show loading indicator
@@ -1034,7 +1083,7 @@ class _ClubDashboardScreenSimpleState extends State<ClubDashboardScreenSimple> {
             _navigateToMemberManagement();
             break;
           case 2:
-            _navigateToTournamentCreate();
+            _navigateToTournamentManagement();
             break;
           case 3:
             _navigateToClubSettings();

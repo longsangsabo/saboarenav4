@@ -8,12 +8,12 @@ class MemberSearchBar extends StatefulWidget {
   final bool showFilterIndicator;
 
   const MemberSearchBar({
-    Key? key,
+    super.key,
     required this.controller,
     required this.onChanged,
     required this.onFilterTap,
     this.showFilterIndicator = false,
-  }) : super(key: key);
+  });
 
   @override
   _MemberSearchBarState createState() => _MemberSearchBarState();

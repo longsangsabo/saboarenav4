@@ -59,14 +59,14 @@ void testTournamentScenario() {
   ];
 
   print('\n📈 Tournament Results:');
-  standings.forEach((standing) {
+  for (var standing in standings) {
     var player = players.firstWhere((p) => p['id'] == standing['playerId']);
     int eloChange = calculateEloChange(standing['position']);
     int newElo = player['currentElo'] + eloChange;
     
     print('${standing['position']}. ${player['name']}: '
           '${player['currentElo']} → $newElo (${eloChange > 0 ? '+' : ''}$eloChange)');
-  });
+  }
 
   print('\n✅ Tournament ELO system working correctly!');
 }

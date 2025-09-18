@@ -7,11 +7,11 @@ class TournamentQuickActions extends StatelessWidget {
   final VoidCallback onViewReports;
 
   const TournamentQuickActions({
-    Key? key,
+    super.key,
     required this.onCreateTournament,
     required this.onManageSchedule,
     required this.onViewReports,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

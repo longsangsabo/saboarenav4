@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sabo_arena/core/app_export.dart';
 import 'package:sizer/sizer.dart';
+import '../../../services/tournament_service.dart';
 
 class MatchManagementView extends StatefulWidget {
   final String tournamentId;
@@ -30,6 +31,7 @@ class _MatchManagementViewState extends State<MatchManagementView>
   List<TournamentMatch> _matches = [];
   List<TournamentMatch> _filteredMatches = [];
   bool _isLoading = true;
+  final _tournamentService = TournamentService.instance;
 
   @override
   void initState() {
@@ -60,11 +62,10 @@ class _MatchManagementViewState extends State<MatchManagementView>
   }
 
   Future<void> _loadMatches() async {
-    // Simulate loading
-    await Future.delayed(Duration(milliseconds: 1000));
+    // Load real matches from database
+    await _loadRealMatches();
     
     setState(() {
-      _matches = _generateMockMatches();
       _filteredMatches = _matches;
       _isLoading = false;
     });
@@ -732,6 +733,36 @@ class _MatchManagementViewState extends State<MatchManagementView>
     // Implementation for editing match
   }
 
+  Future<void> _loadRealMatches() async {
+    try {
+      final matchesData = await _tournamentService.getTournamentMatches(widget.tournamentId);
+      
+      // Convert database format to TournamentMatch objects
+      final matches = matchesData.map((match) => TournamentMatch(
+        id: match['id']?.toString() ?? 'unknown',
+        player1: match['player1_name']?.toString() ?? 'TBD',
+        player2: match['player2_name']?.toString() ?? 'TBD',
+        score1: match['player1_score'] as int?,
+        score2: match['player2_score'] as int?,
+        winner: match['winner_id'] != null ? (match['winner_id'] == match['player1_id'] ? 1 : 2) : null,
+        status: match['status']?.toString() ?? 'pending',
+        round: match['round']?.toString() ?? 'Round 1',
+        scheduledTime: match['scheduled_time']?.toString(),
+        table: match['table_name']?.toString(),
+      )).toList();
+      
+      setState(() {
+        _matches = matches;
+      });
+    } catch (e) {
+      print('Error loading matches: $e');
+      // Show empty list if error
+      setState(() {
+        _matches = [];
+      });
+    }
+  }
+  
   List<TournamentMatch> _generateMockMatches() {
     return [
       TournamentMatch(

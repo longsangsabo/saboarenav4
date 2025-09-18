@@ -8,12 +8,12 @@ class TournamentStatsOverview extends StatelessWidget {
   final int completedCount;
 
   const TournamentStatsOverview({
-    Key? key,
+    super.key,
     required this.totalTournaments,
     required this.upcomingCount,
     required this.ongoingCount,
     required this.completedCount,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -51,11 +51,11 @@ class TournamentStatsOverview extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 20),
+          SizedBox(height: 16),
           Row(
             children: [
               Expanded(
-                child: _buildStatCard(
+                child: _buildStatItem(
                   context,
                   'Tổng số',
                   totalTournaments.toString(),
@@ -63,9 +63,9 @@ class TournamentStatsOverview extends StatelessWidget {
                   AppTheme.primaryLight,
                 ),
               ),
-              SizedBox(width: 12),
+              SizedBox(width: 8),
               Expanded(
-                child: _buildStatCard(
+                child: _buildStatItem(
                   context,
                   'Sắp tới',
                   upcomingCount.toString(),
@@ -73,13 +73,9 @@ class TournamentStatsOverview extends StatelessWidget {
                   Colors.blue,
                 ),
               ),
-            ],
-          ),
-          SizedBox(height: 12),
-          Row(
-            children: [
+              SizedBox(width: 8),
               Expanded(
-                child: _buildStatCard(
+                child: _buildStatItem(
                   context,
                   'Đang diễn ra',
                   ongoingCount.toString(),
@@ -87,9 +83,9 @@ class TournamentStatsOverview extends StatelessWidget {
                   Colors.green,
                 ),
               ),
-              SizedBox(width: 12),
+              SizedBox(width: 8),
               Expanded(
-                child: _buildStatCard(
+                child: _buildStatItem(
                   context,
                   'Đã kết thúc',
                   completedCount.toString(),
@@ -104,7 +100,7 @@ class TournamentStatsOverview extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard(
+  Widget _buildStatItem(
     BuildContext context,
     String label,
     String value,
@@ -112,37 +108,42 @@ class TournamentStatsOverview extends StatelessWidget {
     Color color,
   ) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: color.withOpacity(0.2),
           width: 1,
         ),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             icon,
             color: color,
-            size: 28,
-          ),
-          SizedBox(height: 8),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
+            size: 20,
           ),
           SizedBox(height: 4),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: color,
+              fontSize: 18,
+            ),
+          ),
+          SizedBox(height: 2),
           Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: AppTheme.textSecondaryLight,
+              fontSize: 10,
             ),
             textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

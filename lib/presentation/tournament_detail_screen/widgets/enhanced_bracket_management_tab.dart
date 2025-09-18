@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import '../../../core/app_export.dart';
 import '../../../services/bracket_generator_service.dart';
+import '../../../services/tournament_service.dart' as TournamentSvc;
 
 // Tournament format constants
 class TournamentFormats {
@@ -27,9 +28,9 @@ class EnhancedBracketManagementTab extends StatefulWidget {
   final String tournamentId;
 
   const EnhancedBracketManagementTab({
-    Key? key,
+    super.key,
     required this.tournamentId,
-  }) : super(key: key);
+  });
 
   @override
   _EnhancedBracketManagementTabState createState() => _EnhancedBracketManagementTabState();
@@ -40,6 +41,9 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
   String _selectedFormat = TournamentFormats.singleElimination;
   String _selectedSeeding = SeedingMethods.eloRating;
   TournamentBracket? _generatedBracket;
+  List<UserProfile> _realParticipants = [];
+  bool _isLoadingParticipants = false;
+  final _tournamentService = TournamentSvc.TournamentService.instance;
   
   final List<Map<String, String>> _tournamentFormats = [
     {'key': TournamentFormats.singleElimination, 'label': 'Loại trực tiếp'},
@@ -55,6 +59,27 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
     {'key': SeedingMethods.random, 'label': 'Ngẫu nhiên'},
     {'key': SeedingMethods.manual, 'label': 'Thủ công'},
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRealParticipants();
+  }
+
+  Future<void> _loadRealParticipants() async {
+    setState(() => _isLoadingParticipants = true);
+    
+    try {
+      final participants = await _tournamentService.getTournamentParticipants(widget.tournamentId);
+      setState(() {
+        _realParticipants = participants;
+        _isLoadingParticipants = false;
+      });
+    } catch (e) {
+      print('Error loading participants: $e');
+      setState(() => _isLoadingParticipants = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +134,7 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
                 SizedBox(height: 4.sp),
                 Text(
                   _generatedBracket == null
-                      ? "Chưa tạo bảng đấu • 16 người chơi đã đăng ký"
+                      ? "Chưa tạo bảng đấu • ${_realParticipants.length} người chơi đã đăng ký"
                       : "Đã tạo bảng đấu ${_getFormatName(_generatedBracket!.format)} • ${_generatedBracket!.participants.length} người chơi",
                   style: TextStyle(
                     fontSize: 12.sp,
@@ -594,8 +619,25 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
     });
 
     try {
-      // Mock participants for demo
-      final participants = _generateMockParticipants(16);
+      // Use real participants from database
+      if (_realParticipants.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Không có người tham gia nào!'),
+            backgroundColor: AppTheme.warningLight,
+          ),
+        );
+        return;
+      }
+
+      // Convert real participants to tournament participants
+      final participants = _realParticipants.map((user) => TournamentParticipant(
+        id: user.id ?? 'unknown',
+        name: user.displayName ?? 'Unknown Player',
+        rank: user.rank?.name ?? 'Unranked',
+        elo: user.eloRating ?? 1200,
+        seed: 1, // Will be updated by seeding method
+      )).toList();
       
       // Use BracketGeneratorService to generate bracket
       final bracket = await BracketGeneratorService.generateBracket(
@@ -612,7 +654,7 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('✅ Đã tạo bảng đấu ${_getFormatName(_selectedFormat)} thành công!'),
+            content: Text('✅ Đã tạo bảng đấu ${_getFormatName(_selectedFormat)} với ${participants.length} người chơi thật!'),
             backgroundColor: AppTheme.successLight,
           ),
         );
@@ -635,23 +677,7 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
     }
   }
 
-  List<TournamentParticipant> _generateMockParticipants(int count) {
-    final ranks = ['E+', 'E', 'F+', 'F', 'G+', 'G', 'H+', 'H'];
-    final names = ['Nguyễn Văn A', 'Trần Thị B', 'Lê Văn C', 'Phạm Thị D', 
-                   'Hoàng Văn E', 'Vũ Thị F', 'Đặng Văn G', 'Bùi Thị H',
-                   'Đỗ Văn I', 'Ngô Thị J', 'Dương Văn K', 'Mai Thị L',
-                   'Vương Văn M', 'Đinh Thị N', 'Phan Văn O', 'Tôn Thị P'];
-    
-    return List.generate(count, (i) {
-      return TournamentParticipant(
-        id: 'player_${i + 1}',
-        name: names[i % names.length],
-        rank: ranks[i % ranks.length],
-        elo: 2000 - (i * 50),
-        seed: i + 1,
-      );
-    });
-  }
+
 
   void _showBracketDemo() {
     showDialog(
@@ -674,7 +700,7 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
             SizedBox(height: 8.sp),
             Text('🎯 Seeding: ${_seedingMethods.firstWhere((m) => m['key'] == _selectedSeeding)['label']}'),
             SizedBox(height: 16.sp),
-            Text('Đây sẽ là demo cho bảng đấu ${_selectedFormat} với seeding ${_selectedSeeding}'),
+            Text('Đây sẽ là demo cho bảng đấu $_selectedFormat với seeding $_selectedSeeding'),
           ],
         ),
         actions: [
@@ -712,24 +738,28 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
             children: [
               Text('Danh sách người chơi sau khi seeding theo ${_seedingMethods.firstWhere((m) => m['key'] == _selectedSeeding)['label']}:'),
               SizedBox(height: 16.sp),
-              Container(
+              SizedBox(
                 height: 300,
-                child: ListView.builder(
-                  itemCount: 16,
-                  itemBuilder: (context, index) {
-                    final participant = _generateMockParticipants(16)[index];
-                    return ListTile(
-                      leading: CircleAvatar(
-                        child: Text('${index + 1}'),
-                        backgroundColor: AppTheme.primaryLight,
-                        foregroundColor: Colors.white,
+                child: _isLoadingParticipants 
+                  ? Center(child: CircularProgressIndicator())
+                  : _realParticipants.isEmpty
+                    ? Center(child: Text('Chưa có người tham gia nào'))
+                    : ListView.builder(
+                        itemCount: _realParticipants.length,
+                        itemBuilder: (context, index) {
+                          final participant = _realParticipants[index];
+                          return ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: AppTheme.primaryLight,
+                              foregroundColor: Colors.white,
+                              child: Text('${index + 1}'),
+                            ),
+                            title: Text(participant.displayName ?? 'Unknown'),
+                            subtitle: Text('Rank: ${participant.rank?.name ?? 'Unranked'} • ELO: ${participant.eloRating ?? 1200}'),
+                            trailing: Text('Seed ${index + 1}'),
+                          );
+                        },
                       ),
-                      title: Text(participant.name),
-                      subtitle: Text('Rank: ${participant.rank} • ELO: ${participant.elo}'),
-                      trailing: Text('Seed ${participant.seed}'),
-                    );
-                  },
-                ),
               ),
             ],
           ),

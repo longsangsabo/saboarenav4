@@ -42,10 +42,10 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
   final _tournamentService = TournamentService.instance;
   
   // Validation errors
-  Map<String, String> _errors = {};
+  final Map<String, String> _errors = {};
   
   // Tournament data with comprehensive fields
-  Map<String, dynamic> _tournamentData = {
+  final Map<String, dynamic> _tournamentData = {
     // Basic Info
     'name': '',
     'description': '',
@@ -349,7 +349,7 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
           
           // Game Type
           DropdownButtonFormField<String>(
-            value: _tournamentData['gameType'],
+            initialValue: _tournamentData['gameType'],
             decoration: InputDecoration(
               labelText: 'Môn thi đấu *',
               border: OutlineInputBorder(),
@@ -369,7 +369,7 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
           
           // Tournament Format
           DropdownButtonFormField<String>(
-            value: _tournamentData['format'],
+            initialValue: _tournamentData['format'],
             decoration: InputDecoration(
               labelText: 'Hình thức thi đấu *',
               border: OutlineInputBorder(),
@@ -389,7 +389,7 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
           
           // Max Participants
           DropdownButtonFormField<int>(
-            value: _tournamentData['maxParticipants'],
+            initialValue: _tournamentData['maxParticipants'],
             decoration: InputDecoration(
               labelText: 'Số lượng tham gia *',
               border: OutlineInputBorder(),
@@ -565,7 +565,7 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
           
           // Min Rank
           DropdownButtonFormField<String>(
-            value: _tournamentData['minRank']?.isEmpty == true ? null : _tournamentData['minRank'],
+            initialValue: _tournamentData['minRank']?.isEmpty == true ? null : _tournamentData['minRank'],
             decoration: InputDecoration(
               labelText: 'Hạng tối thiểu',
               border: OutlineInputBorder(),
@@ -581,7 +581,7 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
           
           // Max Rank
           DropdownButtonFormField<String>(
-            value: _tournamentData['maxRank']?.isEmpty == true ? null : _tournamentData['maxRank'],
+            initialValue: _tournamentData['maxRank']?.isEmpty == true ? null : _tournamentData['maxRank'],
             decoration: InputDecoration(
               labelText: 'Hạng tối đa',
               border: OutlineInputBorder(),

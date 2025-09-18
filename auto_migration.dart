@@ -46,7 +46,7 @@ void main() async {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         print('   ✅ Success');
       } else {
-        print('   ❌ Failed: ${response.statusCode} - ${body.length > 100 ? body.substring(0, 100) + '...' : body}');
+        print('   ❌ Failed: ${response.statusCode} - ${body.length > 100 ? '${body.substring(0, 100)}...' : body}');
         
         // If this method fails, try method 2
         if (i == 0) {

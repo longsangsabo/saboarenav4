@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sabo_arena/core/app_export.dart';
 import 'package:sabo_arena/theme/theme_extensions.dart';
 import 'package:sabo_arena/utils/size_extensions.dart';
 

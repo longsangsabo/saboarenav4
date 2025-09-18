@@ -183,7 +183,7 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
       children: [
         // Cover Image
         CustomImageWidget(
-          imagePath: 'https://images.unsplash.com/photo-1574631806042-182f10c4a017?w=800&h=400&fit=crop',
+          imagePath: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=400&fit=crop',
           fit: BoxFit.cover,
         ),
         // Gradient Overlay
@@ -576,7 +576,7 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
       'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=200&fit=crop',
       'https://images.unsplash.com/photo-1594736797933-d0601ba2fe65?w=300&h=200&fit=crop',
       'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=300&h=200&fit=crop',
-      'https://images.unsplash.com/photo-1574631806042-182f10c4a017?w=300&h=200&fit=crop',
+      'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=200&fit=crop',
     ];
 
     return Container(

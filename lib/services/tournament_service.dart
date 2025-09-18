@@ -533,7 +533,6 @@ class TournamentService {
           .update({
             'payment_status': paymentStatus,
             'notes': notes,
-            'updated_at': DateTime.now().toIso8601String(),
           })
           .eq('tournament_id', tournamentId)
           .eq('user_id', userId);

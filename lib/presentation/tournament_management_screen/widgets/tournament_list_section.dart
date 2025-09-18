@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../core/app_export.dart';
 import '../../../models/tournament.dart';
+import '../../tournament_detail_screen/widgets/tournament_management_panel.dart';
 
 class TournamentListSection extends StatelessWidget {
   final List<Tournament> tournaments;
@@ -9,11 +10,11 @@ class TournamentListSection extends StatelessWidget {
   final bool canManage;
 
   const TournamentListSection({
-    Key? key,
+    super.key,
     required this.tournaments,
     required this.onTournamentTap,
     this.canManage = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -21,13 +22,10 @@ class TournamentListSection extends StatelessWidget {
       return _buildEmptyState(context);
     }
 
-    return ListView.builder(
-      padding: EdgeInsets.all(16),
-      itemCount: tournaments.length,
-      itemBuilder: (context, index) {
-        final tournament = tournaments[index];
-        return _buildTournamentCard(context, tournament);
-      },
+    return Column(
+      children: tournaments.map((tournament) => 
+        _buildTournamentCard(context, tournament)
+      ).toList(),
     );
   }
 
@@ -149,26 +147,43 @@ class TournamentListSection extends StatelessWidget {
               if (canManage) ...[
                 SizedBox(height: 12),
                 Divider(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                Column(
                   children: [
-                    _buildActionButton(
-                      context,
-                      'Chỉnh sửa',
-                      Icons.edit,
-                      () => _editTournament(context, tournament),
+                    // Primary action - Manage tournament
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () => _manageTournament(context, tournament),
+                        icon: Icon(Icons.settings, size: 18),
+                        label: Text('Quản lý Giải đấu'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primaryLight,
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
                     ),
-                    _buildActionButton(
-                      context,
-                      'Quản lý',
-                      Icons.settings,
-                      () => _manageTournament(context, tournament),
-                    ),
-                    _buildActionButton(
-                      context,
-                      'Thống kê',
-                      Icons.bar_chart,
-                      () => _viewStats(context, tournament),
+                    SizedBox(height: 8),
+                    // Secondary actions
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildActionButton(
+                          context,
+                          'Chỉnh sửa',
+                          Icons.edit,
+                          () => _editTournament(context, tournament),
+                        ),
+                        _buildActionButton(
+                          context,
+                          'Thống kê',
+                          Icons.bar_chart,
+                          () => _viewStats(context, tournament),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -279,8 +294,30 @@ class TournamentListSection extends StatelessWidget {
   }
 
   void _manageTournament(BuildContext context, Tournament tournament) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Quản lý giải đấu: ${tournament.title}')),
+    // Mở TournamentManagementPanel với toàn màn hình
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.9,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (context, scrollController) => Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: TournamentManagementPanel(
+            tournamentId: tournament.id,
+            tournamentStatus: tournament.status,
+            onStatusChanged: () {
+              // Callback để refresh danh sách nếu cần
+              Navigator.of(context).pop();
+            },
+          ),
+        ),
+      ),
     );
   }
 

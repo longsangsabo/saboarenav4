@@ -520,5 +520,5 @@ bool _simulateRankingUpdates() {
 double log(num x) => x.log();
 
 extension LogExtension on num {
-  double log() => (this > 0) ? (this.toString().length - 1).toDouble() : 0.0;
+  double log() => (this > 0) ? (toString().length - 1).toDouble() : 0.0;
 }
