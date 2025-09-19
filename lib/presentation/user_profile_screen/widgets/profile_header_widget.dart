@@ -758,7 +758,7 @@ class ProfileHeaderWidget extends StatelessWidget {
       padding: EdgeInsets.only(bottom: 0.5.h),
       child: Row(
         children: [
-          Container(
+          SizedBox(
             width: 20.w,
             child: Text(
               position,

@@ -417,7 +417,7 @@ class BracketConnector extends StatelessWidget {
   Widget build(BuildContext context) {
     if (isLastRound) return const SizedBox.shrink();
 
-    return Container(
+    return SizedBox(
       width: 30,
       child: CustomPaint(
         painter: ConnectorPainter(

@@ -150,7 +150,7 @@ class SwissSystemBracket extends StatelessWidget {
                     ),
                   ],
                 ),
-              )).toList(),
+              )),
             ],
           ),
         ),
