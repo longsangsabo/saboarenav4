@@ -214,7 +214,7 @@ class RoundRobinBracket extends StatelessWidget {
             title: Text('${p['a']['name']} vs ${p['b']['name']}'),
             subtitle: Text('Played: ${rec['totalMatches']}, ${p['a']['name']}: ${rec['player1Wins']}, ${p['b']['name']}: ${rec['player2Wins']}, Draws: ${rec['draws']}'),
           );
-        }).toList(),
+        }),
       ],
     );
   }

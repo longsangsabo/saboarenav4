@@ -78,7 +78,7 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
       'id': post.id,
       'userName': post.authorName, // Use authorName from PostModel
       'userAvatar': post.authorAvatarUrl ?? 'https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png',
-      'userRank': 'B', // TODO: Get user rank
+      'userRank': null, // TODO: Get user rank
       'content': post.content,
       'imageUrl': post.imageUrl, // Use imageUrl from PostModel
       'location': '', // PostModel doesn't have location

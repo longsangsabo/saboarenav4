@@ -67,7 +67,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
       "name": "Nguyễn Văn Minh",
       "avatar":
           "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png",
-      "rank": "A",
+      "rank": "F",
       "elo": 1850,
       "registrationDate": "2024-09-10"
     },
@@ -76,7 +76,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
       "name": "Trần Thị Hương",
       "avatar":
           "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png",
-      "rank": "B",
+      "rank": "G+",
       "elo": 1720,
       "registrationDate": "2024-09-11"
     },
@@ -85,7 +85,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
       "name": "Lê Hoàng Nam",
       "avatar":
           "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png",
-      "rank": "A",
+      "rank": "F",
       "elo": 1890,
       "registrationDate": "2024-09-12"
     },
@@ -94,7 +94,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
       "name": "Phạm Thị Lan",
       "avatar":
           "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png",
-      "rank": "B",
+      "rank": "G",
       "elo": 1680,
       "registrationDate": "2024-09-12"
     },
@@ -103,7 +103,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
       "name": "Võ Minh Tuấn",
       "avatar":
           "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png",
-      "rank": "C",
+      "rank": "H",
       "elo": 1520,
       "registrationDate": "2024-09-13"
     },
@@ -112,7 +112,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
       "name": "Đặng Thị Mai",
       "avatar":
           "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png",
-      "rank": "B",
+      "rank": "G",
       "elo": 1750,
       "registrationDate": "2024-09-13"
     },
@@ -121,7 +121,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
       "name": "Bùi Văn Đức",
       "avatar":
           "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png",
-      "rank": "A",
+      "rank": "F+",
       "elo": 1920,
       "registrationDate": "2024-09-14"
     },
@@ -130,7 +130,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
       "name": "Ngô Thị Linh",
       "avatar":
           "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png",
-      "rank": "C",
+      "rank": "H+",
       "elo": 1480,
       "registrationDate": "2024-09-14"
     }

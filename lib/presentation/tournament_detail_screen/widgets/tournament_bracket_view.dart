@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sabo_arena/core/app_export.dart';
 import 'package:sizer/sizer.dart';
 import 'package:sabo_arena/theme/app_theme.dart';
+import '../../../core/utils/rank_migration_helper.dart';
 
 class TournamentBracketView extends StatefulWidget {
   final String tournamentId;
@@ -401,7 +402,7 @@ class _TournamentBracketViewState extends State<TournamentBracketView>
               rows: _getRealRoundRobinData().map((player) {
                 return DataRow(
                   cells: [
-                    DataCell(Text(player['rank'].toString())),
+                    DataCell(Text(RankMigrationHelper.getNewDisplayName(player['rank']))),
                     DataCell(Text(player['name'])),
                     DataCell(Text(player['wins'].toString())),
                     DataCell(Text(player['losses'].toString())),

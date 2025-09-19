@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../core/utils/rank_migration_helper.dart';
 
 /// Service để handle tất cả các quy tắc thách đấu SABO Arena
 /// Bao gồm: rank eligibility, SPA betting, handicap calculation
@@ -290,12 +291,7 @@ class ChallengeRulesService {
       'rank': rank,
       'value': value,
       'color': color,
-      'displayName': rank == 'K' ? 'Khởi đầu' : 
-                     rank == 'I' ? 'Sơ cấp' :
-                     rank == 'H' ? 'Trung cấp' :
-                     rank == 'G' ? 'Trung cao' :
-                     rank == 'F' ? 'Cao cấp' :
-                     rank == 'E' ? 'Chuyên nghiệp' : rank,
+      'displayName': RankMigrationHelper.getNewDisplayName(rank),
     };
   }
 }

@@ -72,17 +72,18 @@ class ClubPermissionService {
   /// Force refresh user role by clearing cache and fetching fresh data
   Future<ClubRole> refreshUserRole(String clubId, {String? userId}) async {
     userId ??= _supabase.auth.currentUser?.id;
-    if (userId != null) {
-      clearCache(clubId: clubId, userId: userId);
-    }
-    return await getUserRoleInClub(clubId, userId: userId);
+    clearCache(clubId: clubId, userId: userId);
+      return await getUserRoleInClub(clubId, userId: userId);
   }
 
   /// Debug method to check membership details
   Future<Map<String, dynamic>> debugMembership(String clubId, {String? userId}) async {
     try {
       userId ??= _supabase.auth.currentUser?.id;
-      if (userId == null) return {'error': 'No user ID'};
+
+      if (userId == null) {
+        return {'error': 'User not authenticated'};
+      }
 
       print('🔍 DEBUG: Checking membership for user $userId in club $clubId');
 
@@ -111,8 +112,8 @@ class ClubPermissionService {
   Future<ClubRole> getUserRoleInClub(String clubId, {String? userId}) async {
     try {
       userId ??= _supabase.auth.currentUser?.id;
+
       if (userId == null) {
-        print('❌ ClubPermissionService: No user ID available');
         return ClubRole.none;
       }
 

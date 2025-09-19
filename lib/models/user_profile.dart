@@ -1,4 +1,5 @@
 import 'package:sabo_arena/core/constants/ranking_constants.dart';
+import '../core/utils/rank_migration_helper.dart';
 
 class UserProfile {
   final String id;
@@ -156,7 +157,7 @@ class UserProfile {
   }
 
   String get displayRank {
-    return rank ?? RankingConstants.UNRANKED;
+    return RankMigrationHelper.getNewDisplayName(rank);
   }
 
   String get skillLevelDisplay {

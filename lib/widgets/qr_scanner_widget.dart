@@ -3,6 +3,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:sizer/sizer.dart';
 import 'package:sabo_arena/services/integrated_qr_service.dart';
 import '../routes/app_routes.dart';
+import '../core/utils/rank_migration_helper.dart';
 
 class QRScannerWidget extends StatefulWidget {
   final Function(Map<String, dynamic>)? onUserFound;
@@ -302,7 +303,7 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
               SizedBox(height: 2.h),
               _buildUserStat('User Code', userCode ?? 'N/A'),
               _buildUserStat('ELO Rating', '${userProfile['elo_rating'] ?? 1200}'),
-              _buildUserStat('Rank', userProfile['rank'] ?? 'Chưa xếp hạng'),
+              _buildUserStat('Rank', RankMigrationHelper.getNewDisplayName(userProfile['rank'] as String?)),
             ] else ...[
               Text(
                 'User Code: $userCode',
@@ -430,7 +431,7 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
             ],
             SizedBox(height: 2.h),
             _buildUserStat('ELO Rating', '${userData['elo_rating'] ?? 1200}'),
-            _buildUserStat('Rank', userData['rank'] ?? 'Chưa xếp hạng'),
+            _buildUserStat('Rank', RankMigrationHelper.getNewDisplayName(userData['rank'] as String?)),
             _buildUserStat('Thắng/Thua', '${userData['total_wins'] ?? 0}/${userData['total_losses'] ?? 0}'),
           ],
         ),

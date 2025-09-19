@@ -177,7 +177,7 @@ class _QRCodeWidgetState extends State<QRCodeWidget> {
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            'Rank ${widget.userData["rank"] as String? ?? "B"} • ELO ${widget.userData["elo_rating"] ?? widget.userData["eloRating"] ?? 1450}',
+                            'Rank ${widget.userData["rank"] as String? ?? "Chưa xếp hạng"} • ELO ${widget.userData["elo_rating"] ?? widget.userData["eloRating"] ?? 1450}',
                             style: AppTheme.lightTheme.textTheme.bodySmall
                                 ?.copyWith(
                               color: AppTheme

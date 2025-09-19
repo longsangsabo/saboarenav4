@@ -8,6 +8,7 @@ import '../../../models/user_profile.dart';
 import '../../../services/bracket_generator_service.dart';
 import '../../../services/tournament_service.dart' as TournamentSvc;
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/utils/rank_migration_helper.dart';
 
 // Tournament format constants
 class TournamentFormats {
@@ -897,7 +898,7 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
                               child: Text('${index + 1}'),
                             ),
                             title: Text(participant.fullName),
-                            subtitle: Text('Rank: ${participant.rank ?? 'Unranked'} • ELO: ${participant.eloRating}'),
+                            subtitle: Text('Rank: ${RankMigrationHelper.getNewDisplayName(participant.rank)} • ELO: ${participant.eloRating}'),
                             trailing: Text('Seed ${index + 1}'),
                           );
                         },

@@ -51,7 +51,7 @@ class TestUserService {
       'username': 'testuser',
       'display_name': 'Test User',
       'bio': 'Test user for development - Avatar upload testing',
-      'rank': 'C',
+      'rank': null,
       'elo_rating': 1200,
       'spa_points': 0,
       'favorite_game': '8-Ball',

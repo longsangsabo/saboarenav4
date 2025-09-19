@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 
 import '../../../models/user_profile.dart';
+import '../../../services/user_service.dart';
+import '../../../core/app_export.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import './map_view_widget.dart';
 import './player_card_widget.dart';
+import '../../widgets/rank_change_request_dialog.dart';
 
 
-class CompetitivePlayTab extends StatelessWidget {
+class CompetitivePlayTab extends StatefulWidget {
   final bool isLoading;
   final String? errorMessage;
   final List<UserProfile> players;
@@ -22,15 +26,283 @@ class CompetitivePlayTab extends StatelessWidget {
   });
 
   @override
+  State<CompetitivePlayTab> createState() => _CompetitivePlayTabState();
+}
+
+class _CompetitivePlayTabState extends State<CompetitivePlayTab> {
+  final UserService _userService = UserService.instance;
+  UserProfile? _currentUser;
+  bool _isLoadingUser = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCurrentUser();
+  }
+
+  Future<void> _loadCurrentUser() async {
+    try {
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user != null) {
+        final userProfile = await _userService.getCurrentUserProfile();
+        if (mounted) {
+          setState(() {
+            _currentUser = userProfile;
+            _isLoadingUser = false;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _isLoadingUser = false;
+          });
+        }
+      }
+    } catch (e) {
+      print('Error loading current user: $e');
+      if (mounted) {
+        setState(() {
+          _isLoadingUser = false;
+        });
+      }
+    }
+  }
+
+  bool get _hasRank {
+    if (_currentUser == null) return false;
+    final userRank = _currentUser!.rank;
+    return userRank != null && userRank.isNotEmpty && userRank != 'unranked';
+  }
+
+  Widget _buildRankRequiredPrompt(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Colors.orange.withOpacity(0.3),
+                  width: 2,
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.emoji_events,
+                    size: 48,
+                    color: Colors.orange.shade600,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Đăng ký xếp hạng để tham gia',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.orange.shade800,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Bạn cần có hạng đấu để tham gia thách đấu xếp hạng. Đăng ký ngay để:',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade700,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  Column(
+                    children: [
+                      _buildBenefitRow('🏆', 'Tham gia thách đấu xếp hạng'),
+                      const SizedBox(height: 8),
+                      _buildBenefitRow('📊', 'Theo dõi tiến bộ qua ELO'),
+                      const SizedBox(height: 8),
+                      _buildBenefitRow('🎯', 'Gặp đối thủ cùng trình độ'),
+                      const SizedBox(height: 8),
+                      _buildBenefitRow('🏅', 'Tranh tài trong giải đấu'),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => _navigateToRankRegistration(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange.shade600,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        'Đăng ký xếp hạng ngay',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextButton(
+                    onPressed: () {
+                      // Navigate to social play instead
+                      DefaultTabController.of(context).animateTo(1);
+                    },
+                    child: Text(
+                      'Hoặc chơi giao lưu không tính điểm',
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBenefitRow(String emoji, String text) {
+    return Row(
+      children: [
+        Text(emoji, style: const TextStyle(fontSize: 16)),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(fontSize: 14),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _navigateToRankRegistration(BuildContext context) {
+    Navigator.pushNamed(context, AppRoutes.clubSelectionScreen);
+  }
+
+  Widget _buildRankInfoBanner(BuildContext context) {
+    if (_currentUser == null) return const SizedBox.shrink();
+
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.green.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.green.shade200),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.verified, color: Colors.green.shade600, size: 24),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Hạng hiện tại: ${_currentUser!.rank}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.green.shade800,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Bạn có thể tham gia thách đấu xếp hạng',
+                  style: TextStyle(
+                    color: Colors.green.shade700,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          TextButton.icon(
+            onPressed: () => _showRankChangeRequestDialog(context),
+            icon: Icon(Icons.swap_vert, size: 18, color: Colors.blue.shade600),
+            label: Text(
+              'Thay đổi hạng',
+              style: TextStyle(color: Colors.blue.shade600),
+            ),
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.blue.shade50,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showRankChangeRequestDialog(BuildContext context) {
+    if (_currentUser == null) return;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return RankChangeRequestDialog(
+          userProfile: _currentUser!,
+          onRequestSubmitted: () {
+            // Optional: Refresh data or show confirmation
+          },
+        );
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: () async => onRefresh(),
-      child: _buildBody(context),
+    if (_isLoadingUser) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Đang tải thông tin người dùng...'),
+          ],
+        ),
+      );
+    }
+
+    // Check if user has rank - if not, show rank registration prompt
+    if (!_hasRank) {
+      return _buildRankRequiredPrompt(context);
+    }
+
+    return Column(
+      children: [
+        // Rank info banner for users with rank
+        _buildRankInfoBanner(context),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: () async => widget.onRefresh(),
+            child: _buildBody(context),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildBody(BuildContext context) {
-    if (isLoading) {
+    if (widget.isLoading) {
       return const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -43,11 +315,11 @@ class CompetitivePlayTab extends StatelessWidget {
       );
     }
 
-    if (errorMessage != null) {
+    if (widget.errorMessage != null) {
       return _buildErrorState(context);
     }
 
-    if (players.isEmpty) {
+    if (widget.players.isEmpty) {
       return _buildEmptyState(context);
     }
 
@@ -114,16 +386,16 @@ class CompetitivePlayTab extends StatelessWidget {
         const SizedBox(height: 16),
         // Players list/map
         Expanded(
-          child: isMapView
-              ? MapViewWidget(players: players.map((p) => p.toJson()).toList())
+          child: widget.isMapView
+              ? MapViewWidget(players: widget.players.map((p) => p.toJson()).toList())
               : ListView.builder(
                   padding: const EdgeInsets.only(left: 16, right: 16, bottom: 80),
-                  itemCount: players.length,
+                  itemCount: widget.players.length,
                   itemBuilder: (context, index) {
                     return PlayerCardWidget(
-                      player: players[index],
+                      player: widget.players[index],
                       mode: 'thach_dau',
-                      challengeInfo: _getChallengeInfo(players[index]),
+                      challengeInfo: _getChallengeInfo(widget.players[index]),
                     );
                   },
                 ),
@@ -184,7 +456,7 @@ class CompetitivePlayTab extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              errorMessage ?? 'Không thể tải danh sách đối thủ. Vui lòng thử lại.',
+              widget.errorMessage ?? 'Không thể tải danh sách đối thủ. Vui lòng thử lại.',
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.grey[600],
@@ -193,7 +465,7 @@ class CompetitivePlayTab extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: onRefresh,
+              onPressed: widget.onRefresh,
               child: const Text('Thử lại'),
             ),
           ],
@@ -234,7 +506,7 @@ class CompetitivePlayTab extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: onRefresh,
+              onPressed: widget.onRefresh,
               child: const Text('Tải lại'),
             ),
           ],

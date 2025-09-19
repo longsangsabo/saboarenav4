@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-// Removed Sizer dependency
-import '../../../core/layout/responsive.dart';
-
 import '../../../core/app_export.dart';
+import '../../../core/layout/responsive.dart';
 import 'payment_options_dialog.dart';
 
-class RegistrationWidget extends StatelessWidget {
+class RegistrationWidget extends StatefulWidget {
   final Map<String, dynamic> tournament;
   final bool isRegistered;
   final VoidCallback? onRegisterTap;
@@ -20,12 +18,18 @@ class RegistrationWidget extends StatelessWidget {
   });
 
   @override
+  State<RegistrationWidget> createState() => _RegistrationWidgetState();
+}
+
+class _RegistrationWidgetState extends State<RegistrationWidget> {
+
+  @override
   Widget build(BuildContext context) {
-    final registrationDeadline = tournament["registrationDeadline"] as String;
+    final registrationDeadline = widget.tournament["registrationDeadline"] as String;
     final isDeadlinePassed = _isDeadlinePassed(registrationDeadline);
     final canRegister = !isDeadlinePassed &&
-        (tournament["currentParticipants"] as int) <
-            (tournament["maxParticipants"] as int);
+        (widget.tournament["currentParticipants"] as int) <
+            (widget.tournament["maxParticipants"] as int);
 
     return Container(
       margin: const EdgeInsets.all(Gaps.xl),
@@ -64,9 +68,9 @@ class RegistrationWidget extends StatelessWidget {
           const SizedBox(height: Gaps.lg),
       _buildRequirementItem('Hạn đăng ký', registrationDeadline, 'schedule'),
       const SizedBox(height: Gaps.sm),
-      _buildRequirementItem('Yêu cầu rank', tournament["rankRequirement"] as String, 'military_tech'),
+      _buildRequirementItem('Yêu cầu rank', widget.tournament["rankRequirement"] as String, 'military_tech'),
       const SizedBox(height: Gaps.sm),
-      _buildRequirementItem('Lệ phí', tournament["entryFee"] as String, 'payments'),
+      _buildRequirementItem('Lệ phí', widget.tournament["entryFee"] as String, 'payments'),
       const SizedBox(height: Gaps.lg),
           if (!isDeadlinePassed)
             Container(
@@ -162,9 +166,9 @@ class RegistrationWidget extends StatelessWidget {
       );
     }
 
-    if (isRegistered) {
+    if (widget.isRegistered) {
       return OutlinedButton(
-        onPressed: onWithdrawTap,
+        onPressed: widget.onWithdrawTap,
         style: OutlinedButton.styleFrom(
           side: BorderSide(
             color: AppTheme.lightTheme.colorScheme.error,
@@ -244,18 +248,18 @@ class RegistrationWidget extends StatelessWidget {
   }
 
   void _showPaymentOptions(BuildContext context) {
-    final entryFeeText = tournament["entryFee"] as String;
+    final entryFeeText = widget.tournament["entryFee"] as String;
     final entryFee = double.tryParse(entryFeeText.replaceAll(RegExp(r'[^\d.]'), '')) ?? 0.0;
     
     showDialog(
       context: context,
       builder: (context) => PaymentOptionsDialog(
-        tournamentId: tournament["id"] as String,
-        tournamentName: tournament["title"] as String,
+        tournamentId: widget.tournament["id"] as String,
+        tournamentName: widget.tournament["title"] as String,
         entryFee: entryFee,
         onPaymentConfirmed: (paymentMethod) {
           // Handle payment confirmation with payment method
-          onRegisterTap?.call();
+          widget.onRegisterTap?.call();
         },
       ),
     );

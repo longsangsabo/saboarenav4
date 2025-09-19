@@ -25,7 +25,7 @@ class RankingService {
     }
     return RankDisplayInfo(
       code: rankCode!,
-      name: details['name']!,
+      name: details['name']!, // Sử dụng tên mới từ RANK_DETAILS
       color: Color(int.parse(details['color']!.replaceFirst('#', '0xFF'))),
       icon: RankingConstants.RANK_ICONS[rankCode] ?? Icons.star,
     );

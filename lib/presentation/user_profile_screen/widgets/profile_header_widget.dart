@@ -4,6 +4,7 @@ import 'dart:io';
 
 import '../../../core/app_export.dart';
 import '../../../core/utils/sabo_rank_system.dart';
+import '../../../core/utils/rank_migration_helper.dart';
 
 import './rank_registration_info_modal.dart';
 
@@ -412,7 +413,7 @@ class ProfileHeaderWidget extends StatelessWidget {
           ),
           SizedBox(height: 0.5.h),
           Text(
-            userRank!, // an toàn vì đã check hasRank
+            RankMigrationHelper.getNewDisplayName(userRank), // Sử dụng tên mới
             style: AppTheme.lightTheme.textTheme.headlineMedium?.copyWith(
               color: rankColor,
               fontWeight: FontWeight.bold,
@@ -901,18 +902,18 @@ class ProfileHeaderWidget extends StatelessWidget {
               SizedBox(height: 2.h),
               Text('🎱 Hệ thống rank K → E+:'),
               SizedBox(height: 1.h),
-              _buildRankInfo('K', '1000-1099', 'Tập Sự (2-4 bi khi hình dễ)', Color(0xFF8B4513)),
-              _buildRankInfo('K+', '1100-1199', 'Tập Sự+ (sắt ngưỡng lên I)', Color(0xFFA0522D)),
-              _buildRankInfo('I', '1200-1299', 'Sơ Cấp (5-7 bi khi có hình)', Color(0xFF795548)),
-              _buildRankInfo('I+', '1300-1399', 'Sơ Cấp+ (sắt ngưỡng lên H)', Color(0xFF6D4C41)),
-              _buildRankInfo('H', '1400-1499', 'Trung Cấp (8-10 bi khi có hình)', Color(0xFF5D4037)),
-              _buildRankInfo('H+', '1500-1599', 'Trung Cấp+ (sắt ngưỡng lên G)', Color(0xFF4E342E)),
-              _buildRankInfo('G', '1600-1699', 'Khá (11-13 bi đẹp)', Color(0xFF3E2723)),
-              _buildRankInfo('G+', '1700-1799', 'Khá+ (sắt ngưỡng lên F)', Color(0xFF2E1916)),
-              _buildRankInfo('F', '1800-1899', 'Giỏi (14-15 bi clear)', Color(0xFF1B0E0A)),
-              _buildRankInfo('F+', '1900-1999', 'Giỏi+ (sắt ngưỡng lên E)', Color(0xFF000000)),
-              _buildRankInfo('E', '2000-2099', 'Chuyên Gia (an toàn chủ động)', Color(0xFFB22222)),
-              _buildRankInfo('E+', '2100+', 'Chuyên Gia+ (sắt ngưỡng lên D)', Color(0xFF8B0000)),
+              _buildRankInfo('K', '1000-1099', 'Người mới (2-4 bi khi hình dễ)', Color(0xFF8B4513)),
+              _buildRankInfo('K+', '1100-1199', 'Học việc (sắt ngưỡng lên I)', Color(0xFFA0522D)),
+              _buildRankInfo('I', '1200-1299', 'Thợ 3 (5-7 bi khi có hình)', Color(0xFF795548)),
+              _buildRankInfo('I+', '1300-1399', 'Thợ 2 (sắt ngưỡng lên H)', Color(0xFF6D4C41)),
+              _buildRankInfo('H', '1400-1499', 'Thợ 1 (8-10 bi khi có hình)', Color(0xFF5D4037)),
+              _buildRankInfo('H+', '1500-1599', 'Thợ chính (sắt ngưỡng lên G)', Color(0xFF4E342E)),
+              _buildRankInfo('G', '1600-1699', 'Thợ giỏi (11-13 bi đẹp)', Color(0xFF3E2723)),
+              _buildRankInfo('G+', '1700-1799', 'Cao thủ (sắt ngưỡng lên F)', Color(0xFF2E1916)),
+              _buildRankInfo('F', '1800-1899', 'Chuyên gia (14-15 bi clear)', Color(0xFF1B0E0A)),
+              _buildRankInfo('F+', '1900-1999', 'Đại cao thủ (sắt ngưỡng lên E)', Color(0xFF000000)),
+              _buildRankInfo('E', '2000-2099', 'Huyền thoại (an toàn chủ động)', Color(0xFFB22222)),
+              _buildRankInfo('E+', '2100+', 'Vô địch (sắt ngưỡng lên D)', Color(0xFF8B0000)),
               SizedBox(height: 1.h),
               Text(
                 '💡 Rank up cần verification, rank down tự động. Hệ thống dựa trên kỹ thuật bida Việt Nam thực tế!',

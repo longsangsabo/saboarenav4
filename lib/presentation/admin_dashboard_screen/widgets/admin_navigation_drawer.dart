@@ -3,6 +3,8 @@ import '../../../theme/app_theme.dart';
 import '../../../routes/app_routes.dart';
 import '../../../services/auth_service.dart';
 import '../../admin_tournament_management_screen/admin_tournament_management_screen.dart';
+import '../club_rank_change_management_screen.dart';
+import '../system_admin_rank_management_screen.dart';
 
 class AdminNavigationDrawer extends StatelessWidget {
   const AdminNavigationDrawer({super.key});
@@ -65,6 +67,16 @@ class AdminNavigationDrawer extends StatelessWidget {
                       icon: Icons.approval,
                       title: 'Duyệt CLB',
                       route: AppRoutes.clubApprovalScreen,
+                    ),
+                    _NavigationItem(
+                      icon: Icons.grade,
+                      title: 'Thay đổi hạng (Club)',
+                      onTap: () => _navigateToRankChangeManagement(context),
+                    ),
+                    _NavigationItem(
+                      icon: Icons.admin_panel_settings,
+                      title: 'System Admin Rank',
+                      onTap: () => _navigateToSystemAdminRankManagement(context),
                     ),
                     _NavigationItem(
                       icon: Icons.sports,
@@ -357,6 +369,22 @@ class AdminNavigationDrawer extends StatelessWidget {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => const AdminTournamentManagementScreen(),
+      ),
+    );
+  }
+
+  void _navigateToRankChangeManagement(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const ClubRankChangeManagementScreen(),
+      ),
+    );
+  }
+
+  void _navigateToSystemAdminRankManagement(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const SystemAdminRankManagementScreen(),
       ),
     );
   }

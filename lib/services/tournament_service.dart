@@ -1,8 +1,9 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../core/utils/rank_migration_helper.dart';
 import '../models/tournament.dart';
 import '../models/user_profile.dart';
 import '../core/constants/tournament_constants.dart';
 import 'notification_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:math' as math;
 
 class TournamentService {
@@ -225,7 +226,7 @@ class TournamentService {
             "name": player1Profile['full_name'] ?? 'Player 1',
             "avatar": player1Profile['avatar_url'] ?? 
                 "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png",
-            "rank": player1Profile['rank'] ?? player1Profile['elo_rating']?.toString() ?? "Chưa xếp hạng",
+            "rank": RankMigrationHelper.getNewDisplayName(player1Profile['rank'] as String?),
             "score": match['player1_score'] ?? 0
           } : null,
           "player2": player2Profile != null ? {
@@ -233,7 +234,7 @@ class TournamentService {
             "name": player2Profile['full_name'] ?? 'Player 2',
             "avatar": player2Profile['avatar_url'] ?? 
                 "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png",
-            "rank": player2Profile['rank'] ?? player2Profile['elo_rating']?.toString() ?? "Chưa xếp hạng",
+            "rank": RankMigrationHelper.getNewDisplayName(player2Profile['rank'] as String?),
             "score": match['player2_score'] ?? 0
           } : null,
           "winner": match['winner_id'] != null ? 
@@ -512,7 +513,7 @@ class TournamentService {
             'full_name': user['full_name'] ?? 'Unknown Player',
             'avatar_url': user['avatar_url'],
             'elo_rating': user['elo_rating'] ?? 1200,
-            'rank': user['rank'] ?? 'Unranked',
+            'rank': RankMigrationHelper.getNewDisplayName(user['rank'] as String?),
           },
         };
       }).toList();

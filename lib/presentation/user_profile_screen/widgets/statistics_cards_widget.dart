@@ -3,8 +3,9 @@ import 'package:sizer/sizer.dart';
 
 import '../../../models/user_profile.dart';
 import '../../../services/user_service.dart';
-import '../../../theme/app_theme.dart';
-import '../../../widgets/custom_icon_widget.dart';
+import '../../widgets/rank_change_request_dialog.dart';
+import '../../../core/utils/rank_migration_helper.dart';
+import '../../../core/app_export.dart';
 
 class StatisticsCardsWidget extends StatefulWidget {
   final String userId;
@@ -249,13 +250,114 @@ class _StatisticsCardsWidgetState extends State<StatisticsCardsWidget> {
       );
     }
 
-    // User có rank - hiển thị card bình thường
-    return _buildStatCard(
-      title: 'Xếp hạng',
-      value: '#${_userRanking > 0 ? _userRanking : 'N/A'}',
-      subtitle: '${_userProfile!.rankingPoints} điểm',
-      color: Colors.purple,
-      icon: 'leaderboard',
+    // User có rank - hiển thị card với option thay đổi rank
+    return GestureDetector(
+      onTap: () => _showRankChangeDialog(),
+      child: Container(
+        padding: EdgeInsets.all(4.w),
+        decoration: BoxDecoration(
+          color: AppTheme.lightTheme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.lightTheme.shadowColor.withValues(alpha: 0.1),
+              blurRadius: 8,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Xếp hạng',
+                  style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Row(
+                  children: [
+                    CustomIconWidget(
+                      iconName: 'leaderboard',
+                      color: Colors.purple,
+                      size: 18,
+                    ),
+                    SizedBox(width: 1.w),
+                    Icon(
+                      Icons.swap_vert,
+                      color: Colors.blue.shade600,
+                      size: 16,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            SizedBox(height: 1.h),
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '#${_userRanking > 0 ? _userRanking : 'N/A'}',
+                        style: AppTheme.lightTheme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.purple,
+                        ),
+                      ),
+                      SizedBox(height: 0.5.h),
+                      Text(
+                        '${_userProfile!.rankingPoints} điểm',
+                        style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
+                          color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 1.h),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
+              decoration: BoxDecoration(
+                color: Colors.green.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.green.shade200),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.verified, color: Colors.green.shade600, size: 16),
+                  SizedBox(width: 1.w),
+                  Expanded(
+                    child: Text(
+                      'Hạng: ${RankMigrationHelper.getNewDisplayName(userRank)}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.green.shade800,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    'Nhấn để thay đổi',
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Colors.blue.shade600,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -398,6 +500,23 @@ class _StatisticsCardsWidgetState extends State<StatisticsCardsWidget> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showRankChangeDialog() {
+    if (_userProfile == null) return;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return RankChangeRequestDialog(
+          userProfile: _userProfile!,
+          onRequestSubmitted: () {
+            // Optional: Refresh data
+            _loadStatistics();
+          },
+        );
+      },
     );
   }
 }

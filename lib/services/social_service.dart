@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:typed_data'; // Add this import
 import '../models/post.dart';
+import '../core/utils/rank_migration_helper.dart';
 
 class SocialService {
   static SocialService? _instance;
@@ -36,11 +37,11 @@ class SocialService {
           userId: json['user_id'],
           content: json['content'],
           postType: json['post_type'] ?? 'text',
-          imageUrls: json['image_urls'] != null
+          imageUrls: json['image_urls'] != null 
               ? List<String>.from(json['image_urls'])
               : null,
           location: json['location'],
-          hashtags: json['hashtags'] != null
+          hashtags: json['hashtags'] != null 
               ? List<String>.from(json['hashtags'])
               : null,
           tournamentId: json['tournament_id'],
@@ -53,15 +54,13 @@ class SocialService {
           updatedAt: DateTime.parse(json['updated_at']),
           userName: userProfile?['full_name'] ?? userProfile?['username'],
           userAvatar: userProfile?['avatar_url'],
-          userRank: userProfile?['skill_level'],
+          userRank: RankMigrationHelper.getNewDisplayName(userProfile?['rank'] as String?),
         );
       }).toList();
     } catch (error) {
       throw Exception('Failed to get feed posts: $error');
     }
-  }
-
-  Future<Post> createPost({
+  }  Future<Post> createPost({
     required String content,
     String postType = 'text',
     List<String>? imageUrls,
@@ -118,7 +117,7 @@ class SocialService {
         updatedAt: DateTime.parse(response['updated_at']),
         userName: userProfile?['full_name'] ?? userProfile?['username'],
         userAvatar: userProfile?['avatar_url'],
-        userRank: userProfile?['skill_level'],
+        userRank: RankMigrationHelper.getNewDisplayName(userProfile?['rank'] as String?),
       );
     } catch (error) {
       throw Exception('Failed to create post: $error');
@@ -259,7 +258,7 @@ class SocialService {
           updatedAt: DateTime.parse(json['updated_at']),
           userName: userProfile?['full_name'] ?? userProfile?['username'],
           userAvatar: userProfile?['avatar_url'],
-          userRank: userProfile?['skill_level'],
+          userRank: RankMigrationHelper.getNewDisplayName(userProfile?['rank'] as String?),
         );
       }).toList();
     } catch (error) {
