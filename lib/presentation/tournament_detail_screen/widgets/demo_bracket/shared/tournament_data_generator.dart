@@ -609,70 +609,110 @@ class TournamentDataGenerator {
   }
 
   /// Calculate Losers Bracket rounds for Double Elimination
-  /// CRITICAL: Proper Losers Bracket logic implementation
+  /// CORRECT: Standard Double Elimination Losers Bracket logic
   static List<Map<String, dynamic>> calculateDoubleEliminationLosers(int playerCount) {
     final List<Map<String, dynamic>> rounds = [];
     
-    // Losers bracket has complex structure:
-    // - LB Round 1: Players eliminated from WB Round 1
-    // - LB Round 2: Players eliminated from WB Round 2 vs LB Round 1 winners
-    // - Pattern continues alternating between elimination feeds and advancement
+    // Calculate winners bracket structure to know eliminations per round
+    final winnersRounds = calculateSingleEliminationRounds(playerCount);
     
-    int currentPlayers = playerCount ~/ 2; // Half of original players start here
     int roundNumber = 1;
-    bool isEliminationRound = true; // Alternates between elimination feeds and advancement
+    int currentSurvivors = 0;
     
-    while (currentPlayers > 1) {
-      String title;
-      if (currentPlayers == 2) {
-        title = 'LB Final';
-      } else if (currentPlayers <= 4) {
-        title = 'LB Bán kết';
+    // Process each Winners Bracket round to generate Losers Bracket rounds
+    for (int wbRound = 0; wbRound < winnersRounds.length; wbRound++) {
+      final wbRoundData = winnersRounds[wbRound];
+      final eliminatedCount = (wbRoundData['matches'] as List).length; // Number of losers from this WB round
+      
+      if (wbRound == 0) {
+        // LB Round 1: Only eliminated players from WB R1
+        // FIXED: LB Round 1 matches = eliminatedCount ~/ 2 (pairs of eliminated players)
+        final lbR1Matches = eliminatedCount ~/ 2;
+        rounds.add({
+          'title': 'LB Round $roundNumber',
+          'matches': generateLosersRoundMatches(roundNumber, lbR1Matches, true),
+          'matchCount': lbR1Matches,
+        });
+        currentSurvivors = lbR1Matches; // Winners from LB R1
+        roundNumber++;
       } else {
-        title = 'LB Round $roundNumber';
+        // LB Round N: Mix eliminated players with survivors
+        if (currentSurvivors > 0 && eliminatedCount > 0) {
+          // Mix round: survivors vs new eliminations
+          // Must have equal number of survivors and eliminations to pair properly
+          final matchCount = min(currentSurvivors, eliminatedCount);
+          
+          String title = 'LB Round $roundNumber';
+          if (matchCount == 1) {
+            title = 'LB Final';
+          } else if (matchCount == 2) {
+            title = 'LB Semifinals';
+          }
+          
+          rounds.add({
+            'title': title,
+            'matches': generateLosersRoundMatches(roundNumber, matchCount, true),
+            'matchCount': matchCount,
+          });
+          currentSurvivors = matchCount; // Winners from this mix round
+          roundNumber++;
+          
+          // If survivors need to be reduced further (more than 1 survivor)
+          if (currentSurvivors > 1 && wbRound < winnersRounds.length - 1) {
+            final reductionMatches = currentSurvivors ~/ 2;
+            if (reductionMatches > 0) {
+              String reductionTitle = 'LB Round $roundNumber';
+              if (reductionMatches == 1) {
+                reductionTitle = 'LB Final';
+              } else if (reductionMatches == 2) {
+                reductionTitle = 'LB Semifinals';
+              }
+              
+              rounds.add({
+                'title': reductionTitle,
+                'matches': generateLosersRoundMatches(roundNumber, reductionMatches, false),
+                'matchCount': reductionMatches,
+              });
+              currentSurvivors = reductionMatches;
+              roundNumber++;
+            }
+          }
+        }
       }
       
-      final matchCount = isEliminationRound ? currentPlayers : currentPlayers ~/ 2;
-      rounds.add({
-        'title': title,
-        'matches': generateLosersRoundMatches(roundNumber, matchCount, isEliminationRound),
-        'matchCount': matchCount,
-      });
-      
-      if (isEliminationRound) {
-        // Elimination round - same number advance
-        currentPlayers = matchCount;
-      } else {
-        // Advancement round - half advance
-        currentPlayers = matchCount;
-      }
-      
-      isEliminationRound = !isEliminationRound; // Alternate pattern
-      roundNumber++;
-      
-      // Prevent infinite loop
+      // Safety check
       if (roundNumber > 10) break;
     }
     
     return rounds;
   }
 
-  /// Generate matches for Losers Bracket rounds
-  static List<Map<String, String>> generateLosersRoundMatches(int roundNumber, int matchCount, bool isEliminationRound) {
+  /// Generate matches for Losers Bracket rounds with correct player naming
+  static List<Map<String, String>> generateLosersRoundMatches(int roundNumber, int matchCount, bool isMixRound) {
     final List<Map<String, String>> matches = [];
     
     for (int i = 0; i < matchCount; i++) {
       final matchId = 'LB${roundNumber}M${i + 1}';
       
       String player1, player2;
-      if (isEliminationRound) {
-        // New eliminations vs previous survivors
-        player1 = 'WB Eliminated ${i * 2 + 1}';
-        player2 = 'LB Survivor ${i * 2 + 2}';
+      if (roundNumber == 1) {
+        // LB Round 1: Only eliminated players from WB R1
+        player1 = 'WB R1 Loser ${i * 2 + 1}';
+        player2 = 'WB R1 Loser ${i * 2 + 2}';
+      } else if (isMixRound) {
+        // Mix round: survivors vs new eliminations
+        // For LB Round 2: survivors from LB R1 vs losers from WB R2
+        if (roundNumber == 2) {
+          player1 = 'LB R1 Winner ${i + 1}';
+          player2 = 'WB R2 Loser ${i + 1}';
+        } else {
+          player1 = 'LB R${roundNumber - 1} Winner ${i + 1}';
+          player2 = 'WB R${roundNumber} Loser ${i + 1}';
+        }
       } else {
-        // Advancement matches
-        player1 = 'LB Player ${i * 2 + 1}';
-        player2 = 'LB Player ${i * 2 + 2}';
+        // Advancement matches between survivors
+        player1 = 'LB Winner ${i * 2 + 1}';
+        player2 = 'LB Winner ${i * 2 + 2}';
       }
       
       // Generate realistic scores for early rounds

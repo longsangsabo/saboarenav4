@@ -31,6 +31,7 @@ class SingleEliminationBracket extends StatelessWidget {
   }
 
   Widget _buildBracketContent(BuildContext context, List<Map<String, dynamic>> rounds) {
+    print('🏗️ Building Single Elimination content with ${rounds.length} rounds'); // Debug
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(

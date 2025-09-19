@@ -20,7 +20,7 @@ class DoubleEliminationBracket extends StatelessWidget {
     return BracketContainer(
       title: 'Double Elimination',
       subtitle: '$playerCount players',
-      height: 600, // Increased height for double elimination complexity
+      height: 650, // Increased height for losers bracket info
       onFullscreenTap: onFullscreenTap,
       onInfoTap: () => _showDoubleEliminationInfo(context),
       child: _buildBracketContent(context),
@@ -44,6 +44,7 @@ class DoubleEliminationBracket extends StatelessWidget {
 
   Widget _buildWinnersBracket() {
     final winnersRounds = TournamentDataGenerator.calculateDoubleEliminationWinners(playerCount);
+    print('🏆 Double Elimination Winners Rounds: ${winnersRounds.length}'); // Debug
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,6 +64,44 @@ class DoubleEliminationBracket extends StatelessWidget {
             ),
           ),
         ),
+        const SizedBox(height: 8),
+        // Detailed info about Winners Bracket logic
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.green.shade50,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.green.shade200),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.info_outline, color: Colors.green.shade700, size: 16),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Winners Bracket Logic',
+                    style: TextStyle(
+                      color: Colors.green.shade700,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '• Single elimination format\n• Losers drop to Losers Bracket (second chance)\n• Winner advances to Grand Final',
+                style: TextStyle(
+                  color: Colors.green.shade600,
+                  fontSize: 11,
+                  height: 1.3,
+                ),
+              ),
+            ],
+          ),
+        ),
         const SizedBox(height: 12),
         SizedBox(
           height: 200,
@@ -80,6 +119,7 @@ class DoubleEliminationBracket extends StatelessWidget {
 
   Widget _buildLosersBracket() {
     final losersRounds = TournamentDataGenerator.calculateDoubleEliminationLosers(playerCount);
+    print('🔥 Double Elimination Losers Rounds: ${losersRounds.length}'); // Debug
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,9 +139,47 @@ class DoubleEliminationBracket extends StatelessWidget {
             ),
           ),
         ),
+        const SizedBox(height: 8),
+        // Detailed info about Losers Bracket logic
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.orange.shade50,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.orange.shade200),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.warning_amber_outlined, color: Colors.orange.shade700, size: 16),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Losers Bracket Complex Logic',
+                    style: TextStyle(
+                      color: Colors.orange.shade700,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '• LB R1: WB R1 losers compete (${playerCount == 8 ? "4→2" : "8→4"} survivors)\n• LB R2: LB R1 winners vs WB R2 losers (mixed round)\n• LB R3+: Advancement rounds until 1 survivor\n• Winner faces WB Champion in Grand Final',
+                style: TextStyle(
+                  color: Colors.orange.shade600,
+                  fontSize: 11,
+                  height: 1.3,
+                ),
+              ),
+            ],
+          ),
+        ),
         const SizedBox(height: 12),
         SizedBox(
-          height: 180,
+          height: 220, // Increased height for better visibility
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -133,6 +211,44 @@ class DoubleEliminationBracket extends StatelessWidget {
               fontWeight: FontWeight.bold,
               fontSize: 16,
             ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        // Detailed Grand Final info
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.purple.shade50,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.purple.shade200),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.emoji_events, color: Colors.purple.shade700, size: 16),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Grand Final Rules',
+                    style: TextStyle(
+                      color: Colors.purple.shade700,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '• Winners Bracket Champion vs Losers Bracket Champion\n• If LB Champion wins: Bracket Reset (both have 1 loss)\n• If WB Champion wins: Tournament ends (LB had 2 losses)',
+                style: TextStyle(
+                  color: Colors.purple.shade600,
+                  fontSize: 11,
+                  height: 1.3,
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 12),

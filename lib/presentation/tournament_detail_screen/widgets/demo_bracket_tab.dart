@@ -3,7 +3,8 @@
 
 import 'package:flutter/material.dart';
 import 'demo_bracket/formats/single_elimination_bracket.dart';
-// import 'demo_bracket/formats/double_elimination_bracket.dart'; // Coming soon
+import 'demo_bracket/formats/double_elimination_bracket.dart';
+import 'demo_bracket/formats/de32_bracket_simple.dart';
 import 'demo_bracket/formats/round_robin_bracket.dart';
 import 'demo_bracket/formats/swiss_system_bracket.dart';
 import 'demo_bracket/components/bracket_components.dart';
@@ -141,6 +142,8 @@ class _DemoBracketTabState extends State<DemoBracketTab> {
   }
 
   Widget _buildPlayerCountSelector() {
+    final availableCounts = _playerCounts;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -171,12 +174,26 @@ class _DemoBracketTabState extends State<DemoBracketTab> {
                   });
                 }
               },
-              items: _playerCounts.map((count) {
+              items: availableCounts.map((count) {
+                String label = '$count players';
+                // Add DE32 indicator for Double Elimination + 32 players
+                if (_selectedFormat == 'double_elimination' && count == 32) {
+                  label += ' (DE32 Two-Group)';
+                }
+                
                 return DropdownMenuItem<int>(
                   value: count,
                   child: Text(
-                    '$count players',
-                    style: const TextStyle(fontSize: 13),
+                    label,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: (_selectedFormat == 'double_elimination' && count == 32)
+                          ? Colors.indigo[700]
+                          : Colors.black,
+                      fontWeight: (_selectedFormat == 'double_elimination' && count == 32)
+                          ? FontWeight.w600
+                          : FontWeight.normal,
+                    ),
                   ),
                 );
               }).toList(),
@@ -210,275 +227,15 @@ class _DemoBracketTabState extends State<DemoBracketTab> {
   }
 
   Widget _buildDoubleEliminationBracket() {
-    // Use the new comprehensive Double Elimination calculation
-    final rounds = TournamentDataGenerator.calculateDoubleEliminationRounds(_selectedPlayerCount);
-    
-    if (rounds.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.all(16),
-        child: const Center(
-          child: Text(
-            'Failed to generate Double Elimination bracket',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
-          ),
-        ),
-      );
+    // SABO Arena rule: Double Elimination with 32 players uses DE32 Two-Group System
+    if (_selectedPlayerCount == 32) {
+      return const DE32Bracket();
     }
     
-    // Separate rounds by bracket type
-    final winnersRounds = rounds.where((r) => r['bracketType'] == 'winners').toList();
-    final losersRounds = rounds.where((r) => r['bracketType'] == 'losers').toList();
-    final grandFinalRounds = rounds.where((r) => r['bracketType']?.startsWith('grand_final') == true).toList();
-    
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withOpacity(0.3)),
-      ),
-      child: Column(
-        children: [
-          // Header section
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [const Color(0xFF2E86AB), const Color(0xFF2E86AB).withOpacity(0.8)],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
-              ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.account_tree,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        'Double Elimination',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        '$_selectedPlayerCount players',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  onPressed: () => _showDoubleEliminationInfo(),
-                  icon: const Icon(
-                    Icons.info_outline,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                  tooltip: 'Thông tin chi tiết',
-                ),
-                const SizedBox(width: 8),
-                IconButton(
-                  onPressed: _showFullscreenBracket,
-                  icon: const Icon(
-                    Icons.fullscreen,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                  tooltip: 'Xem toàn màn hình',
-                ),
-              ],
-            ),
-          ),
-          
-          // Bracket content section
-          Container(
-            height: 350, // Giảm từ 450 xuống 350
-            padding: const EdgeInsets.all(12), // Giảm padding từ 16 xuống 12
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Winners Bracket
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.green.withOpacity(0.3)),
-                      borderRadius: BorderRadius.circular(8),
-                      color: Colors.green.withOpacity(0.1),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.emoji_events, color: Colors.green, size: 16),
-                            const SizedBox(width: 6),
-                            Text(
-                              'Winners Bracket',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.green[700],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        SizedBox(
-                          height: 100, // Giảm height xuống 100
-                          child: winnersRounds.isNotEmpty 
-                              ? SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: SingleChildScrollView(
-                                    scrollDirection: Axis.vertical,
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: _buildRoundsWithConnectors(winnersRounds),
-                                    ),
-                                  ),
-                                )
-                              : const Center(
-                                  child: Text('No winners rounds', style: TextStyle(color: Colors.grey)),
-                                ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 8), // Giảm từ 12 xuống 8
-                  
-                  // Losers Bracket
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.orange.withOpacity(0.3)),
-                      borderRadius: BorderRadius.circular(8),
-                      color: Colors.orange.withOpacity(0.1),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.trending_down, color: Colors.orange, size: 16),
-                            const SizedBox(width: 6),
-                            Text(
-                              'Losers Bracket',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.orange[700],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        SizedBox(
-                          height: 80, // Giảm height xuống 80
-                          child: losersRounds.isNotEmpty 
-                              ? SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: SingleChildScrollView(
-                                    scrollDirection: Axis.vertical,
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: _buildRoundsWithConnectors(losersRounds),
-                                    ),
-                                  ),
-                                )
-                              : const Center(
-                                  child: Text(
-                                    'Eliminations populate here',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey,
-                                      fontStyle: FontStyle.italic,
-                                    ),
-                                  ),
-                                ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 8), // Giảm từ 12 xuống 8
-                  
-                  // Grand Final
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.purple.withOpacity(0.3)),
-                      borderRadius: BorderRadius.circular(8),
-                      color: Colors.purple.withOpacity(0.1),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.military_tech, color: Colors.purple, size: 16),
-                            const SizedBox(width: 6),
-                            Text(
-                              'Grand Final',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.purple[700],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        SizedBox(
-                          height: 60, // Giữ nguyên 60 cho Grand Final
-                          child: grandFinalRounds.isNotEmpty 
-                              ? SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: SingleChildScrollView(
-                                    scrollDirection: Axis.vertical,
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: _buildRoundsWithConnectors(grandFinalRounds),
-                                    ),
-                                  ),
-                                )
-                              : const Center(
-                                  child: Text('Grand Final', style: TextStyle(color: Colors.grey)),
-                                ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+    // Traditional Double Elimination for other player counts
+    return DoubleEliminationBracket(
+      playerCount: _selectedPlayerCount,
+      onFullscreenTap: _showFullscreenBracket,
     );
   }
 
@@ -496,6 +253,8 @@ class _DemoBracketTabState extends State<DemoBracketTab> {
     );
   }
 
+
+
   void _showFullscreenBracket() {
     Widget dialog;
     
@@ -504,7 +263,12 @@ class _DemoBracketTabState extends State<DemoBracketTab> {
         dialog = SingleEliminationFullscreenDialog(playerCount: _selectedPlayerCount);
         break;
       case 'double_elimination':
-        dialog = _buildDoubleEliminationFullscreenDialog();
+        // SABO Arena rule: Double Elimination with 32 players uses DE32 format
+        if (_selectedPlayerCount == 32) {
+          dialog = _buildDE32FullscreenDialog();
+        } else {
+          dialog = _buildDoubleEliminationFullscreenDialog();
+        }
         break;
       case 'round_robin':
         dialog = RoundRobinFullscreenDialog(playerCount: _selectedPlayerCount);
@@ -616,10 +380,10 @@ class _DemoBracketTabState extends State<DemoBracketTab> {
   }
 
   Widget _buildDoubleEliminationFullscreenDialog() {
-    final rounds = TournamentDataGenerator.calculateDoubleEliminationRounds(_selectedPlayerCount);
-    final winnersRounds = rounds.where((r) => r['bracketType'] == 'winners').toList();
-    final losersRounds = rounds.where((r) => r['bracketType'] == 'losers').toList();
-    final grandFinalRounds = rounds.where((r) => r['bracketType']?.startsWith('grand_final') == true).toList();
+    // Use the SAME logic as the main bracket display
+    final winnersRounds = TournamentDataGenerator.calculateDoubleEliminationWinners(_selectedPlayerCount);
+    final losersRounds = TournamentDataGenerator.calculateDoubleEliminationLosers(_selectedPlayerCount);
+    final grandFinalRounds = TournamentDataGenerator.calculateDoubleEliminationGrandFinal(_selectedPlayerCount);
     
     return Dialog.fullscreen(
       child: Scaffold(
@@ -803,40 +567,339 @@ class _DemoBracketTabState extends State<DemoBracketTab> {
     );
   }
 
-  /// Helper method to build rounds with connectors
-  List<Widget> _buildRoundsWithConnectors(List<Map<String, dynamic>> rounds) {
-    List<Widget> widgets = [];
-    
-    for (int i = 0; i < rounds.length; i++) {
-      final round = rounds[i];
-      final isLastRound = i == rounds.length - 1;
-      
-      // Add round column
-      widgets.add(
-        Container(
-          width: 120,
-          margin: const EdgeInsets.only(right: 4),
-          child: RoundColumn(
-            title: round['title'] ?? 'Round',
-            matches: List<Map<String, String>>.from(round['matches'] ?? []),
-            isFullscreen: false,
+  Widget _buildDE32FullscreenDialog() {
+    return Dialog.fullscreen(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('SABO Double Elimination DE32'),
+          leading: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.info_outline),
+              onPressed: () => _showDE32Info(),
+            ),
+          ],
+        ),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Tournament Info
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  margin: const EdgeInsets.only(bottom: 24),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.indigo[50]!, Colors.indigo[100]!],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.indigo[200]!),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.workspaces, color: Colors.indigo[700], size: 32),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'SABO DE32 Two-Group Tournament System',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.indigo[800],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              '32 players • 2 groups of 16 • 55 total matches\n'
+                              'Each group: Modified DE16 → 2 qualifiers\n'
+                              'Cross-Bracket: 4 qualifiers → 1 champion',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.indigo[700],
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                // Group A Section
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  margin: const EdgeInsets.only(bottom: 24),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.blue.withOpacity(0.1),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.blue,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Text(
+                              'GROUP A',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            '16 players • 26 matches • Modified DE16 Format',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.blue[700],
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Structure: Winners Bracket (15 matches) + Losers Bracket (11 matches)\n'
+                        'Produces: Group Winner (1st) + Group Runner-up (2nd)',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.blue[600],
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                // Group B Section
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  margin: const EdgeInsets.only(bottom: 24),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.green.withOpacity(0.3)),
+                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.green.withOpacity(0.1),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.green,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Text(
+                              'GROUP B',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            '16 players • 26 matches • Modified DE16 Format',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.green[700],
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Structure: Winners Bracket (15 matches) + Losers Bracket (11 matches)\n'
+                        'Produces: Group Winner (1st) + Group Runner-up (2nd)',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.green[600],
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                // Cross-Bracket Finals Section
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.purple.withOpacity(0.3)),
+                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.purple.withOpacity(0.1),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.purple,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Text(
+                              'CROSS-BRACKET FINALS',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            '4 qualifiers • 3 matches (2 Semis + 1 Final)',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.purple[700],
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Bracket Structure:',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.purple[700],
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '• Semifinal 1: Group A Winner vs Group B Winner\n'
+                            '• Semifinal 2: Group A Runner-up vs Group B Runner-up\n'
+                            '• DE32 Final: SF1 Winner vs SF2 Winner',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.purple[600],
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(height: 32),
+              ],
+            ),
           ),
         ),
-      );
-      
-      // Add connector if not the last round
-      if (!isLastRound && i < rounds.length - 1) {
-        final nextRound = rounds[i + 1];
-        widgets.add(
-          BracketConnector(
-            fromMatchCount: (round['matches'] as List).length,
-            toMatchCount: (nextRound['matches'] as List).length,
-            isLastRound: isLastRound,
-          ),
-        );
-      }
-    }
-    
-    return widgets;
+      ),
+    );
   }
+
+  void _showDE32Info() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.workspaces, color: Colors.indigo),
+            SizedBox(width: 8),
+            Text('SABO DE32 Tournament'),
+          ],
+        ),
+        content: const SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'SABO Double Elimination DE32',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 12),
+              Text(
+                '🎯 Tournament Structure:',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.indigo,
+                ),
+              ),
+              SizedBox(height: 4),
+              Text('• 32 players split into 2 groups (A & B)'),
+              Text('• Each group: 16 players, modified DE16 format'),
+              Text('• Group matches: 26 per group (52 total)'),
+              Text('• Cross-bracket finals: 3 matches'),
+              Text('• Total tournament: 55 matches'),
+              SizedBox(height: 12),
+              Text(
+                '🏆 Group Phase:',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue,
+                ),
+              ),
+              SizedBox(height: 4),
+              Text('• Winners Bracket: 15 matches per group'),
+              Text('• Losers Bracket: 11 matches per group'),
+              Text('• Each group produces 2 qualifiers'),
+              Text('• 1st place: Group Winner'),
+              Text('• 2nd place: Group Runner-up'),
+              SizedBox(height: 12),
+              Text(
+                '⚡ Cross-Bracket Finals:',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.purple,
+                ),
+              ),
+              SizedBox(height: 4),
+              Text('• SF1: Group A Winner vs Group B Winner'),
+              Text('• SF2: Group A Runner-up vs Group B Runner-up'),
+              Text('• Final: SF1 Winner vs SF2 Winner'),
+              Text('• Single elimination format'),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Đóng'),
+          ),
+        ],
+      ),
+    );
+  }
+
+
 }
