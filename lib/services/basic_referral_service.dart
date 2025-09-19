@@ -84,10 +84,6 @@ class BasicReferralService {
           .eq('is_active', true)
           .single();
 
-      if (codeResponse == null) {
-        return {'success': false, 'message': 'Invalid referral code'};
-      }
-
       final currentUses = codeResponse['current_uses'] ?? 0;
       final maxUses = codeResponse['max_uses'];
       
@@ -196,7 +192,7 @@ class BasicReferralService {
       final usageResponse = await _supabase
           .from('referral_usage')
           .select('spa_awarded_referrer')
-          .in_('referral_code_id', codeIds);
+          .inFilter('referral_code_id', codeIds);
 
       final totalReferrals = usageResponse.length;
       final totalSpaEarned = usageResponse.fold(0, (sum, usage) => 

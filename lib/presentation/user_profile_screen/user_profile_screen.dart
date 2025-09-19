@@ -10,6 +10,7 @@ import '../../services/auth_service.dart';
 import '../../services/user_service.dart';
 import '../../services/storage_service.dart';
 import '../../services/permission_service.dart';
+import '../../services/share_service.dart';
 import '../club_dashboard_screen/club_dashboard_screen_simple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -17,7 +18,6 @@ import './widgets/achievements_section_widget.dart';
 import './widgets/edit_profile_modal.dart';
 import './widgets/profile_header_widget.dart';
 import './widgets/qr_code_widget.dart';
-import './widgets/settings_menu_widget.dart';
 import './widgets/social_features_widget.dart';
 import './widgets/statistics_cards_widget.dart';
 
@@ -229,19 +229,6 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                     onFriendsListTap: _viewFriendsList,
                     onRecentChallengesTap: _viewRecentChallenges,
                     onTournamentHistoryTap: _viewTournamentHistory,
-                  ),
-                  SizedBox(height: 4.h),
-                  SettingsMenuWidget(
-                    onAccountSettings: _openAccountSettings,
-                    onPrivacySettings: _openPrivacySettings,
-                    onNotificationSettings: _openNotificationSettings,
-                    onLanguageSettings: _openLanguageSettings,
-                    onPaymentHistory: _openPaymentHistory,
-                    onHelpSupport: _openHelpSupport,
-                    onAbout: _openAbout,
-                    onLogout: _handleLogout,
-                    onClubManagement: _navigateToClubManagement,
-                    isClubOwner: _userProfile?.role == 'club_owner',
                   ),
                   SizedBox(height: 10.h),
                 ],
@@ -874,73 +861,159 @@ class _UserProfileScreenState extends State<UserProfileScreen>
     );
   }
 
+  void _shareProfile() async {
+    if (_userProfile == null) return;
+    
+    try {
+      await ShareService.shareUserProfile(_userProfile!);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi chia sẻ hồ sơ: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   void _showMoreOptions() {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
+      isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => Container(
-        padding: EdgeInsets.all(20),
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.8,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              'Tùy chọn khác',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            // Header
+            Container(
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(width: 24), // Spacer for centering
+                  Text(
+                    'Tùy chọn',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: Icon(Icons.close),
+                    padding: EdgeInsets.zero,
+                    constraints: BoxConstraints(),
+                  ),
+                ],
+              ),
             ),
-            SizedBox(height: 20),
-            _buildOptionItem(
-              icon: Icons.share,
-              title: 'Chia sẻ hồ sơ',
-              subtitle: 'Chia sẻ hồ sơ của bạn với bạn bè',
-              onTap: () {
-                Navigator.pop(context);
-                _shareProfile();
-              },
+            
+            // Scrollable content
+            Flexible(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    // Share & Copy Section
+                    _buildOptionItem(
+                      icon: Icons.share,
+                      title: 'Chia sẻ hồ sơ',
+                      subtitle: 'Chia sẻ hồ sơ của bạn với bạn bè',
+                      onTap: () {
+                        Navigator.pop(context);
+                        _shareProfile();
+                      },
+                    ),
+                    _buildOptionItem(
+                      icon: Icons.copy,
+                      title: 'Sao chép liên kết',
+                      subtitle: 'Sao chép đường dẫn đến hồ sơ',
+                      onTap: () {
+                        Navigator.pop(context);
+                        _copyProfileLink();
+                      },
+                    ),
+                    
+                    Divider(height: 30),
+                    
+                    // Settings Section
+                    _buildOptionItem(
+                      icon: Icons.person,
+                      title: 'Tài khoản',
+                      subtitle: 'Thông tin cá nhân, bảo mật',
+                      onTap: () {
+                        Navigator.pop(context);
+                        _openAccountSettings();
+                      },
+                    ),
+                    _buildOptionItem(
+                      icon: Icons.notifications,
+                      title: 'Thông báo',
+                      subtitle: 'Cài đặt thông báo push',
+                      onTap: () {
+                        Navigator.pop(context);
+                        _openNotificationSettings();
+                      },
+                    ),
+                    _buildOptionItem(
+                      icon: Icons.language,
+                      title: 'Ngôn ngữ',
+                      subtitle: 'Tiếng Việt, English',
+                      onTap: () {
+                        Navigator.pop(context);
+                        _openLanguageSettings();
+                      },
+                    ),
+                    _buildOptionItem(
+                      icon: Icons.help,
+                      title: 'Trợ giúp & Hỗ trợ',
+                      subtitle: 'FAQ, liên hệ',
+                      onTap: () {
+                        Navigator.pop(context);
+                        _openHelpSupport();
+                      },
+                    ),
+                    
+                    // Show Club Management if user is club owner
+                    if (_userProfile?.role == 'club_owner')
+                      _buildOptionItem(
+                        icon: Icons.business,
+                        title: 'Quản lý CLB',
+                        subtitle: 'Điều hành câu lạc bộ',
+                        onTap: () {
+                          Navigator.pop(context);
+                          _navigateToClubManagement();
+                        },
+                      ),
+                    
+                    Divider(height: 30),
+                    
+                    // Logout
+                    _buildOptionItem(
+                      icon: Icons.logout,
+                      title: 'Đăng xuất',
+                      subtitle: 'Thoát tài khoản hiện tại',
+                      onTap: () {
+                        Navigator.pop(context);
+                        _handleLogout();
+                      },
+                      isDestructive: true,
+                    ),
+                    
+                    SizedBox(height: 10),
+                  ],
+                ),
+              ),
             ),
-            _buildOptionItem(
-              icon: Icons.bookmark,
-              title: 'Lưu hồ sơ',
-              subtitle: 'Lưu hồ sơ vào danh sách yêu thích',
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('✅ Đã lưu hồ sơ')),
-                );
-              },
-            ),
-            _buildOptionItem(
-              icon: Icons.copy,
-              title: 'Sao chép liên kết',
-              subtitle: 'Sao chép đường dẫn đến hồ sơ',
-              onTap: () {
-                Navigator.pop(context);
-                _copyProfileLink();
-              },
-            ),
-            _buildOptionItem(
-              icon: Icons.print,
-              title: 'In hồ sơ',
-              subtitle: 'In thông tin hồ sơ ra giấy',
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('🖨️ Chức năng in sẽ sớm được cập nhật')),
-                );
-              },
-            ),
-            _buildOptionItem(
-              icon: Icons.backup,
-              title: 'Sao lưu dữ liệu',
-              subtitle: 'Sao lưu thông tin cá nhân',
-              onTap: () {
-                Navigator.pop(context);
-                _backupData();
-              },
-            ),
-            SizedBox(height: 10),
           ],
         ),
       ),
@@ -953,19 +1026,26 @@ class _UserProfileScreenState extends State<UserProfileScreen>
     required String subtitle,
     required VoidCallback onTap,
     Color? iconColor,
+    bool isDestructive = false,
   }) {
+    final effectiveIconColor = isDestructive ? Colors.red : (iconColor ?? Colors.blue);
+    final effectiveTitleColor = isDestructive ? Colors.red : null;
+    
     return ListTile(
       leading: Container(
         padding: EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: (iconColor ?? Colors.blue).withOpacity(0.1),
+          color: effectiveIconColor.withOpacity(0.1),
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, color: iconColor ?? Colors.blue, size: 20),
+        child: Icon(icon, color: effectiveIconColor, size: 20),
       ),
       title: Text(
         title,
-        style: TextStyle(fontWeight: FontWeight.w600),
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          color: effectiveTitleColor,
+        ),
       ),
       subtitle: Text(
         subtitle,
@@ -974,69 +1054,6 @@ class _UserProfileScreenState extends State<UserProfileScreen>
       onTap: onTap,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
-      ),
-    );
-  }
-
-  void _shareProfile() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Chia sẻ hồ sơ'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Chọn cách thức chia sẻ hồ sơ của bạn:'),
-            SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildShareOption(Icons.message, 'Tin nhắn', () {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('📱 Chia sẻ qua tin nhắn')),
-                  );
-                }),
-                _buildShareOption(Icons.email, 'Email', () {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('📧 Chia sẻ qua email')),
-                  );
-                }),
-                _buildShareOption(Icons.link, 'Liên kết', () {
-                  Navigator.pop(context);
-                  _copyProfileLink();
-                }),
-              ],
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Hủy'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildShareOption(IconData icon, String label, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        children: [
-          Container(
-            padding: EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: Colors.blue, size: 24),
-          ),
-          SizedBox(height: 8),
-          Text(label, style: TextStyle(fontSize: 12)),
-        ],
       ),
     );
   }
@@ -1054,71 +1071,6 @@ class _UserProfileScreenState extends State<UserProfileScreen>
           ],
         ),
         backgroundColor: Colors.green,
-      ),
-    );
-  }
-
-  void _backupData() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.backup, color: Colors.blue),
-            SizedBox(width: 8),
-            Text('Sao lưu dữ liệu'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Dữ liệu sẽ được sao lưu bao gồm:'),
-            SizedBox(height: 8),
-            Text('• Thông tin cá nhân'),
-            Text('• Lịch sử thách đấu'),
-            Text('• Thành tích đạt được'),
-            Text('• Danh sách bạn bè'),
-            SizedBox(height: 16),
-            Container(
-              padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.info, color: Colors.blue, size: 16),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Dữ liệu sẽ được mã hóa và lưu trữ an toàn',
-                      style: TextStyle(fontSize: 13, color: Colors.blue.shade700),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Hủy'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('✅ Đã bắt đầu sao lưu dữ liệu'),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            },
-            child: Text('Sao lưu'),
-          ),
-        ],
       ),
     );
   }

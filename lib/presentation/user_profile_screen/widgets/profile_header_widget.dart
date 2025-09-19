@@ -4,9 +4,6 @@ import 'dart:io';
 
 import '../../../core/app_export.dart';
 import '../../../core/utils/sabo_rank_system.dart';
-import '../../../models/user_profile.dart';
-import '../../../services/share_service.dart';
-import '../../../widgets/user_qr_code_widget.dart';
 
 import './rank_registration_info_modal.dart';
 
@@ -91,7 +88,7 @@ class ProfileHeaderWidget extends StatelessWidget {
             ),
           ),
 
-          // Cover Photo Edit Button
+          // Cover Photo Edit Button Only
           Positioned(
             top: 2.h,
             right: 4.w,
@@ -120,11 +117,11 @@ class ProfileHeaderWidget extends StatelessWidget {
             child: _buildAvatarSection(context),
           ),
 
-          // Action Buttons (QR, Share, Edit)
+          // Edit Action Button Only
           Positioned(
             bottom: 1.h,
             right: 4.w,
-            child: _buildActionButtons(context),
+            child: _buildEditButton(context),
           ),
         ],
       ),
@@ -189,41 +186,13 @@ class ProfileHeaderWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButtons(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // QR Code Button
-        _buildActionButton(
-          context: context,
-          icon: 'qr_code',
-          label: 'QR',
-          onTap: () => _showQRCode(context),
-          backgroundColor: AppTheme.lightTheme.colorScheme.secondary,
-        ),
-        
-        SizedBox(width: 2.w),
-        
-        // Share Button
-        _buildActionButton(
-          context: context,
-          icon: 'share',
-          label: 'Chia sẻ',
-          onTap: () => _shareProfile(context),
-          backgroundColor: AppTheme.lightTheme.colorScheme.tertiary,
-        ),
-        
-        SizedBox(width: 2.w),
-        
-        // Edit Button
-        _buildActionButton(
-          context: context,
-          icon: 'edit',
-          label: 'Sửa',
-          onTap: onEditProfile,
-          backgroundColor: AppTheme.lightTheme.colorScheme.primary,
-        ),
-      ],
+  Widget _buildEditButton(BuildContext context) {
+    return _buildActionButton(
+      context: context,
+      icon: 'edit',
+      label: 'Sửa',
+      onTap: onEditProfile,
+      backgroundColor: AppTheme.lightTheme.colorScheme.primary,
     );
   }
 
@@ -269,100 +238,6 @@ class ProfileHeaderWidget extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  void _showQRCode(BuildContext context) {
-    try {
-      // Convert userData to UserProfile
-      final userProfile = UserProfile(
-        id: userData['id'] ?? '',
-        email: userData['email'] ?? '',
-        fullName: userData['displayName'] ?? userData['full_name'] ?? 'Unknown User',
-        username: userData['username'],
-        bio: userData['bio'],
-        avatarUrl: userData['avatar'],
-        coverPhotoUrl: userData['coverPhoto'],
-        phone: userData['phone'],
-        dateOfBirth: userData['dateOfBirth'] != null 
-            ? DateTime.tryParse(userData['dateOfBirth']) 
-            : null,
-        role: userData['role'] ?? 'player',
-        skillLevel: userData['skillLevel'] ?? 'beginner',
-        rank: userData['rank'],
-        totalWins: userData['totalWins'] ?? 0,
-        totalLosses: userData['totalLosses'] ?? 0,
-        totalTournaments: userData['totalTournaments'] ?? 0,
-        eloRating: userData['eloRating'] ?? 1200,
-        spaPoints: userData['spaPoints'] ?? 0,
-        totalPrizePool: (userData['totalPrizePool'] ?? 0.0).toDouble(),
-        isVerified: userData['isVerified'] ?? false,
-        isActive: userData['isActive'] ?? true,
-        location: userData['location'],
-        createdAt: userData['createdAt'] != null 
-            ? DateTime.tryParse(userData['createdAt']) ?? DateTime.now()
-            : DateTime.now(),
-        updatedAt: userData['updatedAt'] != null 
-            ? DateTime.tryParse(userData['updatedAt']) ?? DateTime.now()
-            : DateTime.now(),
-      );
-
-      // Show QR Code bottom sheet
-      UserQRCodeBottomSheet.show(context, userProfile);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Lỗi hiển thị QR Code: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  void _shareProfile(BuildContext context) async {
-    try {
-      // Convert userData to UserProfile for sharing
-      final userProfile = UserProfile(
-        id: userData['id'] ?? '',
-        email: userData['email'] ?? '',
-        fullName: userData['displayName'] ?? userData['full_name'] ?? 'Unknown User',
-        username: userData['username'],
-        bio: userData['bio'],
-        avatarUrl: userData['avatar'],
-        coverPhotoUrl: userData['coverPhoto'],
-        phone: userData['phone'],
-        dateOfBirth: userData['dateOfBirth'] != null 
-            ? DateTime.tryParse(userData['dateOfBirth']) 
-            : null,
-        role: userData['role'] ?? 'player',
-        skillLevel: userData['skillLevel'] ?? 'beginner',
-        rank: userData['rank'],
-        totalWins: userData['totalWins'] ?? 0,
-        totalLosses: userData['totalLosses'] ?? 0,
-        totalTournaments: userData['totalTournaments'] ?? 0,
-        eloRating: userData['eloRating'] ?? 1200,
-        spaPoints: userData['spaPoints'] ?? 0,
-        totalPrizePool: (userData['totalPrizePool'] ?? 0.0).toDouble(),
-        isVerified: userData['isVerified'] ?? false,
-        isActive: userData['isActive'] ?? true,
-        location: userData['location'],
-        createdAt: userData['createdAt'] != null 
-            ? DateTime.tryParse(userData['createdAt']) ?? DateTime.now()
-            : DateTime.now(),
-        updatedAt: userData['updatedAt'] != null 
-            ? DateTime.tryParse(userData['updatedAt']) ?? DateTime.now()
-            : DateTime.now(),
-      );
-
-      // Share user profile
-      await ShareService.shareUserProfile(userProfile);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Lỗi chia sẻ hồ sơ: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
   }
 
   Widget _buildProfileInfoSection(BuildContext context) {
@@ -463,13 +338,27 @@ class ProfileHeaderWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              'RANK',
-              style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
-                color: AppTheme.lightTheme.colorScheme.primary,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1.2,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'RANK',
+                  style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
+                    color: AppTheme.lightTheme.colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                SizedBox(width: 1.w),
+                GestureDetector(
+                  onTap: () => _showRankExplanationDialog(context),
+                  child: Icon(
+                    Icons.info_outline,
+                    size: 12,
+                    color: AppTheme.lightTheme.colorScheme.primary.withOpacity(0.7),
+                  ),
+                ),
+              ],
             ),
             SizedBox(height: 0.5.h),
             Text(
@@ -499,13 +388,27 @@ class ProfileHeaderWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            'RANK',
-            style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
-              color: rankColor,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1.2,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'RANK',
+                style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
+                  color: rankColor,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 1.2,
+                ),
+              ),
+              SizedBox(width: 1.w),
+              GestureDetector(
+                onTap: () => _showRankExplanationDialog(context),
+                child: Icon(
+                  Icons.info_outline,
+                  size: 12,
+                  color: rankColor.withOpacity(0.7),
+                ),
+              ),
+            ],
           ),
           SizedBox(height: 0.5.h),
           Text(
@@ -563,12 +466,25 @@ class ProfileHeaderWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'ELO Rating',
-                style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
-                  color: AppTheme.lightTheme.colorScheme.primary,
-                  fontWeight: FontWeight.w600,
-                ),
+              Row(
+                children: [
+                  Text(
+                    'ELO Rating',
+                    style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
+                      color: AppTheme.lightTheme.colorScheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(width: 1.w),
+                  GestureDetector(
+                    onTap: () => _showEloExplanationDialog(context),
+                    child: Icon(
+                      Icons.info_outline,
+                      size: 16,
+                      color: AppTheme.lightTheme.colorScheme.primary.withOpacity(0.7),
+                    ),
+                  ),
+                ],
               ),
               Text(
                 SaboRankSystem.formatElo(currentElo),
@@ -689,13 +605,27 @@ class ProfileHeaderWidget extends StatelessWidget {
           size: 24,
         ),
         SizedBox(height: 0.5.h),
-        Text(
-          label,
-          style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
-            color: AppTheme.lightTheme.colorScheme.onSurface.withOpacity(0.7),
-            fontWeight: FontWeight.w500,
-          ),
-          textAlign: TextAlign.center,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              label,
+              style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
+                color: AppTheme.lightTheme.colorScheme.onSurface.withOpacity(0.7),
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(width: 1.w),
+            GestureDetector(
+              onTap: () => _showStatExplanationDialog(context, label),
+              child: Icon(
+                Icons.info_outline,
+                size: 12,
+                color: AppTheme.lightTheme.colorScheme.onSurface.withOpacity(0.5),
+              ),
+            ),
+          ],
         ),
         SizedBox(height: 0.2.h),
         Text(
@@ -765,5 +695,277 @@ class ProfileHeaderWidget extends StatelessWidget {
         fit: fit,
       );
     }
+  }
+
+  // Hiển thị dialog giải thích ELO Rating
+  void _showEloExplanationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.trending_up, color: AppTheme.lightTheme.colorScheme.primary),
+            SizedBox(width: 2.w),
+            Text('ELO Rating System'),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'ELO Rating đánh giá trình độ chơi bida dựa trên kết quả tournament.',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              SizedBox(height: 2.h),
+              Text(
+                '🏆 Thưởng ELO Tournament (Fixed Rewards):',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              SizedBox(height: 1.h),
+              _buildEloReward('🥇 1st Place', '+75 ELO', 'Vô địch', Colors.amber),
+              _buildEloReward('🥈 2nd Place', '+60 ELO', 'Á quân', Colors.grey[400]!),
+              _buildEloReward('🥉 3rd Place', '+45 ELO', 'Hạng 3', Colors.orange),
+              _buildEloReward('4th Place', '+35 ELO', 'Hạng 4', Colors.blue),
+              _buildEloReward('Top 25%', '+25 ELO', 'Tier trên', Colors.green),
+              _buildEloReward('Top 50%', '+15 ELO', 'Tier giữa', Colors.teal),
+              _buildEloReward('Top 75%', '+10 ELO', 'Tier dưới', Colors.indigo),
+              _buildEloReward('Bottom 25%', '-5 ELO', 'Penalty nhẹ', Colors.red),
+              SizedBox(height: 1.h),
+              Text(
+                '💡 Range: 1000-3000 điểm. Hệ thống Fixed Rewards đảm bảo công bằng!',
+                style: TextStyle(
+                  fontStyle: FontStyle.italic,
+                  color: Colors.blue[600],
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Đóng'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEloReward(String position, String reward, String description, Color color) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 0.5.h),
+      child: Row(
+        children: [
+          Container(
+            width: 20.w,
+            child: Text(
+              position,
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+            ),
+          ),
+          Container(
+            width: 15.w,
+            padding: EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: color, width: 1),
+            ),
+            child: Text(
+              reward,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: color,
+                fontSize: 11,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          SizedBox(width: 2.w),
+          Expanded(
+            child: Text(
+              description,
+              style: TextStyle(fontSize: 12),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Hiển thị dialog giải thích cho SPA Points và Prize Pool
+  void _showStatExplanationDialog(BuildContext context, String statType) {
+    String title;
+    String description;
+    List<String> details;
+    IconData icon;
+    
+    if (statType == 'SPA Points') {
+      title = 'SPA Points System';
+      icon = Icons.star;
+      description = 'SPA Points là điểm thưởng tích lũy được từ các hoạt động trên nền tảng SABO Arena.';
+      details = [
+        '🎯 Cách kiếm SPA Points:',
+        '• Referral Code: +100 SPA (người giới thiệu), +50 SPA (người được giới thiệu)',
+        '• Tournament tham gia: 50-150 SPA base (x multiplier theo vị trí)',
+        '  - 1st place: x3.0, 2nd: x2.5, 3rd: x2.0',
+        '  - Top 25%: x1.5, Top 50%: x1.2, Others: x1.0',
+        '• Daily challenges và achievements',
+        '',
+        '💰 Sử dụng SPA Points:',
+        '• SPA Shop: Đổi quà tặng và items',
+        '• Premium features và benefits',
+        '• Tournament entry fees (tùy chọn)',
+      ];
+    } else {
+      title = 'Prize Pool System';
+      icon = Icons.monetization_on;
+      description = 'Tổng giá trị tiền thưởng (VNĐ) bạn đã giành được từ tournaments.';
+      details = [
+        '🏆 Tournament Prize Distribution Templates:',
+        '• Standard: 40% / 25% / 15% / 10% / 5% / 5%',
+        '• Winner Takes All: 100% cho vô địch',
+        '• Top Heavy: 60% / 25% / 15%',
+        '• Flat Distribution: 25% / 25% / 25% / 25%',
+        '',
+        '💰 Prize Pool Sources:',
+        '• Entry fees từ participants',
+        '• Sponsorship và tài trợ',
+        '• Platform contribution',
+        '',
+        '💳 Prize Withdrawal:',
+        '• Rút về tài khoản ngân hàng',
+        '• Phí giao dịch: 2% (minimum 10K VNĐ)',
+        '• Xử lý trong 1-3 ngày làm việc',
+      ];
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(icon, color: statType == 'SPA Points' ? Colors.amber : Colors.green),
+            SizedBox(width: 2.w),
+            Text(title),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              description,
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+            SizedBox(height: 2.h),
+            ...details.map((detail) => Padding(
+              padding: EdgeInsets.only(bottom: 0.5.h),
+              child: Text(detail),
+            )),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Đóng'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Hiển thị dialog giải thích Rank System
+  void _showRankExplanationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.military_tech, color: Colors.purple),
+            SizedBox(width: 2.w),
+            Text('Vietnamese Billiards Ranking'),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Hệ thống rank bida Việt Nam dựa trên điểm ELO và trình độ thực tế.',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              SizedBox(height: 2.h),
+              Text('🎱 Hệ thống rank K → E+:'),
+              SizedBox(height: 1.h),
+              _buildRankInfo('K', '1000-1099', 'Tập Sự (2-4 bi khi hình dễ)', Color(0xFF8B4513)),
+              _buildRankInfo('K+', '1100-1199', 'Tập Sự+ (sắt ngưỡng lên I)', Color(0xFFA0522D)),
+              _buildRankInfo('I', '1200-1299', 'Sơ Cấp (5-7 bi khi có hình)', Color(0xFF795548)),
+              _buildRankInfo('I+', '1300-1399', 'Sơ Cấp+ (sắt ngưỡng lên H)', Color(0xFF6D4C41)),
+              _buildRankInfo('H', '1400-1499', 'Trung Cấp (8-10 bi khi có hình)', Color(0xFF5D4037)),
+              _buildRankInfo('H+', '1500-1599', 'Trung Cấp+ (sắt ngưỡng lên G)', Color(0xFF4E342E)),
+              _buildRankInfo('G', '1600-1699', 'Khá (11-13 bi đẹp)', Color(0xFF3E2723)),
+              _buildRankInfo('G+', '1700-1799', 'Khá+ (sắt ngưỡng lên F)', Color(0xFF2E1916)),
+              _buildRankInfo('F', '1800-1899', 'Giỏi (14-15 bi clear)', Color(0xFF1B0E0A)),
+              _buildRankInfo('F+', '1900-1999', 'Giỏi+ (sắt ngưỡng lên E)', Color(0xFF000000)),
+              _buildRankInfo('E', '2000-2099', 'Chuyên Gia (an toàn chủ động)', Color(0xFFB22222)),
+              _buildRankInfo('E+', '2100+', 'Chuyên Gia+ (sắt ngưỡng lên D)', Color(0xFF8B0000)),
+              SizedBox(height: 1.h),
+              Text(
+                '💡 Rank up cần verification, rank down tự động. Hệ thống dựa trên kỹ thuật bida Việt Nam thực tế!',
+                style: TextStyle(
+                  fontStyle: FontStyle.italic,
+                  color: Colors.blue[600],
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Đóng'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRankInfo(String rank, String range, String description, Color color) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 0.5.h),
+      child: Row(
+        children: [
+          Container(
+            width: 8.w,
+            padding: EdgeInsets.symmetric(vertical: 2, horizontal: 6),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: color, width: 1),
+            ),
+            child: Text(
+              rank,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: color,
+                fontSize: 12,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          SizedBox(width: 2.w),
+          Expanded(
+            child: Text(
+              '$range: $description',
+              style: TextStyle(fontSize: 13),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

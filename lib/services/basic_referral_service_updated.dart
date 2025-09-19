@@ -66,10 +66,6 @@ class BasicReferralService {
           .eq('is_active', true)
           .single();
 
-      if (codeResponse == null) {
-        return {'success': false, 'message': 'Invalid referral code'};
-      }
-
       final currentUses = codeResponse['current_uses'] ?? 0;
       final maxUses = codeResponse['max_uses'];
       

@@ -269,7 +269,7 @@ class _BasicReferralCardState extends State<BasicReferralCard> {
   }
 
   Widget _buildGenerateButton() {
-    return Container(
+    return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
         onPressed: _isGenerating ? null : _generateNewCode,

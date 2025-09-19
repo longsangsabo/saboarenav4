@@ -36,13 +36,17 @@ class _QRCodeWidgetState extends State<QRCodeWidget> {
     });
 
     try {
-      final userCode = widget.userData["userId"] as String? ?? "SABO123456";
-      final username = widget.userData["username"] as String? ?? userCode;
+      // Get real user data
+      final userId = widget.userData["id"] as String? ?? "temp-id";
+      final username = widget.userData["username"] as String? ?? widget.userData["displayName"] as String? ?? "user";
+      final userCode = widget.userData["userCode"] as String? ?? 
+                      widget.userData["userId"] as String? ?? 
+                      "SABO${userId.hashCode.abs().toString().padLeft(6, '0')}";
       
-      final qrData = await IntegratedQRService.generateIntegratedQRData(
-        userId: widget.userData["id"] ?? "temp-id",
+      final qrData = IntegratedQRService.generateIntegratedQRData(
+        userId: userId,
         userCode: userCode,
-        referralCode: "SABO-${username.toUpperCase()}",
+        referralCode: "SABO-${username.replaceAll(' ', '').toUpperCase()}",
       );
       
       setState(() {
@@ -59,6 +63,13 @@ class _QRCodeWidgetState extends State<QRCodeWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // Debug: Print userData to check avatar field
+    debugPrint('QR Widget userData: ${widget.userData}');
+    final avatarUrl = widget.userData["avatar_url"] as String? ??
+        widget.userData["avatarUrl"] as String? ??
+        widget.userData["avatar"] as String?;
+    debugPrint('QR Widget avatar URL: $avatarUrl');
+    
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -138,8 +149,9 @@ class _QRCodeWidgetState extends State<QRCodeWidget> {
                       ),
                       child: ClipOval(
                         child: CustomImageWidget(
-                          imageUrl: widget.userData["avatar"] as String? ??
-                              "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png",
+                          imageUrl: widget.userData["avatar_url"] as String? ??
+                              widget.userData["avatarUrl"] as String? ??
+                              widget.userData["avatar"] as String?,
                           width: 15.w,
                           height: 15.w,
                           fit: BoxFit.cover,
@@ -152,8 +164,10 @@ class _QRCodeWidgetState extends State<QRCodeWidget> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            widget.userData["displayName"] as String? ??
-                                "Nguyễn Văn An",
+                            widget.userData["full_name"] as String? ??
+                                widget.userData["fullName"] as String? ??
+                                widget.userData["displayName"] as String? ??
+                                "Người dùng",
                             style: AppTheme.lightTheme.textTheme.titleMedium
                                 ?.copyWith(
                               fontWeight: FontWeight.bold,
@@ -163,7 +177,7 @@ class _QRCodeWidgetState extends State<QRCodeWidget> {
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            'Rank ${widget.userData["rank"] as String? ?? "B"} • ELO ${widget.userData["eloRating"] ?? 1450}',
+                            'Rank ${widget.userData["rank"] as String? ?? "B"} • ELO ${widget.userData["elo_rating"] ?? widget.userData["eloRating"] ?? 1450}',
                             style: AppTheme.lightTheme.textTheme.bodySmall
                                 ?.copyWith(
                               color: AppTheme
@@ -224,7 +238,7 @@ class _QRCodeWidgetState extends State<QRCodeWidget> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    'ID: ${widget.userData["userId"] as String? ?? "SABO123456"}',
+                    'ID: ${_getUserCode()}',
                     style: AppTheme.lightTheme.textTheme.labelLarge?.copyWith(
                       color: AppTheme.lightTheme.colorScheme.primary,
                       fontWeight: FontWeight.w600,
@@ -331,6 +345,13 @@ class _QRCodeWidgetState extends State<QRCodeWidget> {
         ],
       ),
     );
+  }
+
+  String _getUserCode() {
+    final userId = widget.userData["id"] as String? ?? "temp-id";
+    return widget.userData["userCode"] as String? ?? 
+           widget.userData["userId"] as String? ?? 
+           "SABO${userId.hashCode.abs().toString().padLeft(6, '0')}";
   }
 
   Widget _buildQRPattern() {

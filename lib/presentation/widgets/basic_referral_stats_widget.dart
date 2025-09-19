@@ -115,7 +115,7 @@ class _BasicReferralStatsWidgetState extends State<BasicReferralStatsWidget> {
   }
 
   Widget _buildLoadingState() {
-    return Container(
+    return SizedBox(
       height: 40.w,
       child: Center(
         child: Column(
@@ -139,7 +139,7 @@ class _BasicReferralStatsWidgetState extends State<BasicReferralStatsWidget> {
   }
 
   Widget _buildErrorState() {
-    return Container(
+    return SizedBox(
       height: 30.w,
       child: Center(
         child: Column(
