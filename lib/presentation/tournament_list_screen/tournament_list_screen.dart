@@ -4,6 +4,7 @@ import 'package:sabo_arena/models/tournament.dart';
 import 'package:sabo_arena/presentation/tournament_list_screen/widgets/tournament_card_widget.dart';
 import 'package:sabo_arena/presentation/tournament_list_screen/widgets/tournament_filter_bottom_sheet.dart';
 import 'package:sabo_arena/presentation/tournament_list_screen/widgets/tournament_search_delegate.dart';
+import 'package:sabo_arena/presentation/demo_bracket_screen/demo_bracket_screen.dart';
 import 'package:sabo_arena/services/tournament_service.dart';
 
 
@@ -160,6 +161,16 @@ class _TournamentListScreenState extends State<TournamentListScreen>
       appBar: AppBar(
         title: const Text("Giải đấu"),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.preview),
+            tooltip: 'Demo Bảng Đấu',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const DemoBracketScreen(),
+              ),
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () => _showSearch(context),

@@ -4,8 +4,10 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import '../../../core/app_export.dart';
+import '../../../models/user_profile.dart';
 import '../../../services/bracket_generator_service.dart';
 import '../../../services/tournament_service.dart' as TournamentSvc;
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Tournament format constants
 class TournamentFormats {
@@ -70,13 +72,19 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
     setState(() => _isLoadingParticipants = true);
     
     try {
+      print('🔍 Loading participants for tournament: ${widget.tournamentId}');
       final participants = await _tournamentService.getTournamentParticipants(widget.tournamentId);
+      print('✅ Loaded ${participants.length} participants from database');
+      for (int i = 0; i < participants.length; i++) {
+        print('  ${i + 1}. ${participants[i].fullName} (ELO: ${participants[i].eloRating})');
+      }
+      
       setState(() {
         _realParticipants = participants;
         _isLoadingParticipants = false;
       });
     } catch (e) {
-      print('Error loading participants: $e');
+      print('❌ Error loading participants: $e');
       setState(() => _isLoadingParticipants = false);
     }
   }
@@ -613,6 +621,119 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
     return _getFormatInfo(format)['name'];
   }
 
+  Widget _buildDebugActions() {
+    return Container(
+      padding: EdgeInsets.all(16.sp),
+      decoration: BoxDecoration(
+        color: Colors.yellow.shade50,
+        borderRadius: BorderRadius.circular(12.sp),
+        border: Border.all(color: Colors.orange.shade300),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "🛠️ Debug Actions",
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.orange.shade700,
+            ),
+          ),
+          SizedBox(height: 12.sp),
+          Text(
+            "Số người tham gia hiện tại: ${_realParticipants.length}",
+            style: TextStyle(
+              fontSize: 12.sp,
+              color: Colors.orange.shade600,
+            ),
+          ),
+          SizedBox(height: 8.sp),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _addDemoParticipants,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange.shade600,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: Text("Demo (Local)"),
+                ),
+              ),
+              SizedBox(width: 8.sp),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _addDemoParticipantsToDatabase,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green.shade600,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: Text("Add to DB"),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 8.sp),
+          ElevatedButton(
+            onPressed: _loadRealParticipants,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue.shade600,
+              foregroundColor: Colors.white,
+            ),
+            child: Text("🔄 Reload từ Database"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _addDemoParticipants() async {
+    try {
+      // Add some demo participants for testing
+      final demoUsers = [
+        {'full_name': 'Nguyễn Văn A', 'elo_rating': 1500, 'rank': 'intermediate'},
+        {'full_name': 'Trần Thị B', 'elo_rating': 1400, 'rank': 'beginner'},
+        {'full_name': 'Lê Văn C', 'elo_rating': 1600, 'rank': 'advanced'},
+        {'full_name': 'Phạm Thị D', 'elo_rating': 1350, 'rank': 'beginner'},
+      ];
+
+      for (final user in demoUsers) {
+        final demoParticipant = UserProfile(
+          id: 'demo_${DateTime.now().millisecondsSinceEpoch}_${user['full_name']?.hashCode}',
+          email: 'demo@example.com',
+          fullName: user['full_name'] as String,
+          role: 'player',
+          skillLevel: user['rank'] as String,
+          rank: user['rank'] as String,
+          totalWins: 0,
+          totalLosses: 0,
+          totalTournaments: 0,
+          eloRating: user['elo_rating'] as int,
+          spaPoints: 0,
+          totalPrizePool: 0.0,
+          isVerified: false,
+          isActive: true,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+        
+        _realParticipants.add(demoParticipant);
+      }
+
+      setState(() {});
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('✅ Đã thêm ${demoUsers.length} người tham gia demo!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      print('Error adding demo participants: $e');
+    }
+  }
+
   void _generateBracket() async {
     setState(() {
       _isGenerating = true;
@@ -620,6 +741,8 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
 
     try {
       // Use real participants from database
+      print('🔍 Bracket Generation: Found ${_realParticipants.length} participants');
+      
       if (_realParticipants.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -627,19 +750,36 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
             backgroundColor: AppTheme.warningLight,
           ),
         );
+        setState(() {
+          _isGenerating = false;
+        });
+        return;
+      }
+
+      if (_realParticipants.length < 2) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Cần ít nhất 2 người tham gia để tạo bảng đấu!'),
+            backgroundColor: AppTheme.warningLight,
+          ),
+        );
+        setState(() {
+          _isGenerating = false;
+        });
         return;
       }
 
       // Convert real participants to tournament participants
       final participants = _realParticipants.map((user) => TournamentParticipant(
-        id: user.id ?? 'unknown',
-        name: user.displayName ?? 'Unknown Player',
-        rank: user.rank?.name ?? 'Unranked',
-        elo: user.eloRating ?? 1200,
+        id: user.id,
+        name: user.fullName,
+        rank: user.rank ?? 'Unranked',
+        elo: user.eloRating,
         seed: 1, // Will be updated by seeding method
       )).toList();
       
       // Use BracketGeneratorService to generate bracket
+      print('🚀 Generating bracket with ${participants.length} participants');
       final bracket = await BracketGeneratorService.generateBracket(
         tournamentId: widget.tournamentId,
         format: _selectedFormat,
@@ -647,6 +787,7 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
         seedingMethod: _selectedSeeding,
       );
       
+      print('✅ Bracket generated successfully: ${bracket.toString()}');
       setState(() {
         _generatedBracket = bracket;
       });
@@ -660,6 +801,7 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
         );
       }
     } catch (e) {
+      print('❌ Error generating bracket: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -754,8 +896,8 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
                               foregroundColor: Colors.white,
                               child: Text('${index + 1}'),
                             ),
-                            title: Text(participant.displayName ?? 'Unknown'),
-                            subtitle: Text('Rank: ${participant.rank?.name ?? 'Unranked'} • ELO: ${participant.eloRating ?? 1200}'),
+                            title: Text(participant.fullName),
+                            subtitle: Text('Rank: ${participant.rank ?? 'Unranked'} • ELO: ${participant.eloRating}'),
                             trailing: Text('Seed ${index + 1}'),
                           );
                         },
@@ -821,5 +963,82 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
 
   int _calculateTotalMatches(TournamentBracket bracket) {
     return bracket.rounds.fold<int>(0, (sum, round) => sum + round.matches.length);
+  }
+
+  void _addDemoParticipantsToDatabase() async {
+    try {
+      // Add demo participants directly to database
+      final demoUsers = [
+        {'full_name': 'Demo Player 1', 'email': 'demo1@test.com', 'elo_rating': 1500},
+        {'full_name': 'Demo Player 2', 'email': 'demo2@test.com', 'elo_rating': 1400},
+        {'full_name': 'Demo Player 3', 'email': 'demo3@test.com', 'elo_rating': 1600},
+        {'full_name': 'Demo Player 4', 'email': 'demo4@test.com', 'elo_rating': 1350},
+        {'full_name': 'Demo Player 5', 'email': 'demo5@test.com', 'elo_rating': 1450},
+      ];
+
+      for (final userData in demoUsers) {
+        try {
+          // Insert into users table first (if not exists)
+          final userResult = await Supabase.instance.client
+              .from('users')
+              .upsert({
+                'id': 'demo_${userData['email']?.hashCode}',
+                'email': userData['email'],
+                'full_name': userData['full_name'],
+                'role': 'player',
+                'skill_level': 'intermediate',
+                'rank': 'intermediate',
+                'total_wins': 0,
+                'total_losses': 0,
+                'total_tournaments': 0,
+                'elo_rating': userData['elo_rating'],
+                'spa_points': 0,
+                'total_prize_pool': 0.0,
+                'is_verified': false,
+                'is_active': true,
+                'created_at': DateTime.now().toIso8601String(),
+                'updated_at': DateTime.now().toIso8601String(),
+              })
+              .select();
+
+          if (userResult.isNotEmpty) {
+            final userId = userResult[0]['id'];
+            
+            // Insert into tournament_participants
+            await Supabase.instance.client
+                .from('tournament_participants')
+                .upsert({
+                  'id': 'tp_${widget.tournamentId}_$userId',
+                  'tournament_id': widget.tournamentId,
+                  'user_id': userId,
+                  'status': 'confirmed',
+                  'registered_at': DateTime.now().toIso8601String(),
+                  'payment_status': 'paid',
+                })
+                .select();
+          }
+        } catch (e) {
+          print('Error adding ${userData['full_name']}: $e');
+        }
+      }
+
+      // Reload participants
+      await _loadRealParticipants();
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('✅ Đã thêm ${demoUsers.length} demo users vào database!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      print('❌ Error adding demo participants to database: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('❌ Lỗi thêm vào database: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 }

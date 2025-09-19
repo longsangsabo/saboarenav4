@@ -3,6 +3,7 @@ import 'package:sabo_arena/core/app_export.dart';
 import 'package:sizer/sizer.dart';
 import 'package:sabo_arena/theme/app_theme.dart';
 import '../../../services/tournament_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Define the missing data model for a tournament participant.
 class TournamentParticipant {
@@ -808,7 +809,123 @@ class _ParticipantManagementViewState extends State<ParticipantManagementView>
   }
 
   void _showAddParticipantDialog() {
-    // Placeholder for showing a dialog to add a new participant.
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Thêm người tham gia'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Chọn cách thêm người tham gia:'),
+            SizedBox(height: 16),
+            ListTile(
+              leading: Icon(Icons.group_add),
+              title: Text('Thêm 5 người demo'),
+              subtitle: Text('Tạo 5 tài khoản demo để test'),
+              onTap: () {
+                Navigator.pop(context);
+                _addDemoParticipants();
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.person_add),
+              title: Text('Thêm user thủ công'),
+              subtitle: Text('Chưa implement'),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Tính năng đang phát triển')),
+                );
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Hủy'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _addDemoParticipants() async {
+    try {
+      final demoUsers = [
+        {'full_name': 'Demo Player 1', 'email': 'demo1@sabo.com', 'elo_rating': 1500},
+        {'full_name': 'Demo Player 2', 'email': 'demo2@sabo.com', 'elo_rating': 1400},
+        {'full_name': 'Demo Player 3', 'email': 'demo3@sabo.com', 'elo_rating': 1600},
+        {'full_name': 'Demo Player 4', 'email': 'demo4@sabo.com', 'elo_rating': 1350},
+        {'full_name': 'Demo Player 5', 'email': 'demo5@sabo.com', 'elo_rating': 1450},
+      ];
+
+      final supabase = Supabase.instance.client;
+
+      for (final userData in demoUsers) {
+        try {
+          // Insert user first
+          final userResult = await supabase
+              .from('users')
+              .upsert({
+                'id': 'demo_${userData['email']?.hashCode}',
+                'email': userData['email'],
+                'full_name': userData['full_name'],
+                'role': 'player',
+                'skill_level': 'intermediate',
+                'rank': 'intermediate',
+                'total_wins': 0,
+                'total_losses': 0,
+                'total_tournaments': 0,
+                'elo_rating': userData['elo_rating'],
+                'spa_points': 0,
+                'total_prize_pool': 0.0,
+                'is_verified': false,
+                'is_active': true,
+                'created_at': DateTime.now().toIso8601String(),
+                'updated_at': DateTime.now().toIso8601String(),
+              })
+              .select();
+
+          if (userResult.isNotEmpty) {
+            final userId = userResult[0]['id'];
+            
+            // Add to tournament
+            await supabase
+                .from('tournament_participants')
+                .upsert({
+                  'id': 'tp_${widget.tournamentId}_$userId',
+                  'tournament_id': widget.tournamentId,
+                  'user_id': userId,
+                  'status': 'confirmed',
+                  'registered_at': DateTime.now().toIso8601String(),
+                  'payment_status': 'paid',
+                })
+                .select();
+          }
+        } catch (e) {
+          print('Error adding ${userData['full_name']}: $e');
+        }
+      }
+
+      // Reload participants
+      await _loadParticipants();
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('✅ Đã thêm ${demoUsers.length} demo users!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      print('❌ Error adding demo participants: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('❌ Lỗi thêm participants: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _handleParticipantAction(TournamentParticipant participant, String action) {

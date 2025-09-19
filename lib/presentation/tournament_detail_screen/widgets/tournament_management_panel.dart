@@ -1,10 +1,10 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import 'package:sabo_arena/core/app_export.dart';
 import 'package:sabo_arena/theme/app_theme.dart';
 import 'package:sabo_arena/services/tournament_service.dart';
 import 'package:sabo_arena/services/bracket_service.dart';
+import 'enhanced_bracket_management_tab.dart';
 
 class TournamentManagementPanel extends StatefulWidget {
   final String tournamentId;
@@ -177,7 +177,7 @@ class _TournamentManagementPanelState extends State<TournamentManagementPanel>
       case 1:
         return _ParticipantManagementTab(tournamentId: widget.tournamentId);
       case 2:
-        return _BracketManagementTab(tournamentId: widget.tournamentId);
+        return EnhancedBracketManagementTab(tournamentId: widget.tournamentId);
       case 3:
         return _MatchManagementTab(tournamentId: widget.tournamentId);
       case 4:
@@ -1366,15 +1366,9 @@ class _ParticipantManagementTabState extends State<_ParticipantManagementTab> {
   }
 }
 
-class _BracketManagementTab extends StatefulWidget {
-  final String tournamentId;
 
-  const _BracketManagementTab({required this.tournamentId});
 
-  @override
-  _BracketManagementTabState createState() => _BracketManagementTabState();
-}
-
+/* REMOVED: Replaced with EnhancedBracketManagementTab
 class _BracketManagementTabState extends State<_BracketManagementTab> {
   final TournamentService _tournamentService = TournamentService.instance;
   final BracketService _bracketService = BracketService.instance;
@@ -2074,6 +2068,7 @@ class _BracketManagementTabState extends State<_BracketManagementTab> {
     return (log(bracketSize) / log(2)).round();
   }
 }
+*/
 
 class _MatchManagementTab extends StatefulWidget {
   final String tournamentId;

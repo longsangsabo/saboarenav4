@@ -159,16 +159,27 @@ class TournamentService {
   Future<List<UserProfile>> getTournamentParticipants(
       String tournamentId) async {
     try {
+      print('🔍 TournamentService: Querying participants for tournament $tournamentId');
       final response =
           await _supabase.from('tournament_participants').select('''
             *,
             users (*)
           ''').eq('tournament_id', tournamentId).order('registered_at');
 
-      return response
+      print('📊 TournamentService: Raw response count: ${response.length}');
+      for (int i = 0; i < response.length; i++) {
+        final item = response[i];
+        print('  ${i + 1}. User: ${item['users']?['full_name']} - Status: ${item['status']}');
+      }
+
+      final participants = response
           .map<UserProfile>((json) => UserProfile.fromJson(json['users']))
           .toList();
+      
+      print('✅ TournamentService: Returning ${participants.length} participants');
+      return participants;
     } catch (error) {
+      print('❌ TournamentService: Error getting participants: $error');
       throw Exception('Failed to get tournament participants: $error');
     }
   }
