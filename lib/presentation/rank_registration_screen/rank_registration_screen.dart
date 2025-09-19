@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:sabo_arena/services/user_service.dart';
 import 'package:sabo_arena/models/club.dart';
 import 'package:sabo_arena/services/club_service.dart';
+import 'package:sabo_arena/core/constants/ranking_constants.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:path/path.dart' as path;
 
 class RankRegistrationScreen extends StatefulWidget {
   final String clubId;
@@ -25,18 +29,30 @@ class _RankRegistrationScreenState extends State<RankRegistrationScreen> {
   bool _hasRankRequest = false;
   
   final _formKey = GlobalKey<FormState>();
-  String _selectedRank = 'C';
+  String _selectedRank = 'K'; // Default to first available rank
   final TextEditingController _experienceController = TextEditingController();
   final TextEditingController _achievementsController = TextEditingController();
   final TextEditingController _commentsController = TextEditingController();
+  
+  // Image upload for tournament evidence
+  List<File> _evidenceImages = [];
+  final ImagePicker _imagePicker = ImagePicker();
+  bool _isUploadingImages = false;
 
-  final List<String> _rankOptions = ['C', 'B', 'A', 'AA', 'AAA'];
+  final List<String> _rankOptions = RankingConstants.RANK_ORDER;
   final Map<String, String> _rankDescriptions = {
-    'C': 'Người mới bắt đầu - 0-6 tháng kinh nghiệm',
-    'B': 'Cơ bản - 6-18 tháng kinh nghiệm',
-    'A': 'Trung cấp - 1.5-3 năm kinh nghiệm',
-    'AA': 'Khá - 3-5 năm kinh nghiệm',
-    'AAA': 'Giỏi - Trên 5 năm kinh nghiệm',
+    'K': 'Người mới - 1000-1099 ELO',
+    'K+': 'Học việc - 1100-1199 ELO',
+    'I': 'Thợ 3 - 1200-1299 ELO',
+    'I+': 'Thợ 2 - 1300-1399 ELO',
+    'H': 'Thợ 1 - 1400-1499 ELO',
+    'H+': 'Thợ chính - 1500-1599 ELO',
+    'G': 'Thợ giỏi - 1600-1699 ELO',
+    'G+': 'Cao thủ - 1700-1799 ELO',
+    'F': 'Chuyên gia - 1800-1899 ELO',
+    'F+': 'Đại cao thủ - 1900-1999 ELO',
+    'E': 'Huyền thoại - 2000-2099 ELO',
+    'E+': 'Vô địch - 2100-9999 ELO',
   };
 
   @override
@@ -81,23 +97,75 @@ class _RankRegistrationScreenState extends State<RankRegistrationScreen> {
     }
   }
 
+  // Image picker methods for tournament evidence
+  Future<void> _pickImages() async {
+    try {
+      final List<XFile> pickedFiles = await _imagePicker.pickMultiImage(
+        imageQuality: 70,
+      );
+      
+      if (pickedFiles.isNotEmpty) {
+        setState(() {
+          _evidenceImages.addAll(
+            pickedFiles.map((xFile) => File(xFile.path)).toList()
+          );
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Lỗi khi chọn ảnh: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _removeImage(int index) {
+    setState(() {
+      _evidenceImages.removeAt(index);
+    });
+  }
+
   Future<void> _submitRankRequest() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
 
     try {
+      // Upload evidence images first if any
+      List<String> imageUrls = [];
+      if (_evidenceImages.isNotEmpty) {
+        setState(() => _isUploadingImages = true);
+        
+        for (File image in _evidenceImages) {
+          try {
+            final String fileName = 'rank_evidence_${DateTime.now().millisecondsSinceEpoch}_${path.basename(image.path)}';
+            final result = await _userService.uploadImage(image, fileName);
+            if (result['success'] == true && result['url'] != null) {
+              imageUrls.add(result['url']);
+            }
+          } catch (e) {
+            print('Error uploading image: $e');
+          }
+        }
+        
+        setState(() => _isUploadingImages = false);
+      }
+
       // Combine all info into notes
       final notes = '''
 Rank mong muốn: $_selectedRank
 Kinh nghiệm: ${_experienceController.text}
 Thành tích: ${_achievementsController.text}
 Ghi chú: ${_commentsController.text}
+${imageUrls.isNotEmpty ? '\nHình ảnh bằng chứng: ${imageUrls.length} ảnh đã tải lên' : ''}
 '''.trim();
 
       final result = await _userService.requestRankRegistration(
         clubId: widget.clubId,
         notes: notes,
+        evidenceUrls: imageUrls,
       );
 
       setState(() => _isLoading = false);
@@ -403,6 +471,128 @@ Ghi chú: ${_commentsController.text}
                 fillColor: Colors.white,
               ),
               maxLines: 2,
+            ),
+
+            SizedBox(height: 24),
+
+            // Evidence Images Section
+            Text(
+              'Hình ảnh bằng chứng',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Tải lên hình ảnh kết quả giải đấu trong 3 tháng gần đây để xác thực rank của bạn',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.grey[600],
+              ),
+            ),
+            SizedBox(height: 12),
+            
+            // Upload Images Container
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey[300]!),
+              ),
+              child: Column(
+                children: [
+                  // Add Images Button
+                  OutlinedButton.icon(
+                    onPressed: _pickImages,
+                    icon: Icon(Icons.add_photo_alternate_outlined),
+                    label: Text('Thêm hình ảnh'),
+                    style: OutlinedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    ),
+                  ),
+                  
+                  if (_evidenceImages.isNotEmpty) ...[
+                    SizedBox(height: 16),
+                    Text(
+                      '${_evidenceImages.length} hình ảnh đã chọn',
+                      style: TextStyle(
+                        color: Colors.green[700],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    
+                    // Image Grid
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        crossAxisSpacing: 8,
+                        mainAxisSpacing: 8,
+                      ),
+                      itemCount: _evidenceImages.length,
+                      itemBuilder: (context, index) {
+                        return Stack(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.grey[300]!),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.file(
+                                  _evidenceImages[index],
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              top: 4,
+                              right: 4,
+                              child: GestureDetector(
+                                onTap: () => _removeImage(index),
+                                child: Container(
+                                  padding: EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.close,
+                                    color: Colors.white,
+                                    size: 16,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ],
+                  
+                  if (_isUploadingImages) ...[
+                    SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                        SizedBox(width: 8),
+                        Text('Đang tải hình ảnh...'),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
             ),
 
             SizedBox(height: 32),

@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user_profile.dart';
 import 'dart:typed_data';
+import 'dart:io';
 
 class UserService {
   static UserService? _instance;
@@ -138,6 +139,34 @@ class UserService {
       return UserProfile.fromJson(response);
     } catch (error) {
       throw Exception('Failed to update user profile: $error');
+    }
+  }
+
+  // Generic image upload method for evidence/documents
+  Future<Map<String, dynamic>> uploadImage(File imageFile, String fileName) async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) throw Exception('User not authenticated');
+
+      final imageBytes = await imageFile.readAsBytes();
+      final filePath = 'evidence/${user.id}/${DateTime.now().millisecondsSinceEpoch}_$fileName';
+
+      await _supabase.storage
+          .from('user-images')
+          .uploadBinary(filePath, Uint8List.fromList(imageBytes));
+
+      final publicUrl = _supabase.storage.from('user-images').getPublicUrl(filePath);
+
+      return {
+        'success': true,
+        'url': publicUrl,
+        'path': filePath,
+      };
+    } catch (error) {
+      return {
+        'success': false,
+        'error': error.toString(),
+      };
     }
   }
 
@@ -422,6 +451,7 @@ class UserService {
   Future<Map<String, dynamic>> requestRankRegistration({
     required String clubId,
     String? notes,
+    List<String>? evidenceUrls,
   }) async {
     try {
       final user = _supabase.auth.currentUser;
@@ -456,6 +486,10 @@ class UserService {
         requestData['notes'] = notes;
       }
 
+      if (evidenceUrls != null && evidenceUrls.isNotEmpty) {
+        requestData['evidence_urls'] = evidenceUrls;
+      }
+
       final response = await _supabase
           .from('rank_requests')
           .upsert(requestData)
@@ -467,6 +501,7 @@ class UserService {
         'message': 'Yêu cầu đăng ký rank đã được gửi thành công',
         'request_id': response['id'],
         'status': response['status'],
+        'evidence_count': evidenceUrls?.length ?? 0,
       };
     } catch (error) {
       print('Error requesting rank registration: $error');
