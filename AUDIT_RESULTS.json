@@ -1,0 +1,61 @@
+{
+  "database": {
+    "referral_codes": {
+      "total": 7,
+      "active": 7,
+      "expired": 0,
+      "patterns": {
+        "SABO-FORMAT": 7
+      }
+    },
+    "referral_usage": {
+      "total_usage": 0,
+      "total_spa_referrer": 0,
+      "total_spa_referred": 0
+    }
+  },
+  "services": {
+    "basic_referral_service": {
+      "exists": true,
+      "methods": 5,
+      "missing_methods": []
+    },
+    "qr_scan_service": {
+      "exists": true,
+      "uses_basic_service": true,
+      "has_referral_detection": true
+    }
+  },
+  "ui_components": {
+    "basic_referral_card": {
+      "exists": true,
+      "has_service_integration": true
+    },
+    "basic_referral_code_input": {
+      "exists": true,
+      "has_service_integration": true
+    },
+    "basic_referral_stats_widget": {
+      "exists": true,
+      "has_service_integration": true
+    },
+    "basic_referral_dashboard": {
+      "exists": true,
+      "has_service_integration": false
+    }
+  },
+  "integration": {
+    "dependencies": {
+      "required": [
+        "supabase_flutter",
+        "share_plus",
+        "sizer"
+      ],
+      "missing": []
+    }
+  },
+  "issues": [
+    "\u26a0\ufe0f basic_referral_dashboard missing BasicReferralService integration"
+  ],
+  "recommendations": []
+}

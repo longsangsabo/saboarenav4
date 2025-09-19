@@ -189,7 +189,7 @@ class _SimpleChallengeModalWidgetState extends State<SimpleChallengeModalWidget>
         ),
         SizedBox(height: 6),
         DropdownButtonFormField<String>(
-          value: _selectedGameType,
+          initialValue: _selectedGameType,
           decoration: InputDecoration(
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
@@ -268,7 +268,7 @@ class _SimpleChallengeModalWidgetState extends State<SimpleChallengeModalWidget>
         ),
         SizedBox(height: 6),
         DropdownButtonFormField<String>(
-          value: _locations.isEmpty ? null : _selectedLocation,
+          initialValue: _locations.isEmpty ? null : _selectedLocation,
           decoration: InputDecoration(
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
@@ -307,7 +307,7 @@ class _SimpleChallengeModalWidgetState extends State<SimpleChallengeModalWidget>
         ),
         SizedBox(height: 6),
         DropdownButtonFormField<int>(
-          value: _spaPoints,
+          initialValue: _spaPoints,
           decoration: InputDecoration(
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
@@ -320,7 +320,7 @@ class _SimpleChallengeModalWidgetState extends State<SimpleChallengeModalWidget>
                 value: option['amount'] as int,
                 child: Text('${option['amount']} SPA - ${option['description']}'),
               );
-            }).toList(),
+            }),
           ],
           onChanged: (value) {
             setState(() {

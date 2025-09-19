@@ -25,7 +25,7 @@ class ChallengeModalWidget extends StatefulWidget {
 
 class _ChallengeModalWidgetState extends State<ChallengeModalWidget> {
   String _selectedGameType = '8-ball';
-  int _handicapValue = 0;
+  final int _handicapValue = 0;
   int _spaPoints = 0;
   DateTime _selectedDate = DateTime.now().add(const Duration(hours: 1));
   TimeOfDay _selectedTime = TimeOfDay.now();

@@ -209,8 +209,8 @@ class _FindOpponentsScreenState extends State<FindOpponentsScreen>
       floatingActionButton: FloatingActionButton(
         onPressed: _showQRScanner,
         backgroundColor: Theme.of(context).primaryColor,
-        child: Icon(Icons.qr_code_scanner, color: Colors.white),
         tooltip: 'Quét QR để tìm người chơi',
+        child: Icon(Icons.qr_code_scanner, color: Colors.white),
       ),
       bottomNavigationBar: SafeArea(
         child: Container(

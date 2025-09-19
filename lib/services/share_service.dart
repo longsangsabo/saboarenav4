@@ -47,7 +47,7 @@ class ShareService {
     final shareText = '''
 🏆 Tham gia giải đấu SABO ARENA!
 
-🎪 ${tournamentName}
+🎪 $tournamentName
 📅 Ngày: $startDate
 👥 Người chơi: $participants
 💰 Giải thưởng: $prizePool
@@ -101,7 +101,7 @@ ${matchId != null ? '🔗 Chi tiết: $_baseUrl/match/$matchId\n' : ''}📱 Tả
     String? description,
   }) async {
     final shareText = '''
-🏛️ Tham gia CLB ${clubName}!
+🏛️ Tham gia CLB $clubName!
 
 📍 Địa điểm: $location
 👥 Thành viên: $memberCount người
@@ -152,16 +152,16 @@ ${description != null ? '📝 $description\n' : ''}
   
   /// Generate QR data for user
   static String generateUserQRData(UserProfile user) {
-    return '${_baseUrl}/user/${user.id}';
+    return '$_baseUrl/user/${user.id}';
   }
   
   /// Generate QR data for tournament
   static String generateTournamentQRData(String tournamentId) {
-    return '${_baseUrl}/tournament/$tournamentId';
+    return '$_baseUrl/tournament/$tournamentId';
   }
   
   /// Generate QR data for club
   static String generateClubQRData(String clubId) {
-    return '${_baseUrl}/club/$clubId';
+    return '$_baseUrl/club/$clubId';
   }
 }

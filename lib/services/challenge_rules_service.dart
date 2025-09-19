@@ -278,8 +278,9 @@ class ChallengeRulesService {
 
     // Determine color based on rank level
     String color;
-    if (value <= 2) color = '#4CAF50'; // Green for K, K+
-    else if (value <= 4) color = '#2196F3'; // Blue for I, I+
+    if (value <= 2) {
+      color = '#4CAF50'; // Green for K, K+
+    } else if (value <= 4) color = '#2196F3'; // Blue for I, I+
     else if (value <= 6) color = '#FF9800'; // Orange for H, H+
     else if (value <= 8) color = '#9C27B0'; // Purple for G, G+
     else if (value <= 10) color = '#F44336'; // Red for F, F+

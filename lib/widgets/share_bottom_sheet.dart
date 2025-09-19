@@ -237,7 +237,7 @@ class ShareBottomSheet extends StatelessWidget {
     if (postImageUrl == null) return;
 
     try {
-      final shareText = _buildShareText() + '\n\n🖼️ Hình ảnh: $postImageUrl';
+      final shareText = '${_buildShareText()}\n\n🖼️ Hình ảnh: $postImageUrl';
       await ShareService.shareCustom(
         text: shareText,
         subject: 'Post với hình ảnh từ SABO ARENA',

@@ -1,5 +1,6 @@
 /// Test script for Challenge Rules Service
 /// Run this to validate all challenge logic is working correctly
+library;
 
 import '../lib/services/challenge_rules_service.dart';
 

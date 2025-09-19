@@ -1,3 +1,18 @@
+# ⚠️ **DEPRECATED DOCUMENT - DO NOT USE** ⚠️
+
+**🚨 WARNING: This document describes an OLD QR SYSTEM that has been replaced**
+
+**📅 Deprecated Date: September 19, 2025**  
+**🔄 Replaced By: INTEGRATED_QR_FINAL_DOCUMENTATION.md**  
+**❌ Status: OUTDATED - Do not follow these instructions**
+
+**✅ For current system documentation, see:**
+- `INTEGRATED_QR_FINAL_DOCUMENTATION.md` (Primary reference) 
+- `INTEGRATED_QR_REFERRAL_SOLUTION.md` (Technical details)
+- `DOCUMENTATION_MIGRATION_GUIDE.md` (Migration info)
+
+---
+
 # SABO Arena - QR System Implementation Report
 ## Complete Development & Testing Documentation
 ### Date: September 19, 2025

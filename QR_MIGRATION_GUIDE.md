@@ -1,3 +1,17 @@
+# ⚠️ **DEPRECATED DOCUMENT - DO NOT USE** ⚠️
+
+**🚨 WARNING: This migration guide is for an OLD SYSTEM that has been replaced**
+
+**📅 Deprecated Date: September 19, 2025**  
+**🔄 Replaced By: INTEGRATED_QR_FINAL_DOCUMENTATION.md**  
+**❌ Status: OUTDATED - Do not follow this migration**
+
+**✅ For current system documentation, see:**
+- `INTEGRATED_QR_FINAL_DOCUMENTATION.md` (Primary reference)
+- `DOCUMENTATION_MIGRATION_GUIDE.md` (Current migration guide)
+
+---
+
 # 🎯 HƯỚNG DẪN CHẠY MIGRATION SQL CHO QR SYSTEM
 
 ## ❌ Vấn đề hiện tại:

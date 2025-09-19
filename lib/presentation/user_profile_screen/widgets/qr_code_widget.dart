@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../core/app_export.dart';
+import '../../../services/integrated_qr_service.dart';
 
-class QRCodeWidget extends StatelessWidget {
+class QRCodeWidget extends StatefulWidget {
   final Map<String, dynamic> userData;
   final VoidCallback? onClose;
 
@@ -13,6 +15,47 @@ class QRCodeWidget extends StatelessWidget {
     required this.userData,
     this.onClose,
   });
+
+  @override
+  State<QRCodeWidget> createState() => _QRCodeWidgetState();
+}
+
+class _QRCodeWidgetState extends State<QRCodeWidget> {
+  String? _qrData;
+  bool _isGenerating = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _generateQRCode();
+  }
+
+  Future<void> _generateQRCode() async {
+    setState(() {
+      _isGenerating = true;
+    });
+
+    try {
+      final userCode = widget.userData["userId"] as String? ?? "SABO123456";
+      final username = widget.userData["username"] as String? ?? userCode;
+      
+      final qrData = await IntegratedQRService.generateIntegratedQRData(
+        userId: widget.userData["id"] ?? "temp-id",
+        userCode: userCode,
+        referralCode: "SABO-${username.toUpperCase()}",
+      );
+      
+      setState(() {
+        _qrData = qrData;
+        _isGenerating = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isGenerating = false;
+      });
+      print('Error generating QR code: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +94,7 @@ class QRCodeWidget extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  onPressed: onClose,
+                  onPressed: widget.onClose,
                   icon: CustomIconWidget(
                     iconName: 'close',
                     color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
@@ -95,7 +138,7 @@ class QRCodeWidget extends StatelessWidget {
                       ),
                       child: ClipOval(
                         child: CustomImageWidget(
-                          imageUrl: userData["avatar"] as String? ??
+                          imageUrl: widget.userData["avatar"] as String? ??
                               "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png",
                           width: 15.w,
                           height: 15.w,
@@ -109,7 +152,7 @@ class QRCodeWidget extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            userData["displayName"] as String? ??
+                            widget.userData["displayName"] as String? ??
                                 "Nguyễn Văn An",
                             style: AppTheme.lightTheme.textTheme.titleMedium
                                 ?.copyWith(
@@ -120,7 +163,7 @@ class QRCodeWidget extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            'Rank ${userData["rank"] as String? ?? "B"} • ELO ${userData["eloRating"] ?? 1450}',
+                            'Rank ${widget.userData["rank"] as String? ?? "B"} • ELO ${widget.userData["eloRating"] ?? 1450}',
                             style: AppTheme.lightTheme.textTheme.bodySmall
                                 ?.copyWith(
                               color: AppTheme
@@ -135,7 +178,7 @@ class QRCodeWidget extends StatelessWidget {
 
                 SizedBox(height: 4.h),
 
-                // QR Code Placeholder (In real app, use qr_flutter package)
+                // QR Code - Real or Loading
                 Container(
                   width: 50.w,
                   height: 50.w,
@@ -151,7 +194,21 @@ class QRCodeWidget extends StatelessWidget {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: _buildQRPattern(),
+                      child: _isGenerating 
+                        ? Center(
+                            child: CircularProgressIndicator(
+                              color: AppTheme.lightTheme.colorScheme.primary,
+                            ),
+                          )
+                        : _qrData != null
+                          ? QrImageView(
+                              data: _qrData!,
+                              version: QrVersions.auto,
+                              size: 40.w,
+                              backgroundColor: Colors.white,
+                              foregroundColor: Colors.black,
+                            )
+                          : _buildQRPattern(),
                     ),
                   ),
                 ),
@@ -167,7 +224,7 @@ class QRCodeWidget extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    'ID: ${userData["userId"] as String? ?? "SABO123456"}',
+                    'ID: ${widget.userData["userId"] as String? ?? "SABO123456"}',
                     style: AppTheme.lightTheme.textTheme.labelLarge?.copyWith(
                       color: AppTheme.lightTheme.colorScheme.primary,
                       fontWeight: FontWeight.w600,
@@ -230,12 +287,43 @@ class QRCodeWidget extends StatelessWidget {
           // Instructions
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 4.w),
-            child: Text(
-              'Bạn bè có thể quét mã QR này để thêm bạn vào danh sách bạn bè',
-              style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
-                color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
+            child: Column(
+              children: [
+                Text(
+                  'Bạn bè có thể quét mã QR này để xem profile của bạn',
+                  style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
+                    color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 1.h),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
+                  decoration: BoxDecoration(
+                    color: AppTheme.lightTheme.colorScheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CustomIconWidget(
+                        iconName: 'gift',
+                        color: AppTheme.lightTheme.colorScheme.primary,
+                        size: 16,
+                      ),
+                      SizedBox(width: 2.w),
+                      Text(
+                        'Người mới đăng ký qua QR sẽ nhận 50 SPA, bạn nhận 100 SPA',
+                        style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
+                          color: AppTheme.lightTheme.colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
 
@@ -280,14 +368,47 @@ class QRCodeWidget extends StatelessWidget {
   }
 
   void _shareQRCode(BuildContext context) {
-    // In real app, implement sharing functionality
-    HapticFeedback.lightImpact();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Đang chia sẻ mã QR...'),
-        backgroundColor: AppTheme.lightTheme.colorScheme.primary,
-      ),
-    );
+    if (_qrData != null) {
+      // In real app, implement sharing functionality
+      HapticFeedback.lightImpact();
+      
+      // Copy QR data to clipboard
+      Clipboard.setData(ClipboardData(text: _qrData!));
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              CustomIconWidget(
+                iconName: 'copy',
+                color: Colors.white,
+                size: 20,
+              ),
+              SizedBox(width: 2.w),
+              Expanded(
+                child: Text('Đã copy link profile + referral vào clipboard'),
+              ),
+            ],
+          ),
+          backgroundColor: AppTheme.lightTheme.colorScheme.primary,
+          action: SnackBarAction(
+            label: 'Chia sẻ',
+            textColor: Colors.white,
+            onPressed: () {
+              // Implement platform sharing here
+            },
+          ),
+        ),
+      );
+    } else {
+      HapticFeedback.lightImpact();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Đang tạo mã QR, vui lòng đợi...'),
+          backgroundColor: AppTheme.lightTheme.colorScheme.error,
+        ),
+      );
+    }
   }
 
   void _saveQRCode(BuildContext context) {

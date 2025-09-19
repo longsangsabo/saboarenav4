@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:sizer/sizer.dart';
-import 'package:sabo_arena/services/qr_scan_service.dart';
+import 'package:sabo_arena/services/integrated_qr_service.dart';
+import '../routes/app_routes.dart';
 
 class QRScannerWidget extends StatefulWidget {
   final Function(Map<String, dynamic>)? onUserFound;
   final VoidCallback? onCancel;
 
   const QRScannerWidget({
-    Key? key,
+    super.key,
     this.onUserFound,
     this.onCancel,
-  }) : super(key: key);
+  });
 
   @override
   State<QRScannerWidget> createState() => _QRScannerWidgetState();
@@ -222,20 +223,28 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
     try {
       print('🔍 Processing QR code: $qrData');
       
-      // Use new QRScanService to scan and validate
-      final userData = await QRScanService.scanQRCode(qrData);
+      // Use IntegratedQRService to scan and validate
+      final scanResult = await IntegratedQRService.scanIntegratedQR(qrData);
       
-      if (userData != null) {
-        // QR valid, show user info or call callback
-        if (widget.onUserFound != null) {
-          widget.onUserFound!(userData);
+      if (scanResult != null && scanResult['success'] == true) {
+        final qrType = scanResult['type'];
+        final userProfile = scanResult['user_profile'];
+        
+        if (qrType == 'integrated_profile') {
+          // Show integrated profile view with referral option
+          _showIntegratedProfileDialog(scanResult);
         } else {
-          _showUserFoundDialog(userData);
+          // Legacy QR code, show normal user info
+          if (widget.onUserFound != null) {
+            widget.onUserFound!(userProfile ?? {});
+          } else {
+            _showUserFoundDialog(userProfile ?? {});
+          }
         }
       } else {
         // QR invalid or user not found
         setState(() {
-          errorMessage = 'QR code không hợp lệ hoặc người dùng không tồn tại';
+          errorMessage = scanResult?['error'] ?? 'QR code không hợp lệ';
           isScanning = true;
         });
       }
@@ -246,6 +255,142 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
         isScanning = true;
       });
     }
+  }
+
+  void _showIntegratedProfileDialog(Map<String, dynamic> scanResult) {
+    final userProfile = scanResult['user_profile'];
+    final userCode = scanResult['user_code'];
+    final referralCode = scanResult['referral_code'];
+    final actions = scanResult['actions'] as List<dynamic>? ?? [];
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.qr_code_2, color: Colors.blue),
+            SizedBox(width: 2.w),
+            Text('QR Profile + Referral'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // User Profile Section
+            if (userProfile != null) ...[
+              if (userProfile['avatar_url'] != null)
+                Center(
+                  child: CircleAvatar(
+                    radius: 8.w,
+                    backgroundImage: NetworkImage(userProfile['avatar_url']),
+                    backgroundColor: Colors.grey[300],
+                  ),
+                ),
+              SizedBox(height: 2.h),
+              Text(
+                userProfile['full_name'] ?? 'Unknown User',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (userProfile['bio'] != null) ...[
+                SizedBox(height: 1.h),
+                Text(userProfile['bio']),
+              ],
+              SizedBox(height: 2.h),
+              _buildUserStat('User Code', userCode ?? 'N/A'),
+              _buildUserStat('ELO Rating', '${userProfile['elo_rating'] ?? 1200}'),
+              _buildUserStat('Rank', userProfile['rank'] ?? 'Chưa xếp hạng'),
+            ] else ...[
+              Text(
+                'User Code: $userCode',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 1.h),
+              Text('Profile không tìm thấy, nhưng có thể dùng referral code'),
+            ],
+            
+            // Referral Section
+            if (referralCode != null) ...[
+              Divider(height: 3.h),
+              Container(
+                padding: EdgeInsets.all(3.w),
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(2.w),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.card_giftcard, color: Colors.green, size: 5.w),
+                        SizedBox(width: 2.w),
+                        Text(
+                          'Referral Bonus',
+                          style: TextStyle(
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 1.h),
+                    Text(
+                      'Code: $referralCode',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    Text(
+                      'Đăng ký qua QR này để nhận 50 SPA!',
+                      style: TextStyle(color: Colors.green),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              setState(() => isScanning = true);
+            },
+            child: Text('Quét tiếp'),
+          ),
+          if (actions.contains('view_profile'))
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pop(context);
+                // TODO: Navigate to user profile
+              },
+              child: Text('Xem Profile'),
+            ),
+          if (actions.contains('apply_referral'))
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pop(context);
+                // Navigate to registration with pre-filled referral
+                Navigator.pushNamed(
+                  context, 
+                  AppRoutes.registerScreen,
+                  arguments: {'referralCode': referralCode},
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+              ),
+              child: Text('Đăng ký + Referral'),
+            ),
+        ],
+      ),
+    );
   }
 
   void _showUserFoundDialog(Map<String, dynamic> userData) {

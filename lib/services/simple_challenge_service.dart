@@ -144,7 +144,7 @@ class SimpleChallengeService {
   }) async {
     try {
       final challengeTypeVi = challengeType == 'thach_dau' ? 'thách đấu' : 'giao lưu';
-      final spaInfo = spaPoints > 0 ? ' (${spaPoints} SPA)' : '';
+      final spaInfo = spaPoints > 0 ? ' ($spaPoints SPA)' : '';
       
       final message = '''
 🎱 Lời mời $challengeTypeVi!
