@@ -31,11 +31,191 @@ class RoundRobinBracket extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _buildTournamentStats(context),
+          const SizedBox(height: 20),
           _buildStandingsTable(),
+          const SizedBox(height: 30),
+          _buildMatchSchedule(context),
+          const SizedBox(height: 30),
+          _buildHeadToHeadRecords(context),
           const SizedBox(height: 30),
           _buildRecentMatches(),
         ],
       ),
+    );
+  }
+
+  Widget _buildTournamentStats(BuildContext context) {
+    final schedule = TournamentDataGenerator.generateRoundRobinSchedule(playerCount);
+    final totalMatches = schedule.length;
+    final playedMatches = schedule.where((m) => m['isPlayed'] == true).length;
+    final totalGoals = schedule.where((m) => m['isPlayed'] == true).fold<int>(0, (sum, m) {
+      final s1 = int.tryParse(m['score1'] ?? '') ?? 0;
+      final s2 = int.tryParse(m['score2'] ?? '') ?? 0;
+      return sum + s1 + s2;
+    });
+    final avgGoals = playedMatches > 0 ? (totalGoals / playedMatches).toStringAsFixed(1) : '0.0';
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _statCard('Matches', '$totalMatches', Colors.indigo),
+        _statCard('Played', '$playedMatches', Colors.teal),
+        _statCard('Avg Goals', avgGoals, Colors.orange),
+      ],
+    );
+  }
+
+  Widget _statCard(String title, String value, Color color) {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.only(right: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withOpacity(0.12)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: TextStyle(color: color, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 6),
+            Text(value, style: TextStyle(color: color, fontSize: 18, fontWeight: FontWeight.bold)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMatchSchedule(BuildContext context) {
+    final schedule = TournamentDataGenerator.generateRoundRobinSchedule(playerCount);
+    if (schedule.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final displayCount = schedule.length > 12 ? 12 : schedule.length;
+    final visibleMatches = schedule.take(displayCount).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade900,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: const Text(
+            '📅 Lịch thi đấu (Schedule)',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: visibleMatches.map((m) {
+            return Container(
+              width: 220,
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('${m['matchId']} · Round ${m['round']}', style: const TextStyle(fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 6),
+                  Text('${m['player1']} vs ${m['player2']}', style: const TextStyle()),
+                  const SizedBox(height: 6),
+                  Text(m['isPlayed'] ? '${m['score1']} - ${m['score2']}' : m['result'], style: TextStyle(color: m['isPlayed'] ? Colors.black : Colors.orange)),
+                ],
+              ),
+            );
+          }).toList(),
+        ),
+        if (schedule.length > displayCount) ...[
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: ElevatedButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('Full Schedule'),
+                    content: SizedBox(
+                      width: double.maxFinite,
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: schedule.length,
+                        itemBuilder: (context, index) {
+                          final m = schedule[index];
+                          return ListTile(
+                            dense: true,
+                            title: Text('${m['matchId']} · ${m['player1']} vs ${m['player2']}'),
+                            subtitle: Text(m['isPlayed'] ? '${m['score1']} - ${m['score2']}' : m['result'] ?? 'Pending'),
+                          );
+                        },
+                      ),
+                    ),
+                    actions: [TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Close'))],
+                  ),
+                );
+              },
+              child: const Text('View full schedule'),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildHeadToHeadRecords(BuildContext context) {
+    final schedule = TournamentDataGenerator.generateRoundRobinSchedule(playerCount);
+    if (playerCount < 2) return const SizedBox.shrink();
+
+    final standings = TournamentDataGenerator.calculateRoundRobinStandings(playerCount, schedule);
+    // pick top 4 players for quick head-to-head overview
+    final topPlayers = standings.take(4).map((s) {
+      final parts = (s['name'] as String).split(' ');
+      final id = int.tryParse(parts.isNotEmpty ? parts.last : '') ?? 0;
+      return {'id': id, 'name': s['name']};
+    }).toList();
+
+    final pairs = <Map<String, dynamic>>[];
+    for (int i = 0; i < topPlayers.length; i++) {
+      for (int j = i + 1; j < topPlayers.length; j++) {
+        final a = topPlayers[i];
+        final b = topPlayers[j];
+        final rec = TournamentDataGenerator.generateHeadToHeadRecord(a['id'], b['id'], schedule);
+        pairs.add({'a': a, 'b': b, 'rec': rec});
+      }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.deepPurple.shade600,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: const Text('🤼 Head-to-Head', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+        ),
+        const SizedBox(height: 12),
+        ...pairs.map((p) {
+          final rec = p['rec'] as Map<String, dynamic>;
+          return ListTile(
+            title: Text('${p['a']['name']} vs ${p['b']['name']}'),
+            subtitle: Text('Played: ${rec['totalMatches']}, ${p['a']['name']}: ${rec['player1Wins']}, ${p['b']['name']}: ${rec['player2Wins']}, Draws: ${rec['draws']}'),
+          );
+        }).toList(),
+      ],
     );
   }
 
@@ -159,7 +339,7 @@ class RoundRobinBracket extends StatelessWidget {
                     ),
                   ],
                 ),
-              )).toList(),
+              )),
             ],
           ),
         ),

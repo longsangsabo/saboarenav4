@@ -128,6 +128,189 @@ class TournamentDataGenerator {
     return matches;
   }
 
+  /// Generate complete Round Robin match schedule
+  /// Creates every possible match combination (n×(n-1)÷2)
+  static List<Map<String, dynamic>> generateRoundRobinSchedule(int playerCount) {
+    final List<Map<String, dynamic>> schedule = [];
+    int matchCounter = 1;
+    
+    // Generate all possible matches
+    for (int i = 1; i <= playerCount; i++) {
+      for (int j = i + 1; j <= playerCount; j++) {
+        // Determine if match has been played (simulate tournament progress)
+        final isPlayed = matchCounter <= (playerCount * 1.5).round();
+        
+        String score1 = '';
+        String score2 = '';
+        String result = 'Pending';
+        
+        if (isPlayed) {
+          // Generate realistic match results
+          final random = (i * j + matchCounter) % 7;
+          if (random == 0) {
+            // Draw
+            score1 = '1';
+            score2 = '1';
+            result = 'Draw';
+          } else if (random % 2 == 0) {
+            // Player 1 wins
+            score1 = '2';
+            score2 = random == 2 ? '0' : '1';
+            result = 'Player $i Win';
+          } else {
+            // Player 2 wins
+            score1 = random == 3 ? '0' : '1';
+            score2 = '2';
+            result = 'Player $j Win';
+          }
+        }
+        
+        schedule.add({
+          'matchId': 'RR$matchCounter',
+          'round': ((matchCounter - 1) ~/ (playerCount ~/ 2)) + 1,
+          'player1': 'Player $i',
+          'player2': 'Player $j',
+          'player1Id': i,
+          'player2Id': j,
+          'score1': score1,
+          'score2': score2,
+          'result': result,
+          'isPlayed': isPlayed,
+          'timestamp': isPlayed ? DateTime.now().subtract(Duration(hours: matchCounter)).toString() : null,
+        });
+        matchCounter++;
+      }
+    }
+    
+    return schedule;
+  }
+
+  /// Generate head-to-head record between two players
+  static Map<String, dynamic> generateHeadToHeadRecord(int player1Id, int player2Id, List<Map<String, dynamic>> schedule) {
+    final matches = schedule.where((match) => 
+      (match['player1Id'] == player1Id && match['player2Id'] == player2Id) ||
+      (match['player1Id'] == player2Id && match['player2Id'] == player1Id)
+    ).toList();
+    
+    int player1Wins = 0;
+    int player2Wins = 0;
+    int draws = 0;
+    
+    for (final match in matches) {
+      if (match['isPlayed']) {
+        if (match['result'].contains('Draw')) {
+          draws++;
+        } else if (match['result'].contains('Player $player1Id')) {
+          player1Wins++;
+        } else if (match['result'].contains('Player $player2Id')) {
+          player2Wins++;
+        }
+      }
+    }
+    
+    return {
+      'player1Wins': player1Wins,
+      'player2Wins': player2Wins,
+      'draws': draws,
+      'totalMatches': matches.length,
+      'playedMatches': matches.where((m) => m['isPlayed']).length,
+    };
+  }
+
+  /// Calculate Round Robin standings with detailed statistics
+  static List<Map<String, dynamic>> calculateRoundRobinStandings(int playerCount, List<Map<String, dynamic>> schedule) {
+    final List<Map<String, dynamic>> standings = [];
+    
+    for (int i = 1; i <= playerCount; i++) {
+      int wins = 0;
+      int draws = 0;
+      int losses = 0;
+      int goalsFor = 0;
+      int goalsAgainst = 0;
+      int matchesPlayed = 0;
+      
+      // Calculate statistics from schedule
+      for (final match in schedule) {
+        if (match['isPlayed'] && (match['player1Id'] == i || match['player2Id'] == i)) {
+          matchesPlayed++;
+          
+          final isPlayer1 = match['player1Id'] == i;
+          final playerScore = int.tryParse(isPlayer1 ? match['score1'] : match['score2']) ?? 0;
+          final opponentScore = int.tryParse(isPlayer1 ? match['score2'] : match['score1']) ?? 0;
+          
+          goalsFor += playerScore;
+          goalsAgainst += opponentScore;
+          
+          if (playerScore > opponentScore) {
+            wins++;
+          } else if (playerScore == opponentScore) {
+            draws++;
+          } else {
+            losses++;
+          }
+        }
+      }
+      
+      final points = wins * 3 + draws * 1;
+      final goalDifference = goalsFor - goalsAgainst;
+      final winRate = matchesPlayed > 0 ? (wins / matchesPlayed * 100) : 0;
+      
+      standings.add({
+        'rank': i,
+        'name': 'Player $i',
+        'matchesPlayed': matchesPlayed,
+        'wins': wins,
+        'draws': draws,
+        'losses': losses,
+        'goalsFor': goalsFor,
+        'goalsAgainst': goalsAgainst,
+        'goalDifference': goalDifference,
+        'points': points,
+        'winRate': winRate.round(),
+        'form': _generateForm(i, schedule), // Last 5 matches
+      });
+    }
+    
+    // Sort by points (desc), then goal difference (desc), then goals for (desc)
+    standings.sort((a, b) {
+      if (a['points'] != b['points']) return b['points'].compareTo(a['points']);
+      if (a['goalDifference'] != b['goalDifference']) return b['goalDifference'].compareTo(a['goalDifference']);
+      return b['goalsFor'].compareTo(a['goalsFor']);
+    });
+    
+    // Update ranks after sorting
+    for (int i = 0; i < standings.length; i++) {
+      standings[i]['rank'] = i + 1;
+    }
+    
+    return standings;
+  }
+
+  /// Generate form string (last 5 matches: W=Win, D=Draw, L=Loss)
+  static String _generateForm(int playerId, List<Map<String, dynamic>> schedule) {
+    final playerMatches = schedule.where((match) => 
+      match['isPlayed'] && (match['player1Id'] == playerId || match['player2Id'] == playerId)
+    ).toList()..sort((a, b) => b['matchId'].compareTo(a['matchId'])); // Most recent first
+    
+    final form = StringBuffer();
+    for (int i = 0; i < 5 && i < playerMatches.length; i++) {
+      final match = playerMatches[i];
+      final isPlayer1 = match['player1Id'] == playerId;
+      final playerScore = int.tryParse(isPlayer1 ? match['score1'] : match['score2']) ?? 0;
+      final opponentScore = int.tryParse(isPlayer1 ? match['score2'] : match['score1']) ?? 0;
+      
+      if (playerScore > opponentScore) {
+        form.write('W');
+      } else if (playerScore == opponentScore) {
+        form.write('D');
+      } else {
+        form.write('L');
+      }
+    }
+    
+    return form.toString();
+  }
+
   /// Generate Swiss System standings
   static List<Map<String, dynamic>> generateSwissStandings(int playerCount) {
     final List<Map<String, dynamic>> standings = [];
@@ -415,6 +598,121 @@ class TournamentDataGenerator {
         'player2': 'Losers Bracket Champion',
         'score1': '',
         'score2': '',
+      },
+    ];
+  }
+
+  /// Calculate Winners Bracket rounds for Double Elimination
+  static List<Map<String, dynamic>> calculateDoubleEliminationWinners(int playerCount) {
+    // Same as single elimination but tracks eliminated players
+    return calculateSingleEliminationRounds(playerCount);
+  }
+
+  /// Calculate Losers Bracket rounds for Double Elimination
+  /// CRITICAL: Proper Losers Bracket logic implementation
+  static List<Map<String, dynamic>> calculateDoubleEliminationLosers(int playerCount) {
+    final List<Map<String, dynamic>> rounds = [];
+    
+    // Losers bracket has complex structure:
+    // - LB Round 1: Players eliminated from WB Round 1
+    // - LB Round 2: Players eliminated from WB Round 2 vs LB Round 1 winners
+    // - Pattern continues alternating between elimination feeds and advancement
+    
+    int currentPlayers = playerCount ~/ 2; // Half of original players start here
+    int roundNumber = 1;
+    bool isEliminationRound = true; // Alternates between elimination feeds and advancement
+    
+    while (currentPlayers > 1) {
+      String title;
+      if (currentPlayers == 2) {
+        title = 'LB Final';
+      } else if (currentPlayers <= 4) {
+        title = 'LB Bán kết';
+      } else {
+        title = 'LB Round $roundNumber';
+      }
+      
+      final matchCount = isEliminationRound ? currentPlayers : currentPlayers ~/ 2;
+      rounds.add({
+        'title': title,
+        'matches': generateLosersRoundMatches(roundNumber, matchCount, isEliminationRound),
+        'matchCount': matchCount,
+      });
+      
+      if (isEliminationRound) {
+        // Elimination round - same number advance
+        currentPlayers = matchCount;
+      } else {
+        // Advancement round - half advance
+        currentPlayers = matchCount;
+      }
+      
+      isEliminationRound = !isEliminationRound; // Alternate pattern
+      roundNumber++;
+      
+      // Prevent infinite loop
+      if (roundNumber > 10) break;
+    }
+    
+    return rounds;
+  }
+
+  /// Generate matches for Losers Bracket rounds
+  static List<Map<String, String>> generateLosersRoundMatches(int roundNumber, int matchCount, bool isEliminationRound) {
+    final List<Map<String, String>> matches = [];
+    
+    for (int i = 0; i < matchCount; i++) {
+      final matchId = 'LB${roundNumber}M${i + 1}';
+      
+      String player1, player2;
+      if (isEliminationRound) {
+        // New eliminations vs previous survivors
+        player1 = 'WB Eliminated ${i * 2 + 1}';
+        player2 = 'LB Survivor ${i * 2 + 2}';
+      } else {
+        // Advancement matches
+        player1 = 'LB Player ${i * 2 + 1}';
+        player2 = 'LB Player ${i * 2 + 2}';
+      }
+      
+      // Generate realistic scores for early rounds
+      final hasResult = roundNumber <= 3 || (roundNumber <= 5 && i == 0);
+      String score1 = '';
+      String score2 = '';
+      
+      if (hasResult) {
+        final isPlayer1Winner = (i + roundNumber) % 2 == 1; // Different pattern than WB
+        score1 = isPlayer1Winner ? '2' : ((i + roundNumber) % 3 == 0 ? '0' : '1');
+        score2 = isPlayer1Winner ? ((i + roundNumber) % 3 == 0 ? '0' : '1') : '2';
+      }
+      
+      matches.add({
+        'matchId': matchId,
+        'player1': player1,
+        'player2': player2,
+        'score1': score1,
+        'score2': score2,
+      });
+    }
+    
+    return matches;
+  }
+
+  /// Calculate Grand Final rounds for Double Elimination
+  static List<Map<String, dynamic>> calculateDoubleEliminationGrandFinal(int playerCount) {
+    return [
+      {
+        'title': 'Grand Final',
+        'matches': [
+          {
+            'matchId': 'GF1',
+            'player1': 'Winners Champion',
+            'player2': 'Losers Champion',
+            'score1': '2',
+            'score2': '1',
+          },
+        ],
+        'matchCount': 1,
       },
     ];
   }
