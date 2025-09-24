@@ -9,7 +9,7 @@ void main() {
   
   // Test với 8 players
   testLosersBracket(8);
-  print('\n' + '=' * 60);
+  print('\n${'=' * 60}');
   
   // Test với 16 players  
   testLosersBracket(16);

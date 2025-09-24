@@ -1,4 +1,3 @@
-import 'package:sabo_arena/core/constants/ranking_constants.dart';
 import '../core/utils/rank_migration_helper.dart';
 
 class UserProfile {

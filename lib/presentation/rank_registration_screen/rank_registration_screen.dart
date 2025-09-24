@@ -35,7 +35,7 @@ class _RankRegistrationScreenState extends State<RankRegistrationScreen> {
   final TextEditingController _commentsController = TextEditingController();
   
   // Image upload for tournament evidence
-  List<File> _evidenceImages = [];
+  final List<File> _evidenceImages = [];
   final ImagePicker _imagePicker = ImagePicker();
   bool _isUploadingImages = false;
 

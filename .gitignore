@@ -46,3 +46,13 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 scripts/flutter/
+
+# Release signing files - NEVER commit these!
+android/key.properties
+*.jks
+*.keystore
+
+# Build scripts (optional - can be committed)
+# build_android_release.bat
+# build_ios_release.bat
+# create_keystore.bat

@@ -707,7 +707,7 @@ class TournamentDataGenerator {
           player2 = 'WB R2 Loser ${i + 1}';
         } else {
           player1 = 'LB R${roundNumber - 1} Winner ${i + 1}';
-          player2 = 'WB R${roundNumber} Loser ${i + 1}';
+          player2 = 'WB R$roundNumber Loser ${i + 1}';
         }
       } else {
         // Advancement matches between survivors
