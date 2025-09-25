@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sizer/sizer.dart';
 import '../../services/admin_service.dart';
 
@@ -348,8 +349,17 @@ class _AdminTournamentManagementScreenState extends State<AdminTournamentManagem
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
+      return Center(
+        child: SizedBox(
+          width: 60,
+          height: 60,
+          child: SvgPicture.asset(
+            'assets/images/logo.svg',
+            width: 60,
+            height: 60,
+            fit: BoxFit.contain,
+          ),
+        ),
       );
     }
 

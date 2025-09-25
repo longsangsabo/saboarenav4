@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sizer/sizer.dart';
 import '../../routes/app_routes.dart';
 import '../../services/auth_service.dart';
@@ -382,8 +383,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ),
                         child: _isLoading
-                            ? const CircularProgressIndicator(
-                                color: Colors.white)
+                            ? SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: SvgPicture.asset(
+                                  'assets/images/logo.svg',
+                                  width: 20,
+                                  height: 20,
+                                  fit: BoxFit.contain,
+                                  colorFilter: const ColorFilter.mode(
+                                    Colors.white,
+                                    BlendMode.srcIn,
+                                  ),
+                                ),
+                              )
                             : Text(
                                 'Đăng ký',
                                 style: TextStyle(

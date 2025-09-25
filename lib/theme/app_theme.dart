@@ -5,18 +5,18 @@ import 'package:google_fonts/google_fonts.dart';
 class AppTheme {
   AppTheme._();
 
-  // Billiards Heritage Color Palette
-  static const Color primaryLight = Color(0xFF1B5E20); // Deep billiards green
+  // Modern Billiards Color Palette - Updated for better UX
+  static const Color primaryLight = Color(0xFF00695C); // Modern teal green
   static const Color primaryVariantLight =
-      Color(0xFF2E7D32); // Supporting green
-  static const Color secondaryLight = Color(0xFF2E7D32); // Secondary actions
-  static const Color secondaryVariantLight = Color(0xFF388E3C); // Success color
-  static const Color backgroundLight = Color(0xFFFAFAFA); // Soft white
+      Color(0xFF004D40); // Deeper supportive green
+  static const Color secondaryLight = Color(0xFF26A69A); // Vibrant accent
+  static const Color secondaryVariantLight = Color(0xFF4DB6AC); // Light success
+  static const Color backgroundLight = Color(0xFFF8FFFE); // Ultra clean white with teal hint
   static const Color surfaceLight = Color(0xFFFFFFFF); // Pure white
-  static const Color errorLight = Color(0xFFD32F2F); // Standard error red
-  static const Color accentLight = Color(0xFFFF6F00); // Tournament highlight
-  static const Color warningLight = Color(0xFFF57C00); // Challenge pending
-  static const Color successLight = Color(0xFF388E3C); // Achievement color
+  static const Color errorLight = Color(0xFFE53E3E); // Modern red
+  static const Color accentLight = Color(0xFFFF8A50); // Warm orange for highlights
+  static const Color warningLight = Color(0xFFFFB020); // Modern amber
+  static const Color successLight = Color(0xFF38A169); // Fresh success green
   static const Color onPrimaryLight = Color(0xFFFFFFFF);
   static const Color onSecondaryLight = Color(0xFFFFFFFF);
   static const Color onBackgroundLight = Color(0xFF212121); // Text primary
@@ -618,82 +618,90 @@ class AppTheme {
     final Color textDisabled = isLight ? textDisabledLight : textDisabledDark;
 
     return TextTheme(
-      // Display styles for tournament headers
-      displayLarge: GoogleFonts.roboto(
+      // Display styles for tournament headers - MONTSERRAT BOLD
+      displayLarge: GoogleFonts.montserrat(
         fontSize: 57,
-        fontWeight: FontWeight.w400,
+        fontWeight: FontWeight.w800, // Extra bold for impact
+        color: textPrimary,
+        letterSpacing: -1.0, // Tighter for modern look
+      ),
+      displayMedium: GoogleFonts.montserrat(
+        fontSize: 45,
+        fontWeight: FontWeight.w700,
+        color: textPrimary,
+        letterSpacing: -0.5,
+      ),
+      displaySmall: GoogleFonts.montserrat(
+        fontSize: 36,
+        fontWeight: FontWeight.w700,
         color: textPrimary,
         letterSpacing: -0.25,
       ),
-      displayMedium: GoogleFonts.roboto(
-        fontSize: 45,
-        fontWeight: FontWeight.w400,
-        color: textPrimary,
-      ),
-      displaySmall: GoogleFonts.roboto(
-        fontSize: 36,
-        fontWeight: FontWeight.w400,
-        color: textPrimary,
-      ),
 
-      // Headline styles for section headers
-      headlineLarge: GoogleFonts.roboto(
+      // Headline styles for section headers - MONTSERRAT STRONG
+      headlineLarge: GoogleFonts.montserrat(
         fontSize: 32,
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w700,
         color: textPrimary,
+        letterSpacing: -0.5,
       ),
-      headlineMedium: GoogleFonts.roboto(
+      headlineMedium: GoogleFonts.montserrat(
         fontSize: 28,
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w600,
         color: textPrimary,
+        letterSpacing: -0.25,
       ),
-      headlineSmall: GoogleFonts.roboto(
+      headlineSmall: GoogleFonts.montserrat(
         fontSize: 24,
-        fontWeight: FontWeight.w500,
-        color: textPrimary,
-      ),
-
-      // Title styles for cards and dialogs
-      titleLarge: GoogleFonts.roboto(
-        fontSize: 22,
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w600,
         color: textPrimary,
         letterSpacing: 0,
       ),
-      titleMedium: GoogleFonts.roboto(
+
+      // Title styles for cards and dialogs - INTER CLEAN
+      titleLarge: GoogleFonts.inter(
+        fontSize: 22,
+        fontWeight: FontWeight.w600,
+        color: textPrimary,
+        letterSpacing: 0,
+      ),
+      titleMedium: GoogleFonts.inter(
         fontSize: 16,
         fontWeight: FontWeight.w500,
         color: textPrimary,
         letterSpacing: 0.15,
       ),
-      titleSmall: GoogleFonts.roboto(
+      titleSmall: GoogleFonts.inter(
         fontSize: 14,
         fontWeight: FontWeight.w500,
         color: textPrimary,
         letterSpacing: 0.1,
       ),
 
-      // Body styles for content
-      bodyLarge: GoogleFonts.openSans(
+      // Body styles for content - SOURCE SANS 3 READABLE
+      bodyLarge: GoogleFonts.sourceSans3(
         fontSize: 16,
         fontWeight: FontWeight.w400,
         color: textPrimary,
-        letterSpacing: 0.5,
+        letterSpacing: 0.1,
+        height: 1.6, // Better line height for reading
       ),
-      bodyMedium: GoogleFonts.openSans(
+      bodyMedium: GoogleFonts.sourceSans3(
         fontSize: 14,
         fontWeight: FontWeight.w400,
         color: textPrimary,
-        letterSpacing: 0.25,
+        letterSpacing: 0.1,
+        height: 1.5,
       ),
-      bodySmall: GoogleFonts.openSans(
+      bodySmall: GoogleFonts.sourceSans3(
         fontSize: 12,
         fontWeight: FontWeight.w400,
         color: textSecondary,
-        letterSpacing: 0.4,
+        letterSpacing: 0.1,
+        height: 1.4,
       ),
 
-      // Label styles for buttons and captions
+      // Label styles for buttons and captions - ROBOTO UI
       labelLarge: GoogleFonts.roboto(
         fontSize: 14,
         fontWeight: FontWeight.w500,

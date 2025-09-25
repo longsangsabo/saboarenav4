@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sabo_arena/repositories/comment_repository.dart';
 import 'package:sabo_arena/theme/app_theme.dart';
 import 'package:intl/intl.dart';
@@ -410,11 +411,20 @@ class _CommentsModalState extends State<CommentsModal> {
           // Comments List
           Expanded(
             child: _isLoading && _comments.isEmpty
-                ? const Center(
+                ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        CircularProgressIndicator(),
+                        SizedBox(
+                          width: 40,
+                          height: 40,
+                          child: SvgPicture.asset(
+                            'assets/images/logo.svg',
+                            width: 40,
+                            height: 40,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
                         SizedBox(height: 16),
                         Text(
                           'Đang tải bình luận...',

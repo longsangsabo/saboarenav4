@@ -99,14 +99,20 @@ class _FeedPostCardWidgetState extends State<FeedPostCardWidget>
     final colorScheme = theme.colorScheme;
 
     return Container(
-      margin: EdgeInsets.only(bottom: 1.h),
+      margin: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
       decoration: BoxDecoration(
         color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(20), // More modern rounded corners
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 8,
+            color: Colors.black.withValues(alpha: 0.08), // Softer shadow
+            blurRadius: 20, // More blur for modern depth
+            offset: const Offset(0, 4), // Slight vertical offset
+            spreadRadius: -2, // Negative spread for crisp edges
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04), // Very subtle second shadow
+            blurRadius: 10,
             offset: const Offset(0, 2),
           ),
         ],

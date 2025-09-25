@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
@@ -46,6 +47,7 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
     _fabAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _fabAnimationController, curve: Curves.easeInOut),
     );
+
     _fabAnimationController.forward();
   }
 
@@ -314,15 +316,34 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          CircularProgressIndicator(
-                            color: AppTheme.lightTheme.colorScheme.primary,
+                          // Simple Logo Loading
+                          Container(
+                            width: 60,
+                            height: 60,
+                            padding: const EdgeInsets.all(8.0),
+                            child: SvgPicture.asset(
+                              'assets/images/logo.svg',
+                              width: 44,
+                              height: 44,
+                              fit: BoxFit.contain,
+                            ),
                           ),
-                          SizedBox(height: 2.h),
+                          SizedBox(height: 3.h),
                           Text(
                             'Đang tải bảng tin...',
                             style: TextStyle(
-                              fontSize: 12.sp,
-                              color: Colors.grey[600],
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey[700],
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          SizedBox(height: 1.h),
+                          Text(
+                            'Vui lòng đợi một chút',
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              color: Colors.grey[500],
                             ),
                           ),
                         ],
@@ -400,13 +421,38 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
         builder: (context, child) {
           return Transform.scale(
             scale: _fabAnimation.value,
-            child: FloatingActionButton(
-              onPressed: _showCreatePostModal,
-              tooltip: 'Tạo bài viết',
-              child: CustomIconWidget(
-                iconName: 'add',
-                color: theme.colorScheme.onPrimary,
-                size: 28,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                gradient: LinearGradient(
+                  colors: [
+                    theme.colorScheme.primary,
+                    theme.colorScheme.primary.withOpacity(0.8),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: theme.colorScheme.primary.withOpacity(0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: FloatingActionButton(
+                onPressed: _showCreatePostModal,
+                tooltip: 'Tạo bài viết',
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(
+                  Icons.add,
+                  color: theme.colorScheme.onPrimary,
+                  size: 28,
+                ),
               ),
             ),
           );
@@ -416,22 +462,33 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.3),
-                spreadRadius: 1,
-                blurRadius: 5,
-                offset: const Offset(0, -2),
+                color: Colors.black.withOpacity(0.1),
+                spreadRadius: 0,
+                blurRadius: 20,
+                offset: const Offset(0, -5),
               ),
             ],
           ),
-          child: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            currentIndex: 0, // Home tab
-            selectedItemColor: Colors.green,
-            unselectedItemColor: Colors.grey,
-            backgroundColor: Colors.white,
-            elevation: 0,
+          child: ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+            child: BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              currentIndex: 0, // Home tab
+              selectedItemColor: theme.colorScheme.primary,
+              unselectedItemColor: Colors.grey[500],
+              backgroundColor: Colors.white,
+              elevation: 0,
+              selectedFontSize: 12,
+              unselectedFontSize: 11,
             onTap: (index) {
               switch (index) {
                 case 0:
@@ -453,31 +510,32 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
             },
             items: const [
               BottomNavigationBarItem(
-                icon: Icon(Icons.home_outlined),
-                activeIcon: Icon(Icons.home),
+                icon: Icon(Icons.home_outlined, size: 24),
+                activeIcon: Icon(Icons.home_rounded, size: 26),
                 label: 'Trang chủ',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.people_outline),
-                activeIcon: Icon(Icons.people),
+                icon: Icon(Icons.sports_outlined, size: 24),
+                activeIcon: Icon(Icons.sports_rounded, size: 26),
                 label: 'Đối thủ',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.emoji_events_outlined),
-                activeIcon: Icon(Icons.emoji_events),
+                icon: Icon(Icons.emoji_events_outlined, size: 24),
+                activeIcon: Icon(Icons.emoji_events_rounded, size: 26),
                 label: 'Giải đấu',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.business_outlined),
-                activeIcon: Icon(Icons.business),
+                icon: Icon(Icons.groups_outlined, size: 24),
+                activeIcon: Icon(Icons.groups_rounded, size: 26),
                 label: 'Câu lạc bộ',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.person_outline),
-                activeIcon: Icon(Icons.person),
+                icon: Icon(Icons.person_outline_rounded, size: 24),
+                activeIcon: Icon(Icons.person_rounded, size: 26),
                 label: 'Cá nhân',
               ),
             ],
+            ),
           ),
         ),
       ),
