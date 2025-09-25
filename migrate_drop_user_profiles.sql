@@ -1,12 +1,12 @@
 -- MIGRATION: DROP USER_PROFILES TABLE AND FIX CONSTRAINTS
--- This script will remove user_profiles table and fix all related issues
+-- This script will remove users table and fix all related issues
 
--- 1. Drop all foreign key constraints related to user_profiles
+-- 1. Drop all foreign key constraints related to users
 DO $$
 DECLARE
     constraint_record RECORD;
 BEGIN
-    -- Find and drop all foreign key constraints pointing to or from user_profiles
+    -- Find and drop all foreign key constraints pointing to or from users
     FOR constraint_record IN 
         SELECT tc.constraint_name, tc.table_name
         FROM information_schema.table_constraints AS tc 
@@ -17,7 +17,7 @@ BEGIN
             ON ccu.constraint_name = tc.constraint_name
             AND ccu.table_schema = tc.table_schema
         WHERE tc.constraint_type = 'FOREIGN KEY' 
-        AND (tc.table_name = 'user_profiles' OR ccu.table_name = 'user_profiles')
+        AND (tc.table_name = 'users' OR ccu.table_name = 'users')
     LOOP
         EXECUTE format('ALTER TABLE %I DROP CONSTRAINT IF EXISTS %I CASCADE', 
                       constraint_record.table_name, constraint_record.constraint_name);
@@ -26,11 +26,11 @@ BEGIN
     END LOOP;
 END $$;
 
--- 2. Drop user_profiles table completely
-DROP TABLE IF EXISTS user_profiles CASCADE;
+-- 2. Drop users table completely
+DROP TABLE IF EXISTS users CASCADE;
 
 -- 3. Ensure users table has all necessary columns for our app
--- Add any missing columns that might have been in user_profiles
+-- Add any missing columns that might have been in users
 ALTER TABLE users ADD COLUMN IF NOT EXISTS latitude DECIMAL(10,8);
 ALTER TABLE users ADD COLUMN IF NOT EXISTS longitude DECIMAL(11,8);
 ALTER TABLE users ADD COLUMN IF NOT EXISTS location_name TEXT;
@@ -69,12 +69,12 @@ WHERE spa_points IS NULL
 -- 6. Verification
 SELECT 'USER_PROFILES MIGRATION COMPLETED!' as status;
 
--- Check that user_profiles is gone
+-- Check that users is gone
 SELECT 
     CASE 
-        WHEN EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'user_profiles') 
-        THEN '❌ user_profiles table still exists!'
-        ELSE '✅ user_profiles table successfully removed'
+        WHEN EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'users') 
+        THEN '❌ users table still exists!'
+        ELSE '✅ users table successfully removed'
     END as user_profiles_status;
 
 -- Check users table structure
@@ -84,12 +84,12 @@ SELECT
 FROM information_schema.columns 
 WHERE table_name = 'users';
 
--- Check for any remaining foreign key constraints mentioning user_profiles
+-- Check for any remaining foreign key constraints mentioning users
 SELECT 
     CASE 
         WHEN COUNT(*) > 0 
-        THEN '❌ Found ' || COUNT(*) || ' remaining user_profiles constraints'
-        ELSE '✅ No user_profiles constraints remaining'
+        THEN '❌ Found ' || COUNT(*) || ' remaining users constraints'
+        ELSE '✅ No users constraints remaining'
     END as constraint_status
 FROM information_schema.table_constraints AS tc 
 JOIN information_schema.key_column_usage AS kcu
@@ -97,7 +97,7 @@ JOIN information_schema.key_column_usage AS kcu
 JOIN information_schema.constraint_column_usage AS ccu
     ON ccu.constraint_name = tc.constraint_name
 WHERE tc.constraint_type = 'FOREIGN KEY' 
-AND (tc.table_name = 'user_profiles' OR ccu.table_name = 'user_profiles');
+AND (tc.table_name = 'users' OR ccu.table_name = 'users');
 
 -- Show current users count
 SELECT 

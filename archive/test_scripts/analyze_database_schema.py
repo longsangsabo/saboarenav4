@@ -47,7 +47,7 @@ def get_database_schema():
                 'users', 'tournaments', 'clubs', 'posts', 'matches', 
                 'achievements', 'comments', 'post_likes', 'user_achievements',
                 'tournament_participants', 'club_members', 'notifications',
-                'user_profiles', 'match_results', 'tournament_matches',
+                'users', 'match_results', 'tournament_matches',
                 'club_tournaments', 'user_stats', 'rankings'
             ]
             

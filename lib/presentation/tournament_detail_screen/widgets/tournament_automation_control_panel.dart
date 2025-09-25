@@ -13,9 +13,9 @@ class TournamentAutomationControlPanel extends StatefulWidget {
   final Tournament tournament;
 
   const TournamentAutomationControlPanel({
-    Key? key,
+    super.key,
     required this.tournament,
-  }) : super(key: key);
+  });
 
   @override
   State<TournamentAutomationControlPanel> createState() => _TournamentAutomationControlPanelState();
@@ -32,7 +32,7 @@ class _TournamentAutomationControlPanelState extends State<TournamentAutomationC
   bool _isAutomationActive = false;
   bool _isLoading = false;
   Map<String, dynamic> _automationStatus = {};
-  List<Map<String, dynamic>> _automationLogs = [];
+  final List<Map<String, dynamic>> _automationLogs = [];
 
   @override
   void initState() {
@@ -180,7 +180,7 @@ class _TournamentAutomationControlPanelState extends State<TournamentAutomationC
           Switch(
             value: _isAutomationActive,
             onChanged: _toggleAutomation,
-            activeColor: Colors.green[600],
+            activeThumbColor: Colors.green[600],
           ),
           SizedBox(width: 2.w),
           IconButton(
@@ -439,7 +439,7 @@ class _TournamentAutomationControlPanelState extends State<TournamentAutomationC
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: Colors.blue[600],
+            activeThumbColor: Colors.blue[600],
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
         ],
@@ -485,7 +485,7 @@ class _TournamentAutomationControlPanelState extends State<TournamentAutomationC
                 ),
               )
             else
-              ...scheduledActions.map((action) => _buildScheduledActionItem(action)).toList(),
+              ...scheduledActions.map((action) => _buildScheduledActionItem(action)),
           ],
         ),
       ),
@@ -577,7 +577,7 @@ class _TournamentAutomationControlPanelState extends State<TournamentAutomationC
               ],
             ),
             SizedBox(height: 3.w),
-            Container(
+            SizedBox(
               height: 30.h,
               child: _automationLogs.isEmpty
                   ? Center(
@@ -766,7 +766,7 @@ class _TournamentAutomationControlPanelState extends State<TournamentAutomationC
 
   void _updateAutomationSetting(String setting, bool value) {
     setState(() {
-      _automationStatus[setting + '_automation'] = value;
+      _automationStatus['${setting}_automation'] = value;
     });
     _addLog('${setting.toUpperCase()} automation ${value ? 'enabled' : 'disabled'}', 'success');
   }

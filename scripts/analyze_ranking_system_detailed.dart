@@ -48,7 +48,7 @@ class RankingSystemAnalyzer {
     try {
       // Get user profiles with ELO data
       final response = await http.get(
-        Uri.parse('$supabaseUrl/rest/v1/user_profiles?select=*&limit=20'),
+        Uri.parse('$supabaseUrl/rest/v1/users?select=*&limit=20'),
         headers: headers,
       );
 
@@ -125,7 +125,7 @@ class RankingSystemAnalyzer {
     try {
       // Get user profiles to analyze tier distribution
       final response = await http.get(
-        Uri.parse('$supabaseUrl/rest/v1/user_profiles?select=elo_rating,rank,total_matches&limit=50'),
+        Uri.parse('$supabaseUrl/rest/v1/users?select=elo_rating,rank,total_matches&limit=50'),
         headers: headers,
       );
 
@@ -336,7 +336,7 @@ class RankingSystemAnalyzer {
     try {
       // Get top players for leaderboard analysis
       final response = await http.get(
-        Uri.parse('$supabaseUrl/rest/v1/user_profiles?select=username,elo_rating,total_matches,wins,losses&order=elo_rating.desc&limit=10'),
+        Uri.parse('$supabaseUrl/rest/v1/users?select=username,elo_rating,total_matches,wins,losses&order=elo_rating.desc&limit=10'),
         headers: headers,
       );
 

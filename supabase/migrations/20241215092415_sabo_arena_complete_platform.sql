@@ -13,7 +13,7 @@ CREATE TYPE public.post_type AS ENUM ('text', 'image', 'video', 'tournament_shar
 -- 2. CORE TABLES
 
 -- User profiles (Critical intermediary table for PostgREST compatibility)
-CREATE TABLE public.user_profiles (
+CREATE TABLE public.users (
     id UUID PRIMARY KEY REFERENCES auth.users(id),
     email TEXT NOT NULL UNIQUE,
     full_name TEXT NOT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE public.user_profiles (
 -- Clubs
 CREATE TABLE public.clubs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    owner_id UUID REFERENCES public.user_profiles(id) ON DELETE CASCADE,
+    owner_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     description TEXT,
     address TEXT,
@@ -66,7 +66,7 @@ CREATE TABLE public.clubs (
 CREATE TABLE public.club_members (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     club_id UUID REFERENCES public.clubs(id) ON DELETE CASCADE,
-    user_id UUID REFERENCES public.user_profiles(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
     joined_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     is_favorite BOOLEAN DEFAULT false,
     UNIQUE(club_id, user_id)
@@ -76,7 +76,7 @@ CREATE TABLE public.club_members (
 CREATE TABLE public.tournaments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     club_id UUID REFERENCES public.clubs(id) ON DELETE CASCADE,
-    organizer_id UUID REFERENCES public.user_profiles(id) ON DELETE CASCADE,
+    organizer_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
     title TEXT NOT NULL,
     description TEXT,
     tournament_type TEXT DEFAULT 'single_elimination',
@@ -102,7 +102,7 @@ CREATE TABLE public.tournaments (
 CREATE TABLE public.tournament_participants (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tournament_id UUID REFERENCES public.tournaments(id) ON DELETE CASCADE,
-    user_id UUID REFERENCES public.user_profiles(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
     registered_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     payment_status TEXT DEFAULT 'pending',
     seed_number INTEGER,
@@ -114,9 +114,9 @@ CREATE TABLE public.tournament_participants (
 CREATE TABLE public.matches (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tournament_id UUID REFERENCES public.tournaments(id) ON DELETE CASCADE,
-    player1_id UUID REFERENCES public.user_profiles(id) ON DELETE CASCADE,
-    player2_id UUID REFERENCES public.user_profiles(id),
-    winner_id UUID REFERENCES public.user_profiles(id),
+    player1_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
+    player2_id UUID REFERENCES public.users(id),
+    winner_id UUID REFERENCES public.users(id),
     round_number INTEGER NOT NULL,
     match_number INTEGER NOT NULL,
     scheduled_time TIMESTAMPTZ,
@@ -133,7 +133,7 @@ CREATE TABLE public.matches (
 -- Social posts
 CREATE TABLE public.posts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID REFERENCES public.user_profiles(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
     content TEXT,
     post_type public.post_type DEFAULT 'text'::public.post_type,
     image_urls TEXT[],
@@ -153,7 +153,7 @@ CREATE TABLE public.posts (
 CREATE TABLE public.post_interactions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     post_id UUID REFERENCES public.posts(id) ON DELETE CASCADE,
-    user_id UUID REFERENCES public.user_profiles(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
     interaction_type TEXT NOT NULL, -- 'like', 'share'
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(post_id, user_id, interaction_type)
@@ -163,7 +163,7 @@ CREATE TABLE public.post_interactions (
 CREATE TABLE public.comments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     post_id UUID REFERENCES public.posts(id) ON DELETE CASCADE,
-    user_id UUID REFERENCES public.user_profiles(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
     parent_comment_id UUID REFERENCES public.comments(id),
     content TEXT NOT NULL,
     like_count INTEGER DEFAULT 0,
@@ -174,8 +174,8 @@ CREATE TABLE public.comments (
 -- Followers/Following
 CREATE TABLE public.user_follows (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    follower_id UUID REFERENCES public.user_profiles(id) ON DELETE CASCADE,
-    following_id UUID REFERENCES public.user_profiles(id) ON DELETE CASCADE,
+    follower_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
+    following_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(follower_id, following_id)
 );
@@ -196,7 +196,7 @@ CREATE TABLE public.achievements (
 -- User achievements
 CREATE TABLE public.user_achievements (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID REFERENCES public.user_profiles(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
     achievement_id UUID REFERENCES public.achievements(id) ON DELETE CASCADE,
     earned_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     tournament_id UUID REFERENCES public.tournaments(id),
@@ -207,7 +207,7 @@ CREATE TABLE public.user_achievements (
 CREATE TABLE public.club_reviews (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     club_id UUID REFERENCES public.clubs(id) ON DELETE CASCADE,
-    user_id UUID REFERENCES public.user_profiles(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
     rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
     review_text TEXT,
     visit_date DATE,
@@ -217,9 +217,9 @@ CREATE TABLE public.club_reviews (
 );
 
 -- 3. INDEXES FOR PERFORMANCE
-CREATE INDEX idx_user_profiles_username ON public.user_profiles(username);
-CREATE INDEX idx_user_profiles_role ON public.user_profiles(role);
-CREATE INDEX idx_user_profiles_skill_level ON public.user_profiles(skill_level);
+CREATE INDEX idx_users_username ON public.users(username);
+CREATE INDEX idx_users_role ON public.users(role);
+CREATE INDEX idx_users_skill_level ON public.users(skill_level);
 
 CREATE INDEX idx_clubs_owner_id ON public.clubs(owner_id);
 CREATE INDEX idx_clubs_location ON public.clubs(latitude, longitude);
@@ -265,7 +265,7 @@ SECURITY DEFINER
 LANGUAGE plpgsql
 AS $$
 BEGIN
-    INSERT INTO public.user_profiles (id, email, full_name, role)
+    INSERT INTO public.users (id, email, full_name, role)
     VALUES (
         NEW.id, 
         NEW.email, 
@@ -342,18 +342,18 @@ BEGIN
     -- Only update when match is completed and has a winner
     IF NEW.status = 'completed' AND NEW.winner_id IS NOT NULL THEN
         -- Update winner stats
-        UPDATE public.user_profiles 
+        UPDATE public.users 
         SET total_wins = total_wins + 1,
             ranking_points = ranking_points + 10
         WHERE id = NEW.winner_id;
         
         -- Update loser stats
         IF NEW.player1_id = NEW.winner_id THEN
-            UPDATE public.user_profiles 
+            UPDATE public.users 
             SET total_losses = total_losses + 1
             WHERE id = NEW.player2_id;
         ELSE
-            UPDATE public.user_profiles 
+            UPDATE public.users 
             SET total_losses = total_losses + 1
             WHERE id = NEW.player1_id;
         END IF;
@@ -363,7 +363,7 @@ END;
 $$;
 
 -- 5. ENABLE RLS
-ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.clubs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.club_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.tournaments ENABLE ROW LEVEL SECURITY;
@@ -379,9 +379,9 @@ ALTER TABLE public.club_reviews ENABLE ROW LEVEL SECURITY;
 
 -- 6. RLS POLICIES USING CORRECT PATTERNS
 
--- Pattern 1: Core user table (user_profiles)
-CREATE POLICY "users_manage_own_user_profiles"
-ON public.user_profiles
+-- Pattern 1: Core user table (users)
+CREATE POLICY "users_manage_own_users"
+ON public.users
 FOR ALL
 TO authenticated
 USING (id = auth.uid())
@@ -778,7 +778,7 @@ BEGIN
     DELETE FROM public.tournaments WHERE organizer_id = ANY(auth_user_ids_to_delete);
     DELETE FROM public.club_members WHERE user_id = ANY(auth_user_ids_to_delete);
     DELETE FROM public.clubs WHERE owner_id = ANY(auth_user_ids_to_delete);
-    DELETE FROM public.user_profiles WHERE id = ANY(auth_user_ids_to_delete);
+    DELETE FROM public.users WHERE id = ANY(auth_user_ids_to_delete);
 
     -- Delete auth.users last
     DELETE FROM auth.users WHERE id = ANY(auth_user_ids_to_delete);

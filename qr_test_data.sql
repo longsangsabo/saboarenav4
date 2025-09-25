@@ -2,7 +2,7 @@
 -- This creates a demo user that can be found by QR scanner
 
 -- Insert demo user for QR testing
-INSERT INTO user_profiles (
+INSERT INTO users (
     id,
     email,
     full_name,
@@ -59,7 +59,7 @@ INSERT INTO user_profiles (
     updated_at = NOW();
 
 -- Insert additional test users with different codes
-INSERT INTO user_profiles (
+INSERT INTO users (
     id,
     email,
     full_name,
@@ -145,6 +145,6 @@ SELECT
     qr_data,
     skill_level,
     elo_rating
-FROM user_profiles 
+FROM users 
 WHERE user_code IN ('SABO123456', 'SABO000001', 'SABO000002')
 ORDER BY user_code;

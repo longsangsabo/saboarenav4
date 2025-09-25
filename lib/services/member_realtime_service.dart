@@ -472,7 +472,7 @@ class MemberRealtimeService {
     try {
       final response = await _supabase
           .from('club_memberships')
-          .select('*, user_profiles(*)')
+          .select('*, users(*)')
           .eq('club_id', clubId)
           .order('joined_at', ascending: false);
 
@@ -490,7 +490,7 @@ class MemberRealtimeService {
     try {
       final response = await _supabase
           .from('membership_requests')
-          .select('*, user_profiles(*)')
+          .select('*, users(*)')
           .eq('club_id', clubId)
           .order('created_at', ascending: false);
 
@@ -508,7 +508,7 @@ class MemberRealtimeService {
     try {
       final response = await _supabase
           .from('chat_messages')
-          .select('*, user_profiles(*)')
+          .select('*, users(*)')
           .eq('room_id', roomId)
           .eq('is_deleted', false)
           .order('created_at', ascending: false)
@@ -547,7 +547,7 @@ class MemberRealtimeService {
     try {
       final response = await _supabase
           .from('member_activities')
-          .select('*, user_profiles(*)')
+          .select('*, users(*)')
           .eq('club_id', clubId)
           .order('created_at', ascending: false)
           .limit(100);

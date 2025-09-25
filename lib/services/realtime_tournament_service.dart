@@ -99,9 +99,9 @@ class RealTimeTournamentService {
           );
 
       // Subscribe to all channels
-      await tournamentChannel.subscribe();
-      await matchesChannel.subscribe();
-      await participantsChannel.subscribe();
+      tournamentChannel.subscribe();
+      matchesChannel.subscribe();
+      participantsChannel.subscribe();
 
       // Store subscriptions for cleanup
       _activeSubscriptions['tournament_$tournamentId'] = tournamentChannel;
@@ -173,14 +173,14 @@ class RealTimeTournamentService {
       final updateData = {
         'type': 'tournament_update',
         'event': eventType.name,
-        'tournament_id': newRecord['id'] ?? oldRecord?['id'],
+        'tournament_id': newRecord['id'] ?? oldRecord['id'],
         'new_data': newRecord,
         'old_data': oldRecord,
         'timestamp': DateTime.now().toIso8601String(),
       };
 
       // Detect specific changes
-      if (eventType == PostgresChangeEvent.update && oldRecord != null) {
+      if (eventType == PostgresChangeEvent.update) {
         final changes = _detectChanges(oldRecord, newRecord);
         updateData['changes'] = changes;
 
@@ -212,15 +212,15 @@ class RealTimeTournamentService {
       final updateData = {
         'type': 'match_update',
         'event': eventType.name,
-        'match_id': newRecord['id'] ?? oldRecord?['id'],
-        'tournament_id': newRecord['tournament_id'] ?? oldRecord?['tournament_id'],
+        'match_id': newRecord['id'] ?? oldRecord['id'],
+        'tournament_id': newRecord['tournament_id'] ?? oldRecord['tournament_id'],
         'new_data': newRecord,
         'old_data': oldRecord,
         'timestamp': DateTime.now().toIso8601String(),
       };
 
       // Detect specific changes for matches
-      if (eventType == PostgresChangeEvent.update && oldRecord != null) {
+      if (eventType == PostgresChangeEvent.update) {
         final changes = _detectChanges(oldRecord, newRecord);
         updateData['changes'] = changes;
 
@@ -264,9 +264,9 @@ class RealTimeTournamentService {
       final updateData = {
         'type': 'participant_update',
         'event': eventType.name,
-        'participant_id': newRecord['id'] ?? oldRecord?['id'],
-        'tournament_id': newRecord['tournament_id'] ?? oldRecord?['tournament_id'],
-        'user_id': newRecord['user_id'] ?? oldRecord?['user_id'],
+        'participant_id': newRecord['id'] ?? oldRecord['id'],
+        'tournament_id': newRecord['tournament_id'] ?? oldRecord['tournament_id'],
+        'user_id': newRecord['user_id'] ?? oldRecord['user_id'],
         'new_data': newRecord,
         'old_data': oldRecord,
         'timestamp': DateTime.now().toIso8601String(),
@@ -277,7 +277,7 @@ class RealTimeTournamentService {
         updateData['participant_joined'] = true;
       } else if (eventType == PostgresChangeEvent.delete) {
         updateData['participant_left'] = true;
-      } else if (eventType == PostgresChangeEvent.update && oldRecord != null) {
+      } else if (eventType == PostgresChangeEvent.update) {
         final changes = _detectChanges(oldRecord, newRecord);
         updateData['changes'] = changes;
 

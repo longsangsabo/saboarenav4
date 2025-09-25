@@ -32,26 +32,26 @@ Flutter SDK có vẻ bị lỗi, không thể chạy Dart scripts. Nhưng không
 Copy toàn bộ nội dung từ file `add_user_qr_system.sql` và paste vào SQL Editor:
 
 ```sql
--- Migration: Add QR Code system to user_profiles table
+-- Migration: Add QR Code system to users table
 -- Date: 2025-09-19
 -- Purpose: Store user_code and qr_data permanently in database for better performance and future features
 
--- Add user_code and qr_data columns to user_profiles table
-ALTER TABLE user_profiles 
+-- Add user_code and qr_data columns to users table
+ALTER TABLE users 
 ADD COLUMN IF NOT EXISTS user_code TEXT UNIQUE,
 ADD COLUMN IF NOT EXISTS qr_data TEXT,
 ADD COLUMN IF NOT EXISTS qr_generated_at TIMESTAMP WITH TIME ZONE;
 
 -- Create index for faster user_code lookups (important for QR scanning)
-CREATE INDEX IF NOT EXISTS idx_user_profiles_user_code ON user_profiles(user_code);
+CREATE INDEX IF NOT EXISTS idx_user_profiles_user_code ON users(user_code);
 
 -- Create index for QR data queries
-CREATE INDEX IF NOT EXISTS idx_user_profiles_qr_data ON user_profiles(qr_data);
+CREATE INDEX IF NOT EXISTS idx_user_profiles_qr_data ON users(qr_data);
 
 -- Add comments for documentation
-COMMENT ON COLUMN user_profiles.user_code IS 'Unique user code for QR sharing (e.g., SABO123ABC)';
-COMMENT ON COLUMN user_profiles.qr_data IS 'QR code data URL for profile sharing';
-COMMENT ON COLUMN user_profiles.qr_generated_at IS 'Timestamp when QR code was generated';
+COMMENT ON COLUMN users.user_code IS 'Unique user code for QR sharing (e.g., SABO123ABC)';
+COMMENT ON COLUMN users.qr_data IS 'QR code data URL for profile sharing';
+COMMENT ON COLUMN users.qr_generated_at IS 'Timestamp when QR code was generated';
 
 -- Function to auto-generate user_code for existing users
 CREATE OR REPLACE FUNCTION generate_user_codes_for_existing_users()
@@ -63,14 +63,14 @@ DECLARE
 BEGIN
     -- Loop through users without user_code
     FOR user_record IN 
-        SELECT id FROM user_profiles WHERE user_code IS NULL
+        SELECT id FROM users WHERE user_code IS NULL
     LOOP
         -- Generate unique code
         LOOP
             new_user_code := 'SABO' || LPAD(counter::TEXT, 6, '0');
             
             -- Check if code already exists
-            IF NOT EXISTS (SELECT 1 FROM user_profiles WHERE user_code = new_user_code) THEN
+            IF NOT EXISTS (SELECT 1 FROM users WHERE user_code = new_user_code) THEN
                 EXIT;
             END IF;
             
@@ -78,7 +78,7 @@ BEGIN
         END LOOP;
         
         -- Update user with new code
-        UPDATE user_profiles 
+        UPDATE users 
         SET 
             user_code = new_user_code,
             qr_data = 'https://saboarena.com/user/' || user_record.id,
@@ -112,14 +112,14 @@ BEGIN
         base_code := 'SABO' || UPPER(RIGHT(NEW.id::TEXT, 6));
         
         -- Check if base code is available
-        IF NOT EXISTS (SELECT 1 FROM user_profiles WHERE user_code = base_code) THEN
+        IF NOT EXISTS (SELECT 1 FROM users WHERE user_code = base_code) THEN
             new_user_code := base_code;
         ELSE
             -- Generate alternative with counter
             LOOP
                 new_user_code := 'SABO' || LPAD(counter::TEXT, 6, '0');
                 
-                IF NOT EXISTS (SELECT 1 FROM user_profiles WHERE user_code = new_user_code) THEN
+                IF NOT EXISTS (SELECT 1 FROM users WHERE user_code = new_user_code) THEN
                     EXIT;
                 END IF;
                 
@@ -138,15 +138,15 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create trigger to auto-generate user_code on INSERT
-DROP TRIGGER IF EXISTS trigger_auto_generate_user_code ON user_profiles;
+DROP TRIGGER IF EXISTS trigger_auto_generate_user_code ON users;
 CREATE TRIGGER trigger_auto_generate_user_code
-    BEFORE INSERT ON user_profiles
+    BEFORE INSERT ON users
     FOR EACH ROW
     EXECUTE FUNCTION auto_generate_user_code();
 
 -- Grant necessary permissions
-GRANT SELECT, UPDATE ON user_profiles TO authenticated;
-GRANT SELECT ON user_profiles TO anon;
+GRANT SELECT, UPDATE ON users TO authenticated;
+GRANT SELECT ON users TO anon;
 ```
 
 ### Bước 4: Click Run
@@ -163,11 +163,11 @@ SELECT
     COUNT(*) as total_users,
     COUNT(user_code) as users_with_qr_codes,
     ROUND(COUNT(user_code) * 100.0 / COUNT(*), 2) as coverage_percentage
-FROM user_profiles;
+FROM users;
 
 -- Show sample QR codes
 SELECT full_name, user_code, qr_data 
-FROM user_profiles 
+FROM users 
 WHERE user_code IS NOT NULL 
 LIMIT 5;
 ```
@@ -198,7 +198,7 @@ ShareService.shareUserProfile(userProfile);
 ## 🔧 NẾU CÓ LỖI:
 
 Nếu gặp lỗi khi chạy migration, hãy:
-1. Kiểm tra table `user_profiles` có tồn tại không
+1. Kiểm tra table `users` có tồn tại không
 2. Kiểm tra permissions của user
 3. Chạy từng phần của migration thay vì chạy tất cả một lúc
 

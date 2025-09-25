@@ -40,7 +40,7 @@ def get_table_structure(table_name):
 def check_user_tables():
     print("=== CHECKING USER-RELATED TABLES ===\n")
     
-    user_tables = ['users', 'user_profiles', 'profiles']
+    user_tables = ['users', 'users', 'profiles']
     
     for table in user_tables:
         try:

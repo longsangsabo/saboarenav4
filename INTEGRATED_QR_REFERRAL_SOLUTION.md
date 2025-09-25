@@ -112,7 +112,7 @@ class IntegratedQRScanService {
   static Future<Map<String, dynamic>?> _findUserByCode(String userCode) async {
     try {
       final response = await _supabase
-          .from('user_profiles')
+          .from('users')
           .select('*')
           .eq('user_code', userCode)
           .single();

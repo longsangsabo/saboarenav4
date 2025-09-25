@@ -204,13 +204,16 @@ class TournamentService {
 
       Map<String, dynamic> userProfiles = {};
       if (playerIds.isNotEmpty) {
+        print('🔍 TournamentService: Fetching profiles for ${playerIds.length} players');
         final profiles = await _supabase
-            .from('user_profiles')
+            .from('users')
             .select('id, full_name, avatar_url, elo_rating, rank')
             .inFilter('id', playerIds.toSet().toList());
         
+        print('📊 TournamentService: Found ${profiles.length} profiles');
         for (var profile in profiles) {
           userProfiles[profile['id']] = profile;
+          print('  Profile: ${profile['id']} - ${profile['full_name']}');
         }
       }
 

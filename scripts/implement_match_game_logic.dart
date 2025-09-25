@@ -214,8 +214,8 @@ CREATE TABLE IF NOT EXISTS scoring_formats (
 CREATE TABLE IF NOT EXISTS match_results (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   match_id UUID NOT NULL REFERENCES matches(id),
-  player_id UUID NOT NULL REFERENCES user_profiles(id),
-  opponent_id UUID NOT NULL REFERENCES user_profiles(id),
+  player_id UUID NOT NULL REFERENCES users(id),
+  opponent_id UUID NOT NULL REFERENCES users(id),
   game_type_id UUID NOT NULL REFERENCES game_types(id),
   scoring_format_id UUID NOT NULL REFERENCES scoring_formats(id),
   player_score INTEGER NOT NULL DEFAULT 0,

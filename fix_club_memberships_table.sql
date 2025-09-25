@@ -55,7 +55,7 @@ BEGIN
 
     -- Check if user is system admin
     SELECT (role = 'admin') INTO v_is_admin
-    FROM user_profiles 
+    FROM users 
     WHERE id = v_user_id;
 
     -- Get user's club if they're not admin
@@ -91,7 +91,7 @@ BEGIN
         )
     ) INTO v_requests
     FROM notifications n
-    JOIN user_profiles u ON n.user_id = u.id
+    JOIN users u ON n.user_id = u.id
     WHERE n.type = 'rank_change_request'
     AND (n.data->>'workflow_status') IN ('pending_club_review', 'pending_admin_review')
     AND (

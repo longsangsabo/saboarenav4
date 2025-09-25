@@ -146,15 +146,15 @@ CREATE TABLE challenge_configurations (
 ```sql
 CREATE TABLE challenge_matches (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  challenger_id UUID NOT NULL REFERENCES user_profiles(id),
-  challenged_id UUID NOT NULL REFERENCES user_profiles(id),
+  challenger_id UUID NOT NULL REFERENCES users(id),
+  challenged_id UUID NOT NULL REFERENCES users(id),
   challenge_config_id UUID REFERENCES challenge_configurations(id),
   spa_bet_amount INTEGER DEFAULT 0,
   handicap_applied DECIMAL(3,1) DEFAULT 0.0,
-  handicap_recipient UUID REFERENCES user_profiles(id),
+  handicap_recipient UUID REFERENCES users(id),
   challenger_score INTEGER DEFAULT 0,
   challenged_score INTEGER DEFAULT 0,
-  winner_id UUID REFERENCES user_profiles(id),
+  winner_id UUID REFERENCES users(id),
   match_status VARCHAR(20) DEFAULT 'PENDING',
   spa_payout INTEGER DEFAULT 0,
   platform_commission INTEGER DEFAULT 0,
@@ -167,7 +167,7 @@ CREATE TABLE challenge_matches (
 ```sql
 CREATE TABLE spa_transactions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES user_profiles(id),
+  user_id UUID NOT NULL REFERENCES users(id),
   transaction_type VARCHAR(20) NOT NULL,
   amount INTEGER NOT NULL,
   balance_before INTEGER NOT NULL,

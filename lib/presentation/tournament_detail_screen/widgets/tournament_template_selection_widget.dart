@@ -12,10 +12,10 @@ class TournamentTemplateSelectionWidget extends StatefulWidget {
   final String? clubId;
 
   const TournamentTemplateSelectionWidget({
-    Key? key,
+    super.key,
     required this.onTemplateSelected,
     this.clubId,
-  }) : super(key: key);
+  });
 
   @override
   State<TournamentTemplateSelectionWidget> createState() => _TournamentTemplateSelectionWidgetState();
@@ -141,13 +141,13 @@ class _TournamentTemplateSelectionWidgetState extends State<TournamentTemplateSe
 
   Widget _buildCategoryTabs() {
     if (_isLoading || _categories.isEmpty) {
-      return Container(
+      return SizedBox(
         height: 10.h,
         child: Center(child: CircularProgressIndicator()),
       );
     }
 
-    return Container(
+    return SizedBox(
       height: 10.h,
       child: TabBar(
         controller: _tabController,
@@ -359,7 +359,7 @@ class _TournamentTemplateSelectionWidgetState extends State<TournamentTemplateSe
         SizedBox(width: 2.w),
         _buildStatChip(
           Icons.star,
-          template['user_profiles']?['username'] ?? 'System',
+          template['users']?['username'] ?? 'System',
           Colors.orange,
         ),
         Spacer(),

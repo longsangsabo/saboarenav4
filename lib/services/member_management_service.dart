@@ -139,7 +139,7 @@ class MemberManagementService {
     try {
       var query = _supabase
           .from('membership_requests')
-          .select('*, user_profiles(*)')
+          .select('*, users(*)')
           .eq('club_id', clubId);
       
       if (status != null) {
@@ -245,9 +245,9 @@ class MemberManagementService {
     try {
       final response = await _supabase
           .from('club_memberships')
-          .select('*, user_profiles(*)')
+          .select('*, users(*)')
           .eq('club_id', clubId)
-          .or('user_profiles.display_name.ilike.%$searchQuery%,user_profiles.email.ilike.%$searchQuery%');
+          .or('users.display_name.ilike.%$searchQuery%,users.email.ilike.%$searchQuery%');
 
       if (limit != null && response.length > limit) {
         return List<Map<String, dynamic>>.from(response.sublist(0, limit));

@@ -1,21 +1,21 @@
 # ✅ DATABASE TABLE NAME FIXES COMPLETED
 
 ## 🎯 SUMMARY
-Successfully fixed all `user_profiles` references to `users` throughout the codebase.
+Successfully fixed all `users` references to `users` throughout the codebase.
 
 ## 🔍 WHAT WAS FIXED
 
 ### 1. **Core Services (lib/services/)**
-- ✅ **SocialService**: 4 occurrences `user_profiles` → `users`
-- ✅ **MatchService**: 18 occurrences `user_profiles` → `users` 
-- ✅ **ClubService**: 2 occurrences `user_profiles` → `users`
+- ✅ **SocialService**: 4 occurrences `users` → `users`
+- ✅ **MatchService**: 18 occurrences `users` → `users` 
+- ✅ **ClubService**: 2 occurrences `users` → `users`
 
 ### 2. **Foreign Key Relationships Fixed**
-- ✅ `posts`: `user_profiles!posts_user_id_fkey` → `users!posts_user_id_fkey`
-- ✅ `matches`: `user_profiles!matches_player1_id_fkey` → `users!matches_player1_id_fkey`
-- ✅ `matches`: `user_profiles!matches_player2_id_fkey` → `users!matches_player2_id_fkey`
-- ✅ `matches`: `user_profiles!matches_winner_id_fkey` → `users!matches_winner_id_fkey`
-- ✅ `club_members`: `user_profiles` → `users`
+- ✅ `posts`: `users!posts_user_id_fkey` → `users!posts_user_id_fkey`
+- ✅ `matches`: `users!matches_player1_id_fkey` → `users!matches_player1_id_fkey`
+- ✅ `matches`: `users!matches_player2_id_fkey` → `users!matches_player2_id_fkey`
+- ✅ `matches`: `users!matches_winner_id_fkey` → `users!matches_winner_id_fkey`
+- ✅ `club_members`: `users` → `users`
 
 ### 3. **Field Mappings Verified**
 - ✅ `full_name` (correct field in users table)
@@ -69,11 +69,11 @@ Successfully fixed all `user_profiles` references to `users` throughout the code
 
 ## 🔧 ROOT CAUSE ANALYSIS
 
-**Issue**: Code was querying `user_profiles` table but the actual database uses `users` table.
+**Issue**: Code was querying `users` table but the actual database uses `users` table.
 
 **Discovery Method**: Used service_role key to inspect actual database schema via REST API.
 
-**Solution**: Systematic replacement of all `user_profiles` references with `users` in service layer.
+**Solution**: Systematic replacement of all `users` references with `users` in service layer.
 
 ## ✅ VALIDATION COMPLETE
 

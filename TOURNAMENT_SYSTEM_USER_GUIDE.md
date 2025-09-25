@@ -354,7 +354,7 @@ if (user == null) {
 
 // Role-based access control
 final userProfile = await Supabase.instance.client
-    .from('user_profiles')
+    .from('users')
     .select('role, club_id')
     .eq('id', user.id)
     .single();
@@ -379,7 +379,7 @@ CREATE TABLE tournaments (
   status TEXT DEFAULT 'scheduled',
   max_participants INTEGER,
   club_id UUID REFERENCES clubs(id),
-  organizer_id UUID REFERENCES user_profiles(id),
+  organizer_id UUID REFERENCES users(id),
   start_date TIMESTAMPTZ,
   end_date TIMESTAMPTZ,
   registration_deadline TIMESTAMPTZ,
@@ -397,7 +397,7 @@ CREATE TABLE tournaments (
 CREATE TABLE tournament_participants (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tournament_id UUID REFERENCES tournaments(id) ON DELETE CASCADE,
-  user_id UUID REFERENCES user_profiles(id),
+  user_id UUID REFERENCES users(id),
   status TEXT DEFAULT 'registered',
   registration_time TIMESTAMPTZ DEFAULT NOW(),
   seed_position INTEGER,
@@ -417,12 +417,12 @@ CREATE TABLE matches (
   round INTEGER NOT NULL,
   match_number INTEGER,
   bracket_position TEXT, -- 'winner_1', 'loser_1', etc.
-  player1_id UUID REFERENCES user_profiles(id),
-  player2_id UUID REFERENCES user_profiles(id),
+  player1_id UUID REFERENCES users(id),
+  player2_id UUID REFERENCES users(id),
   player1_score INTEGER,
   player2_score INTEGER,
-  winner_id UUID REFERENCES user_profiles(id),
-  loser_id UUID REFERENCES user_profiles(id),
+  winner_id UUID REFERENCES users(id),
+  loser_id UUID REFERENCES users(id),
   status TEXT DEFAULT 'scheduled',
   scheduled_time TIMESTAMPTZ,
   completed_time TIMESTAMPTZ,
@@ -443,7 +443,7 @@ CREATE TABLE tournament_templates (
   club_id UUID REFERENCES clubs(id),
   is_public BOOLEAN DEFAULT false,
   usage_count INTEGER DEFAULT 0,
-  created_by UUID REFERENCES user_profiles(id),
+  created_by UUID REFERENCES users(id),
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 ```

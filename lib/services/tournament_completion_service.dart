@@ -4,13 +4,10 @@
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/constants/tournament_constants.dart';
-import '../models/tournament.dart';
-import '../models/user_profile.dart';
 import 'tournament_service.dart';
 import 'tournament_elo_service.dart';
 import 'social_service.dart';
 import 'notification_service.dart';
-import 'share_service.dart';
 import 'dart:math' as math;
 
 /// Service xử lý hoàn thành tournament và các tác vụ liên quan
@@ -249,7 +246,7 @@ class TournamentCompletionService {
         .from('tournament_participants')
         .select('''
           user_id,
-          user_profiles!inner(id, full_name, elo_rating, rank)
+          users!inner(id, full_name, elo_rating, rank)
         ''')
         .eq('tournament_id', tournamentId);
 
@@ -272,7 +269,7 @@ class TournamentCompletionService {
       standings.add({
         'position': 1,
         'participant_id': championId,
-        'participant_name': champion['user_profiles']['full_name'],
+        'participant_name': champion['users']['full_name'],
         'elimination_round': null, // Champion wasn't eliminated
         'matches_played': _countMatchesPlayed(championId, matches),
         'matches_won': _countMatchesWon(championId, matches),
@@ -289,7 +286,7 @@ class TournamentCompletionService {
       standings.add({
         'position': 2,
         'participant_id': runnerUpId,
-        'participant_name': runnerUp['user_profiles']['full_name'],
+        'participant_name': runnerUp['users']['full_name'],
         'elimination_round': matches.first['round_number'],
         'matches_played': _countMatchesPlayed(runnerUpId, matches),
         'matches_won': _countMatchesWon(runnerUpId, matches),
@@ -326,7 +323,7 @@ class TournamentCompletionService {
         standings.add({
           'position': currentPosition,
           'participant_id': playerId,
-          'participant_name': participant['user_profiles']['full_name'],
+          'participant_name': participant['users']['full_name'],
           'elimination_round': round,
           'matches_played': _countMatchesPlayed(playerId, matches),
           'matches_won': _countMatchesWon(playerId, matches),
@@ -345,7 +342,7 @@ class TournamentCompletionService {
         .from('tournament_participants')
         .select('''
           user_id,
-          user_profiles!inner(id, full_name, elo_rating, rank)
+          users!inner(id, full_name, elo_rating, rank)
         ''')
         .eq('tournament_id', tournamentId);
 
@@ -385,7 +382,7 @@ class TournamentCompletionService {
 
       standings.add({
         'participant_id': playerId,
-        'participant_name': participant['user_profiles']['full_name'],
+        'participant_name': participant['users']['full_name'],
         'matches_played': playerMatches.length,
         'matches_won': wins,
         'matches_lost': losses,
@@ -438,7 +435,7 @@ class TournamentCompletionService {
         .from('tournament_participants')
         .select('''
           user_id,
-          user_profiles!inner(id, full_name, elo_rating, rank)
+          users!inner(id, full_name, elo_rating, rank)
         ''')
         .eq('tournament_id', tournamentId);
 
@@ -446,7 +443,7 @@ class TournamentCompletionService {
       return {
         'position': entry.key + 1,
         'participant_id': entry.value['user_id'],
-        'participant_name': entry.value['user_profiles']['full_name'],
+        'participant_name': entry.value['users']['full_name'],
         'matches_played': 0,
         'matches_won': 0,
       };
@@ -549,13 +546,13 @@ class TournamentCompletionService {
         // Update user's SPA points (prize pool)
         // Get current spa_points first
         final currentPoints = await _supabase
-            .from('user_profiles')
+            .from('users')
             .select('spa_points')
             .eq('id', standing['participant_id'])
             .single();
         
         final newPoints = (currentPoints['spa_points'] ?? 0) + prizeAmount;
-        await _supabase.from('user_profiles').update({
+        await _supabase.from('users').update({
           'spa_points': newPoints,
         }).eq('id', standing['participant_id']);
 
@@ -629,7 +626,7 @@ class TournamentCompletionService {
     try {
       // Get current stats
       final userStats = await _supabase
-          .from('user_profiles')
+          .from('users')
           .select('total_tournaments, tournament_wins, tournament_podiums')
           .eq('id', participantId)
           .single();
@@ -648,7 +645,7 @@ class TournamentCompletionService {
       }
       
       // Update the stats
-      await _supabase.from('user_profiles').update(updates).eq('id', participantId);
+      await _supabase.from('users').update(updates).eq('id', participantId);
       
     } catch (e) {
       print('⚠️ Failed to update user stats for $participantId: $e');

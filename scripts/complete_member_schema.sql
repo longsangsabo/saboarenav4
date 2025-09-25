@@ -9,7 +9,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- =============================================
 -- 1. USER PROFILES TABLE
 -- =============================================
-CREATE TABLE IF NOT EXISTS public.user_profiles (
+CREATE TABLE IF NOT EXISTS public.users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
     email VARCHAR(255) UNIQUE,

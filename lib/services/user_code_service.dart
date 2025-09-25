@@ -13,7 +13,7 @@ class UserCodeService {
       
       // Check if code already exists (collision detection)
       final existingUser = await _supabase
-          .from('user_profiles')
+          .from('users')
           .select('id')
           .eq('user_code', baseCode)
           .maybeSingle();
@@ -41,7 +41,7 @@ class UserCodeService {
       
       // Update user profile with generated code
       await _supabase
-          .from('user_profiles')
+          .from('users')
           .update({
             'user_code': userCode,
             'qr_data': ShareService.generateUserQRData(UserProfile(
@@ -78,7 +78,7 @@ class UserCodeService {
   static Future<String?> getUserCode(String userId) async {
     try {
       final result = await _supabase
-          .from('user_profiles')
+          .from('users')
           .select('user_code')
           .eq('id', userId)
           .single();
@@ -96,7 +96,7 @@ class UserCodeService {
       final qrData = ShareService.generateUserQRData(user);
       
       await _supabase
-          .from('user_profiles')
+          .from('users')
           .update({
             'qr_data': qrData,
             'updated_at': DateTime.now().toIso8601String(),
@@ -114,7 +114,7 @@ class UserCodeService {
   static Future<UserProfile?> findUserByCode(String userCode) async {
     try {
       final result = await _supabase
-          .from('user_profiles')
+          .from('users')
           .select('*')
           .eq('user_code', userCode)
           .single();
@@ -132,7 +132,7 @@ class UserCodeService {
       final newCode = await generateUniqueUserCode(userId);
       
       await _supabase
-          .from('user_profiles')
+          .from('users')
           .update({
             'user_code': newCode,
             'updated_at': DateTime.now().toIso8601String(),
@@ -150,7 +150,7 @@ class UserCodeService {
   static Future<bool> isUserCodeAvailable(String userCode) async {
     try {
       final result = await _supabase
-          .from('user_profiles')
+          .from('users')
           .select('id')
           .eq('user_code', userCode)
           .maybeSingle();

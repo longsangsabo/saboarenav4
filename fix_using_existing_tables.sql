@@ -20,10 +20,10 @@ BEGIN
         RAISE EXCEPTION 'User not authenticated';
     END IF;
 
-    -- Check if user is system admin (try both users and user_profiles tables)
+    -- Check if user is system admin (try both users and users tables)
     SELECT COALESCE(
         (SELECT role = 'admin' FROM users WHERE id = v_user_id),
-        (SELECT role = 'admin' FROM user_profiles WHERE id = v_user_id),
+        (SELECT role = 'admin' FROM users WHERE id = v_user_id),
         false
     ) INTO v_is_admin;
 
@@ -55,17 +55,17 @@ BEGIN
             'user_id', n.user_id,
             'user_name', COALESCE(
                 (SELECT display_name FROM users WHERE id = n.user_id),
-                (SELECT full_name FROM user_profiles WHERE id = n.user_id),
+                (SELECT full_name FROM users WHERE id = n.user_id),
                 'Unknown User'
             ),
             'user_email', COALESCE(
                 (SELECT email FROM users WHERE id = n.user_id),
-                (SELECT email FROM user_profiles WHERE id = n.user_id),
+                (SELECT email FROM users WHERE id = n.user_id),
                 'unknown@email.com'
             ),
             'user_avatar', COALESCE(
                 (SELECT avatar_url FROM users WHERE id = n.user_id),
-                (SELECT avatar_url FROM user_profiles WHERE id = n.user_id)
+                (SELECT avatar_url FROM users WHERE id = n.user_id)
             ),
             'current_rank', (n.data->>'current_rank'),
             'requested_rank', (n.data->>'requested_rank'),

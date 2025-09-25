@@ -948,12 +948,7 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('🚀 Giải đấu đã bắt đầu!'),
-                  backgroundColor: Colors.green,
-                ),
-              );
+              _actuallyStartTournament();
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
             child: Text('Bắt đầu', style: TextStyle(color: Colors.white)),
@@ -961,6 +956,86 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
         ],
       ),
     );
+  }
+
+  Future<void> _actuallyStartTournament() async {
+    print('� SIMPLE: Starting tournament directly');
+    
+    try {
+      final supabase = Supabase.instance.client;
+      
+      // Get tournament participants
+      print('👥 SIMPLE: Getting participants...');
+      final participantsResponse = await supabase
+          .from('tournament_participants')
+          .select('user_id')
+          .eq('tournament_id', widget.tournamentId)
+          .eq('status', 'registered');
+
+      final participantIds = participantsResponse
+          .map<String>((p) => p['user_id'] as String)
+          .toList();
+
+      print('� SIMPLE: Found ${participantIds.length} participants');
+
+      if (participantIds.length < 2) {
+        throw Exception('Cần ít nhất 2 người chơi để bắt đầu giải đấu');
+      }
+
+      // Create simple first round matches
+      final List<Map<String, dynamic>> matches = [];
+      int matchCounter = 1;
+
+      // Pair participants for first round
+      for (int i = 0; i < participantIds.length - 1; i += 2) {
+        final player1Id = participantIds[i];
+        final player2Id = i + 1 < participantIds.length ? participantIds[i + 1] : null;
+
+        matches.add({
+          'tournament_id': widget.tournamentId,
+          'player1_id': player1Id,
+          'player2_id': player2Id,
+          'round_number': 1,
+          'match_number': matchCounter++,
+          'status': player2Id == null ? 'completed' : 'pending',
+          'winner_id': player2Id == null ? player1Id : null,
+          'player1_score': player2Id == null ? 2 : 0,
+          'player2_score': 0,
+        });
+
+        print('⚔️ SIMPLE: Match ${matchCounter - 1}: $player1Id vs ${player2Id ?? "BYE"}');
+      }
+
+      // Insert matches
+      print('� SIMPLE: Inserting ${matches.length} matches...');
+      await supabase.from('matches').insert(matches);
+      print('✅ SIMPLE: Matches inserted successfully');
+
+      // Update tournament status
+      await supabase
+          .from('tournaments')
+          .update({'status': 'in_progress'})
+          .eq('id', widget.tournamentId);
+
+      print('✅ SIMPLE: Tournament started successfully');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('🎉 Giải đấu đã bắt đầu! Tạo ${matches.length} trận đấu thành công!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      
+    } catch (e, stackTrace) {
+      print('❌ SIMPLE: Error starting tournament: $e');
+      print('❌ SIMPLE: Stack trace: $stackTrace');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('❌ Lỗi: $e'),
+          backgroundColor: AppTheme.errorLight,
+        ),
+      );
+    }
   }
 
   int _calculateTotalMatches(TournamentBracket bracket) {

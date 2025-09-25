@@ -318,16 +318,16 @@ CREATE TABLE IF NOT EXISTS match_types (
 -- Challenge Matches Table (Enhanced matches table for challenges)
 CREATE TABLE IF NOT EXISTS challenge_matches (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  challenger_id UUID NOT NULL REFERENCES user_profiles(id),
-  challenged_id UUID NOT NULL REFERENCES user_profiles(id),
+  challenger_id UUID NOT NULL REFERENCES users(id),
+  challenged_id UUID NOT NULL REFERENCES users(id),
   match_type_id UUID NOT NULL REFERENCES match_types(id),
   challenge_config_id UUID REFERENCES challenge_configurations(id),
   spa_bet_amount INTEGER DEFAULT 0,
   handicap_applied DECIMAL(3,1) DEFAULT 0.0,
-  handicap_recipient UUID REFERENCES user_profiles(id), -- Who gets the handicap
+  handicap_recipient UUID REFERENCES users(id), -- Who gets the handicap
   challenger_score INTEGER DEFAULT 0,
   challenged_score INTEGER DEFAULT 0,
-  winner_id UUID REFERENCES user_profiles(id),
+  winner_id UUID REFERENCES users(id),
   match_status VARCHAR(20) DEFAULT 'PENDING', -- PENDING, ACCEPTED, IN_PROGRESS, COMPLETED, CANCELLED
   game_type_id UUID REFERENCES game_types(id),
   scoring_format_id UUID REFERENCES scoring_formats(id),
@@ -347,7 +347,7 @@ CREATE TABLE IF NOT EXISTS challenge_matches (
 -- SPA Transaction History Table
 CREATE TABLE IF NOT EXISTS spa_transactions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES user_profiles(id),
+  user_id UUID NOT NULL REFERENCES users(id),
   transaction_type VARCHAR(20) NOT NULL, -- 'BET_PLACED', 'BET_WON', 'BET_LOST', 'COMMISSION', 'REFUND'
   amount INTEGER NOT NULL, -- Can be negative for losses
   balance_before INTEGER NOT NULL,
@@ -399,8 +399,8 @@ INSERT INTO handicap_rules (rank_difference_type, handicap_multiplier, descripti
 ('SUB_RANK_4', 2.0, '2 main ranks difference (e.g., K vs H)', 'Chênh lệch 2 main rank (vd: K vs H)')
 ON CONFLICT (rank_difference_type) DO NOTHING;
 
--- Add SPA balance to user_profiles if not exists
-ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS spa_balance INTEGER DEFAULT 1000;
+-- Add SPA balance to users if not exists
+ALTER TABLE users ADD COLUMN IF NOT EXISTS spa_balance INTEGER DEFAULT 1000;
 
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_challenge_matches_challenger_id ON challenge_matches(challenger_id);

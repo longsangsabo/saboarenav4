@@ -20,7 +20,7 @@ class MemberManagementService {
     try {
       var query = _supabase
           .from('club_memberships')
-          .select('*, user_profiles(*)');
+          .select('*, users(*)');
       
       query = query.eq('club_id', clubId);
       
@@ -152,7 +152,7 @@ class MemberManagementService {
         query += '&status=eq.$status';
       }
 
-      query += '&select=*,user_profiles(*)&order=created_at.desc';
+      query += '&select=*,users(*)&order=created_at.desc';
 
       final response = await http.get(
         Uri.parse(query),
@@ -347,7 +347,7 @@ class MemberManagementService {
         query += '&offset=$offset';
       }
 
-      query += '&select=*,user_profiles(*)&order=created_at.desc';
+      query += '&select=*,users(*)&order=created_at.desc';
 
       final response = await http.get(
         Uri.parse(query),
@@ -413,7 +413,7 @@ class MemberManagementService {
         query += '&is_published=eq.$isPublished';
       }
 
-      query += '&select=*,user_profiles(*)&order=published_at.desc';
+      query += '&select=*,users(*)&order=published_at.desc';
 
       final response = await http.get(
         Uri.parse(query),
@@ -750,7 +750,7 @@ class MemberManagementService {
       }
 
       // Include user profile data for search
-      query += '&select=*,user_profiles(*)';
+      query += '&select=*,users(*)';
 
       final response = await http.get(
         Uri.parse(query),
@@ -763,7 +763,7 @@ class MemberManagementService {
         // Apply text search filter if provided
         if (searchTerm != null && searchTerm.isNotEmpty) {
           data = data.where((member) {
-            final profile = member['user_profiles'];
+            final profile = member['users'];
             if (profile == null) return false;
             
             final name = (profile['display_name'] ?? '').toLowerCase();

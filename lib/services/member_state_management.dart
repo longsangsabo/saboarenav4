@@ -502,7 +502,7 @@ class MemberSelectors {
     if (state.searchQuery.isNotEmpty) {
       final query = state.searchQuery.toLowerCase();
       filteredMembers = filteredMembers.where((member) {
-        final profile = member['user_profiles'];
+        final profile = member['users'];
         if (profile == null) return false;
 
         final name = (profile['display_name'] ?? '').toLowerCase();

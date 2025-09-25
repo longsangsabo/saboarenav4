@@ -6,7 +6,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/constants/tournament_constants.dart';
 import '../models/tournament.dart';
 import 'tournament_service.dart';
-import 'dart:convert';
 
 /// Service quản lý tournament templates và presets
 class TournamentTemplateService {
@@ -38,7 +37,7 @@ class TournamentTemplateService {
             usage_count,
             created_by,
             created_at,
-            user_profiles!created_by(username)
+            users!created_by(username)
           ''');
 
       if (category != null) {

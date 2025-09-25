@@ -25,7 +25,7 @@ def verify_supabase_database():
         'rank_requests', 'user_preferences', 'tournament_matches',
         'match_results', 'user_stats', 'rankings', 'leaderboards',
         'prizes', 'tournament_prizes', 'user_tournaments', 'club_tournaments',
-        'user_profiles', 'social_posts', 'user_follows', 'post_comments',
+        'users', 'social_posts', 'user_follows', 'post_comments',
         
         # System tables that might exist
         'auth.users', 'storage.objects', 'storage.buckets',

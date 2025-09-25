@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:sabo_arena/core/app_export.dart';
 import 'package:sabo_arena/theme/app_theme.dart';
 import 'package:sabo_arena/services/tournament_service.dart';
@@ -36,12 +37,25 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
     });
 
     try {
+      print('🔄 MatchManagementTab: Loading matches for tournament ${widget.tournamentId}');
       final matches = await _tournamentService.getTournamentMatches(widget.tournamentId);
+      print('📊 MatchManagementTab: Loaded ${matches.length} matches');
+      
+      // Debug first match
+      if (matches.isNotEmpty) {
+        final firstMatch = matches[0];
+        print('🎯 MatchManagementTab: First match data:');
+        print('   matchId: ${firstMatch['matchId']}');
+        print('   player1: ${firstMatch['player1']}');
+        print('   player2: ${firstMatch['player2']}');
+      }
+      
       setState(() {
         _matches = matches;
         _isLoading = false;
       });
     } catch (e) {
+      print('❌ MatchManagementTab: Error loading matches: $e');
       setState(() {
         _errorMessage = 'Lỗi tải trận đấu: ${e.toString()}';
         _isLoading = false;
@@ -278,7 +292,7 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
                 child: _buildPlayerInfo(
                   match['player1'], 
                   player1Score, 
-                  match['winner_id'] == match['player1_id'],
+                  match['winner'] == 'player1',
                 ),
               ),
               
@@ -312,7 +326,7 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
                 child: _buildPlayerInfo(
                   match['player2'], 
                   player2Score, 
-                  match['winner_id'] == match['player2_id'],
+                  match['winner'] == 'player2',
                   isPlayer2: true,
                 ),
               ),
@@ -401,7 +415,7 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
         crossAxisAlignment: isPlayer2 ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
           Text(
-            player['full_name'] ?? player['email'] ?? 'Unknown',
+            player['name'] ?? player['full_name'] ?? player['email'] ?? 'Unknown',
             style: TextStyle(
               fontSize: 12.sp,
               fontWeight: FontWeight.w600,
@@ -490,8 +504,12 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
 
   Future<void> _startMatch(Map<String, dynamic> match) async {
     try {
-      // Update match status to in_progress
-      // This would be implemented in TournamentService
+      print('🚀 Starting match: ${match["matchId"]}');
+      
+      // Use BracketService to start match with RPC function
+      await _bracketService.startMatch(match['matchId']);
+
+      print('✅ Match started successfully');
       
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -502,6 +520,7 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
       
       _loadMatches(); // Refresh
     } catch (e) {
+      print('❌ Error starting match: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Lỗi bắt đầu trận đấu: ${e.toString()}'),
@@ -543,23 +562,36 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
     String winnerId,
   ) async {
     try {
+      print('🎯 MatchManagementTab: Updating match result: ${match["matchId"]}');
+      print('   Scores: $player1Score - $player2Score');
+      print('   Winner: $winnerId');
+      
       // Update match result in database using BracketService
-      await _bracketService.saveMatchResultToDatabase(
-        matchId: match['id'],
+      final success = await _bracketService.saveMatchResultToDatabase(
+        matchId: match['matchId'], // Use matchId not id
         winnerId: winnerId,
         player1Score: player1Score,
         player2Score: player2Score,
       );
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Đã cập nhật kết quả trận đấu'),
-          backgroundColor: AppTheme.successLight,
-        ),
-      );
+      print('✅ MatchManagementTab: Match update success: $success');
       
-      _loadMatches(); // Refresh
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Đã cập nhật kết quả trận đấu'),
+            backgroundColor: AppTheme.successLight,
+          ),
+        );
+        
+        print('🔄 MatchManagementTab: Refreshing matches after update...');
+        await _loadMatches(); // Refresh and wait for completion
+        print('✅ MatchManagementTab: Refresh completed');
+      } else {
+        throw Exception('Update failed - RPC returned false');
+      }
     } catch (e) {
+      print('❌ Error updating match result: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Lỗi cập nhật kết quả: ${e.toString()}'),
@@ -628,7 +660,7 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
                 Expanded(
                   flex: 2,
                   child: Text(
-                    player1?['full_name'] ?? 'Player 1',
+                    player1?['name'] ?? player1?['full_name'] ?? 'Player 1',
                     style: TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
@@ -653,7 +685,7 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
                 Expanded(
                   flex: 2,
                   child: Text(
-                    player2?['full_name'] ?? 'Player 2',
+                    player2?['name'] ?? player2?['full_name'] ?? 'Player 2',
                     style: TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
@@ -740,7 +772,7 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
 
     setState(() {
       if (player1Score > player2Score) {
-        _selectedWinnerId = widget.match['player1_id'];
+        _selectedWinnerId = widget.match['player1']?['id'];
       } else if (player2Score > player1Score) {
         _selectedWinnerId = widget.match['player2_id'];
       } else {
@@ -750,10 +782,10 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
   }
 
   String _getWinnerName() {
-    if (_selectedWinnerId == widget.match['player1_id']) {
-      return widget.match['player1']?['full_name'] ?? 'Player 1';
-    } else if (_selectedWinnerId == widget.match['player2_id']) {
-      return widget.match['player2']?['full_name'] ?? 'Player 2';
+    if (_selectedWinnerId == widget.match['player1']?['id']) {
+      return widget.match['player1']?['name'] ?? widget.match['player1']?['full_name'] ?? 'Player 1';
+    } else if (_selectedWinnerId == widget.match['player2']?['id']) {
+      return widget.match['player2']?['name'] ?? widget.match['player2']?['full_name'] ?? 'Player 2';
     }
     return '';
   }

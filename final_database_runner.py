@@ -25,7 +25,7 @@ def connect_and_fix_database():
     print("\nOr copy and paste this SQL:")
     
     sql_script = """-- FINAL FIX - Based on actual database schema inspection
--- Using real tables: clubs, club_members, users (NOT club_memberships or user_profiles)
+-- Using real tables: clubs, club_members, users (NOT club_memberships or users)
 
 DROP FUNCTION IF EXISTS get_pending_rank_change_requests();
 

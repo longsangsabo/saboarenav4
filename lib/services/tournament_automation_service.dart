@@ -115,28 +115,26 @@ class TournamentAutomationService {
       Duration(minutes: 15), // 15 minutes before deadline
     ];
 
-    if (tournament.registrationDeadline != null) {
-      for (final interval in reminderIntervals) {
-        final reminderTime = tournament.registrationDeadline!.subtract(interval);
-        
-        if (reminderTime.isAfter(DateTime.now())) {
-          Timer(reminderTime.difference(DateTime.now()), () async {
-            await _sendRegistrationReminder(tournament.id, interval);
-          });
-        }
-      }
-
-      // Schedule registration closure
-      final closureDelay = tournament.registrationDeadline!.difference(DateTime.now());
-      if (closureDelay.isPositive) {
-        Timer(closureDelay, () async {
-          await _closeRegistration(tournament.id);
+    for (final interval in reminderIntervals) {
+      final reminderTime = tournament.registrationDeadline!.subtract(interval);
+      
+      if (reminderTime.isAfter(DateTime.now())) {
+        Timer(reminderTime.difference(DateTime.now()), () async {
+          await _sendRegistrationReminder(tournament.id, interval);
         });
-        
-        print('⏰ Registration closure scheduled in ${closureDelay.inMinutes} minutes');
       }
     }
-  }
+
+    // Schedule registration closure
+    final closureDelay = tournament.registrationDeadline!.difference(DateTime.now());
+    if (closureDelay.isPositive) {
+      Timer(closureDelay, () async {
+        await _closeRegistration(tournament.id);
+      });
+      
+      print('⏰ Registration closure scheduled in ${closureDelay.inMinutes} minutes');
+    }
+    }
 
   Future<void> _openRegistration(String tournamentId) async {
     try {
@@ -216,34 +214,32 @@ class TournamentAutomationService {
   // ==================== TOURNAMENT START AUTOMATION ====================
 
   Future<void> _setupStartAutomation(Tournament tournament) async {
-    if (tournament.startDate != null) {
-      final delay = tournament.startDate!.difference(DateTime.now());
-      
-      if (delay.isPositive) {
-        _activeTimers[tournament.id] = Timer(delay, () async {
-          await _startTournament(tournament.id);
-        });
-        
-        print('🏁 Tournament start scheduled in ${delay.inMinutes} minutes');
-
-        // Schedule pre-start notifications
-        final preStartIntervals = [Duration(minutes: 30), Duration(minutes: 10), Duration(minutes: 5)];
-        
-        for (final interval in preStartIntervals) {
-          final notificationTime = tournament.startDate!.subtract(interval);
-          
-          if (notificationTime.isAfter(DateTime.now())) {
-            Timer(notificationTime.difference(DateTime.now()), () async {
-              await _sendPreStartNotification(tournament.id, interval);
-            });
-          }
-        }
-      } else {
-        // Start immediately if past due
+    final delay = tournament.startDate!.difference(DateTime.now());
+    
+    if (delay.isPositive) {
+      _activeTimers[tournament.id] = Timer(delay, () async {
         await _startTournament(tournament.id);
+      });
+      
+      print('🏁 Tournament start scheduled in ${delay.inMinutes} minutes');
+
+      // Schedule pre-start notifications
+      final preStartIntervals = [Duration(minutes: 30), Duration(minutes: 10), Duration(minutes: 5)];
+      
+      for (final interval in preStartIntervals) {
+        final notificationTime = tournament.startDate!.subtract(interval);
+        
+        if (notificationTime.isAfter(DateTime.now())) {
+          Timer(notificationTime.difference(DateTime.now()), () async {
+            await _sendPreStartNotification(tournament.id, interval);
+          });
+        }
       }
+    } else {
+      // Start immediately if past due
+      await _startTournament(tournament.id);
     }
-  }
+    }
 
   Future<void> _startTournament(String tournamentId) async {
     try {

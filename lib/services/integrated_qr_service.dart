@@ -83,7 +83,7 @@ class IntegratedQRService {
     try {
       // Get user profile
       final userResponse = await _supabase
-          .from('user_profiles')
+          .from('users')
           .select('*')
           .eq('id', userId)
           .single();
@@ -95,7 +95,7 @@ class IntegratedQRService {
       
       // Update database with new QR data
       await _supabase
-          .from('user_profiles')
+          .from('users')
           .update({
             'user_code': qrData['user_code'],
             'qr_data': qrData['qr_data'],
@@ -197,7 +197,7 @@ class IntegratedQRService {
   static Future<Map<String, dynamic>?> _findUserByCode(String userCode) async {
     try {
       final response = await _supabase
-          .from('user_profiles')
+          .from('users')
           .select('*')
           .eq('user_code', userCode)
           .single();
@@ -213,7 +213,7 @@ class IntegratedQRService {
   static Future<Map<String, dynamic>?> getUserIntegratedQR(String userId) async {
     try {
       final userResponse = await _supabase
-          .from('user_profiles')
+          .from('users')
           .select('*')
           .eq('id', userId)
           .single();

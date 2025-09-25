@@ -1,7 +1,7 @@
 -- Fix database errors in SABO Arena
 -- This migration fixes the table reference mismatch and database function errors
 
--- Step 1: Fix the handle_new_user function to reference the correct table 'users' instead of 'user_profiles'
+-- Step 1: Fix the handle_new_user function to reference the correct table 'users' instead of 'users'
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -107,8 +107,8 @@ $$;
 
 -- Step 5: Update RLS policies to use correct table references
 -- Drop existing policies that might reference old table names
-DROP POLICY IF EXISTS "public_can_read_user_profiles" ON public.users;
-DROP POLICY IF EXISTS "users_manage_own_user_profiles" ON public.users;
+DROP POLICY IF EXISTS "public_can_read_users" ON public.users;
+DROP POLICY IF EXISTS "users_manage_own_users" ON public.users;
 
 -- Create updated RLS policies
 CREATE POLICY "public_can_read_users" ON public.users

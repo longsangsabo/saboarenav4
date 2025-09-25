@@ -57,12 +57,12 @@ def main():
         # Check club_members to see notification recipients
         print("\n🔍 Checking club admins for notifications...")
         club_id = tournament['club_id']
-        admins = supabase.table('club_members').select('user_id, role, user_profiles(full_name, email)').eq('club_id', club_id).eq('role', 'admin').execute()
+        admins = supabase.table('club_members').select('user_id, role, users(full_name, email)').eq('club_id', club_id).eq('role', 'admin').execute()
         
         if admins.data:
             print(f"👥 Found {len(admins.data)} club admins:")
             for admin in admins.data:
-                profile = admin.get('user_profiles', {})
+                profile = admin.get('users', {})
                 name = profile.get('full_name', 'Unknown') if profile else 'Unknown'
                 email = profile.get('email', 'No email') if profile else 'No email'
                 print(f"   - {name} ({email})")

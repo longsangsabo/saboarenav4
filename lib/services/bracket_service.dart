@@ -511,7 +511,7 @@ class BracketService {
     }
   }
 
-  /// Update match result in database
+  /// Update match result in database using direct table update
   Future<bool> saveMatchResultToDatabase({
     required String matchId,
     required String winnerId,
@@ -519,22 +519,62 @@ class BracketService {
     required int player2Score,
   }) async {
     try {
-      await _supabase
+      print('🎯 Updating match $matchId directly in matches table...');
+      print('   Winner: $winnerId');
+      print('   Scores: $player1Score - $player2Score');
+      
+      // Update match result directly in matches table
+      final result = await _supabase
           .from('matches')
           .update({
-            'winner_id': winnerId,
             'player1_score': player1Score,
             'player2_score': player2Score,
+            'winner_id': winnerId,
             'status': 'completed',
-            'end_time': DateTime.now().toIso8601String(),
+            'updated_at': DateTime.now().toIso8601String(),
           })
-          .eq('id', matchId);
+          .eq('id', matchId)
+          .select();
 
-      print('✅ Match result updated in database');
-      return true;
+      print('✅ Direct update response: $result');
+      
+      // Check if the update was successful
+      if (result.isNotEmpty) {
+        print('✅ Match result updated successfully');
+        return true;
+      } else {
+        print('❌ Match update failed: No rows affected');
+        throw Exception('Failed to update match: No rows affected');
+      }
     } catch (error) {
       print('❌ Error updating match result: $error');
       throw Exception('Failed to update match result: $error');
+    }
+  }
+
+  /// Start a match using RPC function
+  Future<bool> startMatch(String matchId) async {
+    try {
+      print('🎯 Starting match $matchId with RPC function...');
+      
+      // Use RPC function to start match
+      final result = await _supabase.rpc('start_match', params: {
+        'p_match_id': matchId,
+      });
+
+      print('✅ RPC function response: $result');
+      
+      // Check if the start was successful
+      if (result != null && result['success'] == true) {
+        print('✅ Match started successfully');
+        return true;
+      } else {
+        print('❌ Match start failed: ${result?['message'] ?? 'Unknown error'}');
+        throw Exception('Failed to start match: ${result?['message'] ?? 'Unknown error'}');
+      }
+    } catch (error) {
+      print('❌ Error starting match: $error');
+      throw Exception('Failed to start match: $error');
     }
   }
 }

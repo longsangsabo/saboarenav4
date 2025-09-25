@@ -74,7 +74,7 @@ class RegistrationQRService {
       
       // 4. Insert or update user profile
       final result = await _supabase
-          .from('user_profiles')
+          .from('users')
           .upsert(profileData)
           .select()
           .single();
@@ -105,7 +105,7 @@ class RegistrationQRService {
   static Future<Map<String, dynamic>?> getUserQRInfo(String userId) async {
     try {
       final result = await _supabase
-          .from('user_profiles')
+          .from('users')
           .select('user_code, qr_data, qr_generated_at, full_name, elo_rating, rank')
           .eq('id', userId)
           .single();
@@ -122,7 +122,7 @@ class RegistrationQRService {
     try {
       // Get current user data
       final userData = await _supabase
-          .from('user_profiles')
+          .from('users')
           .select('*')
           .eq('id', userId)
           .single();
@@ -134,7 +134,7 @@ class RegistrationQRService {
       
       // Update database
       await _supabase
-          .from('user_profiles')
+          .from('users')
           .update({
             'user_code': newUserCode,
             'qr_data': newQRData,
@@ -171,7 +171,7 @@ class RegistrationQRService {
         final userId = pathSegments[1];
         
         final result = await _supabase
-            .from('user_profiles')
+            .from('users')
             .select('*')
             .eq('id', userId)
             .single();
@@ -202,7 +202,7 @@ class RegistrationQRService {
   static Future<Map<String, dynamic>> getQRStats() async {
     try {
       final stats = await _supabase
-          .from('user_profiles')
+          .from('users')
           .select('user_code, qr_generated_at')
           .not('user_code', 'is', null);
       

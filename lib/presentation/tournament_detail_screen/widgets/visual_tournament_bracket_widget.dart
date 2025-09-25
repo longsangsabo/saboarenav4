@@ -452,7 +452,7 @@ class _VisualTournamentBracketWidgetState extends State<VisualTournamentBracketW
               SizedBox(height: 16.sp),
             ],
           );
-        }).toList(),
+        }),
       ],
     );
   }
@@ -480,7 +480,7 @@ class _VisualTournamentBracketWidgetState extends State<VisualTournamentBracketW
           final roundMatches = entry.value;
           
           return _buildSwissRound(roundNumber, roundMatches);
-        }).toList(),
+        }),
       ],
     );
   }
@@ -867,7 +867,7 @@ class _VisualTournamentBracketWidgetState extends State<VisualTournamentBracketW
           ...matches.map((match) => Container(
             margin: EdgeInsets.only(bottom: 4.sp),
             child: _buildMatchCard(match, color: Colors.purple),
-          )).toList(),
+          )),
         ],
       ),
     );
@@ -946,7 +946,7 @@ class _VisualTournamentBracketWidgetState extends State<VisualTournamentBracketW
       (p) => p['user_id'] == playerId,
       orElse: () => {},
     );
-    return participant['user_profiles']?['username'];
+    return participant['users']?['username'];
   }
 
   String _getEliminationRoundName(int roundNumber, int matchCount) {

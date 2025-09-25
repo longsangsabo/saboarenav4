@@ -101,7 +101,7 @@ class TournamentStatisticsService {
           id,
           registered_at,
           payment_status,
-          user_profiles!inner(
+          users!inner(
             id,
             username,
             skill_level,
@@ -131,7 +131,7 @@ class TournamentStatisticsService {
     final registrationTimeline = <String, int>{};
 
     for (final participant in participants) {
-      final profile = participant['user_profiles'];
+      final profile = participant['users'];
       final skillLevel = profile['skill_level'] ?? 'unknown';
       final eloRating = profile['elo_rating'] ?? 1200;
       final clubName = profile['clubs']?['name'] ?? 'Independent';
@@ -250,7 +250,7 @@ class TournamentStatisticsService {
           final_position,
           matches_won,
           matches_played,
-          user_profiles!inner(
+          users!inner(
             id,
             username,
             elo_rating,
@@ -278,7 +278,7 @@ class TournamentStatisticsService {
     final performanceBySkill = <String, Map<String, dynamic>>{};
     
     for (final participant in participantsWithStats) {
-      final skillLevel = participant['user_profiles']['skill_level'] ?? 'unknown';
+      final skillLevel = participant['users']['skill_level'] ?? 'unknown';
       final winRate = participant['matches_played'] > 0 
           ? (participant['matches_won'] / participant['matches_played']) * 100
           : 0;
@@ -307,13 +307,13 @@ class TournamentStatisticsService {
 
     return {
       'top_performers': topPerformers.take(10).map((p) => {
-        'user_id': p['user_profiles']['id'],
-        'username': p['user_profiles']['username'],
+        'user_id': p['users']['id'],
+        'username': p['users']['username'],
         'final_position': p['final_position'],
         'matches_won': p['matches_won'],
         'matches_played': p['matches_played'],
         'win_rate': p['matches_played'] > 0 ? (p['matches_won'] / p['matches_played']) * 100 : 0,
-        'elo_rating': p['user_profiles']['elo_rating'],
+        'elo_rating': p['users']['elo_rating'],
       }).toList(),
       'performance_by_skill_level': performanceBySkill,
       'total_participants_with_results': participantsWithStats.where((p) => p['final_position'] != null).length,
@@ -456,8 +456,9 @@ class TournamentStatisticsService {
     final distribution = <String, int>{};
     for (final elo in eloRatings) {
       String range;
-      if (elo < 1000) range = '< 1000';
-      else if (elo < 1200) range = '1000-1199';
+      if (elo < 1000) {
+        range = '< 1000';
+      } else if (elo < 1200) range = '1000-1199';
       else if (elo < 1400) range = '1200-1399';
       else if (elo < 1600) range = '1400-1599';
       else if (elo < 1800) range = '1600-1799';
@@ -473,8 +474,9 @@ class TournamentStatisticsService {
     final distribution = <String, int>{};
     for (final duration in durations) {
       String range;
-      if (duration < 15) range = '< 15 min';
-      else if (duration < 30) range = '15-29 min';
+      if (duration < 15) {
+        range = '< 15 min';
+      } else if (duration < 30) range = '15-29 min';
       else if (duration < 45) range = '30-44 min';
       else if (duration < 60) range = '45-59 min';
       else if (duration < 90) range = '60-89 min';

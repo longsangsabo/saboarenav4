@@ -192,7 +192,7 @@ class IntegratedRegistrationService {
       
       // Get referrer info
       final referrerResponse = await _supabase
-          .from('user_profiles')
+          .from('users')
           .select('full_name, elo_rating, rank')
           .eq('id', codeDetails['user_id'])
           .single();

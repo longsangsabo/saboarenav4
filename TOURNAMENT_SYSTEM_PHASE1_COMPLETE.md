@@ -91,7 +91,7 @@
 - ✅ `tournaments` table - Thông tin giải đấu
 - ✅ `tournament_participants` table - Người tham gia
 - ✅ `matches` table - Trận đấu
-- ✅ `user_profiles` table - Hồ sơ người dùng
+- ✅ `users` table - Hồ sơ người dùng
 - ✅ `posts` table - Bài viết cộng đồng
 - ✅ `notifications` table - Thông báo
 

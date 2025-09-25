@@ -210,7 +210,7 @@ class EloStatistics {
 ```sql
 CREATE TABLE elo_history (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES user_profiles(id),
+  user_id UUID NOT NULL REFERENCES users(id),
   match_id UUID REFERENCES matches(id),
   tournament_id UUID REFERENCES tournaments(id),
   elo_before INTEGER NOT NULL,
@@ -220,7 +220,7 @@ CREATE TABLE elo_history (
   base_change INTEGER NOT NULL,
   bonuses JSONB, -- {upset: 5, streak: 3, perfect: 5}
   match_type VARCHAR(20) NOT NULL,
-  opponent_id UUID REFERENCES user_profiles(id),
+  opponent_id UUID REFERENCES users(id),
   created_at TIMESTAMP DEFAULT NOW()
 );
 ```
@@ -228,7 +228,7 @@ CREATE TABLE elo_history (
 ### **elo_statistics table:**
 ```sql
 CREATE TABLE elo_statistics (
-  user_id UUID PRIMARY KEY REFERENCES user_profiles(id),
+  user_id UUID PRIMARY KEY REFERENCES users(id),
   current_elo INTEGER NOT NULL,
   peak_elo INTEGER NOT NULL,
   peak_elo_date TIMESTAMP,

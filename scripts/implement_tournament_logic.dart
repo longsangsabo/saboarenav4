@@ -372,7 +372,7 @@ CREATE TABLE IF NOT EXISTS prize_pools (
   total_amount DECIMAL(12,2),
   distribution_template VARCHAR(30) NOT NULL,
   custom_distribution JSONB, -- For custom percentage distributions
-  created_by UUID NOT NULL REFERENCES user_profiles(id),
+  created_by UUID NOT NULL REFERENCES users(id),
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -385,7 +385,7 @@ CREATE TABLE IF NOT EXISTS prize_distributions (
   amount DECIMAL(12,2) NOT NULL,
   percentage DECIMAL(5,2) NOT NULL,
   is_awarded BOOLEAN DEFAULT false,
-  awarded_to UUID REFERENCES user_profiles(id),
+  awarded_to UUID REFERENCES users(id),
   awarded_at TIMESTAMP,
   created_at TIMESTAMP DEFAULT NOW()
 );
@@ -393,7 +393,7 @@ CREATE TABLE IF NOT EXISTS prize_distributions (
 -- SPA Points Rewards Table
 CREATE TABLE IF NOT EXISTS spa_points_rewards (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES user_profiles(id),
+  user_id UUID NOT NULL REFERENCES users(id),
   tournament_id UUID NOT NULL REFERENCES tournaments(id),
   base_points INTEGER NOT NULL,
   position_multiplier DECIMAL(3,2) NOT NULL,
@@ -406,7 +406,7 @@ CREATE TABLE IF NOT EXISTS spa_points_rewards (
 -- Tournament ELO Rewards Table
 CREATE TABLE IF NOT EXISTS tournament_elo_rewards (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES user_profiles(id),
+  user_id UUID NOT NULL REFERENCES users(id),
   tournament_id UUID NOT NULL REFERENCES tournaments(id),
   base_elo_reward INTEGER NOT NULL,
   bonus_elo INTEGER DEFAULT 0,
