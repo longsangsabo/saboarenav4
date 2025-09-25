@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../services/auth_service.dart';
 
 class NotificationService {
   static NotificationService? _instance;
@@ -6,6 +7,75 @@ class NotificationService {
   NotificationService._();
 
   final SupabaseClient _supabase = Supabase.instance.client;
+  final AuthService _authService = AuthService.instance;
+
+  /// Get unread notification count for current user
+  Future<int> getUnreadNotificationCount() async {
+    try {
+      final currentUser = _authService.currentUser;
+      if (currentUser == null) return 0;
+
+      final response = await _supabase
+          .from('notifications')
+          .select('id')
+          .eq('user_id', currentUser.id)
+          .eq('is_read', false)
+          .eq('is_dismissed', false);
+
+      return response.length;
+    } catch (e) {
+      print('Error getting unread notification count: $e');
+      return 0;
+    }
+  }
+
+  /// Get all notifications for current user
+  Future<List<Map<String, dynamic>>> getUserNotifications({int limit = 20}) async {
+    try {
+      final currentUser = _authService.currentUser;
+      if (currentUser == null) return [];
+
+      final response = await _supabase
+          .from('notifications')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .order('created_at', ascending: false)
+          .limit(limit);
+
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      print('Error getting notifications: $e');
+      return [];
+    }
+  }
+
+  /// Mark notification as read
+  Future<void> markNotificationAsRead(String notificationId) async {
+    try {
+      await _supabase
+          .from('notifications')
+          .update({'is_read': true, 'read_at': DateTime.now().toIso8601String()})
+          .eq('id', notificationId);
+    } catch (e) {
+      print('Error marking notification as read: $e');
+    }
+  }
+
+  /// Mark all notifications as read for current user
+  Future<void> markAllNotificationsAsRead() async {
+    try {
+      final currentUser = _authService.currentUser;
+      if (currentUser == null) return;
+
+      await _supabase
+          .from('notifications')
+          .update({'is_read': true, 'read_at': DateTime.now().toIso8601String()})
+          .eq('user_id', currentUser.id)
+          .eq('is_read', false);
+    } catch (e) {
+      print('Error marking all notifications as read: $e');
+    }
+  }
 
   /// Send notification to club admin when user registers for tournament
   Future<void> sendRegistrationNotification({

@@ -12,7 +12,11 @@ import '../../services/storage_service.dart';
 import '../../services/permission_service.dart';
 import '../../services/share_service.dart';
 import '../../services/club_service.dart';
+import '../../services/messaging_service.dart';
+import '../../services/notification_service.dart';
 import '../club_dashboard_screen/club_dashboard_screen_simple.dart';
+import '../messaging_screen/messaging_screen.dart';
+import '../../widgets/shared_bottom_navigation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import './widgets/achievements_section_widget.dart';
@@ -38,6 +42,8 @@ class _UserProfileScreenState extends State<UserProfileScreen>
   // Services
   final UserService _userService = UserService.instance;
   final AuthService _authService = AuthService.instance;
+  final MessagingService _messagingService = MessagingService.instance;
+  final NotificationService _notificationService = NotificationService.instance;
   final ImagePicker _imagePicker = ImagePicker();
 
   // Dynamic data from backend
@@ -48,10 +54,18 @@ class _UserProfileScreenState extends State<UserProfileScreen>
   String? _tempCoverPhotoPath;
   String? _tempAvatarPath;
 
+  // Messaging state
+  int _unreadMessageCount = 0;
+
+  // Notification state
+  int _unreadNotificationCount = 0;
+
   @override
   void initState() {
     super.initState();
     _loadUserProfile();
+    _loadUnreadMessageCount();
+    _loadUnreadNotificationCount();
   }
 
   @override
@@ -129,6 +143,32 @@ class _UserProfileScreenState extends State<UserProfileScreen>
     }
   }
 
+  Future<void> _loadUnreadMessageCount() async {
+    try {
+      final count = await _messagingService.getUnreadMessageCount();
+      if (mounted) {
+        setState(() {
+          _unreadMessageCount = count;
+        });
+      }
+    } catch (e) {
+      print('❌ Error loading unread message count: $e');
+    }
+  }
+
+  Future<void> _loadUnreadNotificationCount() async {
+    try {
+      final count = await _notificationService.getUnreadNotificationCount();
+      if (mounted) {
+        setState(() {
+          _unreadNotificationCount = count;
+        });
+      }
+    } catch (e) {
+      print('❌ Error loading unread notification count: $e');
+    }
+  }
+
   Future<void> _refreshProfile() async {
     if (_isRefreshing) return;
 
@@ -138,6 +178,8 @@ class _UserProfileScreenState extends State<UserProfileScreen>
 
     HapticFeedback.lightImpact();
     await _loadUserProfile();
+    await _loadUnreadMessageCount();
+    await _loadUnreadNotificationCount();
     if (mounted) {
       setState(() {
         _isRefreshing = false;
@@ -147,10 +189,29 @@ class _UserProfileScreenState extends State<UserProfileScreen>
           content: Text('✅ Đã cập nhật thông tin profile'),
           backgroundColor: AppTheme.lightTheme.colorScheme.primary,
         ),
-    );
+      );
+    }
   }
 
+  void _navigateToMessaging() {
+    Navigator.pushNamed(context, AppRoutes.messagingScreen).then((_) {
+      // Refresh unread count when returning from messaging
+      _loadUnreadMessageCount();
+    });
+  }
 
+  void _navigateToNotifications() {
+    // Check if notification list screen route exists
+    if (AppRoutes.notificationListScreen != null) {
+      Navigator.pushNamed(context, AppRoutes.notificationListScreen).then((_) {
+        // Refresh unread count when returning from notifications
+        _loadUnreadNotificationCount();
+      });
+    } else {
+      // Show notifications modal if no dedicated screen
+      _showNotificationsModal();
+    }
+  }
 }  @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -238,69 +299,13 @@ class _UserProfileScreenState extends State<UserProfileScreen>
           ],
         ),
       ),
-      bottomNavigationBar: SafeArea(
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border(
-              top: BorderSide(color: Colors.grey.shade300, width: 1),
-            ),
-          ),
-          child: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            currentIndex: 4, // Profile tab
-            selectedItemColor: Colors.green,
-            unselectedItemColor: Colors.grey,
-            elevation: 0,
-            backgroundColor: Colors.transparent,
-            onTap: (index) {
-              switch (index) {
-                case 0:
-                  Navigator.pushReplacementNamed(context, AppRoutes.homeFeedScreen);
-                  break;
-                case 1:
-                  Navigator.pushReplacementNamed(context, AppRoutes.findOpponentsScreen);
-                  break;
-                case 2:
-                  Navigator.pushReplacementNamed(context, AppRoutes.tournamentListScreen);
-                  break;
-                case 3:
-                  Navigator.pushReplacementNamed(context, AppRoutes.clubMainScreen);
-                  break;
-                case 4:
-                  // Already on profile
-                  break;
-              }
-            },
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home_outlined),
-                activeIcon: Icon(Icons.home),
-                label: 'Trang chủ',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.people_outline),
-                activeIcon: Icon(Icons.people),
-                label: 'Đối thủ',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.emoji_events_outlined),
-                activeIcon: Icon(Icons.emoji_events),
-                label: 'Giải đấu',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.business_outlined),
-                activeIcon: Icon(Icons.business),
-                label: 'Câu lạc bộ',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person_outline),
-                activeIcon: Icon(Icons.person),
-                label: 'Cá nhân',
-              ),
-            ],
-          ),
-        ),
+      bottomNavigationBar: SharedBottomNavigation(
+        currentIndex: 4, // Profile tab
+        onNavigate: (route) {
+          if (route != AppRoutes.userProfileScreen) {
+            Navigator.pushReplacementNamed(context, route);
+          }
+        },
       ),
     );
   }
@@ -312,6 +317,76 @@ class _UserProfileScreenState extends State<UserProfileScreen>
       title: Text('Hồ sơ cá nhân', style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
       centerTitle: true,
       actions: [
+        // Messaging button with notification badge
+        Stack(
+          children: [
+            IconButton(
+              onPressed: _navigateToMessaging,
+              icon: Icon(Icons.message_outlined, color: AppTheme.lightTheme.colorScheme.primary),
+              tooltip: 'Tin nhắn',
+            ),
+            if (_unreadMessageCount > 0)
+              Positioned(
+                right: 6,
+                top: 6,
+                child: Container(
+                  padding: EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  constraints: BoxConstraints(
+                    minWidth: 18,
+                    minHeight: 18,
+                  ),
+                  child: Text(
+                    _unreadMessageCount > 99 ? '99+' : _unreadMessageCount.toString(),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+          ],
+        ),
+        // Notification button with notification badge
+        Stack(
+          children: [
+            IconButton(
+              onPressed: _navigateToNotifications,
+              icon: Icon(Icons.notifications_outlined, color: AppTheme.lightTheme.colorScheme.primary),
+              tooltip: 'Thông báo',
+            ),
+            if (_unreadNotificationCount > 0)
+              Positioned(
+                right: 6,
+                top: 6,
+                child: Container(
+                  padding: EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  constraints: BoxConstraints(
+                    minWidth: 18,
+                    minHeight: 18,
+                  ),
+                  child: Text(
+                    _unreadNotificationCount > 99 ? '99+' : _unreadNotificationCount.toString(),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+          ],
+        ),
         // Hiển thị nút chuyển sang giao diện club nếu user có role "clb" hoặc "club_owner"
         if (_userProfile?.role == 'clb' || _userProfile?.role == 'club_owner')
           Container(
@@ -1934,6 +2009,339 @@ class _UserProfileScreenState extends State<UserProfileScreen>
           SnackBar(content: Text('Lỗi đăng xuất: $e'), backgroundColor: Colors.red),
         );
       }
+    }
+  }
+
+  void _showNotificationsModal() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _buildNotificationsModal(),
+    );
+  }
+
+  Widget _buildNotificationsModal() {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.8,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        children: [
+          // Header
+          Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.notifications, color: Colors.orange, size: 24),
+                    SizedBox(width: 8),
+                    Text(
+                      'Thông báo',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    if (_unreadNotificationCount > 0)
+                      TextButton(
+                        onPressed: _markAllNotificationsAsRead,
+                        child: Text(
+                          'Đánh dấu tất cả',
+                          style: TextStyle(
+                            color: AppTheme.lightTheme.colorScheme.primary,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: Icon(Icons.close),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          
+          // Notifications List
+          Expanded(
+            child: FutureBuilder<List<Map<String, dynamic>>>(
+              future: _notificationService.getUserNotifications(limit: 50),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(
+                    child: CircularProgressIndicator(
+                      color: AppTheme.lightTheme.colorScheme.primary,
+                    ),
+                  );
+                }
+
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.error_outline, size: 80, color: Colors.grey),
+                        SizedBox(height: 16),
+                        Text(
+                          'Lỗi tải thông báo',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Vui lòng thử lại sau',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                final notifications = snapshot.data ?? [];
+
+                if (notifications.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.notifications_off_outlined, size: 80, color: Colors.grey),
+                        SizedBox(height: 16),
+                        Text(
+                          'Chưa có thông báo',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Thông báo mới sẽ hiển thị ở đây',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  padding: EdgeInsets.all(16),
+                  itemCount: notifications.length,
+                  itemBuilder: (context, index) {
+                    final notification = notifications[index];
+                    return _buildNotificationItem(notification);
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNotificationItem(Map<String, dynamic> notification) {
+    final isRead = notification['is_read'] ?? false;
+    final type = notification['type'] ?? 'default';
+    final createdAt = DateTime.tryParse(notification['created_at'] ?? '') ?? DateTime.now();
+    final timeAgo = _getTimeAgo(createdAt);
+
+    IconData iconData;
+    Color iconColor;
+
+    switch (type) {
+      case 'tournament_invitation':
+        iconData = Icons.emoji_events;
+        iconColor = Colors.amber;
+        break;
+      case 'match_result':
+        iconData = Icons.sports_soccer;
+        iconColor = Colors.green;
+        break;
+      case 'club_announcement':
+        iconData = Icons.business;
+        iconColor = Colors.blue;
+        break;
+      case 'rank_update':
+        iconData = Icons.trending_up;
+        iconColor = Colors.purple;
+        break;
+      case 'friend_request':
+        iconData = Icons.person_add;
+        iconColor = Colors.orange;
+        break;
+      default:
+        iconData = Icons.notifications;
+        iconColor = Colors.grey;
+    }
+
+    return Container(
+      margin: EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isRead ? Colors.white : Colors.blue.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isRead ? Colors.grey.shade300 : Colors.blue.shade200,
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade200,
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: InkWell(
+        onTap: () => _handleNotificationTap(notification),
+        borderRadius: BorderRadius.circular(12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(iconData, color: iconColor, size: 20),
+            ),
+            SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          notification['title'] ?? 'Thông báo',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: isRead ? FontWeight.w500 : FontWeight.bold,
+                            color: isRead ? Colors.grey.shade800 : Colors.black,
+                          ),
+                        ),
+                      ),
+                      if (!isRead)
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                    ],
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    notification['message'] ?? '',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: isRead ? Colors.grey.shade600 : Colors.grey.shade700,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    timeAgo,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getTimeAgo(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inDays > 0) {
+      return '${difference.inDays} ngày trước';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours} giờ trước';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes} phút trước';
+    } else {
+      return 'Vừa xong';
+    }
+  }
+
+  void _handleNotificationTap(Map<String, dynamic> notification) {
+    // Mark as read if not already read
+    if (!(notification['is_read'] ?? false)) {
+      _notificationService.markNotificationAsRead(notification['id']);
+      setState(() {
+        _unreadNotificationCount = (_unreadNotificationCount - 1).clamp(0, 999);
+      });
+    }
+
+    // Handle different notification types
+    final type = notification['type'] ?? '';
+    final actionData = notification['action_data'] ?? {};
+
+    switch (type) {
+      case 'tournament_invitation':
+        // Navigate to tournament details
+        if (actionData['tournament_id'] != null) {
+          Navigator.pop(context); // Close modal
+          Navigator.pushNamed(context, AppRoutes.tournamentDetailsScreen, arguments: actionData['tournament_id']);
+        }
+        break;
+      case 'match_result':
+        // Navigate to match details
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Xem chi tiết kết quả trận đấu')),
+        );
+        break;
+      case 'club_announcement':
+        // Navigate to club screen
+        Navigator.pop(context); // Close modal
+        Navigator.pushNamed(context, AppRoutes.clubMainScreen);
+        break;
+      default:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Đã xem thông báo: ${notification['title']}')),
+        );
+    }
+  }
+
+  void _markAllNotificationsAsRead() async {
+    try {
+      await _notificationService.markAllNotificationsAsRead();
+      setState(() {
+        _unreadNotificationCount = 0;
+      });
+      Navigator.pop(context); // Close modal
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('✅ Đã đánh dấu tất cả thông báo là đã đọc'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('❌ Lỗi đánh dấu thông báo: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 }
