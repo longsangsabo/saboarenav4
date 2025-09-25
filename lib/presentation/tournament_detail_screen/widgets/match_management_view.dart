@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sabo_arena/core/app_export.dart';
 import 'package:sizer/sizer.dart';
 import '../../../services/tournament_service.dart';
+import 'match_result_entry_widget.dart';
 
 class MatchManagementView extends StatefulWidget {
   final String tournamentId;
@@ -726,7 +727,57 @@ class _MatchManagementViewState extends State<MatchManagementView>
   }
 
   void _updateMatchResult(TournamentMatch match) {
-    // Implementation for updating match results
+    // Check if match has both players
+    if (match.player1 == 'TBD' || match.player2 == 'TBD') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('⚠️ Trận đấu chưa có đủ người chơi'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    if (match.status == 'completed') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('⚠️ Trận đấu này đã hoàn thành'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Prepare match data for result entry
+    final matchData = {
+      'round': match.round,
+      'matchNumber': match.id.split('_').last,
+      'player1': {
+        'id': 'player1_${match.id}', // This should come from actual data
+        'name': match.player1,
+      },
+      'player2': {
+        'id': 'player2_${match.id}', // This should come from actual data
+        'name': match.player2,
+      },
+    };
+
+    // Show match result entry dialog
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.sp)),
+        child: MatchResultEntryWidget(
+          matchId: match.id,
+          tournamentId: widget.tournamentId,
+          matchData: matchData,
+          onResultSubmitted: () {
+            // Reload matches after result submitted
+            _loadRealMatches();
+          },
+        ),
+      ),
+    );
   }
 
   void _editMatch(TournamentMatch match) {

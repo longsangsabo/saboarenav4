@@ -1210,4 +1210,137 @@ class EloChange {
     required this.baseReward,
     required this.bonuses,
   });
+
+  /// Start a tournament (change status from recruiting/ready to active)
+  Future<void> startTournament(String tournamentId) async {
+    try {
+      // Check current tournament status
+      final tournamentResponse = await _supabase
+          .from('tournaments')
+          .select('status, participants_count, max_participants')
+          .eq('id', tournamentId)
+          .single();
+
+      if (tournamentResponse['status'] == 'active') {
+        throw Exception('Tournament is already active');
+      }
+
+      if (tournamentResponse['status'] == 'completed') {
+        throw Exception('Tournament is already completed');
+      }
+
+      // Check if tournament has enough participants
+      final participantsCount = tournamentResponse['participants_count'] ?? 0;
+      if (participantsCount < 2) {
+        throw Exception('Tournament needs at least 2 participants to start');
+      }
+
+      // Update tournament status to active
+      await _supabase
+          .from('tournaments')
+          .update({
+            'status': 'active',
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', tournamentId);
+
+      print('✅ Tournament $tournamentId started successfully');
+    } catch (e) {
+      print('❌ Error starting tournament: $e');
+      throw Exception('Failed to start tournament: $e');
+    }
+  }
+
+  /// Get tournament rankings/standings
+  Future<List<Map<String, dynamic>>> getTournamentRankings(String tournamentId) async {
+    try {
+      // Get tournament participants with their match results
+      final response = await _supabase
+          .from('tournament_participants')
+          .select('''
+            user_id,
+            final_position,
+            total_points,
+            matches_won,
+            matches_lost,
+            matches_drawn,
+            user_profiles!inner(username, club_id, clubs(name))
+          ''')
+          .eq('tournament_id', tournamentId)
+          .order('final_position', ascending: true);
+
+      if (response.isEmpty) {
+        return [];
+      }
+
+      return response.map<Map<String, dynamic>>((participant) {
+        final userProfile = participant['user_profiles'];
+        final club = userProfile['clubs'];
+
+        return {
+          'user_id': participant['user_id'],
+          'player_name': userProfile['username'] ?? 'Unknown Player',
+          'club_name': club != null ? club['name'] : null,
+          'final_position': participant['final_position'] ?? 999,
+          'total_points': participant['total_points'] ?? 0,
+          'wins': participant['matches_won'] ?? 0,
+          'losses': participant['matches_lost'] ?? 0,
+          'draws': participant['matches_drawn'] ?? 0,
+        };
+      }).toList();
+    } catch (e) {
+      print('❌ Error getting tournament rankings: $e');
+      throw Exception('Failed to get tournament rankings: $e');
+    }
+  }
+
+  /// Update tournament status
+  Future<void> updateTournamentStatus(String tournamentId, String status) async {
+    try {
+      await _supabase
+          .from('tournaments')
+          .update({
+            'status': status,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', tournamentId);
+
+      print('✅ Tournament $tournamentId status updated to $status');
+    } catch (e) {
+      print('❌ Error updating tournament status: $e');
+      throw Exception('Failed to update tournament status: $e');
+    }
+  }
+
+  /// Get tournament by ID with detailed information (for management UI)
+  Future<Map<String, dynamic>> getTournamentDetails(String tournamentId) async {
+    try {
+      final response = await _supabase
+          .from('tournaments')
+          .select('''
+            id,
+            title,
+            description,
+            tournament_type,
+            status,
+            start_date,
+            end_date,
+            entry_fee,
+            prize_pool,
+            max_participants,
+            current_participants,
+            created_at,
+            updated_at,
+            club_id,
+            clubs(name)
+          ''')
+          .eq('id', tournamentId)
+          .single();
+
+      return response;
+    } catch (e) {
+      print('❌ Error getting tournament by ID: $e');
+      throw Exception('Failed to get tournament details: $e');
+    }
+  }
 }

@@ -4,6 +4,8 @@ import 'package:sabo_arena/core/app_export.dart';
 import 'package:sabo_arena/theme/app_theme.dart';
 import 'package:sabo_arena/services/tournament_service.dart';
 import 'package:sabo_arena/services/bracket_service.dart';
+import 'package:sabo_arena/services/match_progression_service.dart';
+import 'package:sabo_arena/services/tournament_completion_service.dart';
 import 'enhanced_bracket_management_tab.dart';
 
 class TournamentManagementPanel extends StatefulWidget {
@@ -208,6 +210,8 @@ class _TournamentOverviewTab extends StatefulWidget {
 
 class _TournamentOverviewTabState extends State<_TournamentOverviewTab> {
   final TournamentService _tournamentService = TournamentService.instance;
+  final MatchProgressionService _matchProgressionService = MatchProgressionService.instance;
+  final TournamentCompletionService _completionService = TournamentCompletionService.instance;
 
   Future<Map<String, dynamic>> _loadTournamentStats() async {
     try {
@@ -3484,25 +3488,39 @@ class _TournamentSettingsTabState extends State<_TournamentSettingsTab> {
     setState(() => _isCompleting = true);
 
     try {
-      // TODO: Implement tournament completion logic
-      // This would involve:
-      // 1. Update tournament status to 'completed'
-      // 2. Calculate final ELO changes
-      // 3. Distribute prize pool
-      // 4. Send notifications
-      // 5. Update club statistics
-
-      await Future.delayed(Duration(seconds: 2)); // Simulate API call
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Giải đấu đã được hoàn thành thành công!'),
-          backgroundColor: AppTheme.successLight,
-        ),
+      // Use the new TournamentCompletionService for complete workflow
+      final result = await _completionService.completeTournament(
+        tournamentId: widget.tournamentId,
+        sendNotifications: true,
+        postToSocial: true,
+        updateElo: true,
+        distributePrizes: true,
       );
 
-      // Call the status changed callback
-      widget.onStatusChanged?.call();
+      if (result['success']) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '🎉 Giải đấu đã hoàn thành!\n'
+              '👥 ${result['participants_count']} người tham gia\n'
+              '🏆 Vô địch: ${result['champion_id'] != null ? "Đã xác định" : "Chưa xác định"}\n'
+              '⚡ ELO: ${result['elo_changes']} cập nhật\n'
+              '💰 Giải thưởng: ${result['prize_recipients']} người nhận'
+            ),
+            backgroundColor: AppTheme.successLight,
+            duration: Duration(seconds: 5),
+          ),
+        );
+
+        // Call the status changed callback
+        widget.onStatusChanged?.call();
+        
+        // Show completion report dialog
+        _showCompletionReport(result['completion_report']);
+        
+      } else {
+        throw Exception(result['message'] ?? 'Unknown completion error');
+      }
       
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -3539,6 +3557,83 @@ class _TournamentSettingsTabState extends State<_TournamentSettingsTab> {
       SnackBar(
         content: Text('Tính năng lưu trữ đang được phát triển'),
         backgroundColor: AppTheme.primaryLight,
+      ),
+    );
+  }
+
+  /// Show tournament completion report
+  void _showCompletionReport(Map<String, dynamic>? report) {
+    if (report == null) return;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.emoji_events, color: AppTheme.primaryLight),
+            SizedBox(width: 8.sp),
+            Text('Báo cáo hoàn thành'),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Tournament info
+              Text(
+                '🏆 ${report['tournament_info']['title']}',
+                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8.sp),
+              
+              Text('👥 Tham gia: ${report['tournament_info']['participants']}/${report['tournament_info']['max_participants']}'),
+              Text('💰 Prize Pool: ${report['tournament_info']['prize_pool']} SPA'),
+              Text('⚡ ELO Updates: ${report['elo_changes']}'),
+              Text('💳 Prize Distributed: ${report['total_prize_distributed']} SPA'),
+              
+              if (report['champion'] != null) ...[
+                SizedBox(height: 12.sp),
+                Container(
+                  padding: EdgeInsets.all(8.sp),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8.sp),
+                    border: Border.all(color: Colors.amber),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('🏆 Vô địch:', style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text('${report['champion']['participant_name']}'),
+                      Text('Thắng: ${report['champion']['matches_won']}/${report['champion']['matches_played']}'),
+                    ],
+                  ),
+                ),
+              ],
+              
+              SizedBox(height: 12.sp),
+              Text('⏰ Hoàn thành: ${DateTime.parse(report['completion_time']).toString().substring(0, 19)}'),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Đóng'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _exportResults(); // Có thể implement export functionality
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryLight,
+              foregroundColor: Colors.white,
+            ),
+            child: Text('Xuất báo cáo'),
+          ),
+        ],
       ),
     );
   }
