@@ -14,6 +14,7 @@ import '../club_notification_screen/club_notification_screen_simple.dart';
 import '../club_settings_screen/club_settings_screen.dart';
 import '../club_reports_screen/club_reports_screen.dart';
 import '../activity_history_screen/activity_history_screen.dart';
+import '../admin_dashboard_screen/club_rank_change_management_screen.dart';
 import '../../services/club_permission_service.dart';
 
 // Temporary mock classes
@@ -294,11 +295,16 @@ class _ClubDashboardScreenSimpleState extends State<ClubDashboardScreenSimple> {
                 CircleAvatar(
                   radius: 30,
                   backgroundColor: Colors.white.withOpacity(0.2),
-                  child: Icon(
-                    Icons.sports_tennis,
-                    size: 30,
-                    color: Colors.white,
-                  ),
+                  backgroundImage: _club?.logoUrl != null 
+                      ? NetworkImage(_club!.logoUrl!) 
+                      : null,
+                  child: _club?.logoUrl == null 
+                      ? Icon(
+                          Icons.sports_tennis,
+                          size: 30,
+                          color: Colors.white,
+                        )
+                      : null,
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -489,6 +495,12 @@ class _ClubDashboardScreenSimpleState extends State<ClubDashboardScreenSimple> {
         'icon': Icons.history,
         'color': Colors.teal,
         'onTap': _navigateToActivityHistory,
+      },
+      {
+        'title': 'Quản lý hạng',
+        'icon': Icons.military_tech,
+        'color': Colors.amber,
+        'onTap': _navigateToRankManagement,
       },
     ];
 
@@ -718,169 +730,9 @@ class _ClubDashboardScreenSimpleState extends State<ClubDashboardScreenSimple> {
 
 
 
-  Widget _buildQuickActions() {
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-      childAspectRatio: 1.2,
-      children: [
-        _buildActionCard(
-          'Quản lý thành viên',
-          'Thêm, sửa, xóa thành viên',
-          Icons.people_outline,
-          AppTheme.primaryLight,
-          () => _navigateToMemberManagement(),
-        ),
-        _buildActionCard(
-          'Tạo giải đấu',
-          'Tổ chức giải đấu mới',
-          Icons.add_circle_outline,
-          AppTheme.accentLight,
-          () => _navigateToTournamentCreate(),
-        ),
-        _buildActionCard(
-          'Gửi thông báo',
-          'Thông báo đến thành viên',
-          Icons.notifications,
-          AppTheme.warningLight,
-          () => _navigateToNotifications(),
-        ),
-        _buildActionCard(
-          'Báo cáo',
-          'Xem báo cáo chi tiết',
-          Icons.bar_chart_outlined,
-          AppTheme.successLight,
-          () => _showReports(),
-        ),
-      ],
-    );
-  }
 
-  Widget _buildActionCard(String title, String subtitle, IconData icon, Color color, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppTheme.surfaceLight,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withOpacity(0.15), width: 1.5),
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.shadowLight,
-              offset: const Offset(0, 2),
-              blurRadius: 8,
-              spreadRadius: 0,
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, color: color, size: 24),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: AppTheme.textPrimaryLight,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppTheme.textSecondaryLight,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
-  Widget _buildRecentActivities() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceLight,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.shadowLight,
-            offset: const Offset(0, 2),
-            blurRadius: 8,
-            spreadRadius: 0,
-          ),
-        ],
-      ),
-      child: Column(
-        children: _recentActivities.isNotEmpty
-            ? _recentActivities.map((activity) => _buildActivityItem(
-                activity.title,
-                activity.subtitle,
-                _getActivityIcon(activity.type),
-              )).toList()
-            : [
-                _buildActivityItem(
-                  'Chưa có hoạt động nào',
-                  'Hoạt động sẽ xuất hiện tại đây',
-                  Icons.info_outline,
-                ),
-              ],
-      ),
-    );
-  }
 
-  Widget _buildActivityItem(String title, String time, IconData icon) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: AppTheme.primaryLight.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: AppTheme.primaryLight, size: 20),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.textPrimaryLight,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  time,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppTheme.textSecondaryLight,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   void _navigateToMemberManagement() {
     Navigator.push(
@@ -1111,6 +963,15 @@ class _ClubDashboardScreenSimpleState extends State<ClubDashboardScreenSimple> {
       context,
       MaterialPageRoute(
         builder: (context) => ActivityHistoryScreen(clubId: widget.clubId),
+      ),
+    );
+  }
+
+  void _navigateToRankManagement() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const ClubRankChangeManagementScreen(),
       ),
     );
   }

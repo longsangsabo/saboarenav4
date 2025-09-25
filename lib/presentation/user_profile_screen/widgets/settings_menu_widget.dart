@@ -13,7 +13,9 @@ class SettingsMenuWidget extends StatelessWidget {
   final VoidCallback? onAbout;
   final VoidCallback? onLogout;
   final VoidCallback? onClubManagement;  // Added for club owner
+  final VoidCallback? onSwitchToPlayerView;  // Added for switching to player view
   final bool isClubOwner;  // Added to check if user is club owner
+  final bool isInAdminMode;  // Added to check if currently in admin mode
 
   const SettingsMenuWidget({
     super.key,
@@ -26,7 +28,9 @@ class SettingsMenuWidget extends StatelessWidget {
     this.onAbout,
     this.onLogout,
     this.onClubManagement,
+    this.onSwitchToPlayerView,
     this.isClubOwner = false,
+    this.isInAdminMode = false,
   });
 
   @override
@@ -75,6 +79,10 @@ class SettingsMenuWidget extends StatelessWidget {
                   showDivider: true,
                   highlight: true,
                 ),
+              ],
+              // Switch to Player View (only when in admin mode)
+              if (isInAdminMode) ...[
+                _buildPlayerViewItem(context),
               ],
               _buildSettingsItem(
                 context,
@@ -295,6 +303,54 @@ class SettingsMenuWidget extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildPlayerViewItem(BuildContext context) {
+    return Column(
+      children: [
+        ListTile(
+          onTap: onSwitchToPlayerView,
+          contentPadding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+          leading: Container(
+            padding: EdgeInsets.all(2.w),
+            decoration: BoxDecoration(
+              color: Colors.green.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: CustomIconWidget(
+              iconName: 'sports_esports',
+              color: Colors.green,
+              size: 20,
+            ),
+          ),
+          title: Text(
+            'Quay về giao diện Player',
+            style: AppTheme.lightTheme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: AppTheme.lightTheme.colorScheme.onSurface,
+            ),
+          ),
+          subtitle: Text(
+            'Chuyển sang chế độ người chơi',
+            style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
+              color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          trailing: CustomIconWidget(
+            iconName: 'chevron_right',
+            color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+            size: 20,
+          ),
+        ),
+        Divider(
+          height: 1,
+          thickness: 1,
+          color: AppTheme.lightTheme.colorScheme.outlineVariant,
+          indent: 4.w,
+          endIndent: 4.w,
+        ),
+      ],
     );
   }
 }

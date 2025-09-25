@@ -11,6 +11,7 @@ import '../../services/user_service.dart';
 import '../../services/storage_service.dart';
 import '../../services/permission_service.dart';
 import '../../services/share_service.dart';
+import '../../services/club_service.dart';
 import '../club_dashboard_screen/club_dashboard_screen_simple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -311,6 +312,26 @@ class _UserProfileScreenState extends State<UserProfileScreen>
       title: Text('Hồ sơ cá nhân', style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
       centerTitle: true,
       actions: [
+        // Hiển thị nút chuyển sang giao diện club nếu user có role "clb" hoặc "club_owner"
+        if (_userProfile?.role == 'clb' || _userProfile?.role == 'club_owner')
+          Container(
+            margin: const EdgeInsets.only(right: 4),
+            child: ElevatedButton.icon(
+              onPressed: _switchToClubInterface,
+              icon: Icon(Icons.sports_soccer, size: 16),
+              label: Text('CLB', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.lightTheme.colorScheme.primary,
+                foregroundColor: Colors.white,
+                elevation: 2,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                minimumSize: Size(0, 32),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+            ),
+          ),
         IconButton(
           onPressed: _showQRCode,
           icon: CustomIconWidget(iconName: 'qr_code', color: AppTheme.lightTheme.colorScheme.primary),
@@ -847,6 +868,47 @@ class _UserProfileScreenState extends State<UserProfileScreen>
         ],
       ),
     );
+  }
+
+  void _switchToClubInterface() async {
+    if (_userProfile?.role != 'clb' && _userProfile?.role != 'club_owner') {
+      _showErrorMessage('Bạn không có quyền truy cập giao diện club');
+      return;
+    }
+
+    // Show loading
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      // Tìm club đầu tiên mà user sở hữu hoặc là member
+      final club = await ClubService.instance.getFirstClubForUser(_userProfile!.id);
+      
+      // Close loading dialog
+      Navigator.pop(context);
+
+      if (club == null) {
+        _showErrorMessage('Bạn chưa có club nào để quản lý. Vui lòng tạo hoặc tham gia club trước.');
+        return;
+      }
+
+      // Navigate to club dashboard
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ClubDashboardScreenSimple(
+            clubId: club.id,
+          ),
+        ),
+      );
+    } catch (e) {
+      // Close loading dialog
+      Navigator.pop(context);
+      _showErrorMessage('Lỗi khi tải thông tin club: $e');
+    }
   }
 
   void _showQRCode() {

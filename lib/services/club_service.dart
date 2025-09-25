@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/club.dart';
 import '../models/user_profile.dart';
@@ -49,6 +50,54 @@ class ClubService {
       return Club.fromJson(response);
     } catch (error) {
       throw Exception('Failed to get club: $error');
+    }
+  }
+
+  /// Tìm club mà user sở hữu (owner_id = user_id)
+  Future<Club?> getClubByOwnerId(String userId) async {
+    try {
+      final response = await _supabase
+          .from('clubs')
+          .select()
+          .eq('owner_id', userId)
+          .limit(1);
+
+      if (response.isEmpty) {
+        return null;
+      }
+
+      return Club.fromJson(response.first);
+    } catch (error) {
+      print('Error getting club by owner ID: $error');
+      return null;
+    }
+  }
+
+  /// Tìm club đầu tiên mà user là member hoặc owner
+  Future<Club?> getFirstClubForUser(String userId) async {
+    try {
+      // Thử tìm club mà user sở hữu trước
+      Club? ownedClub = await getClubByOwnerId(userId);
+      if (ownedClub != null) {
+        return ownedClub;
+      }
+
+      // Nếu không sở hữu club nào, tìm club mà user là member
+      final memberResponse = await _supabase
+          .from('club_members')
+          .select('club_id, clubs(*)')
+          .eq('user_id', userId)
+          .eq('status', 'active')
+          .limit(1);
+
+      if (memberResponse.isNotEmpty && memberResponse.first['clubs'] != null) {
+        return Club.fromJson(memberResponse.first['clubs']);
+      }
+
+      return null;
+    } catch (error) {
+      print('Error getting first club for user: $error');
+      return null;
     }
   }
 
@@ -323,6 +372,89 @@ class ClubService {
     } catch (error) {
       print('Error getting current user club: $error');
       return null;
+    }
+  }
+
+  /// Update club logo
+  Future<Club> updateClubLogo(String clubId, String logoUrl) async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) throw Exception('User not authenticated');
+
+      // Check if user is club owner
+      final isOwner = await isClubOwner(clubId);
+      if (!isOwner) throw Exception('You are not the owner of this club');
+
+      final response = await _supabase
+          .from('clubs')
+          .update({
+            'logo_url': logoUrl,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', clubId)
+          .select()
+          .single();
+
+      return Club.fromJson(response);
+    } catch (error) {
+      throw Exception('Failed to update club logo: $error');
+    }
+  }
+
+  /// Upload club logo to storage and update database
+  Future<Club> uploadAndUpdateClubLogo(String clubId, Uint8List fileBytes, String fileName) async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) throw Exception('User not authenticated');
+
+      // Check if user is club owner
+      final isOwner = await isClubOwner(clubId);
+      if (!isOwner) throw Exception('You are not the owner of this club');
+
+      // Generate unique filename
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final uniqueFileName = 'club_logo_${clubId}_$timestamp.png';
+
+      // Upload file to storage
+      await _supabase.storage
+          .from('club-logos')
+          .uploadBinary(uniqueFileName, fileBytes);
+
+      // Get public URL
+      final publicUrl = _supabase.storage
+          .from('club-logos')
+          .getPublicUrl(uniqueFileName);
+
+      // Update club logo in database
+      return await updateClubLogo(clubId, publicUrl);
+    } catch (error) {
+      throw Exception('Failed to upload and update club logo: $error');
+    }
+  }
+
+  /// Remove club logo
+  Future<Club> removeClubLogo(String clubId) async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) throw Exception('User not authenticated');
+
+      // Check if user is club owner
+      final isOwner = await isClubOwner(clubId);
+      if (!isOwner) throw Exception('You are not the owner of this club');
+
+      final response = await _supabase
+          .from('clubs')
+          .update({
+            'logo_url': null,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', clubId)
+          .select()
+          .single();
+
+      return Club.fromJson(response);
+    } catch (error) {
+      throw Exception('Failed to remove club logo: $error');
     }
   }
 }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:sabo_arena/widgets/custom_app_bar.dart';
 import 'package:sabo_arena/theme/app_theme.dart';
+import 'package:sabo_arena/routes/app_routes.dart';
 import '../club_profile_edit_screen/club_profile_edit_screen_simple.dart';
+import 'club_logo_settings_screen.dart';
 
 class ClubSettingsScreen extends StatefulWidget {
   final String clubId;
@@ -86,6 +88,29 @@ class _ClubSettingsScreenState extends State<ClubSettingsScreen> {
             ]),
             const SizedBox(height: 32),
             Text(
+              'Giao diện',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: AppTheme.textPrimaryLight,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 20),
+            _buildSettingsCard([
+              _buildSettingItem(
+                Icons.image,
+                'Logo câu lạc bộ',
+                'Thay đổi logo hiển thị trên dashboard',
+                () => _showLogoSettings(),
+              ),
+              _buildSettingItem(
+                Icons.palette,
+                'Màu sắc chủ đạo',
+                'Tùy chỉnh màu sắc giao diện CLB',
+                () => _showColorSettings(),
+              ),
+            ]),
+            const SizedBox(height: 32),
+            Text(
               'Thành viên',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: AppTheme.textPrimaryLight,
@@ -142,6 +167,11 @@ class _ClubSettingsScreenState extends State<ClubSettingsScreen> {
                 () => _showSecuritySettings(),
               ),
             ]),
+            
+            // Switch to Player View Button
+            const SizedBox(height: 32),
+            _buildPlayerViewButton(),
+            
             const SizedBox(height: 80), // Space for bottom navigation
           ],
         ),
@@ -321,6 +351,119 @@ class _ClubSettingsScreenState extends State<ClubSettingsScreen> {
   void _showSecuritySettings() {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Tính năng bảo mật đang được phát triển')),
+    );
+  }
+
+  void _showLogoSettings() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ClubLogoSettingsScreen(clubId: widget.clubId),
+      ),
+    );
+  }
+
+  void _showColorSettings() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Tính năng màu sắc đang được phát triển')),
+    );
+  }
+
+  Widget _buildPlayerViewButton() {
+    return Container(
+      width: double.infinity,
+      height: 56,
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppTheme.primaryLight,
+            AppTheme.primaryLight.withOpacity(0.8),
+          ],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryLight.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: _switchToPlayerView,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.person,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Quay về giao diện Player',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Chuyển sang giao diện người chơi',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.white,
+                  size: 18,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _switchToPlayerView() {
+    // Navigate back to home screen (player view)
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      AppRoutes.homeFeedScreen,
+      (route) => false,
+    );
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('✅ Đã chuyển về giao diện Player'),
+        backgroundColor: Colors.green,
+        duration: Duration(seconds: 2),
+      ),
     );
   }
 }
