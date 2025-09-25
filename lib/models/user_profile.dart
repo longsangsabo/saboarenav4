@@ -4,6 +4,7 @@ class UserProfile {
   final String id;
   final String email;
   final String fullName;
+  final String displayName;
   final String? username;
   final String? bio;
   final String? avatarUrl;
@@ -32,6 +33,7 @@ class UserProfile {
     required this.id,
     required this.email,
     required this.fullName,
+    required this.displayName,
     this.username,
     this.bio,
     this.avatarUrl,
@@ -59,6 +61,7 @@ class UserProfile {
       id: json['id'] ?? '',
       email: json['email'] ?? '',
       fullName: json['full_name'] ?? '',
+      displayName: json['display_name'] ?? json['full_name'] ?? '',
       username: json['username'],
       bio: json['bio'],
       avatarUrl: json['avatar_url'],
@@ -89,6 +92,7 @@ class UserProfile {
       'id': id,
       'email': email,
       'full_name': fullName,
+      'display_name': displayName,
       'username': username,
       'bio': bio,
       'avatar_url': avatarUrl,
@@ -113,6 +117,7 @@ class UserProfile {
 
   UserProfile copyWith({
     String? fullName,
+    String? displayName,
     String? username,
     String? bio,
     String? avatarUrl,
@@ -126,6 +131,7 @@ class UserProfile {
       id: id,
       email: email,
       fullName: fullName ?? this.fullName,
+      displayName: displayName ?? this.displayName,
       username: username ?? this.username,
       bio: bio ?? this.bio,
       avatarUrl: avatarUrl ?? this.avatarUrl,

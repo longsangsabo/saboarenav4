@@ -28,6 +28,8 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
   final ScrollController _scrollController = ScrollController();
   late AnimationController _fabAnimationController;
   late Animation<double> _fabAnimation;
+  late AnimationController _logoRotationController;
+  late Animation<double> _logoRotationAnimation;
 
   // Real Supabase data
   final PostRepository _postRepository = PostRepository();
@@ -38,8 +40,8 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
   @override
   void initState() {
     super.initState();
-    _loadPosts();
-    _scrollController.addListener(_onScroll);
+    
+    // Initialize animation controllers FIRST
     _fabAnimationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -48,29 +50,56 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
       CurvedAnimation(parent: _fabAnimationController, curve: Curves.easeInOut),
     );
 
+    // Logo rotation animation for loading
+    _logoRotationController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
+    _logoRotationAnimation = Tween<double>(begin: 0, end: 2 * 3.14159).animate(
+      CurvedAnimation(parent: _logoRotationController, curve: Curves.linear),
+    );
+
     _fabAnimationController.forward();
+    
+    // Setup scroll listener
+    _scrollController.addListener(_onScroll);
+    
+    // Load posts AFTER animation controllers are initialized
+    _loadPosts();
   }
 
   Future<void> _loadPosts() async {
     try {
-      setState(() {
-        _isLoading = true;
-        _errorMessage = null;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = true;
+          _errorMessage = null;
+        });
+        // Start logo rotation when loading starts
+        _logoRotationController.repeat();
+      }
 
       // Load posts for both tabs using getFeedPosts
       final posts = await _postRepository.getPosts(limit: 20);
       
-      setState(() {
-        _nearbyPosts = posts;
-        _followingPosts = posts; // Use same posts for both tabs for now
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _nearbyPosts = posts;
+          _followingPosts = posts; // Use same posts for both tabs for now
+          _isLoading = false;
+        });
+        // Stop logo rotation when loading finishes
+        _logoRotationController.stop();
+      }
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-        _errorMessage = 'Lỗi tải bài đăng: $e';
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Lỗi tải bài đăng: $e';
+        });
+        // Stop logo rotation when loading finishes with error
+        _logoRotationController.stop();
+      }
     }
   }
 
@@ -97,6 +126,7 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
   void dispose() {
     _scrollController.dispose();
     _fabAnimationController.dispose();
+    _logoRotationController.dispose();
     super.dispose();
   }
 
@@ -110,7 +140,7 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
   Future<void> _loadMorePosts() async {
     if (_isLoading) return;
 
-    setState(() => _isLoading = true);
+    if (mounted) setState(() => _isLoading = true);
 
     try {
       // Load more posts using getFeedPosts
@@ -132,12 +162,12 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
         );
       }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   Future<void> _refreshFeed() async {
-    setState(() => _isLoading = true);
+    if (mounted) setState(() => _isLoading = true);
 
     try {
       await _loadPosts();
@@ -161,7 +191,7 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
         );
       }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -198,10 +228,12 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
       final currentlyLiked = post['isLiked'] ?? false;
       
       // Optimistic update
-      setState(() {
-        post['isLiked'] = !currentlyLiked;
-        post['likeCount'] = (post['likeCount'] ?? 0) + (!currentlyLiked ? 1 : -1);
-      });
+      if (mounted) {
+        setState(() {
+          post['isLiked'] = !currentlyLiked;
+          post['likeCount'] = (post['likeCount'] ?? 0) + (!currentlyLiked ? 1 : -1);
+        });
+      }
 
       // Call backend
       if (!currentlyLiked) {
@@ -212,10 +244,12 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
       
     } catch (e) {
       // Revert optimistic update on error
-      setState(() {
-        post['isLiked'] = !post['isLiked'];
-        post['likeCount'] = (post['likeCount'] ?? 0) + (post['isLiked'] ? -1 : 1);
-      });
+      if (mounted) {
+        setState(() {
+          post['isLiked'] = !post['isLiked'];
+          post['likeCount'] = (post['likeCount'] ?? 0) + (post['isLiked'] ? -1 : 1);
+        });
+      }
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -235,15 +269,19 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
         postTitle: post['content'] ?? 'Bài viết',
         onCommentAdded: () {
           // Update comment count when new comment is added
-          setState(() {
-            post['commentCount'] = (post['commentCount'] ?? 0) + 1;
-          });
+          if (mounted) {
+            setState(() {
+              post['commentCount'] = (post['commentCount'] ?? 0) + 1;
+            });
+          }
         },
         onCommentDeleted: () {
           // Update comment count when comment is deleted
-          setState(() {
-            post['commentCount'] = ((post['commentCount'] ?? 0) - 1).clamp(0, double.infinity).toInt();
-          });
+          if (mounted) {
+            setState(() {
+              post['commentCount'] = ((post['commentCount'] ?? 0) - 1).clamp(0, double.infinity).toInt();
+            });
+          }
         },
       ),
     );
@@ -305,7 +343,7 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
             FeedTabWidget(
               selectedIndex: _selectedTabIndex,
               onTabChanged: (index) {
-                setState(() => _selectedTabIndex = index);
+                if (mounted) setState(() => _selectedTabIndex = index);
               },
             ),
 
@@ -316,16 +354,24 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          // Simple Logo Loading
+                          // Rotating Logo Loading
                           Container(
                             width: 60,
                             height: 60,
                             padding: const EdgeInsets.all(8.0),
-                            child: SvgPicture.asset(
-                              'assets/images/logo.svg',
-                              width: 44,
-                              height: 44,
-                              fit: BoxFit.contain,
+                            child: AnimatedBuilder(
+                              animation: _logoRotationAnimation,
+                              builder: (context, child) {
+                                return Transform.rotate(
+                                  angle: _logoRotationAnimation.value,
+                                  child: SvgPicture.asset(
+                                    'assets/images/logo.svg',
+                                    width: 44,
+                                    height: 44,
+                                    fit: BoxFit.contain,
+                                  ),
+                                );
+                              },
                             ),
                           ),
                           SizedBox(height: 3.h),

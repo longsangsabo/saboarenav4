@@ -258,7 +258,7 @@ class _CommentsModalState extends State<CommentsModal> {
         title: const Text('Sửa bình luận'),
         content: TextField(
           controller: controller,
-          maxLines: null,
+          maxLines: 5,
           maxLength: 1000,
           decoration: const InputDecoration(
             hintText: 'Nhập nội dung bình luận...',

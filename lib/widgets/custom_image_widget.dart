@@ -32,11 +32,32 @@ class CustomImageWidget extends StatelessWidget {
       // Use caller-supplied widget if provided, else fallback asset.
       errorWidget: (context, url, error) =>
           errorWidget ??
-          Image.asset(
-            "assets/images/no-image.jpg",
-            fit: fit,
+          Container(
             width: width,
             height: height,
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.image_not_supported_outlined,
+                  size: width * 0.3,
+                  color: Colors.grey[400],
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Không thể tải hình',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[500],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
           ),
 
       placeholder: (context, url) => Container(

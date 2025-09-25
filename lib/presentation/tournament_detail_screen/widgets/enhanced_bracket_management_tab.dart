@@ -704,6 +704,7 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
           id: 'demo_${DateTime.now().millisecondsSinceEpoch}_${user['full_name']?.hashCode}',
           email: 'demo@example.com',
           fullName: user['full_name'] as String,
+          displayName: user['full_name'] as String,
           role: 'player',
           skillLevel: user['rank'] as String,
           rank: user['rank'] as String,

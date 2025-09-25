@@ -208,6 +208,8 @@ class _FeedPostCardWidgetState extends State<FeedPostCardWidget>
                       fontWeight: FontWeight.w600,
                       color: colorScheme.onSurface,
                     ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                 ),
                 SizedBox(height: 0.5.h),
@@ -252,6 +254,8 @@ class _FeedPostCardWidgetState extends State<FeedPostCardWidget>
               color: theme.colorScheme.onSurface,
               height: 1.4,
             ),
+            overflow: TextOverflow.visible,
+            softWrap: true,
           ),
           SizedBox(height: 2.h),
         ],
@@ -301,6 +305,8 @@ class _FeedPostCardWidgetState extends State<FeedPostCardWidget>
                       fontSize: 10.sp,
                       color: Colors.grey[600],
                     ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                 ),
               ],
@@ -362,11 +368,15 @@ class _FeedPostCardWidgetState extends State<FeedPostCardWidget>
                 ],
                 const Spacer(),
                 if (commentCount > 0 || shareCount > 0) ...[
-                  Text(
-                    '${commentCount > 0 ? '$commentCount bình luận' : ''}${commentCount > 0 && shareCount > 0 ? ' • ' : ''}${shareCount > 0 ? '$shareCount lượt chia sẻ' : ''}',
-                    style: TextStyle(
-                      fontSize: 10.sp,
-                      color: Colors.grey[600],
+                  Flexible(
+                    child: Text(
+                      '${commentCount > 0 ? '$commentCount bình luận' : ''}${commentCount > 0 && shareCount > 0 ? ' • ' : ''}${shareCount > 0 ? '$shareCount lượt chia sẻ' : ''}',
+                      style: TextStyle(
+                        fontSize: 10.sp,
+                        color: Colors.grey[600],
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                   ),
                 ],
@@ -385,40 +395,46 @@ class _FeedPostCardWidgetState extends State<FeedPostCardWidget>
 
         // Action buttons
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.w),
+          padding: EdgeInsets.symmetric(horizontal: 1.w, vertical: 1.w),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               // Like button
-              AnimatedBuilder(
-                animation: _scaleAnimation,
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: isLiked ? _scaleAnimation.value : 1.0,
-                    child: _buildActionButton(
-                      icon: isLiked ? Icons.favorite : Icons.favorite_border,
-                      label: 'Thích',
-                      color: isLiked ? Colors.red : Colors.grey[600],
-                      onTap: _handleLike,
-                    ),
-                  );
-                },
+              Expanded(
+                child: AnimatedBuilder(
+                  animation: _scaleAnimation,
+                  builder: (context, child) {
+                    return Transform.scale(
+                      scale: isLiked ? _scaleAnimation.value : 1.0,
+                      child: _buildActionButton(
+                        icon: isLiked ? Icons.favorite : Icons.favorite_border,
+                        label: 'Thích',
+                        color: isLiked ? Colors.red : Colors.grey[600],
+                        onTap: _handleLike,
+                      ),
+                    );
+                  },
+                ),
               ),
 
               // Comment button
-              _buildActionButton(
-                icon: Icons.comment_outlined,
-                label: 'Bình luận',
-                color: Colors.grey[600],
-                onTap: widget.onComment,
+              Expanded(
+                child: _buildActionButton(
+                  icon: Icons.comment_outlined,
+                  label: 'Bình luận',
+                  color: Colors.grey[600],
+                  onTap: widget.onComment,
+                ),
               ),
 
               // Share button
-              _buildActionButton(
-                icon: Icons.share_outlined,
-                label: 'Chia sẻ',
-                color: Colors.grey[600],
-                onTap: widget.onShare,
+              Expanded(
+                child: _buildActionButton(
+                  icon: Icons.share_outlined,
+                  label: 'Chia sẻ',
+                  color: Colors.grey[600],
+                  onTap: widget.onShare,
+                ),
               ),
             ],
           ),
@@ -437,22 +453,27 @@ class _FeedPostCardWidgetState extends State<FeedPostCardWidget>
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.w),
+        padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 2.w),
         child: Row(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               icon,
               size: 18.sp,
               color: color,
             ),
-            SizedBox(width: 2.w),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11.sp,
-                color: color,
-                fontWeight: FontWeight.w500,
+            SizedBox(width: 1.w),
+            Flexible(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  color: color,
+                  fontWeight: FontWeight.w500,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
             ),
           ],

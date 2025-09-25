@@ -98,6 +98,7 @@ class UserService {
   Future<UserProfile> updateUserProfile({
     String? username,
     String? fullName,
+    String? displayName,
     String? bio,
     String? phone,
     DateTime? dateOfBirth,
@@ -112,6 +113,7 @@ class UserService {
       final updateData = <String, dynamic>{};
       if (username != null) updateData['username'] = username;
       if (fullName != null) updateData['full_name'] = fullName;
+      if (displayName != null) updateData['display_name'] = displayName;
       if (bio != null) updateData['bio'] = bio;
       if (phone != null) updateData['phone'] = phone;
       if (dateOfBirth != null) {

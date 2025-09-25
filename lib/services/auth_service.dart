@@ -31,6 +31,70 @@ class AuthService {
     }
   }
 
+  Future<AuthResponse> signInWithPhone({
+    required String phone,
+    required String password,
+  }) async {
+    try {
+      final response = await _supabase.auth.signInWithPassword(
+        phone: phone,
+        password: password,
+      );
+      return response;
+    } catch (error) {
+      throw Exception('Đăng nhập thất bại: $error');
+    }
+  }
+
+  Future<void> sendPhoneOtp({
+    required String phone,
+    bool createUserIfNeeded = true,
+  }) async {
+    try {
+      await _supabase.auth.signInWithOtp(
+        phone: phone,
+        shouldCreateUser: createUserIfNeeded,
+      );
+    } catch (error) {
+      throw Exception('Gửi mã OTP thất bại: $error');
+    }
+  }
+
+  Future<AuthResponse> verifyPhoneOtp({
+    required String phone,
+    required String token,
+  }) async {
+    try {
+      final response = await _supabase.auth.verifyOTP(
+        phone: phone,
+        token: token,
+        type: OtpType.sms,
+      );
+      return response;
+    } catch (error) {
+      throw Exception('Xác thực OTP thất bại: $error');
+    }
+  }
+
+  Future<void> updateUserMetadata({
+    String? fullName,
+    String? role,
+    Map<String, dynamic>? extra,
+  }) async {
+    final data = <String, dynamic>{};
+    if (fullName != null) data['full_name'] = fullName;
+    if (role != null) data['role'] = role;
+    if (extra != null) data.addAll(extra);
+
+    if (data.isEmpty) return;
+
+    try {
+      await _supabase.auth.updateUser(UserAttributes(data: data));
+    } catch (error) {
+      throw Exception('Cập nhật thông tin người dùng thất bại: $error');
+    }
+  }
+
   /// Check if current user is admin
   Future<bool> isCurrentUserAdmin() async {
     try {
@@ -67,7 +131,7 @@ class AuthService {
     }
   }
 
-  Future<AuthResponse> signUp({
+  Future<AuthResponse> signUpWithEmail({
     required String email,
     required String password,
     required String fullName,
@@ -85,6 +149,59 @@ class AuthService {
       return response;
     } catch (error) {
       throw Exception('Sign up failed: $error');
+    }
+  }
+
+  Future<AuthResponse> signUpWithPhone({
+    required String phone,
+    required String password,
+    required String fullName,
+    String role = 'player',
+  }) async {
+    try {
+      final response = await _supabase.auth.signUp(
+        phone: phone,
+        password: password,
+        data: {
+          'full_name': fullName,
+          'role': role,
+        },
+      );
+      return response;
+    } catch (error) {
+      throw Exception('Đăng ký thất bại: $error');
+    }
+  }
+
+  Future<void> upsertUserRecord({
+    String? fullName,
+    String? role,
+    String? phone,
+    String? email,
+  }) async {
+    final user = currentUser;
+    if (user == null) return;
+
+    final payload = <String, dynamic>{
+      'id': user.id,
+      'updated_at': DateTime.now().toIso8601String(),
+    };
+
+    if (fullName != null) payload['full_name'] = fullName;
+    if (role != null) payload['role'] = role;
+    if (phone != null) payload['phone'] = phone;
+    if (email != null || user.email != null) {
+      payload['email'] = email ?? user.email;
+    }
+
+    try {
+      await _supabase
+          .from('users')
+          .upsert(payload, onConflict: 'id')
+          .select()
+          .maybeSingle();
+    } catch (error) {
+      throw Exception('Cập nhật hồ sơ người dùng thất bại: $error');
     }
   }
 

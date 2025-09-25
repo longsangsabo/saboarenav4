@@ -20,7 +20,7 @@ class FeedTabWidget extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 0.5.h),
+      margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 0.3.h),
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(25),
@@ -75,7 +75,7 @@ class FeedTabWidget extends StatelessWidget {
         onTap: () => onTabChanged(index),
         borderRadius: BorderRadius.circular(20),
         child: Container(
-          padding: EdgeInsets.symmetric(vertical: 2.h),
+          padding: EdgeInsets.symmetric(vertical: 1.2.h),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -84,9 +84,9 @@ class FeedTabWidget extends StatelessWidget {
                 color: isSelected
                     ? colorScheme.onPrimary
                     : colorScheme.onSurfaceVariant,
-                size: 18,
+                size: 16,
               ),
-              SizedBox(width: 2.w),
+              SizedBox(width: 1.5.w),
               Text(
                 title,
                 style: theme.textTheme.bodyMedium?.copyWith(
@@ -94,6 +94,7 @@ class FeedTabWidget extends StatelessWidget {
                       ? colorScheme.onPrimary
                       : colorScheme.onSurfaceVariant,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                  fontSize: 13,
                 ),
               ),
             ],

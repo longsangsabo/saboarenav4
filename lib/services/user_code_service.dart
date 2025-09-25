@@ -48,6 +48,7 @@ class UserCodeService {
               id: userId,
               email: '', // Temp values for QR generation
               fullName: '',
+              displayName: '',
               role: 'player',
               skillLevel: 'beginner',
               totalWins: 0,

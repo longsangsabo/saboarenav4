@@ -24,6 +24,8 @@ environment:
 dependencies:
   flutter:       # CRITICAL: Required for every Flutter project - DO NOT REMOVE
     sdk: flutter # CRITICAL: Required for every Flutter project - DO NOT REMOVE
+  flutter_localizations: # Support for internationalization
+    sdk: flutter
   
   # CRITICAL: Core UI and responsive design - DO NOT REMOVE OR MODIFY
   sizer: ^2.0.15              # Required for responsive design system
@@ -50,7 +52,7 @@ dependencies:
   share_plus: ^10.0.3
   qr_flutter: ^4.1.0
 
-  intl: ^0.19.0
+  intl: ^0.20.2
 dev_dependencies:
   flutter_test:    # CRITICAL: Required for Flutter project testing - DO NOT REMOVE
     sdk: flutter   # CRITICAL: Required for Flutter project testing - DO NOT REMOVE
@@ -60,6 +62,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true # CRITICAL: Required for Material icon font - DO NOT REMOVE
+  generate: true # Enable internationalization
   assets:
     - assets/
     - assets/images/

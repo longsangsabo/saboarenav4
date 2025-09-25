@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 /// Custom app bar variants for different screens
 enum CustomAppBarVariant {
@@ -75,8 +76,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     return CustomAppBar(
       key: key,
       variant: CustomAppBarVariant.homeFeed,
-      title: 'Billiards Social',
+      title: 'SABO ARENA',
       showBackButton: false,
+      centerTitle: false,
       actions: [
         IconButton(
           icon: const Icon(Icons.search),
@@ -220,24 +222,31 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
+            SvgPicture.asset(
+              'assets/images/logo.svg',
               width: 32,
               height: 32,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primary,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                Icons.sports_bar,
-                color: theme.colorScheme.onPrimary,
-                size: 20,
+              fit: BoxFit.contain,
+              placeholderBuilder: (context) => Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.sports_bar,
+                  color: theme.colorScheme.onPrimary,
+                  size: 20,
+                ),
               ),
             ),
             const SizedBox(width: 12),
             Text(
-              title ?? 'Billiards Social',
+              title ?? 'SABO ARENA',
               style: theme.appBarTheme.titleTextStyle?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w700,
+                fontSize: 18,
               ),
             ),
           ],

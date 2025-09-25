@@ -30,6 +30,7 @@ class RegistrationQRService {
         id: userId,
         email: email,
         fullName: fullName,
+        displayName: fullName,
         username: username,
         role: role,
         skillLevel: skillLevel,

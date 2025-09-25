@@ -339,6 +339,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
             // Cập nhật profile qua API
             await _userService.updateUserProfile(
               fullName: updatedProfile.fullName,
+              displayName: updatedProfile.displayName,
               bio: updatedProfile.bio,
               phone: updatedProfile.phone,
               location: updatedProfile.location,

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:sizer/sizer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/app_export.dart';
-import '../../routes/app_routes.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -44,31 +44,35 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _setRoleSpecificData(String role) {
     setState(() {
       _selectedRole = role;
-      
+
       if (role == "player") {
         _onboardingData = [
           _onboardingData[0], // Keep role selection screen
           OnboardingData(
             title: "TÌM BẠN CHƠI BIDA !!",
-            description: "Bạn muốn chơi bida, nhưng đôi của bạn bận cả rồi !!! Hmm..\nĐể SABO tìm đối cần kèo cho bạn nha!!!",
+            description:
+                "Bạn muốn chơi bida, nhưng đối của bạn bận cả rồi !!! Hmm..\nĐể SABO tìm đối cần kèo cho bạn nha!!!",
             imagePath: "assets/images/find_opponent.svg",
             showRoleSelection: false,
           ),
           OnboardingData(
             title: "ĐÁNH GIẢI ĐỂ NÂNG TRÌNH !!",
-            description: "Tham gia các giải đấu phong trào hàng tuần bạn sẽ có cơ hội cọ sát với các cơ thủ cùng trình độ !!\nVà nhận về vô vàn phần quà hấp dẫn !!",
+            description:
+                "Tham gia các giải đấu phong trào hàng tuần bạn sẽ có cơ hội cọ sát với các cơ thủ cùng trình độ !!\nVà nhận về vô vàn phần quà hấp dẫn !!",
             imagePath: "assets/images/tournament.svg",
             showRoleSelection: false,
           ),
           OnboardingData(
             title: "CHẾ ĐỘ THÁCH ĐẤU !!",
-            description: "Chế độ thách đấu giúp bạn giao lưu với các cơ thủ kinh nghiệm, qua đó bạn sẽ có cơ hội học hỏi và cải thiện kỹ năng của mình !!",
+            description:
+                "Chế độ thách đấu giúp bạn giao lưu với các cơ thủ kinh nghiệm, qua đó bạn sẽ có cơ hội học hỏi và cải thiện kỹ năng của mình !!",
             imagePath: "assets/images/challenge.svg",
             showRoleSelection: false,
           ),
           OnboardingData(
             title: "LƯU TRỮ THÀNH TÍCH VÀ\nLỊCH SỬ THI ĐẤU !!",
-            description: "SABO giúp lưu trữ lịch sử thi đấu và thành tích chơi bida của bạn, giúp bạn thống kê và theo dõi quá trình tiến bộ của mình !!\n\nVÀ RẤT NHIỀU TÍNH NĂNG HẤP DẪN KHÁC ĐANG ĐỢI BẠN KHÁM PHÁ !!",
+            description:
+                "SABO giúp lưu trữ lịch sử thi đấu và thành tích chơi bida của bạn, giúp bạn thống kê và theo dõi quá trình tiến bộ của mình !!\n\nVÀ RẤT NHIỀU TÍNH NĂNG HẤP DẪN KHÁC ĐANG ĐỢI BẠN KHÁM PHÁ !!",
             imagePath: "assets/images/achievements.svg",
             showRoleSelection: false,
           ),
@@ -78,31 +82,36 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           _onboardingData[0], // Keep role selection screen
           OnboardingData(
             title: "CHUYỂN ĐỔI SỐ CHO\nCLB CỦA BẠN !!",
-            description: "SABO liên tục phát triển tính năng giúp bạn chỉ cần sử dụng nền tảng là đã giản tiếp chuyển đổi số cho CLB của mình !!\n\nĐừng để CLB của bạn bị bỏ lại phía sau trong thị trường cạnh tranh như hiện tại !!",
+            description:
+                "SABO liên tục phát triển tính năng giúp bạn chỉ cần sử dụng nền tảng là đã giản tiếp chuyển đổi số cho CLB của mình !!\n\nĐừng để CLB của bạn bị bỏ lại phía sau trong thị trường cạnh tranh như hiện tại !!",
             imagePath: "assets/images/digital_transformation.svg",
             showRoleSelection: false,
           ),
           OnboardingData(
             title: "KẾT NỐI CỘNG ĐỒNG\nCÓ CÙNG SỞ THÍCH BIDA !!",
-            description: "SABO có nhiều tính năng giúp CLB kết nối trực tiếp đến người chơi bida mà không cần bạn phải chi quá nhiều chi phí cho quảng cáo!\n\nNgười chơi khi đã được xác minh hạng sẽ được tham gia mọi giải đấu tại các CLB có sử dụng nền tảng. Giúp CLB của bạn thu hút khách hàng mới ở khắp mọi nơi.",
+            description:
+                "SABO có nhiều tính năng giúp CLB kết nối trực tiếp đến người chơi bida mà không cần bạn phải chi quá nhiều chi phí cho quảng cáo!\n\nNgười chơi khi đã được xác minh hạng sẽ được tham gia mọi giải đấu tại các CLB có sử dụng nền tảng. Giúp CLB của bạn thu hút khách hàng mới ở khắp mọi nơi.",
             imagePath: "assets/images/community.svg",
             showRoleSelection: false,
           ),
           OnboardingData(
             title: "TỔ CHỨC GIẢI ĐẤU\nDỄ DÀNG !!",
-            description: "SABO giúp bạn tổ chức, quản lý, quảng bá các giải đấu cấp CLB một cách dễ dàng, thuận lợi và tối ưu mọi chi phí !!",
+            description:
+                "SABO giúp bạn tổ chức, quản lý, quảng bá các giải đấu cấp CLB một cách dễ dàng, thuận lợi và tối ưu mọi chi phí !!",
             imagePath: "assets/images/tournament_management.svg",
             showRoleSelection: false,
           ),
           OnboardingData(
             title: "THU HÚT & GIỮ CHÂN\nTHÀNH VIÊN !!",
-            description: "Thành viên CLB có cơ hội thi đấu thường xuyên, có lộ trình nâng hạng rõ ràng\nCác cơ thủ sẽ cảm thấy gắn bó hơn vì được cập nhật bảng xếp hạng chung, không chỉ chơi tại CLB !!",
+            description:
+                "Thành viên CLB có cơ hội thi đấu thường xuyên, có lộ trình nâng hạng rõ ràng\nCác cơ thủ sẽ cảm thấy gắn bó hơn vì được cập nhật bảng xếp hạng chung, không chỉ chơi tại CLB !!",
             imagePath: "assets/images/member_retention.svg",
             showRoleSelection: false,
           ),
           OnboardingData(
             title: "TỐI ƯU CHI PHÍ MARKETING\n& QUẢNG CÁO !",
-            description: "Sử dụng nền tảng SABO sẽ giúp bạn không phải tốn quá nhiều công sức, chi phí cho việc thiết kế poster, bài post, marketing và quảng cáo mà vẫn giúp CLB tiếp cận được cộng đồng người chơi bida !!\n\nVÀ RẤT NHIỀU TÍNH NĂNG HẤP DẪN KHÁC ĐANG ĐỢI BẠN KHÁM PHÁ !!",
+            description:
+                "Sử dụng nền tảng SABO sẽ giúp bạn không phải tốn quá nhiều công sức, chi phí cho việc thiết kế poster, bài post, marketing và quảng cáo mà vẫn giúp CLB tiếp cận được cộng đồng người chơi bida !!\n\nVÀ RẤT NHIỀU TÍNH NĂNG HẤP DẪN KHÁC ĐANG ĐỢI BẠN KHÁM PHÁ !!",
             imagePath: "assets/images/marketing.svg",
             showRoleSelection: false,
           ),
@@ -137,15 +146,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('has_seen_onboarding', true);
       await prefs.setString('user_role', _selectedRole);
-      print('✅ Onboarding: Marked as completed with role: $_selectedRole');
-      
+      debugPrint('✅ Onboarding: Marked as completed with role: $_selectedRole');
+
       // Navigate to login
       if (mounted) {
         Navigator.of(context).pushReplacementNamed(AppRoutes.loginScreen);
-        print('✅ Onboarding: Navigation to login completed');
+        debugPrint('✅ Onboarding: Navigation to login completed');
       }
     } catch (e) {
-      print('❌ Onboarding: Error saving completion status: $e');
+      debugPrint('❌ Onboarding: Error saving completion status: $e');
       // Still navigate to login even if saving fails
       if (mounted) {
         Navigator.of(context).pushReplacementNamed(AppRoutes.loginScreen);
@@ -160,122 +169,197 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
+      backgroundColor: Colors.transparent,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFFF8FFFE),
+              Color(0xFFE4F5F0),
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Stack(
           children: [
-            // Skip button
-            Padding(
-              padding: EdgeInsets.all(4.w),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Back button (only show after first page)
-                  if (_currentPage > 0)
-                    IconButton(
-                      onPressed: _previousPage,
-                      icon: Icon(
-                        Icons.arrow_back_ios,
-                        color: Colors.grey[600],
-                      ),
-                    )
-                  else
-                    const SizedBox.shrink(),
-                  
-                  // Skip button
-                  TextButton(
-                    onPressed: _skipOnboarding,
-                    style: TextButton.styleFrom(
-                      backgroundColor: const Color(0xFF4A7C59),
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                    ),
-                    child: Text(
-                      _currentPage == _onboardingData.length - 1 ? "Bắt đầu" : "Bỏ qua",
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
+            Positioned(
+              top: -18.w,
+              right: -12.w,
+              child: _DecorativeCircle(
+                diameter: 48.w,
+                color: AppTheme.primaryLight.withValues(alpha: 0.08),
               ),
             ),
-
-            // PageView
-            Expanded(
-              child: PageView.builder(
-                controller: _pageController,
-                onPageChanged: (index) {
-                  setState(() {
-                    _currentPage = index;
-                  });
-                },
-                itemCount: _onboardingData.length,
-                itemBuilder: (context, index) {
-                  final data = _onboardingData[index];
-                  
-                  if (data.showRoleSelection) {
-                    return _buildRoleSelectionPage(data);
-                  } else {
-                    return _buildContentPage(data);
-                  }
-                },
+            Positioned(
+              bottom: -24.w,
+              left: -20.w,
+              child: _DecorativeCircle(
+                diameter: 62.w,
+                color: AppTheme.secondaryLight.withValues(alpha: 0.06),
               ),
             ),
-
-            // Page indicators
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 3.h),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+            SafeArea(
+              child: Column(
                 children: [
-                  // Previous arrow
-                  if (_currentPage > 0)
-                    IconButton(
-                      onPressed: _previousPage,
-                      icon: Icon(
-                        Icons.arrow_back_ios,
-                        color: Colors.grey[400],
-                        size: 20.sp,
-                      ),
-                    )
-                  else
-                    SizedBox(width: 10.w),
-
-                  // Dots
-                  Row(
-                    children: List.generate(
-                      _onboardingData.length,
-                      (index) => Container(
-                        width: 2.w,
-                        height: 2.w,
-                        margin: EdgeInsets.symmetric(horizontal: 1.w),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: _currentPage == index
-                              ? const Color(0xFF4A7C59)
-                              : Colors.grey[300],
+                  Padding(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 5.w, vertical: 3.h),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        if (_currentPage > 0)
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.9),
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppTheme.primaryLight
+                                      .withValues(alpha: 0.12),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: IconButton(
+                              onPressed: _previousPage,
+                              icon: Icon(
+                                Icons.arrow_back_ios_new,
+                                color: AppTheme.primaryLight,
+                                size: 18.sp,
+                              ),
+                            ),
+                          )
+                        else
+                          SizedBox(width: 12.w),
+                        ElevatedButton(
+                          onPressed: _skipOnboarding,
+                          style: ElevatedButton.styleFrom(
+                            elevation: 0,
+                            backgroundColor:
+                                Colors.white.withValues(alpha: 0.9),
+                            foregroundColor: AppTheme.primaryLight,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 6.w, vertical: 1.6.h),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(28),
+                            ),
+                            textStyle: GoogleFonts.montserrat(
+                              fontSize: 11.5.sp,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                          child: Text(
+                            _currentPage == _onboardingData.length - 1
+                                ? "Bắt đầu"
+                                : "Bỏ qua",
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
+                  Expanded(
+                    child: PageView.builder(
+                      controller: _pageController,
+                      onPageChanged: (index) {
+                        setState(() {
+                          _currentPage = index;
+                        });
+                      },
+                      itemCount: _onboardingData.length,
+                      itemBuilder: (context, index) {
+                        final data = _onboardingData[index];
 
-                  // Next arrow
-                  if (_currentPage < _onboardingData.length - 1)
-                    IconButton(
-                      onPressed: _nextPage,
-                      icon: Icon(
-                        Icons.arrow_forward_ios,
-                        color: Colors.grey[400],
-                        size: 20.sp,
-                      ),
-                    )
-                  else
-                    SizedBox(width: 10.w),
+                        if (data.showRoleSelection) {
+                          return _buildRoleSelectionPage(data);
+                        } else {
+                          return _buildContentPage(data);
+                        }
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 4.h, top: 2.5.h),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (_currentPage > 0)
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.9),
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppTheme.primaryLight
+                                      .withValues(alpha: 0.12),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: IconButton(
+                              onPressed: _previousPage,
+                              icon: Icon(
+                                Icons.arrow_back_ios_new,
+                                color: AppTheme.primaryLight,
+                                size: 17.sp,
+                              ),
+                            ),
+                          )
+                        else
+                          SizedBox(width: 10.w),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 4.w),
+                          child: Row(
+                            children: List.generate(
+                              _onboardingData.length,
+                              (index) => AnimatedContainer(
+                                duration: const Duration(milliseconds: 320),
+                                curve: Curves.easeOut,
+                                width: _currentPage == index ? 6.w : 2.2.w,
+                                height: 0.9.h,
+                                margin: EdgeInsets.symmetric(horizontal: 1.w),
+                                decoration: BoxDecoration(
+                                  color: _currentPage == index
+                                      ? AppTheme.primaryLight
+                                      : AppTheme.primaryLight
+                                          .withValues(alpha: 0.25),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        if (_currentPage < _onboardingData.length - 1)
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.9),
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppTheme.primaryLight
+                                      .withValues(alpha: 0.12),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: IconButton(
+                              onPressed: _nextPage,
+                              icon: Icon(
+                                Icons.arrow_forward_ios,
+                                color: AppTheme.primaryLight,
+                                size: 17.sp,
+                              ),
+                            ),
+                          )
+                        else
+                          SizedBox(width: 10.w),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -286,185 +370,137 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildRoleSelectionPage(OnboardingData data) {
+    final bool isPlayerSelected = _selectedRole == "player";
+    final bool isClubOwnerSelected = _selectedRole == "club_owner";
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 6.w),
       child: SingleChildScrollView(
         child: Column(
           children: [
+            SizedBox(height: 5.h),
+
+            // SABO ARENA Logo
+            TweenAnimationBuilder<double>(
+              duration: const Duration(milliseconds: 1000),
+              tween: Tween<double>(begin: 0.0, end: 1.0),
+              builder: (context, value, child) {
+                return Transform.scale(
+                  scale: 0.9 + (0.1 * value),
+                  child: Opacity(
+                    opacity: value,
+                    child: Container(
+                      width: 44.w,
+                      height: 44.w,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: const LinearGradient(
+                          colors: [
+                            Color(0xFF1F2C3E),
+                            Color(0xFF0B141F),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.25),
+                            blurRadius: 24,
+                            offset: const Offset(0, 14),
+                          ),
+                        ],
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.12),
+                          width: 1.4.w,
+                        ),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.all(2.4.w),
+                        child: ClipOval(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color:
+                                    AppTheme.accentLight.withValues(alpha: 0.6),
+                                width: 0.6.w,
+                              ),
+                            ),
+                            child: ClipOval(
+                              child: Image.asset(
+                                'assets/images/sabo-arena.png',
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+
+            SizedBox(height: 4.h),
+
+            // Title
+            Text(
+              data.title,
+              style: GoogleFonts.montserrat(
+                fontSize: 23.sp,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.primaryLight,
+                letterSpacing: 1.1,
+              ),
+              textAlign: TextAlign.center,
+            ),
+
+            SizedBox(height: 1.8.h),
+
+            Text(
+              "Chọn vai trò để cá nhân hóa trải nghiệm của bạn trên SABO.",
+              style: GoogleFonts.openSans(
+                fontSize: 11.5.sp,
+                color: AppTheme.textSecondaryLight.withValues(alpha: 0.9),
+                height: 1.5,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+
             SizedBox(height: 6.h),
-            
-            // Billiard ball icon
-            Container(
-              width: 35.w,
-              height: 35.w,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: const RadialGradient(
-                colors: [
-                  Color(0xFF1A1A1A),
-                  Color(0xFF000000),
-                ],
-                stops: [0.7, 1.0],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.purple.withAlpha(77),
-                  blurRadius: 20,
-                  spreadRadius: 5,
-                ),
-                BoxShadow(
-                  color: Colors.blue.withAlpha(51),
-                  blurRadius: 15,
-                  spreadRadius: 3,
-                ),
-              ],
-            ),
-            child: Stack(
+
+            // Role selection
+            Row(
               children: [
-                // White circle
-                Center(
-                  child: Container(
-                    width: 25.w,
-                    height: 25.w,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                    ),
-                    child: Center(
-                      child: Text(
-                        'S',
-                        style: TextStyle(
-                          fontSize: 28.sp,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF4A7C59),
-                        ),
-                      ),
-                    ),
+                Expanded(
+                  child: _RoleOptionCard(
+                    icon: Icons.sports_martial_arts,
+                    title: 'Người chơi',
+                    isSelected: isPlayerSelected,
+                    onTap: () {
+                      _setRoleSpecificData("player");
+                      _nextPage();
+                    },
                   ),
                 ),
-                // Neon effects
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.cyan.withAlpha(128),
-                        width: 1,
-                      ),
-                    ),
+                SizedBox(width: 4.w),
+                Expanded(
+                  child: _RoleOptionCard(
+                    icon: Icons.apartment,
+                    title: 'Chủ CLB',
+                    isSelected: isClubOwnerSelected,
+                    onTap: () {
+                      _setRoleSpecificData("club_owner");
+                      _nextPage();
+                    },
                   ),
                 ),
               ],
             ),
-          ),
 
-          SizedBox(height: 6.h),
-
-          // Title
-          Text(
-            data.title,
-            style: TextStyle(
-              fontSize: 24.sp,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-              letterSpacing: 1.2,
-            ),
-            textAlign: TextAlign.center,
-          ),
-
-          SizedBox(height: 8.h),
-
-          // Role selection
-          Row(
-            children: [
-              // Player option
-              Flexible(
-                flex: 1,
-                child: GestureDetector(
-                  onTap: () {
-                    // Handle player selection
-                    _setRoleSpecificData("player");
-                    _nextPage();
-                  },
-                  child: Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.all(4.w),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[50],
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.grey[300]!,
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.sports_basketball,
-                          size: 20.w,
-                          color: const Color(0xFF4A7C59),
-                        ),
-                        SizedBox(height: 2.h),
-                        Text(
-                          'Người chơi',
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              SizedBox(width: 4.w),
-
-              // Club owner option
-              Flexible(
-                flex: 1,
-                child: GestureDetector(
-                  onTap: () {
-                    // Handle club owner selection
-                    _setRoleSpecificData("club_owner");
-                    _nextPage();
-                  },
-                  child: Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.all(4.w),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[50],
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.grey[300]!,
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.business,
-                          size: 20.w,
-                          color: const Color(0xFF4A7C59),
-                        ),
-                        SizedBox(height: 2.h),
-                        Text(
-                          'Chủ CLB',
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          
-          SizedBox(height: 4.h), // Add some bottom padding
-        ],
+            SizedBox(height: 4.h),
+          ],
         ),
       ),
     );
@@ -477,46 +513,56 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         child: Column(
           children: [
             SizedBox(height: 2.h),
-            
-            // Illustration
             Container(
-              width: 50.w,
-              height: 30.h,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 3.5.h),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.92),
+                borderRadius: BorderRadius.circular(28),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.primaryLight.withValues(alpha: 0.12),
+                    blurRadius: 32,
+                    offset: const Offset(0, 24),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    width: 52.w,
+                    height: 28.h,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: _buildIllustration(_currentPage),
+                  ),
+                  SizedBox(height: 3.h),
+                  Text(
+                    data.title,
+                    style: GoogleFonts.montserrat(
+                      fontSize: 19.sp,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.primaryLight,
+                      letterSpacing: 1.1,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 2.h),
+                  Text(
+                    data.description,
+                    style: GoogleFonts.openSans(
+                      fontSize: 12.5.sp,
+                      color: AppTheme.textSecondaryLight.withValues(alpha: 0.9),
+                      height: 1.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
-            child: _buildIllustration(_currentPage),
-          ),
-
-          SizedBox(height: 3.h),
-
-          // Title
-          Text(
-            data.title,
-            style: TextStyle(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-              letterSpacing: 1.2,
-            ),
-            textAlign: TextAlign.center,
-          ),
-
-          SizedBox(height: 2.h),
-
-          // Description
-          Text(
-            data.description,
-            style: TextStyle(
-              fontSize: 13.sp,
-              color: Colors.grey[600],
-              height: 1.4,
-            ),
-            textAlign: TextAlign.center,
-          ),
-
-          SizedBox(height: 4.h), // Add some bottom padding
-        ],
+            SizedBox(height: 4.h),
+          ],
         ),
       ),
     );
@@ -769,6 +815,133 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       default:
         return Container();
     }
+  }
+}
+
+class _DecorativeCircle extends StatelessWidget {
+  final double diameter;
+  final Color color;
+
+  const _DecorativeCircle({
+    required this.diameter,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: diameter,
+      height: diameter,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color,
+      ),
+    );
+  }
+}
+
+class _RoleOptionCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _RoleOptionCard({
+    required this.icon,
+    required this.title,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(24),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(24),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 280),
+          curve: Curves.easeOutCubic,
+          padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
+          decoration: BoxDecoration(
+            gradient: isSelected
+                ? LinearGradient(
+                    colors: [
+                      AppTheme.primaryLight,
+                      AppTheme.secondaryLight,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                : null,
+            color: isSelected ? null : Colors.white.withValues(alpha: 0.92),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: isSelected
+                  ? Colors.transparent
+                  : AppTheme.primaryLight.withValues(alpha: 0.15),
+              width: 1.2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: isSelected
+                    ? AppTheme.primaryLight.withValues(alpha: 0.22)
+                    : Colors.black.withValues(alpha: 0.04),
+                blurRadius: isSelected ? 30 : 16,
+                offset: const Offset(0, 18),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: EdgeInsets.all(3.5.w),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? Colors.white
+                      : AppTheme.primaryLight.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  icon,
+                  size: 16.w,
+                  color: isSelected
+                      ? AppTheme.primaryLight
+                      : AppTheme.primaryLight,
+                ),
+              ),
+              SizedBox(height: 2.5.h),
+              Text(
+                title,
+                style: GoogleFonts.montserrat(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
+                  color: isSelected ? Colors.white : AppTheme.primaryLight,
+                  letterSpacing: 0.6,
+                ),
+              ),
+              SizedBox(height: 0.8.h),
+              Text(
+                isSelected ? 'Đã chọn' : 'Khám phá trải nghiệm phù hợp',
+                style: GoogleFonts.openSans(
+                  fontSize: 9.5.sp,
+                  fontWeight: FontWeight.w500,
+                  color: isSelected
+                      ? Colors.white.withValues(alpha: 0.85)
+                      : AppTheme.textSecondaryLight.withValues(alpha: 0.9),
+                  height: 1.3,
+                  letterSpacing: 0.2,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

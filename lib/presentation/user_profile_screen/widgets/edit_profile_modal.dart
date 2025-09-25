@@ -26,6 +26,7 @@ class EditProfileModal extends StatefulWidget {
 
 class _EditProfileModalState extends State<EditProfileModal> {
   final _formKey = GlobalKey<FormState>();
+  final _fullNameController = TextEditingController();
   final _displayNameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _bioController = TextEditingController();
@@ -42,7 +43,8 @@ class _EditProfileModalState extends State<EditProfileModal> {
   }
 
   void _initializeControllers() {
-    _displayNameController.text = widget.userProfile.fullName;
+    _fullNameController.text = widget.userProfile.fullName;
+    _displayNameController.text = widget.userProfile.displayName;
     _phoneController.text = widget.userProfile.phone ?? '';
     _bioController.text = widget.userProfile.bio ?? '';
     _locationController.text = widget.userProfile.location ?? '';
@@ -50,6 +52,7 @@ class _EditProfileModalState extends State<EditProfileModal> {
 
   @override
   void dispose() {
+    _fullNameController.dispose();
     _displayNameController.dispose();
     _phoneController.dispose();
     _bioController.dispose();
@@ -86,7 +89,8 @@ class _EditProfileModalState extends State<EditProfileModal> {
 
       // Sử dụng copyWith để cập nhật thông tin
       final updatedProfile = widget.userProfile.copyWith(
-        fullName: _displayNameController.text.trim().isEmpty ? widget.userProfile.fullName : _displayNameController.text.trim(),
+        fullName: _fullNameController.text.trim().isEmpty ? widget.userProfile.fullName : _fullNameController.text.trim(),
+        displayName: _displayNameController.text.trim().isEmpty ? widget.userProfile.displayName : _displayNameController.text.trim(),
         bio: _bioController.text.trim().isEmpty ? null : _bioController.text.trim(),
         phone: _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
         location: _locationController.text.trim().isEmpty ? null : _locationController.text.trim(),
@@ -435,17 +439,34 @@ class _EditProfileModalState extends State<EditProfileModal> {
                     
                     SizedBox(height: 4.h),
                     
-                    // Họ và tên - có thể chỉnh sửa
+                    // Họ và tên thật
+                    _buildTextField(
+                      controller: _fullNameController,
+                      label: 'Họ và tên thật',
+                      icon: Icons.person_outline,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Họ và tên không được để trống';
+                        }
+                        if (value.trim().length < 2) {
+                          return 'Tên phải có ít nhất 2 ký tự';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 3.h),
+                    
+                    // Tên hiển thị
                     _buildTextField(
                       controller: _displayNameController,
-                      label: 'Họ và tên',
-                      icon: Icons.person_outline,
+                      label: 'Tên hiển thị',
+                      icon: Icons.badge_outlined,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return 'Tên hiển thị không được để trống';
                         }
                         if (value.trim().length < 2) {
-                          return 'Tên phải có ít nhất 2 ký tự';
+                          return 'Tên hiển thị phải có ít nhất 2 ký tự';
                         }
                         return null;
                       },
@@ -539,22 +560,12 @@ class _EditProfileModalState extends State<EditProfileModal> {
           maxLength: maxLength,
           validator: validator,
           decoration: InputDecoration(
-            prefixIcon: Icon(icon, color: Colors.grey.shade600),
+            prefixIcon: Icon(icon),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.green, width: 2),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.red, width: 2),
             ),
             filled: true,
             fillColor: Colors.grey.shade50,
-            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
         ),
       ],
