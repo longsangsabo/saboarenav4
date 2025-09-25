@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import '../../services/tournament_service.dart';
 import 'widgets/tournament_status_panel.dart';
-import 'widgets/match_management_view.dart';
+import 'widgets/match_management_tab.dart';
 import 'widgets/tournament_rankings_widget.dart';
 
 class TournamentManagementScreen extends StatefulWidget {
@@ -240,10 +240,8 @@ class _TournamentManagementScreenState extends State<TournamentManagementScreen>
   }
 
   Widget _buildMatchesTab(String tournamentStatus) {
-    return MatchManagementView(
+    return MatchManagementTab(
       tournamentId: widget.tournamentId,
-      tournamentStatus: tournamentStatus,
-      canManage: widget.canManage,
     );
   }
 

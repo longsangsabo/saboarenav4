@@ -481,11 +481,26 @@ class TournamentService {
   Future<List<Map<String, dynamic>>> getTournamentParticipantsWithPaymentStatus(
       String tournamentId) async {
     try {
-      final response = await _supabase
+      print('🔍 WithPaymentStatus: Querying participants for tournament $tournamentId');
+      
+      // Check authentication status
+      final currentUser = _supabase.auth.currentUser;
+      print('🔐 Auth status: ${currentUser != null ? "Authenticated as ${currentUser.email}" : "NOT AUTHENTICATED"}');
+      
+      // First check total participants without JOIN
+      final totalCheck = await _supabase
+          .from('tournament_participants')
+          .select('id, user_id, payment_status')
+          .eq('tournament_id', tournamentId);
+      print('🔢 DEBUG: Total participants in DB: ${totalCheck.length}');
+      for (int i = 0; i < totalCheck.length; i++) {
+        print('   ${i + 1}. User ID: ${totalCheck[i]['user_id']} - Payment: ${totalCheck[i]['payment_status']}');
+      }
+      var response = await _supabase
           .from('tournament_participants')
           .select('''
             *,
-            users!tournament_participants_user_id_fkey (
+            users (
               id,
               email,
               full_name,
@@ -496,8 +511,18 @@ class TournamentService {
           ''')
           .eq('tournament_id', tournamentId)
           .order('registered_at', ascending: true);
+      
+      print('📊 WithPaymentStatus: Raw response count: ${response.length}');
+      
 
-      return response.map<Map<String, dynamic>>((json) {
+      
+      // If response is still empty or users data is missing, try without join
+      if (response.isEmpty || response.any((item) => item['users'] == null)) {
+        print('⚠️ WithPaymentStatus: Join failed or empty, trying without join...');
+        return await _getTournamentParticipantsWithoutJoin(tournamentId);
+      }
+
+      final result = response.map<Map<String, dynamic>>((json) {
         final user = json['users'];
         return {
           'id': json['id'],
@@ -517,9 +542,86 @@ class TournamentService {
           },
         };
       }).toList();
+      
+      print('✅ WithPaymentStatus: Returning ${result.length} participants with payment info');
+      return result;
     } catch (error) {
       print('❌ Error getting participants with payment status: $error');
       throw Exception('Failed to get tournament participants: $error');
+    }
+  }
+
+  /// Backup method to get participants without join (in case of join issues)
+  Future<List<Map<String, dynamic>>> _getTournamentParticipantsWithoutJoin(String tournamentId) async {
+    try {
+      print('🔄 Fallback: Getting participants without join...');
+      
+      // First get tournament participants
+      var participants = await _supabase
+          .from('tournament_participants')
+          .select('*')
+          .eq('tournament_id', tournamentId)
+          .order('registered_at', ascending: true);
+      
+      print('📊 Fallback: Found ${participants.length} participant records');
+      
+
+      
+      // Then get user data separately
+      final List<Map<String, dynamic>> result = [];
+      for (final participant in participants) {
+        try {
+          final userData = await _supabase
+              .from('users')
+              .select('id, email, full_name, avatar_url, elo_rating, rank')
+              .eq('id', participant['user_id'])
+              .single();
+          
+          result.add({
+            'id': participant['id'],
+            'tournament_id': participant['tournament_id'],
+            'user_id': participant['user_id'],
+            'payment_status': participant['payment_status'] ?? 'pending',
+            'status': participant['status'] ?? 'registered',
+            'notes': participant['notes'],
+            'registered_at': participant['registered_at'],
+            'user': {
+              'id': userData['id'],
+              'email': userData['email'],
+              'full_name': userData['full_name'] ?? 'Unknown Player',
+              'avatar_url': userData['avatar_url'],
+              'elo_rating': userData['elo_rating'] ?? 1200,
+              'rank': RankMigrationHelper.getNewDisplayName(userData['rank'] as String?),
+            },
+          });
+        } catch (e) {
+          print('⚠️ Fallback: Failed to get user data for ${participant['user_id']}: $e');
+          // Add participant without user data
+          result.add({
+            'id': participant['id'],
+            'tournament_id': participant['tournament_id'],
+            'user_id': participant['user_id'],
+            'payment_status': participant['payment_status'] ?? 'pending',
+            'status': participant['status'] ?? 'registered',
+            'notes': participant['notes'],
+            'registered_at': participant['registered_at'],
+            'user': {
+              'id': participant['user_id'],
+              'email': 'unknown@example.com',
+              'full_name': 'Unknown Player',
+              'avatar_url': null,
+              'elo_rating': 1200,
+              'rank': 'Novice',
+            },
+          });
+        }
+      }
+      
+      print('✅ Fallback: Returning ${result.length} participants');
+      return result;
+    } catch (e) {
+      print('❌ Fallback: Error: $e');
+      return [];
     }
   }
 
@@ -1071,6 +1173,8 @@ class TournamentService {
     
     return bonus;
   }
+
+
 }
 
 // ==================== DATA MODELS ====================
@@ -1210,137 +1314,4 @@ class EloChange {
     required this.baseReward,
     required this.bonuses,
   });
-
-  /// Start a tournament (change status from recruiting/ready to active)
-  Future<void> startTournament(String tournamentId) async {
-    try {
-      // Check current tournament status
-      final tournamentResponse = await _supabase
-          .from('tournaments')
-          .select('status, participants_count, max_participants')
-          .eq('id', tournamentId)
-          .single();
-
-      if (tournamentResponse['status'] == 'active') {
-        throw Exception('Tournament is already active');
-      }
-
-      if (tournamentResponse['status'] == 'completed') {
-        throw Exception('Tournament is already completed');
-      }
-
-      // Check if tournament has enough participants
-      final participantsCount = tournamentResponse['participants_count'] ?? 0;
-      if (participantsCount < 2) {
-        throw Exception('Tournament needs at least 2 participants to start');
-      }
-
-      // Update tournament status to active
-      await _supabase
-          .from('tournaments')
-          .update({
-            'status': 'active',
-            'updated_at': DateTime.now().toIso8601String(),
-          })
-          .eq('id', tournamentId);
-
-      print('✅ Tournament $tournamentId started successfully');
-    } catch (e) {
-      print('❌ Error starting tournament: $e');
-      throw Exception('Failed to start tournament: $e');
-    }
-  }
-
-  /// Get tournament rankings/standings
-  Future<List<Map<String, dynamic>>> getTournamentRankings(String tournamentId) async {
-    try {
-      // Get tournament participants with their match results
-      final response = await _supabase
-          .from('tournament_participants')
-          .select('''
-            user_id,
-            final_position,
-            total_points,
-            matches_won,
-            matches_lost,
-            matches_drawn,
-            user_profiles!inner(username, club_id, clubs(name))
-          ''')
-          .eq('tournament_id', tournamentId)
-          .order('final_position', ascending: true);
-
-      if (response.isEmpty) {
-        return [];
-      }
-
-      return response.map<Map<String, dynamic>>((participant) {
-        final userProfile = participant['user_profiles'];
-        final club = userProfile['clubs'];
-
-        return {
-          'user_id': participant['user_id'],
-          'player_name': userProfile['username'] ?? 'Unknown Player',
-          'club_name': club != null ? club['name'] : null,
-          'final_position': participant['final_position'] ?? 999,
-          'total_points': participant['total_points'] ?? 0,
-          'wins': participant['matches_won'] ?? 0,
-          'losses': participant['matches_lost'] ?? 0,
-          'draws': participant['matches_drawn'] ?? 0,
-        };
-      }).toList();
-    } catch (e) {
-      print('❌ Error getting tournament rankings: $e');
-      throw Exception('Failed to get tournament rankings: $e');
-    }
-  }
-
-  /// Update tournament status
-  Future<void> updateTournamentStatus(String tournamentId, String status) async {
-    try {
-      await _supabase
-          .from('tournaments')
-          .update({
-            'status': status,
-            'updated_at': DateTime.now().toIso8601String(),
-          })
-          .eq('id', tournamentId);
-
-      print('✅ Tournament $tournamentId status updated to $status');
-    } catch (e) {
-      print('❌ Error updating tournament status: $e');
-      throw Exception('Failed to update tournament status: $e');
-    }
-  }
-
-  /// Get tournament by ID with detailed information (for management UI)
-  Future<Map<String, dynamic>> getTournamentDetails(String tournamentId) async {
-    try {
-      final response = await _supabase
-          .from('tournaments')
-          .select('''
-            id,
-            title,
-            description,
-            tournament_type,
-            status,
-            start_date,
-            end_date,
-            entry_fee,
-            prize_pool,
-            max_participants,
-            current_participants,
-            created_at,
-            updated_at,
-            club_id,
-            clubs(name)
-          ''')
-          .eq('id', tournamentId)
-          .single();
-
-      return response;
-    } catch (e) {
-      print('❌ Error getting tournament by ID: $e');
-      throw Exception('Failed to get tournament details: $e');
-    }
-  }
 }

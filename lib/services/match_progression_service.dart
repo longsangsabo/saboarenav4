@@ -506,7 +506,7 @@ class MatchProgressionService {
         .select('*')
         .eq('tournament_id', tournamentId)
         .or('player1_id.eq.$playerId,player2_id.eq.$playerId')
-        .in_('status', ['ready', 'pending'])
+        .inFilter('status', ['ready', 'pending'])
         .order('round_number')
         .order('match_number');
 

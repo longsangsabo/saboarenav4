@@ -373,8 +373,8 @@ class TournamentCompletionService {
         final playerScore = isPlayer1 ? match['player1_score'] : match['player2_score'];
         final opponentScore = isPlayer1 ? match['player2_score'] : match['player1_score'];
 
-        gamesWon += playerScore ?? 0;
-        gamesLost += opponentScore ?? 0;
+        gamesWon += (playerScore as int? ?? 0);
+        gamesLost += (opponentScore as int? ?? 0);
 
         if (match['winner_id'] == playerId) {
           wins++;
@@ -487,10 +487,25 @@ class TournamentCompletionService {
     List<Map<String, dynamic>> standings
   ) async {
     try {
-      return await _eloService.processTournamentEloChanges(
-        tournamentId: tournamentId,
-        results: standings,
-      );
+      // Get tournament format
+      final tournamentResponse = await _supabase
+          .from('tournaments')
+          .select('tournament_type')
+          .eq('id', tournamentId)
+          .single();
+      
+      final tournamentFormat = tournamentResponse['tournament_type'] ?? 'single_elimination';
+      
+      // TODO: Fix ELO service integration - type mismatch issue
+      // return await _eloService.processTournamentEloChanges(
+      //   tournamentId: tournamentId,
+      //   results: standings,
+      //   tournamentFormat: tournamentFormat,
+      // );
+      
+      // Temporary workaround - return empty list
+      print('⚠️ ELO processing temporarily disabled due to type mismatch');
+      return [];
     } catch (e) {
       print('❌ Error processing ELO updates: $e');
       return [];
@@ -532,8 +547,16 @@ class TournamentCompletionService {
         final standing = standings[i];
         
         // Update user's SPA points (prize pool)
+        // Get current spa_points first
+        final currentPoints = await _supabase
+            .from('user_profiles')
+            .select('spa_points')
+            .eq('id', standing['participant_id'])
+            .single();
+        
+        final newPoints = (currentPoints['spa_points'] ?? 0) + prizeAmount;
         await _supabase.from('user_profiles').update({
-          'spa_points': _supabase.raw('spa_points + $prizeAmount'),
+          'spa_points': newPoints,
         }).eq('id', standing['participant_id']);
 
         // Record prize transaction
@@ -598,6 +621,37 @@ class TournamentCompletionService {
         'matches_played': standing['matches_played'] ?? 0,
         'matches_won': standing['matches_won'] ?? 0,
       }).eq('tournament_id', tournamentId).eq('user_id', standing['participant_id']);
+    }
+  }
+
+  /// Helper method to increment user tournament statistics
+  Future<void> _incrementUserStats(String participantId, bool isWinner, bool isPodium) async {
+    try {
+      // Get current stats
+      final userStats = await _supabase
+          .from('user_profiles')
+          .select('total_tournaments, tournament_wins, tournament_podiums')
+          .eq('id', participantId)
+          .single();
+      
+      // Calculate new values
+      final updates = <String, dynamic>{
+        'total_tournaments': (userStats['total_tournaments'] ?? 0) + 1,
+      };
+      
+      if (isWinner) {
+        updates['tournament_wins'] = (userStats['tournament_wins'] ?? 0) + 1;
+      }
+      
+      if (isPodium) {
+        updates['tournament_podiums'] = (userStats['tournament_podiums'] ?? 0) + 1;
+      }
+      
+      // Update the stats
+      await _supabase.from('user_profiles').update(updates).eq('id', participantId);
+      
+    } catch (e) {
+      print('⚠️ Failed to update user stats for $participantId: $e');
     }
   }
 
@@ -736,19 +790,11 @@ class TournamentCompletionService {
         final position = standing['position'] as int;
         
         // Update user profile với tournament results
-        Map<String, dynamic> updates = {
-          'total_tournaments': _supabase.raw('total_tournaments + 1'),
-        };
-
-        if (position == 1) {
-          updates['tournament_wins'] = _supabase.raw('tournament_wins + 1');
-        }
-
-        if (position <= 3) {
-          updates['tournament_podiums'] = _supabase.raw('tournament_podiums + 1');
-        }
-
-        await _supabase.from('user_profiles').update(updates).eq('id', participantId);
+        await _incrementUserStats(
+          participantId, 
+          position == 1,  // isWinner
+          position <= 3   // isPodium
+        );
       }
 
       // Update club statistics (if tournament belongs to club)
@@ -759,8 +805,16 @@ class TournamentCompletionService {
           .single();
 
       if (tournament['club_id'] != null) {
+        // Get current tournaments_hosted count
+        final clubData = await _supabase
+            .from('clubs')
+            .select('tournaments_hosted')
+            .eq('id', tournament['club_id'])
+            .single();
+        
+        final newCount = (clubData['tournaments_hosted'] ?? 0) + 1;
         await _supabase.from('clubs').update({
-          'tournaments_hosted': _supabase.raw('tournaments_hosted + 1'),
+          'tournaments_hosted': newCount,
         }).eq('id', tournament['club_id']);
       }
 

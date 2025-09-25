@@ -9,8 +9,8 @@ import '../../models/user_profile.dart';
 
 import 'widgets/tournament_management_panel.dart';
 import 'widgets/tournament_bracket_view.dart';
-import 'widgets/participant_management_view.dart';
-import 'widgets/match_management_view.dart';
+import 'widgets/participant_management_tab.dart';
+import 'widgets/match_management_tab.dart';
 import 'widgets/tournament_stats_view.dart';
 import '../../widgets/custom_bottom_bar.dart';
 import './widgets/participants_list_widget.dart';
@@ -804,11 +804,15 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => ParticipantManagementView(
-        tournamentId: _tournamentData['id'] as String,
-        tournamentStatus: _tournamentData['status'] as String,
-        maxParticipants: _tournamentData['maxParticipants'] as int,
-        canManage: _canManageTournament(),
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.9,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: ParticipantManagementTab(
+          tournamentId: _tournamentData['id'] as String,
+        ),
       ),
     );
   }
@@ -834,10 +838,15 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => MatchManagementView(
-        tournamentId: _tournamentData['id'] as String,
-        tournamentStatus: _tournamentData['status'] as String,
-        canManage: _canManageTournament(),
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.9,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: MatchManagementTab(
+          tournamentId: _tournamentData['id'] as String,
+        ),
       ),
     );
   }
