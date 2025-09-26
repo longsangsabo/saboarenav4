@@ -206,12 +206,12 @@ class _FindOpponentsScreenState extends State<FindOpponentsScreen>
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: _tabController.index == 1 ? FloatingActionButton(
         onPressed: _showQRScanner,
         backgroundColor: Theme.of(context).primaryColor,
         tooltip: 'Quét QR để tìm người chơi',
         child: Icon(Icons.qr_code_scanner, color: Colors.white),
-      ),
+      ) : null,
       bottomNavigationBar: SafeArea(
         child: Container(
           decoration: BoxDecoration(

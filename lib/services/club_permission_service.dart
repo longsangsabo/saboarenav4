@@ -83,18 +83,18 @@ class ClubPermissionService {
       userId ??= _supabase.auth.currentUser?.id;
 
       if (userId == null) {
-        debugPrint('❌ DEBUG: No user ID available');
-        return {'error': 'No user ID available'};
+        return {'error': 'User ID is null'};
       }
 
-      debugPrint('🔍 DEBUG: Checking membership for user $userId in club $clubId');
+      final String safeUserId = userId;
+      debugPrint('🔍 DEBUG: Checking membership for user $safeUserId in club $clubId');
 
       // Query all membership data
       final response = await _supabase
           .from('club_members')
           .select('*')
           .eq('club_id', clubId)
-          .eq('user_id', userId)
+          .eq('user_id', safeUserId)
           .maybeSingle();
 
       if (response == null) {
@@ -116,12 +116,13 @@ class ClubPermissionService {
       userId ??= _supabase.auth.currentUser?.id;
 
       if (userId == null) {
-        debugPrint('❌ ClubPermissionService: No user ID available');
+        debugPrint('❌ ClubPermissionService: User ID is null');
         return ClubRole.none;
       }
 
-      final cacheKey = '${clubId}_$userId';
-      debugPrint('🔍 ClubPermissionService: Checking role for user $userId in club $clubId');
+      final String safeUserId = userId;
+      final cacheKey = '${clubId}_$safeUserId';
+      debugPrint('🔍 ClubPermissionService: Checking role for user $safeUserId in club $clubId');
 
       // Check cache first and validate expiry
       if (_roleCache.containsKey(cacheKey)) {
@@ -142,7 +143,7 @@ class ClubPermissionService {
           .from('club_members')
           .select('role, status')
           .eq('club_id', clubId)
-          .eq('user_id', userId)
+          .eq('user_id', safeUserId)
           .maybeSingle()
           .timeout(Duration(seconds: 10), onTimeout: () {
             debugPrint('⚠️ ClubPermissionService: Database query timeout');

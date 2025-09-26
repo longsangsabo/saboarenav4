@@ -117,7 +117,7 @@ class TournamentAutomationService {
     ];
 
     for (final interval in reminderIntervals) {
-      final reminderTime = tournament.registrationDeadline!.subtract(interval);
+      final reminderTime = tournament.registrationDeadline.subtract(interval);
       
       if (reminderTime.isAfter(DateTime.now())) {
         Timer(reminderTime.difference(DateTime.now()), () async {
@@ -127,7 +127,7 @@ class TournamentAutomationService {
     }
 
     // Schedule registration closure
-    final closureDelay = tournament.registrationDeadline!.difference(DateTime.now());
+    final closureDelay = tournament.registrationDeadline.difference(DateTime.now());
     if (closureDelay.isPositive) {
       Timer(closureDelay, () async {
         await _closeRegistration(tournament.id);
@@ -215,7 +215,7 @@ class TournamentAutomationService {
   // ==================== TOURNAMENT START AUTOMATION ====================
 
   Future<void> _setupStartAutomation(Tournament tournament) async {
-    final delay = tournament.startDate!.difference(DateTime.now());
+    final delay = tournament.startDate.difference(DateTime.now());
     
     if (delay.isPositive) {
       _activeTimers[tournament.id] = Timer(delay, () async {
@@ -228,7 +228,7 @@ class TournamentAutomationService {
       final preStartIntervals = [Duration(minutes: 30), Duration(minutes: 10), Duration(minutes: 5)];
       
       for (final interval in preStartIntervals) {
-        final notificationTime = tournament.startDate!.subtract(interval);
+        final notificationTime = tournament.startDate.subtract(interval);
         
         if (notificationTime.isAfter(DateTime.now())) {
           Timer(notificationTime.difference(DateTime.now()), () async {

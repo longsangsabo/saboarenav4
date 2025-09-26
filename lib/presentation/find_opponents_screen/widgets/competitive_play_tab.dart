@@ -6,7 +6,7 @@ import '../../../core/app_export.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import './map_view_widget.dart';
 import './player_card_widget.dart';
-import '../../widgets/rank_change_request_dialog.dart';
+
 import 'package:flutter/foundation.dart';
 
 
@@ -75,176 +75,75 @@ class _CompetitivePlayTabState extends State<CompetitivePlayTab> {
     return userRank != null && userRank.isNotEmpty && userRank != 'unranked';
   }
 
-  Widget _buildRankRequiredPrompt(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+  Widget _buildRankStatusBanner(BuildContext context) {
+    if (_currentUser == null) {
+      return Container(
+        margin: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.orange.shade50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.orange.shade200),
+        ),
+        child: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: Colors.orange.withOpacity(0.3),
-                  width: 2,
-                ),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.emoji_events,
-                    size: 48,
-                    color: Colors.orange.shade600,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Đăng ký xếp hạng để tham gia',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.orange.shade800,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Bạn cần có hạng đấu để tham gia thách đấu xếp hạng. Đăng ký ngay để:',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade700,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  Column(
-                    children: [
-                      _buildBenefitRow('🏆', 'Tham gia thách đấu xếp hạng'),
-                      const SizedBox(height: 8),
-                      _buildBenefitRow('📊', 'Theo dõi tiến bộ qua ELO'),
-                      const SizedBox(height: 8),
-                      _buildBenefitRow('🎯', 'Gặp đối thủ cùng trình độ'),
-                      const SizedBox(height: 8),
-                      _buildBenefitRow('🏅', 'Tranh tài trong giải đấu'),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () => _navigateToRankRegistration(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange.shade600,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        'Đăng ký xếp hạng ngay',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextButton(
-                    onPressed: () {
-                      // Navigate to social play instead
-                      DefaultTabController.of(context).animateTo(1);
-                    },
-                    child: Text(
-                      'Hoặc chơi giao lưu không tính điểm',
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ),
-                ],
+            Icon(Icons.info_outline, color: Colors.orange.shade600, size: 24),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Đăng ký hạng để tham gia thách đấu có cược điểm SPA',
+                style: TextStyle(fontSize: 14),
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
+      );
+    }
 
-  Widget _buildBenefitRow(String emoji, String text) {
-    return Row(
-      children: [
-        Text(emoji, style: const TextStyle(fontSize: 16)),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(fontSize: 14),
-          ),
+    if (_hasRank) {
+      return Container(
+        margin: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.green.shade50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.green.shade200),
         ),
-      ],
-    );
-  }
-
-  void _navigateToRankRegistration(BuildContext context) {
-    Navigator.pushNamed(context, AppRoutes.clubSelectionScreen);
-  }
-
-  Widget _buildRankInfoBanner(BuildContext context) {
-    if (_currentUser == null) return const SizedBox.shrink();
+        child: Row(
+          children: [
+            Icon(Icons.verified, color: Colors.green.shade600, size: 24),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Hạng hiện tại: ${_currentUser!.rank} - Có thể thách đấu có cược SPA',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.green.shade800,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.green.shade50,
+        color: Colors.orange.shade50,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.green.shade200),
+        border: Border.all(color: Colors.orange.shade200),
       ),
       child: Row(
         children: [
-          Icon(Icons.verified, color: Colors.green.shade600, size: 24),
+          Icon(Icons.info_outline, color: Colors.orange.shade600, size: 24),
           const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Hạng hiện tại: ${_currentUser!.rank}',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.green.shade800,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Bạn có thể tham gia thách đấu xếp hạng',
-                  style: TextStyle(
-                    color: Colors.green.shade700,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          TextButton.icon(
-            onPressed: () => _showRankChangeRequestDialog(context),
-            icon: Icon(Icons.swap_vert, size: 18, color: Colors.blue.shade600),
-            label: Text(
-              'Thay đổi hạng',
-              style: TextStyle(color: Colors.blue.shade600),
-            ),
-            style: TextButton.styleFrom(
-              backgroundColor: Colors.blue.shade50,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+          const Expanded(
+            child: Text(
+              'Đăng ký hạng để tham gia thách đấu có cược điểm SPA',
+              style: TextStyle(fontSize: 14),
             ),
           ),
         ],
@@ -252,53 +151,39 @@ class _CompetitivePlayTabState extends State<CompetitivePlayTab> {
     );
   }
 
-  void _showRankChangeRequestDialog(BuildContext context) {
-    if (_currentUser == null) return;
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return RankChangeRequestDialog(
-          userProfile: _currentUser!,
-          onRequestSubmitted: () {
-            // Optional: Refresh data or show confirmation
-          },
-        );
-      },
-    );
+
+  void _navigateToRankRegistration(BuildContext context) {
+    Navigator.pushNamed(context, AppRoutes.clubSelectionScreen);
   }
+
+
+
+
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoadingUser) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Đang tải thông tin người dùng...'),
-          ],
-        ),
-      );
-    }
-
-    // Check if user has rank - if not, show rank registration prompt
-    if (!_hasRank) {
-      return _buildRankRequiredPrompt(context);
-    }
-
-    return Column(
-      children: [
-        // Rank info banner for users with rank
-        _buildRankInfoBanner(context),
-        Expanded(
-          child: RefreshIndicator(
-            onRefresh: () async => widget.onRefresh(),
-            child: _buildBody(context),
+    return Scaffold(
+      body: Column(
+        children: [
+          // Info banner - always show rank status
+          if (!_isLoadingUser) _buildRankStatusBanner(context),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: () async => widget.onRefresh(),
+              child: _buildBody(context),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
+      // Always show register rank button at bottom right
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _navigateToRankRegistration(context),
+        backgroundColor: Colors.orange.shade600,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.emoji_events),
+        label: Text(_hasRank ? 'Đăng ký lại hạng' : 'Đăng ký hạng'),
+      ),
     );
   }
 
@@ -310,7 +195,7 @@ class _CompetitivePlayTabState extends State<CompetitivePlayTab> {
           children: [
             CircularProgressIndicator(),
             SizedBox(height: 16),
-            Text('Đang tìm đối thủ xứng tầm...'),
+            Text('Đang tìm đối thủ để thách đấu có cược SPA...'),
           ],
         ),
       );
@@ -345,7 +230,7 @@ class _CompetitivePlayTabState extends State<CompetitivePlayTab> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Thách đấu xếp hạng',
+                      'Thách đấu có cược SPA',
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         color: Colors.orange[800],
@@ -353,7 +238,7 @@ class _CompetitivePlayTabState extends State<CompetitivePlayTab> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Đấu ranked để tăng ELO và leo hạng',
+                      'Tìm đối thủ để thách đấu có điểm thưởng SPA',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.orange[600],
@@ -489,7 +374,7 @@ class _CompetitivePlayTabState extends State<CompetitivePlayTab> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Không có đối thủ xứng tầm',
+              'Không có đối thủ nào ở gần',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -498,7 +383,7 @@ class _CompetitivePlayTabState extends State<CompetitivePlayTab> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Thử mở rộng phạm vi ELO hoặc khoảng cách',
+              'Thử mở rộng khoảng cách hoặc thay đổi bộ lọc',
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.grey[500],

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../models/user_profile.dart';
 import '../../../services/opponent_club_service.dart';
+import '../../../services/user_service.dart';
+import '../../../routes/app_routes.dart';
 // import '../../../services/challenge_service.dart';
 import './simple_challenge_modal_widget.dart';
 import 'package:flutter/foundation.dart';
@@ -470,7 +473,16 @@ class PlayerCardWidget extends StatelessWidget {
     );
   }
 
-  void _showChallengeModal(BuildContext context, String challengeType) {
+  void _showChallengeModal(BuildContext context, String challengeType) async {
+    // Check if user has rank for competitive play
+    if (challengeType == 'thach_dau') {
+      final hasRank = await _checkUserRank(context);
+      if (!hasRank) {
+        _showRegistrationRequiredDialog(context, 'thách đấu có cược SPA');
+        return;
+      }
+    }
+    
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -493,7 +505,16 @@ class PlayerCardWidget extends StatelessWidget {
     );
   }
 
-  void _showScheduleModal(BuildContext context) {
+  void _showScheduleModal(BuildContext context) async {
+    // Check if user has rank for competitive scheduling
+    if (mode == 'thach_dau') {
+      final hasRank = await _checkUserRank(context);
+      if (!hasRank) {
+        _showRegistrationRequiredDialog(context, 'hẹn lịch thách đấu có cược SPA');
+        return;
+      }
+    }
+    
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -501,6 +522,66 @@ class PlayerCardWidget extends StatelessWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => _buildScheduleModal(context),
+    );
+  }
+
+  Future<bool> _checkUserRank(BuildContext context) async {
+    try {
+      final userService = UserService.instance;
+      final currentUser = await userService.getCurrentUserProfile();
+      
+      if (currentUser == null) return false;
+      
+      final userRank = currentUser.rank;
+      return userRank != null && userRank.isNotEmpty && userRank != 'unranked';
+    } catch (e) {
+      debugPrint('Error checking user rank: $e');
+      return false;
+    }
+  }
+
+  void _showRegistrationRequiredDialog(BuildContext context, String action) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Row(
+            children: [
+              Icon(Icons.info_outline, color: Colors.orange.shade600, size: 28),
+              const SizedBox(width: 12),
+              const Text('Cần đăng ký hạng'),
+            ],
+          ),
+          content: Text(
+            'Bạn cần đăng ký hạng trước khi có thể $action.\n\nĐăng ký hạng giúp hệ thống tìm đối thủ phù hợp với trình độ của bạn.',
+            style: const TextStyle(fontSize: 16),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Để sau',
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pushNamed(context, AppRoutes.clubSelectionScreen);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange.shade600,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('Đăng ký ngay'),
+            ),
+          ],
+        );
+      },
     );
   }
 
