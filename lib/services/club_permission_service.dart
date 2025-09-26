@@ -81,9 +81,9 @@ class ClubPermissionService {
   Future<Map<String, dynamic>> debugMembership(String clubId, {String? userId}) async {
     try {
       userId ??= _supabase.auth.currentUser?.id;
-
+      
       if (userId == null) {
-        return {'error': 'User ID is null'};
+        return {'error': 'No user ID available'};
       }
 
       final String safeUserId = userId;
@@ -114,10 +114,9 @@ class ClubPermissionService {
   Future<ClubRole> getUserRoleInClub(String clubId, {String? userId}) async {
     try {
       userId ??= _supabase.auth.currentUser?.id;
-
+      
       if (userId == null) {
-        debugPrint('❌ ClubPermissionService: User ID is null');
-        return ClubRole.none;
+        throw Exception('No authenticated user found');
       }
 
       final String safeUserId = userId;
