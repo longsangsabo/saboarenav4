@@ -55,7 +55,7 @@ class UserCodeService {
               totalWins: 0,
               totalLosses: 0,
               totalTournaments: 0,
-              eloRating: 1200,
+              eloRating: 1000,
               spaPoints: 0,
               totalPrizePool: 0.0,
               isVerified: false,

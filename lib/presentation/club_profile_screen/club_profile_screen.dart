@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/app_export.dart';
 import '../../core/utils/sabo_rank_system.dart';
+import '../../core/constants/ranking_constants.dart';
 
 import './widgets/club_header_widget.dart';
 import './widgets/club_info_section_widget.dart';
@@ -636,7 +637,7 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
         ],
         border: Border.all(
           color: hasRank 
-              ? SaboRankSystem.getRankColor(SaboRankSystem.getRankFromElo(currentElo)).withOpacity(0.3)
+              ? SaboRankSystem.getRankColor(RankingConstants.getRankFromElo(currentElo)).withOpacity(0.3)
               : Colors.orange.withOpacity(0.3),
           width: 2,
         ),
@@ -649,7 +650,7 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
               Icon(
                 Icons.military_tech,
                 color: hasRank 
-                    ? SaboRankSystem.getRankColor(SaboRankSystem.getRankFromElo(currentElo))
+                    ? SaboRankSystem.getRankColor(RankingConstants.getRankFromElo(currentElo))
                     : Colors.orange,
                 size: 6.w,
               ),
@@ -707,8 +708,8 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
   }
 
   Widget _buildRankInfo(String rank, int elo) {
-    final rankColor = SaboRankSystem.getRankColor(SaboRankSystem.getRankFromElo(elo));
-    final skillDescription = SaboRankSystem.getRankSkillDescription(SaboRankSystem.getRankFromElo(elo));
+    final rankColor = SaboRankSystem.getRankColor(RankingConstants.getRankFromElo(elo));
+    final skillDescription = SaboRankSystem.getRankSkillDescription(RankingConstants.getRankFromElo(elo));
     
     return Container(
       padding: EdgeInsets.all(3.w),

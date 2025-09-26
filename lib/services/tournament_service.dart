@@ -541,7 +541,7 @@ class TournamentService {
             'email': user['email'],
             'full_name': user['full_name'] ?? 'Unknown Player',
             'avatar_url': user['avatar_url'],
-            'elo_rating': user['elo_rating'] ?? 1200,
+            'elo_rating': user['elo_rating'] ?? 1000,
             'rank': RankMigrationHelper.getNewDisplayName(user['rank'] as String?),
           },
         };
@@ -594,7 +594,7 @@ class TournamentService {
               'email': userData['email'],
               'full_name': userData['full_name'] ?? 'Unknown Player',
               'avatar_url': userData['avatar_url'],
-              'elo_rating': userData['elo_rating'] ?? 1200,
+              'elo_rating': userData['elo_rating'] ?? 1000,
               'rank': RankMigrationHelper.getNewDisplayName(userData['rank'] as String?),
             },
           });
@@ -614,7 +614,7 @@ class TournamentService {
               'email': 'unknown@example.com',
               'full_name': 'Unknown Player',
               'avatar_url': null,
-              'elo_rating': 1200,
+              'elo_rating': 1000,
               'rank': 'Novice',
             },
           });

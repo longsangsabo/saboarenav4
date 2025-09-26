@@ -53,7 +53,7 @@ class TestUserService {
       'display_name': 'Test User',
       'bio': 'Test user for development - Avatar upload testing',
       'rank': null,
-      'elo_rating': 1200,
+      'elo_rating': 1000,
       'spa_points': 0,
       'favorite_game': '8-Ball',
       'created_at': DateTime.now().toIso8601String(),

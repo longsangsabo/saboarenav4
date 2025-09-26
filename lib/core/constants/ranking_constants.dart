@@ -193,6 +193,12 @@ class RankingConstants {
   }
 
   static String getRankFromElo(int elo) {
+    if (elo <= 0) {
+      return UNRANKED;
+    }
+    if (elo > 0 && elo < 1000) {
+      return RANK_K;
+    }
     for (final entry in RANK_ELO_RANGES.entries) {
       final min = entry.value['min']!;
       final max = entry.value['max']!;
@@ -200,7 +206,8 @@ class RankingConstants {
         return entry.key;
       }
     }
-    return UNRANKED;
+    // If ELO is above all defined ranges, return highest rank
+    return RANK_E_PLUS;
   }
 
   static int getRankIndex(String rank) {

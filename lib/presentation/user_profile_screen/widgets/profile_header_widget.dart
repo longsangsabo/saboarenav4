@@ -4,6 +4,7 @@ import 'dart:io';
 
 import '../../../core/app_export.dart';
 import '../../../core/utils/sabo_rank_system.dart';
+import '../../../core/constants/ranking_constants.dart';
 
 
 import './rank_registration_info_modal.dart';
@@ -376,7 +377,7 @@ class ProfileHeaderWidget extends StatelessWidget {
 
     // Giao diện khi người dùng ĐÃ CÓ RANK
     final currentElo = userData["elo_rating"] as int? ?? 1200;
-    final rank = SaboRankSystem.getRankFromElo(currentElo);
+    final rank = RankingConstants.getRankFromElo(currentElo);
     final rankColor = SaboRankSystem.getRankColor(rank);
 
     return Container(
@@ -456,7 +457,7 @@ class ProfileHeaderWidget extends StatelessWidget {
     final currentElo = userData["elo_rating"] as int? ?? 1200;
     final nextRankInfo = SaboRankSystem.getNextRankInfo(currentElo);
     final progress = SaboRankSystem.getRankProgress(currentElo);
-    final currentRank = SaboRankSystem.getRankFromElo(currentElo);
+    final currentRank = RankingConstants.getRankFromElo(currentElo);
     final skillDescription = SaboRankSystem.getRankSkillDescription(currentRank);
 
     return Container(
