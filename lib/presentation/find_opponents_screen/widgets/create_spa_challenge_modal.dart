@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../models/user_profile.dart';
 import '../../../services/club_spa_service.dart';
+import '../../../services/simple_challenge_service.dart';
+import '../../../services/user_service.dart';
 
 class CreateSpaChallengeModal extends StatefulWidget {
   final UserProfile? currentUser;
@@ -19,10 +21,11 @@ class CreateSpaChallengeModal extends StatefulWidget {
 
 class _CreateSpaChallengeModalState extends State<CreateSpaChallengeModal> {
   final ClubSpaService _clubSpaService = ClubSpaService();
+  final SimpleChallengeService _challengeService = SimpleChallengeService.instance;
+  final UserService _userService = UserService.instance;
 
   UserProfile? _selectedOpponent;
   int _selectedSpaBonus = 100; // Default SPA bonus
-  String _challengeNote = '';
   bool _isCreating = false;
   
   final TextEditingController _noteController = TextEditingController();
@@ -43,23 +46,60 @@ class _CreateSpaChallengeModalState extends State<CreateSpaChallengeModal> {
     setState(() => _isCreating = true);
 
     try {
-      // For now, just show success message
-      // In real implementation, this would integrate with match creation service
-      await Future.delayed(const Duration(seconds: 2)); // Simulate API call
+      // Get current user profile
+      final currentUser = await _userService.getCurrentUserProfile();
+      if (currentUser == null) {
+        throw Exception('Không thể lấy thông tin người dùng');
+      }
 
-      if (mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Thách đấu SPA đã được tạo thành công!\n'
-              'Đối thủ: ${_selectedOpponent!.displayName}\n'
-              'Phần thưởng: $_selectedSpaBonus SPA',
+      // For now, use a default club ID since UserProfile doesn't have clubId field
+      // In a real implementation, you would get the user's club from another service
+      const String defaultClubId = 'default-club-id'; // This should be retrieved from user's club membership
+      
+      // Check club SPA balance
+      final clubBalance = await _clubSpaService.getClubSpaBalance(defaultClubId);
+      if (clubBalance == null) {
+        // If no club balance record exists, we can still create the challenge
+        // The SPA reward will be handled when the match is completed
+        debugPrint('⚠️ No club SPA balance found, proceeding with challenge creation');
+      } else {
+        final availableSpa = clubBalance['available_spa'] ?? 0.0;
+        if (availableSpa < _selectedSpaBonus) {
+          throw Exception('Club không đủ SPA để tạo thách đấu (Cần: $_selectedSpaBonus, Có: ${availableSpa.toInt()})');
+        }
+      }
+
+      // Create the challenge with SPA stakes
+      final challengeResult = await _challengeService.sendChallenge(
+        challengedUserId: _selectedOpponent!.id,
+        challengeType: 'thach_dau', // SPA challenges are competitive
+        gameType: '8-ball', // Default game type for SPA challenges
+        scheduledTime: DateTime.now().add(const Duration(hours: 24)), // Default scheduled time
+        location: 'TBD', // To be determined
+        spaPoints: _selectedSpaBonus,
+        message: _noteController.text.trim().isEmpty 
+            ? 'Thách đấu SPA với phần thưởng $_selectedSpaBonus SPA' 
+            : _noteController.text.trim(),
+      );
+
+      if (challengeResult != null) {
+        if (mounted) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Thách đấu SPA đã được gửi thành công!\n'
+                'Đối thủ: ${_selectedOpponent!.displayName}\n'
+                'Phần thưởng: $_selectedSpaBonus SPA\n'
+                'ID thách đấu: ${challengeResult['id']}',
+              ),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 4),
             ),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 3),
-          ),
-        );
+          );
+        }
+      } else {
+        throw Exception('Không thể tạo thách đấu');
       }
     } catch (e) {
       debugPrint('Error creating SPA challenge: $e');
@@ -68,6 +108,7 @@ class _CreateSpaChallengeModalState extends State<CreateSpaChallengeModal> {
           SnackBar(
             content: Text('Lỗi tạo thách đấu: $e'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
           ),
         );
       }
@@ -80,16 +121,21 @@ class _CreateSpaChallengeModalState extends State<CreateSpaChallengeModal> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.9,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 16,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
           // Header
           Row(
             children: [
@@ -108,13 +154,19 @@ class _CreateSpaChallengeModalState extends State<CreateSpaChallengeModal> {
           ),
           const SizedBox(height: 20),
 
-          // Opponent Selection
-          const Text(
+          // Scrollable content
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Opponent Selection
+                  const Text(
             'Chọn đối thủ',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
-          Container(
+          SizedBox(
             height: 120,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
@@ -233,32 +285,40 @@ class _CreateSpaChallengeModalState extends State<CreateSpaChallengeModal> {
               hintText: 'Thêm lời nhắn cho đối thủ...',
               border: OutlineInputBorder(),
             ),
-            onChanged: (value) => setState(() => _challengeNote = value),
+            onChanged: (value) => {}, // Note content is handled by controller
           ),
-          const SizedBox(height: 24),
-
-          // Create Button
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: ElevatedButton(
-              onPressed: _canCreateChallenge && !_isCreating ? _createChallenge : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+          const SizedBox(height: 100), // Extra space for the fixed button
+                ],
               ),
-              child: _isCreating
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text(
-                      'Gửi thách đấu SPA',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                    ),
+            ),
+          ),
+
+          // Fixed Create Button at bottom
+          Container(
+            padding: const EdgeInsets.only(top: 16),
+            child: SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: _canCreateChallenge && !_isCreating ? _createChallenge : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: _isCreating
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text(
+                        'Gửi thách đấu SPA',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
+              ),
             ),
           ),
         ],
+      ),
       ),
     );
   }
