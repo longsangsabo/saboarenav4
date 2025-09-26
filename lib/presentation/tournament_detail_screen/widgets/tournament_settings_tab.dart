@@ -6,6 +6,7 @@ import 'package:sabo_arena/theme/app_theme.dart';
 import 'package:sabo_arena/services/tournament_service.dart';
 import 'package:sabo_arena/services/bracket_service.dart';
 import 'package:sabo_arena/services/tournament_completion_service.dart';
+import 'package:flutter/foundation.dart';
 
 class TournamentSettingsTab extends StatefulWidget {
   final String tournamentId;
@@ -50,13 +51,13 @@ class _TournamentSettingsTabState extends State<TournamentSettingsTab> {
       _matches = await _tournamentService.getTournamentMatches(widget.tournamentId);
       
       // Debug: Check both methods
-      print('🔍 Debug: Loading participants for tournament ${widget.tournamentId}');
+      debugPrint('🔍 Debug: Loading participants for tournament ${widget.tournamentId}');
       final simpleParticipants = await _tournamentService.getTournamentParticipants(widget.tournamentId);
-      print('🔍 Debug: Simple method returned ${simpleParticipants.length} participants');
+      debugPrint('🔍 Debug: Simple method returned ${simpleParticipants.length} participants');
       
       _participants = await _tournamentService
           .getTournamentParticipantsWithPaymentStatus(widget.tournamentId);
-      print('🔍 Debug: WithPaymentStatus method returned ${_participants.length} participants');
+      debugPrint('🔍 Debug: WithPaymentStatus method returned ${_participants.length} participants');
       
       // Debug: Check raw database query
       await _debugDirectDatabaseQuery();
@@ -88,19 +89,19 @@ class _TournamentSettingsTabState extends State<TournamentSettingsTab> {
 
   Future<void> _debugDirectDatabaseQuery() async {
     try {
-      print('🔍 Direct DB Query: Checking tournament_participants table...');
+      debugPrint('🔍 Direct DB Query: Checking tournament_participants table...');
       final response = await Supabase.instance.client
           .from('tournament_participants')
           .select('id, user_id, payment_status, status')
           .eq('tournament_id', widget.tournamentId);
       
-      print('📊 Direct DB Query: Found ${response.length} raw records');
+      debugPrint('📊 Direct DB Query: Found ${response.length} raw records');
       for (int i = 0; i < response.length; i++) {
         final record = response[i];
-        print('  ${i + 1}. ID: ${record['id']}, User: ${record['user_id']}, Payment: ${record['payment_status']}, Status: ${record['status']}');
+        debugPrint('  ${i + 1}. ID: ${record['id']}, User: ${record['user_id']}, Payment: ${record['payment_status']}, Status: ${record['status']}');
       }
     } catch (e) {
-      print('❌ Direct DB Query error: $e');
+      debugPrint('❌ Direct DB Query error: $e');
     }
   }
 

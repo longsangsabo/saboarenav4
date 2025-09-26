@@ -6,6 +6,7 @@ import 'package:sabo_arena/core/constants/ranking_constants.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:path/path.dart' as path;
+import 'package:flutter/foundation.dart';
 
 class RankRegistrationScreen extends StatefulWidget {
   final String clubId;
@@ -146,7 +147,7 @@ class _RankRegistrationScreenState extends State<RankRegistrationScreen> {
               imageUrls.add(result['url']);
             }
           } catch (e) {
-            print('Error uploading image: $e');
+            debugPrint('Error uploading image: $e');
           }
         }
         

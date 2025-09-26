@@ -6,6 +6,7 @@ import '../../core/app_export.dart';
 import '../../services/admin_service.dart';
 import '../../models/user_profile.dart';
 import '../../widgets/custom_app_bar.dart';
+import 'package:flutter/foundation.dart';
 
 /// DEMO: User Management Screen for Admin
 /// This is a proposal/mockup for future implementation
@@ -568,21 +569,21 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
 
   void _showBanDialog(UserProfile user) {
     // Implementation for ban dialog
-    print('Ban user: ${user.fullName}');
+    debugPrint('Ban user: ${user.fullName}');
   }
 
   void _showSuspendDialog(UserProfile user) {
     // Implementation for suspend dialog
-    print('Suspend user: ${user.fullName}');
+    debugPrint('Suspend user: ${user.fullName}');
   }
 
   void _restoreUser(UserProfile user) {
     // Implementation for restore user
-    print('Restore user: ${user.fullName}');
+    debugPrint('Restore user: ${user.fullName}');
   }
 
   void _verifyUser(UserProfile user) {
     // Implementation for verify user
-    print('Verify user: ${user.fullName}');
+    debugPrint('Verify user: ${user.fullName}');
   }
 }

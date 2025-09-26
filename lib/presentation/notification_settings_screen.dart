@@ -4,7 +4,7 @@ import '../services/notification_preferences_service.dart';
 
 /// Notification Settings Screen để users tùy chỉnh notification preferences
 class NotificationSettingsScreen extends StatefulWidget {
-  const NotificationSettingsScreen({Key? key}) : super(key: key);
+  const NotificationSettingsScreen({super.key});
 
   @override
   State<NotificationSettingsScreen> createState() => _NotificationSettingsScreenState();
@@ -173,7 +173,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               ),
               value: _preferences?.globalEnabled ?? true,
               onChanged: _isSaving ? null : _updateGlobalSetting,
-              activeColor: Colors.green[700],
+              activeThumbColor: Colors.green[700],
             ),
           ],
         ),
@@ -238,7 +238,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
         onChanged: _isSaving || !_preferences!.globalEnabled 
             ? null 
             : (value) => _updateTypeSetting(type, value),
-        activeColor: Colors.green[700],
+        activeThumbColor: Colors.green[700],
       ),
       children: [
         if (setting.enabled && _preferences!.globalEnabled)
@@ -324,7 +324,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               onChanged: _isSaving ? null : (value) {
                 // TODO: Implement quiet hours toggle
               },
-              activeColor: Colors.green[700],
+              activeThumbColor: Colors.green[700],
             ),
             if (_preferences!.quietHours.enabled) ...[
               ListTile(

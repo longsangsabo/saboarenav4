@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import './sabo_rank_system.dart';
 import '../constants/ranking_constants.dart';
+import 'package:flutter/foundation.dart';
 
 /// 🔄 RANK MIGRATION HELPER
 /// 
@@ -133,8 +134,8 @@ class RankMigrationHelper {
 
   /// Debug method: In ra mapping comparison
   static void printRankMappingComparison() {
-    print('🔄 RANK MIGRATION MAPPING:');
-    print('=' * 50);
+    debugPrint('🔄 RANK MIGRATION MAPPING:');
+    debugPrint('=' * 50);
     
     for (String code in RankingConstants.RANK_ORDER) {
       String newName = SaboRankSystem.getRankDisplayName(code);
@@ -142,7 +143,7 @@ class RankMigrationHelper {
           .firstWhere((entry) => entry.value == code, orElse: () => const MapEntry('', ''))
           .key;
           
-      print('$code: ${oldName.isNotEmpty ? oldName : 'N/A'} → $newName');
+      debugPrint('$code: ${oldName.isNotEmpty ? oldName : 'N/A'} → $newName');
     }
   }
 }

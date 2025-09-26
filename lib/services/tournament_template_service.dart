@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/constants/tournament_constants.dart';
 import '../models/tournament.dart';
 import 'tournament_service.dart';
+import 'package:flutter/foundation.dart';
 
 /// Service quản lý tournament templates và presets
 class TournamentTemplateService {
@@ -60,7 +61,7 @@ class TournamentTemplateService {
       return [...builtInTemplates, ...templates];
 
     } catch (e) {
-      print('❌ Error getting tournament templates: $e');
+      debugPrint('❌ Error getting tournament templates: $e');
       throw Exception('Failed to get tournament templates: $e');
     }
   }
@@ -75,7 +76,7 @@ class TournamentTemplateService {
     Map<String, dynamic>? customizations,
   }) async {
     try {
-      print('🏗️ Creating tournament from template: $templateId');
+      debugPrint('🏗️ Creating tournament from template: $templateId');
 
       // Get template configuration
       Map<String, dynamic> templateConfig;
@@ -140,11 +141,11 @@ class TournamentTemplateService {
             .eq('id', templateId);
       }
 
-      print('✅ Tournament created from template: $tournamentId');
+      debugPrint('✅ Tournament created from template: $tournamentId');
       return tournamentId;
 
     } catch (e) {
-      print('❌ Error creating tournament from template: $e');
+      debugPrint('❌ Error creating tournament from template: $e');
       throw Exception('Failed to create tournament from template: $e');
     }
   }
@@ -159,7 +160,7 @@ class TournamentTemplateService {
     bool isPublic = false,
   }) async {
     try {
-      print('💾 Saving tournament as template: $tournamentId');
+      debugPrint('💾 Saving tournament as template: $tournamentId');
 
       // Get tournament data
       final tournament = await _tournamentService.getTournamentById(tournamentId);
@@ -186,11 +187,11 @@ class TournamentTemplateService {
           .select()
           .single();
 
-      print('✅ Template saved: ${template['id']}');
+      debugPrint('✅ Template saved: ${template['id']}');
       return template['id'];
 
     } catch (e) {
-      print('❌ Error saving tournament as template: $e');
+      debugPrint('❌ Error saving tournament as template: $e');
       throw Exception('Failed to save tournament as template: $e');
     }
   }
@@ -477,7 +478,7 @@ class TournamentTemplateService {
     // - Setting up automated tasks
     // - Applying custom rules or scoring systems
     
-    print('⚙️ Applying template configurations for tournament: $tournamentId');
+    debugPrint('⚙️ Applying template configurations for tournament: $tournamentId');
     
     // Example: Set up automated notifications
     if (config['auto_notifications'] == true) {
@@ -532,7 +533,7 @@ class TournamentTemplateService {
       }).toList();
 
     } catch (e) {
-      print('❌ Error getting template categories: $e');
+      debugPrint('❌ Error getting template categories: $e');
       throw Exception('Failed to get template categories: $e');
     }
   }
@@ -596,9 +597,9 @@ class TournamentTemplateService {
           .update(updates!)
           .eq('id', templateId);
 
-      print('✅ Template updated: $templateId');
+      debugPrint('✅ Template updated: $templateId');
     } catch (e) {
-      print('❌ Error updating template: $e');
+      debugPrint('❌ Error updating template: $e');
       throw Exception('Failed to update template: $e');
     }
   }
@@ -615,9 +616,9 @@ class TournamentTemplateService {
           .delete()
           .eq('id', templateId);
 
-      print('✅ Template deleted: $templateId');
+      debugPrint('✅ Template deleted: $templateId');
     } catch (e) {
-      print('❌ Error deleting template: $e');
+      debugPrint('❌ Error deleting template: $e');
       throw Exception('Failed to delete template: $e');
     }
   }
@@ -656,7 +657,7 @@ class TournamentTemplateService {
       };
 
     } catch (e) {
-      print('❌ Error getting template usage stats: $e');
+      debugPrint('❌ Error getting template usage stats: $e');
       throw Exception('Failed to get template usage stats: $e');
     }
   }

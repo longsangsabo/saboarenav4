@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:path/path.dart' as path;
 import 'test_user_service.dart';
+import 'package:flutter/foundation.dart';
 
 class StorageService {
   static final SupabaseClient _supabase = Supabase.instance.client;
@@ -14,15 +15,15 @@ class StorageService {
       
       if (user != null) {
         userId = user.id;
-        print('🔐 Using authenticated user: $userId');
+        debugPrint('🔐 Using authenticated user: $userId');
       } else {
         // Use test user for development
         userId = TestUserService.instance.getCurrentUserId();
         if (userId == null) {
-          print('❌ No user ID available (not authenticated and not in development)');
+          debugPrint('❌ No user ID available (not authenticated and not in development)');
           return null;
         }
-        print('🧪 Using test user for development: $userId');
+        debugPrint('🧪 Using test user for development: $userId');
         
         // Ensure test user exists in database
         await TestUserService.instance.getOrCreateTestUser();
@@ -33,7 +34,7 @@ class StorageService {
       final allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
       
       if (!allowedExtensions.contains(fileExtension)) {
-        print('❌ Invalid file format: $fileExtension');
+        debugPrint('❌ Invalid file format: $fileExtension');
         return null;
       }
 
@@ -41,7 +42,7 @@ class StorageService {
       final fileName = 'avatar_${userId}_${DateTime.now().millisecondsSinceEpoch}$fileExtension';
       final filePath = 'avatars/$fileName';
 
-      print('🚀 Uploading avatar: $filePath');
+      debugPrint('🚀 Uploading avatar: $filePath');
 
       // Read file bytes
       final bytes = await imageFile.readAsBytes();
@@ -59,7 +60,7 @@ class StorageService {
           .from('user-images')
           .getPublicUrl(filePath);
 
-      print('✅ Avatar uploaded successfully: $publicUrl');
+      debugPrint('✅ Avatar uploaded successfully: $publicUrl');
 
       // Update user profile in database
       if (user != null) {
@@ -73,11 +74,11 @@ class StorageService {
         await TestUserService.instance.updateTestUserProfile(avatarUrl: publicUrl);
       }
 
-      print('✅ Avatar URL saved to database');
+      debugPrint('✅ Avatar URL saved to database');
       return publicUrl;
 
     } catch (e) {
-      print('❌ Error uploading avatar: $e');
+      debugPrint('❌ Error uploading avatar: $e');
       return null;
     }
   }
@@ -90,15 +91,15 @@ class StorageService {
       
       if (user != null) {
         userId = user.id;
-        print('🔐 Using authenticated user: $userId');
+        debugPrint('🔐 Using authenticated user: $userId');
       } else {
         // Use test user for development
         userId = TestUserService.instance.getCurrentUserId();
         if (userId == null) {
-          print('❌ No user ID available');
+          debugPrint('❌ No user ID available');
           return null;
         }
-        print('🧪 Using test user for development: $userId');
+        debugPrint('🧪 Using test user for development: $userId');
         
         // Ensure test user exists in database
         await TestUserService.instance.getOrCreateTestUser();
@@ -109,7 +110,7 @@ class StorageService {
       final allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
       
       if (!allowedExtensions.contains(fileExtension)) {
-        print('❌ Invalid file format: $fileExtension');
+        debugPrint('❌ Invalid file format: $fileExtension');
         return null;
       }
 
@@ -117,7 +118,7 @@ class StorageService {
       final fileName = 'cover_${userId}_${DateTime.now().millisecondsSinceEpoch}$fileExtension';
       final filePath = 'covers/$fileName';
 
-      print('🚀 Uploading cover photo: $filePath');
+      debugPrint('🚀 Uploading cover photo: $filePath');
 
       // Read file bytes  
       final bytes = await imageFile.readAsBytes();
@@ -135,7 +136,7 @@ class StorageService {
           .from('user-images')
           .getPublicUrl(filePath);
 
-      print('✅ Cover photo uploaded successfully: $publicUrl');
+      debugPrint('✅ Cover photo uploaded successfully: $publicUrl');
 
       // Update user profile in database
       if (user != null) {
@@ -149,11 +150,11 @@ class StorageService {
         await TestUserService.instance.updateTestUserProfile(coverPhotoUrl: publicUrl);
       }
 
-      print('✅ Cover photo URL saved to database');
+      debugPrint('✅ Cover photo URL saved to database');
       return publicUrl;
 
     } catch (e) {
-      print('❌ Error uploading cover photo: $e');
+      debugPrint('❌ Error uploading cover photo: $e');
       return null;
     }
   }
@@ -169,10 +170,10 @@ class StorageService {
       if (pathSegments.length >= 3) {
         final filePath = pathSegments.sublist(2).join('/'); // Skip /storage/v1/object/public/user-images/
         await _supabase.storage.from('user-images').remove([filePath]);
-        print('✅ Old avatar deleted: $filePath');
+        debugPrint('✅ Old avatar deleted: $filePath');
       }
     } catch (e) {
-      print('⚠️ Error deleting old avatar: $e');
+      debugPrint('⚠️ Error deleting old avatar: $e');
     }
   }
 
@@ -187,10 +188,10 @@ class StorageService {
       if (pathSegments.length >= 3) {
         final filePath = pathSegments.sublist(2).join('/'); // Skip /storage/v1/object/public/user-images/
         await _supabase.storage.from('user-images').remove([filePath]);
-        print('✅ Old cover photo deleted: $filePath');
+        debugPrint('✅ Old cover photo deleted: $filePath');
       }
     } catch (e) {
-      print('⚠️ Error deleting old cover photo: $e');
+      debugPrint('⚠️ Error deleting old cover photo: $e');
     }
   }
 
@@ -213,10 +214,10 @@ class StorageService {
   static Future<bool> checkStorageConnection() async {
     try {
       await _supabase.storage.listBuckets();
-      print('✅ Storage connection successful');
+      debugPrint('✅ Storage connection successful');
       return true;
     } catch (e) {
-      print('❌ Storage connection failed: $e');
+      debugPrint('❌ Storage connection failed: $e');
       return false;
     }
   }

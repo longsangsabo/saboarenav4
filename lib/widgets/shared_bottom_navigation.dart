@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/app_export.dart';
 import '../services/messaging_service.dart';
 import '../services/notification_service.dart';
+import 'package:flutter/foundation.dart';
 
 class SharedBottomNavigation extends StatefulWidget {
   final int currentIndex;
@@ -39,7 +40,7 @@ class _SharedBottomNavigationState extends State<SharedBottomNavigation> {
         });
       }
     } catch (e) {
-      print('❌ Error loading unread message count: $e');
+      debugPrint('❌ Error loading unread message count: $e');
     }
   }
 
@@ -52,7 +53,7 @@ class _SharedBottomNavigationState extends State<SharedBottomNavigation> {
         });
       }
     } catch (e) {
-      print('❌ Error loading unread notification count: $e');
+      debugPrint('❌ Error loading unread notification count: $e');
     }
   }
 

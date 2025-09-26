@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import '../services/member_realtime_service.dart';
 import '../services/member_management_service.dart';
 import 'member_state_management.dart';
+import 'package:flutter/foundation.dart';
 
 /// Central controller for Member Management System
 /// Combines state management, real-time updates, and business logic
@@ -57,12 +58,12 @@ class MemberController extends ChangeNotifier {
       dispatch(const SetLoadingAction(false));
       
       if (kDebugMode) {
-        print('✅ MemberController initialized for club: $clubId, user: $userId');
+        debugPrint('✅ MemberController initialized for club: $clubId, user: $userId');
       }
     } catch (e) {
       dispatch(SetErrorAction('Failed to initialize: ${e.toString()}'));
       if (kDebugMode) {
-        print('❌ MemberController initialization failed: $e');
+        debugPrint('❌ MemberController initialization failed: $e');
       }
     }
   }
@@ -394,7 +395,7 @@ class MemberController extends ChangeNotifier {
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Failed to mark notification read: $e');
+        debugPrint('❌ Failed to mark notification read: $e');
       }
     }
 
@@ -414,7 +415,7 @@ class MemberController extends ChangeNotifier {
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Failed to mark all notifications read: $e');
+        debugPrint('❌ Failed to mark all notifications read: $e');
       }
     }
 
@@ -442,7 +443,7 @@ class MemberController extends ChangeNotifier {
       );
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Failed to send notification: $e');
+        debugPrint('❌ Failed to send notification: $e');
       }
     }
   }
@@ -485,7 +486,7 @@ class MemberController extends ChangeNotifier {
       );
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Failed to log activity: $e');
+        debugPrint('❌ Failed to log activity: $e');
       }
     }
   }
@@ -541,41 +542,41 @@ class MemberController extends ChangeNotifier {
   void _handleMembersUpdate(List<Map<String, dynamic>> members) {
     dispatch(SetMembersAction(members));
     if (kDebugMode) {
-      print('🔄 Real-time members update: ${members.length} members');
+      debugPrint('🔄 Real-time members update: ${members.length} members');
     }
   }
 
   void _handleRequestsUpdate(List<Map<String, dynamic>> requests) {
     dispatch(SetRequestsAction(requests));
     if (kDebugMode) {
-      print('🔄 Real-time requests update: ${requests.length} requests');
+      debugPrint('🔄 Real-time requests update: ${requests.length} requests');
     }
   }
 
   void _handleNotificationsUpdate(List<Map<String, dynamic>> notifications) {
     dispatch(SetNotificationsAction(notifications));
     if (kDebugMode) {
-      print('🔄 Real-time notifications update: ${notifications.length} notifications');
+      debugPrint('🔄 Real-time notifications update: ${notifications.length} notifications');
     }
   }
 
   void _handleActivitiesUpdate(List<Map<String, dynamic>> activities) {
     dispatch(SetActivitiesAction(activities));
     if (kDebugMode) {
-      print('🔄 Real-time activities update: ${activities.length} activities');
+      debugPrint('🔄 Real-time activities update: ${activities.length} activities');
     }
   }
 
   void _handleChatMessagesUpdate(List<Map<String, dynamic>> messages) {
     dispatch(SetChatMessagesAction(messages));
     if (kDebugMode) {
-      print('🔄 Real-time chat messages update: ${messages.length} messages');
+      debugPrint('🔄 Real-time chat messages update: ${messages.length} messages');
     }
   }
 
   void _handleConnectionStatusUpdate(bool isConnected) {
     if (kDebugMode) {
-      print(isConnected ? '🟢 Real-time connected' : '🔴 Real-time disconnected');
+      debugPrint(isConnected ? '🟢 Real-time connected' : '🔴 Real-time disconnected');
     }
     
     if (!isConnected) {

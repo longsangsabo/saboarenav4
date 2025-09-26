@@ -12,6 +12,7 @@ import '../club_settings_screen/club_settings_screen.dart';
 import '../../services/club_service.dart';
 import '../../services/auth_service.dart';
 import '../../models/club.dart';
+import 'package:flutter/foundation.dart';
 
 // Temporary mock classes
 class ClubDashboardStats {
@@ -1175,7 +1176,7 @@ class _ClubDashboardScreenState extends State<ClubDashboardScreen> {
         });
       }
     } catch (error) {
-      print('Error loading dashboard data: $error');
+      debugPrint('Error loading dashboard data: $error');
       if (mounted) {
         setState(() {
           _isLoadingData = false;

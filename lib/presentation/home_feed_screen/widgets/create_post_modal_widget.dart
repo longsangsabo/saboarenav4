@@ -46,7 +46,7 @@ class _CreatePostModalWidgetState extends State<CreatePostModalWidget> {
       
       return response;
     } catch (e) {
-      print('Error fetching user data: $e');
+      debugPrint('Error fetching user data: $e');
       return null;
     }
   }

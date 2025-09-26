@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:sabo_arena/models/user_profile.dart';
 import 'package:sabo_arena/services/share_service.dart';
+import 'package:flutter/foundation.dart';
 
 class UserCodeService {
   static final SupabaseClient _supabase = Supabase.instance.client;
@@ -26,7 +27,7 @@ class UserCodeService {
       
       return baseCode;
     } catch (e) {
-      print('Error generating user code: $e');
+      debugPrint('Error generating user code: $e');
       // Fallback: use timestamp-based code
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       return 'SABO${timestamp.toString().substring(7)}';
@@ -66,10 +67,10 @@ class UserCodeService {
           })
           .eq('id', userId);
       
-      print('✅ User code created: $userCode for user: $userId');
+      debugPrint('✅ User code created: $userCode for user: $userId');
       return true;
     } catch (e) {
-      print('❌ Error creating user code: $e');
+      debugPrint('❌ Error creating user code: $e');
       return false;
     }
   }
@@ -85,7 +86,7 @@ class UserCodeService {
       
       return result['user_code'] as String?;
     } catch (e) {
-      print('Error getting user code: $e');
+      debugPrint('Error getting user code: $e');
       return null;
     }
   }
@@ -105,7 +106,7 @@ class UserCodeService {
       
       return true;
     } catch (e) {
-      print('Error updating QR data: $e');
+      debugPrint('Error updating QR data: $e');
       return false;
     }
   }
@@ -121,7 +122,7 @@ class UserCodeService {
       
       return UserProfile.fromJson(result);
     } catch (e) {
-      print('Error finding user by code: $e');
+      debugPrint('Error finding user by code: $e');
       return null;
     }
   }
@@ -141,7 +142,7 @@ class UserCodeService {
       
       return newCode;
     } catch (e) {
-      print('Error regenerating user code: $e');
+      debugPrint('Error regenerating user code: $e');
       return null;
     }
   }
@@ -157,7 +158,7 @@ class UserCodeService {
       
       return result == null; // Available if no user found
     } catch (e) {
-      print('Error checking user code availability: $e');
+      debugPrint('Error checking user code availability: $e');
       return false;
     }
   }

@@ -9,6 +9,7 @@ import '../../../services/bracket_generator_service.dart';
 import '../../../services/tournament_service.dart' as TournamentSvc;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/utils/rank_migration_helper.dart';
+import 'package:flutter/foundation.dart';
 
 // Tournament format constants
 class TournamentFormats {
@@ -73,11 +74,11 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
     setState(() => _isLoadingParticipants = true);
     
     try {
-      print('🔍 Loading participants for tournament: ${widget.tournamentId}');
+      debugPrint('🔍 Loading participants for tournament: ${widget.tournamentId}');
       final participants = await _tournamentService.getTournamentParticipants(widget.tournamentId);
-      print('✅ Loaded ${participants.length} participants from database');
+      debugPrint('✅ Loaded ${participants.length} participants from database');
       for (int i = 0; i < participants.length; i++) {
-        print('  ${i + 1}. ${participants[i].fullName} (ELO: ${participants[i].eloRating})');
+        debugPrint('  ${i + 1}. ${participants[i].fullName} (ELO: ${participants[i].eloRating})');
       }
       
       setState(() {
@@ -85,7 +86,7 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
         _isLoadingParticipants = false;
       });
     } catch (e) {
-      print('❌ Error loading participants: $e');
+      debugPrint('❌ Error loading participants: $e');
       setState(() => _isLoadingParticipants = false);
     }
   }
@@ -732,7 +733,7 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
         ),
       );
     } catch (e) {
-      print('Error adding demo participants: $e');
+      debugPrint('Error adding demo participants: $e');
     }
   }
 
@@ -743,7 +744,7 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
 
     try {
       // Use real participants from database
-      print('🔍 Bracket Generation: Found ${_realParticipants.length} participants');
+      debugPrint('🔍 Bracket Generation: Found ${_realParticipants.length} participants');
       
       if (_realParticipants.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -781,7 +782,7 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
       )).toList();
       
       // Use BracketGeneratorService to generate bracket
-      print('🚀 Generating bracket with ${participants.length} participants');
+      debugPrint('🚀 Generating bracket with ${participants.length} participants');
       final bracket = await BracketGeneratorService.generateBracket(
         tournamentId: widget.tournamentId,
         format: _selectedFormat,
@@ -789,7 +790,7 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
         seedingMethod: _selectedSeeding,
       );
       
-      print('✅ Bracket generated successfully: ${bracket.toString()}');
+      debugPrint('✅ Bracket generated successfully: ${bracket.toString()}');
       setState(() {
         _generatedBracket = bracket;
       });
@@ -803,7 +804,7 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
         );
       }
     } catch (e) {
-      print('❌ Error generating bracket: $e');
+      debugPrint('❌ Error generating bracket: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -959,13 +960,13 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
   }
 
   Future<void> _actuallyStartTournament() async {
-    print('� SIMPLE: Starting tournament directly');
+    debugPrint('� SIMPLE: Starting tournament directly');
     
     try {
       final supabase = Supabase.instance.client;
       
       // Get tournament participants
-      print('👥 SIMPLE: Getting participants...');
+      debugPrint('👥 SIMPLE: Getting participants...');
       final participantsResponse = await supabase
           .from('tournament_participants')
           .select('user_id')
@@ -976,7 +977,7 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
           .map<String>((p) => p['user_id'] as String)
           .toList();
 
-      print('� SIMPLE: Found ${participantIds.length} participants');
+      debugPrint('� SIMPLE: Found ${participantIds.length} participants');
 
       if (participantIds.length < 2) {
         throw Exception('Cần ít nhất 2 người chơi để bắt đầu giải đấu');
@@ -1003,13 +1004,13 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
           'player2_score': 0,
         });
 
-        print('⚔️ SIMPLE: Match ${matchCounter - 1}: $player1Id vs ${player2Id ?? "BYE"}');
+        debugPrint('⚔️ SIMPLE: Match ${matchCounter - 1}: $player1Id vs ${player2Id ?? "BYE"}');
       }
 
       // Insert matches
-      print('� SIMPLE: Inserting ${matches.length} matches...');
+      debugPrint('� SIMPLE: Inserting ${matches.length} matches...');
       await supabase.from('matches').insert(matches);
-      print('✅ SIMPLE: Matches inserted successfully');
+      debugPrint('✅ SIMPLE: Matches inserted successfully');
 
       // Update tournament status
       await supabase
@@ -1017,7 +1018,7 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
           .update({'status': 'in_progress'})
           .eq('id', widget.tournamentId);
 
-      print('✅ SIMPLE: Tournament started successfully');
+      debugPrint('✅ SIMPLE: Tournament started successfully');
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -1027,8 +1028,8 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
       );
       
     } catch (e, stackTrace) {
-      print('❌ SIMPLE: Error starting tournament: $e');
-      print('❌ SIMPLE: Stack trace: $stackTrace');
+      debugPrint('❌ SIMPLE: Error starting tournament: $e');
+      debugPrint('❌ SIMPLE: Stack trace: $stackTrace');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('❌ Lỗi: $e'),
@@ -1095,7 +1096,7 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
                 .select();
           }
         } catch (e) {
-          print('Error adding ${userData['full_name']}: $e');
+          debugPrint('Error adding ${userData['full_name']}: $e');
         }
       }
 
@@ -1109,7 +1110,7 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
         ),
       );
     } catch (e) {
-      print('❌ Error adding demo participants to database: $e');
+      debugPrint('❌ Error adding demo participants to database: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('❌ Lỗi thêm vào database: $e'),

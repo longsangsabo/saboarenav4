@@ -5,6 +5,7 @@ import 'package:sabo_arena/widgets/custom_app_bar.dart';
 import 'widgets/operating_hours_editor_simple.dart';
 import 'widgets/location_picker_simple.dart';
 import 'widgets/image_upload_section_simple.dart';
+import 'package:flutter/foundation.dart';
 
 class ClubProfileEditScreen extends StatefulWidget {
   const ClubProfileEditScreen({super.key});
@@ -1002,7 +1003,7 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
 
   void _onPreviewPressed() {
     // Navigate to preview screen
-    print("Preview pressed");
+    debugPrint("Preview pressed");
   }
 
   void _onResetPressed() {
@@ -1032,10 +1033,10 @@ class _ClubProfileEditScreenState extends State<ClubProfileEditScreen>
   }
 
   void _onAddPhotos() {
-    print("Add photos pressed");
+    debugPrint("Add photos pressed");
   }
 
   void _onRemovePhoto(int index) {
-    print("Remove photo at index $index");
+    debugPrint("Remove photo at index $index");
   }
 }

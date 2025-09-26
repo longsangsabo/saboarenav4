@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/club.dart';
+import 'package:flutter/foundation.dart';
 
 /// Service để lấy dữ liệu CLB thật từ Supabase cho tab đối thủ
 class OpponentClubService {
@@ -21,11 +22,11 @@ class OpponentClubService {
       if (_cachedClubs != null && 
           _lastFetch != null && 
           DateTime.now().difference(_lastFetch!) < _cacheTimeout) {
-        print('✅ OpponentClubService: Using cached clubs (${_cachedClubs!.length})');
+        debugPrint('✅ OpponentClubService: Using cached clubs (${_cachedClubs!.length})');
         return _cachedClubs!;
       }
 
-      print('🔄 OpponentClubService: Fetching clubs from Supabase...');
+      debugPrint('🔄 OpponentClubService: Fetching clubs from Supabase...');
       
       final response = await _supabase
           .from('clubs')
@@ -60,11 +61,11 @@ class OpponentClubService {
       _cachedClubs = clubs;
       _lastFetch = DateTime.now();
 
-      print('✅ OpponentClubService: Loaded ${clubs.length} active clubs');
+      debugPrint('✅ OpponentClubService: Loaded ${clubs.length} active clubs');
       return clubs;
 
     } catch (error) {
-      print('❌ OpponentClubService: Error loading clubs: $error');
+      debugPrint('❌ OpponentClubService: Error loading clubs: $error');
       
       // Return fallback mock data if Supabase fails
       return _getFallbackClubs();
@@ -85,7 +86,7 @@ class OpponentClubService {
       return clubs[randomIndex].name;
 
     } catch (error) {
-      print('❌ OpponentClubService: Error getting random club: $error');
+      debugPrint('❌ OpponentClubService: Error getting random club: $error');
       return _getFallbackClubName();
     }
   }
@@ -99,7 +100,7 @@ class OpponentClubService {
         orElse: () => clubs.isNotEmpty ? clubs.first : _getFallbackClubs().first,
       );
     } catch (error) {
-      print('❌ OpponentClubService: Error getting club by ID: $error');
+      debugPrint('❌ OpponentClubService: Error getting club by ID: $error');
       return null;
     }
   }
@@ -108,7 +109,7 @@ class OpponentClubService {
   void clearCache() {
     _cachedClubs = null;
     _lastFetch = null;
-    print('🗑️ OpponentClubService: Cache cleared');
+    debugPrint('🗑️ OpponentClubService: Cache cleared');
   }
 
   /// Fallback clubs nếu Supabase không hoạt động
@@ -183,7 +184,7 @@ class OpponentClubService {
           (clubs.map((c) => c.rating).reduce((a, b) => a + b) / clubs.length).round(),
       };
     } catch (error) {
-      print('❌ OpponentClubService: Error getting stats: $error');
+      debugPrint('❌ OpponentClubService: Error getting stats: $error');
       return {
         'total_clubs': 0,
         'verified_clubs': 0,

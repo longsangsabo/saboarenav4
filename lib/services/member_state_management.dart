@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';
 
 /// State management for Member Management System
 /// Using a simple state management pattern similar to Redux
@@ -284,7 +285,7 @@ class ClearErrorAction extends MemberAction {
 /// Reducer function to handle state changes
 MemberState memberReducer(MemberState state, MemberAction action) {
   if (kDebugMode) {
-    print('🔄 Reducer: ${action.runtimeType}');
+    debugPrint('🔄 Reducer: ${action.runtimeType}');
   }
 
   switch (action.runtimeType) {
@@ -462,7 +463,7 @@ MemberState memberReducer(MemberState state, MemberAction action) {
 
     default:
       if (kDebugMode) {
-        print('⚠️ Unknown action: ${action.runtimeType}');
+        debugPrint('⚠️ Unknown action: ${action.runtimeType}');
       }
       return state;
   }

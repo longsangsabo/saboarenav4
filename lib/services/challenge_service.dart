@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'notification_service.dart';
 import 'challenge_rules_service.dart';
+import 'package:flutter/foundation.dart';
 
 class ChallengeService {
   static ChallengeService? _instance;
@@ -116,7 +117,7 @@ class ChallengeService {
 
       return challengeResponse;
     } catch (error) {
-      print('❌ Failed to send challenge: $error');
+      debugPrint('❌ Failed to send challenge: $error');
       throw Exception('Không thể gửi thách đấu: $error');
     }
   }
@@ -170,7 +171,7 @@ class ChallengeService {
 
       return scheduleResponse;
     } catch (error) {
-      print('❌ Failed to send schedule request: $error');
+      debugPrint('❌ Failed to send schedule request: $error');
       throw Exception('Không thể gửi lời mời hẹn lịch: $error');
     }
   }

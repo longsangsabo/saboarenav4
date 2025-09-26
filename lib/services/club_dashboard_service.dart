@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/foundation.dart';
 
 class ClubDashboardService {
   static ClubDashboardService? _instance;
@@ -79,7 +80,7 @@ class ClubDashboardService {
         }
       } catch (e) {
         // Tournaments table might not exist yet
-        print('Note: tournaments table not found: $e');
+        debugPrint('Note: tournaments table not found: $e');
       }
 
       // Sort activities by timestamp
@@ -87,7 +88,7 @@ class ClubDashboardService {
       
       return activities.take(limit).toList();
     } catch (error) {
-      print('Error getting recent activities: $error');
+      debugPrint('Error getting recent activities: $error');
       return _getMockActivities(); // Fallback to mock data
     }
   }
@@ -102,7 +103,7 @@ class ClubDashboardService {
 
       return response.length;
     } catch (error) {
-      print('Error getting active members count: $error');
+      debugPrint('Error getting active members count: $error');
       return 0;
     }
   }
@@ -116,7 +117,7 @@ class ClubDashboardService {
 
       return response.length;
     } catch (error) {
-      print('Error getting tournaments count (table might not exist): $error');
+      debugPrint('Error getting tournaments count (table might not exist): $error');
       return 0; // Return 0 if tournaments table doesn't exist yet
     }
   }
@@ -141,7 +142,7 @@ class ClubDashboardService {
       
       return total;
     } catch (error) {
-      print('Error getting monthly revenue (table might not exist): $error');
+      debugPrint('Error getting monthly revenue (table might not exist): $error');
       return 0.0; // Return 0 if payments table doesn't exist yet
     }
   }
@@ -166,7 +167,7 @@ class ClubDashboardService {
 
       return higherRatedClubs.length + 1; // Add 1 for current position
     } catch (error) {
-      print('Error getting club ranking: $error');
+      debugPrint('Error getting club ranking: $error');
       return 0;
     }
   }

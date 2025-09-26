@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sabo_arena/core/app_export.dart';
 import 'package:sabo_arena/widgets/custom_app_bar.dart';
+import 'package:flutter/foundation.dart';
 
 class ClubProfileViewScreen extends StatefulWidget {
   const ClubProfileViewScreen({super.key});
@@ -967,13 +968,13 @@ class _ClubProfileViewScreenState extends State<ClubProfileViewScreen>
   }
 
   // Event Handlers
-  void _onSharePressed() => print('Share pressed');
-  void _onMorePressed() => print('More pressed');
-  void _onEditBasicInfo() => print('Edit basic info pressed');
-  void _onCallPressed(String phone) => print('Call $phone');
-  void _onEmailPressed(String email) => print('Email $email');
-  void _onWebsitePressed(String website) => print('Open $website');
-  void _onViewAllPhotos() => print('View all photos');
-  void _onOpenMap() => print('Open map');
-  void _onEditProfile() => print('Edit profile pressed');
+  void _onSharePressed() => debugPrint('Share pressed');
+  void _onMorePressed() => debugPrint('More pressed');
+  void _onEditBasicInfo() => debugPrint('Edit basic info pressed');
+  void _onCallPressed(String phone) => debugPrint('Call $phone');
+  void _onEmailPressed(String email) => debugPrint('Email $email');
+  void _onWebsitePressed(String website) => debugPrint('Open $website');
+  void _onViewAllPhotos() => debugPrint('View all photos');
+  void _onOpenMap() => debugPrint('Open map');
+  void _onEditProfile() => debugPrint('Edit profile pressed');
 }

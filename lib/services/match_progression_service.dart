@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/constants/tournament_constants.dart';
 import 'notification_service.dart';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 
 /// Service quản lý progression của matches trong tournament bracket
 class MatchProgressionService {
@@ -28,7 +29,7 @@ class MatchProgressionService {
     String? notes,
   }) async {
     try {
-      print('🎯 Starting match progression for match $matchId');
+      debugPrint('🎯 Starting match progression for match $matchId');
 
       // 1. Update match result in database
       await _updateMatchInDatabase(matchId, winnerId, loserId, scores, notes);
@@ -72,7 +73,7 @@ class MatchProgressionService {
       };
 
     } catch (error) {
-      print('❌ Error in match progression: $error');
+      debugPrint('❌ Error in match progression: $error');
       return {
         'success': false,
         'error': error.toString(),
@@ -100,7 +101,7 @@ class MatchProgressionService {
       'notes': notes,
     }).eq('id', matchId);
 
-    print('✅ Match $matchId updated in database');
+    debugPrint('✅ Match $matchId updated in database');
   }
 
   /// Get tournament info
@@ -239,7 +240,7 @@ class MatchProgressionService {
       }
     }
 
-    print('✅ Single elimination: Winner $winnerId advanced to Round $nextRoundNumber');
+    debugPrint('✅ Single elimination: Winner $winnerId advanced to Round $nextRoundNumber');
 
     return {
       'advancement_made': true,
@@ -290,7 +291,7 @@ class MatchProgressionService {
       }
     }
 
-    print('✅ Double elimination: Winner $winnerId and loser $loserId processed');
+    debugPrint('✅ Double elimination: Winner $winnerId and loser $loserId processed');
 
     return {
       'advancement_made': updatedMatches.isNotEmpty,
@@ -427,7 +428,7 @@ class MatchProgressionService {
   /// Update Round Robin standings
   Future<void> _updateRoundRobinStandings(String tournamentId, String matchId, String winnerId) async {
     // Implementation cho round robin standings update
-    print('📊 Updating Round Robin standings for tournament $tournamentId');
+    debugPrint('📊 Updating Round Robin standings for tournament $tournamentId');
   }
 
   /// Check if tournament is complete
@@ -447,7 +448,7 @@ class MatchProgressionService {
         'completed_at': DateTime.now().toIso8601String(),
       }).eq('id', tournamentId);
       
-      print('🏆 Tournament $tournamentId marked as completed!');
+      debugPrint('🏆 Tournament $tournamentId marked as completed!');
       return true;
     }
 
@@ -492,7 +493,7 @@ class MatchProgressionService {
       }
 
     } catch (e) {
-      print('⚠️ Failed to send progression notifications: $e');
+      debugPrint('⚠️ Failed to send progression notifications: $e');
     }
   }
 

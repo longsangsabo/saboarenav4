@@ -7,10 +7,10 @@ class MessagingScreen extends StatefulWidget {
   final String? chatName;
   
   const MessagingScreen({
-    Key? key,
+    super.key,
     this.chatId,
     this.chatName,
-  }) : super(key: key);
+  });
 
   @override
   State<MessagingScreen> createState() => _MessagingScreenState();
@@ -25,7 +25,7 @@ class _MessagingScreenState extends State<MessagingScreen> {
   List<Map<String, dynamic>> _chatRooms = [];
   String? _selectedChatId;
   String? _selectedChatName;
-  StreamSubscription? _messageSubscription;
+  RealtimeChannel? _messageSubscription;
   bool _isLoading = false;
 
   @override
@@ -42,7 +42,7 @@ class _MessagingScreenState extends State<MessagingScreen> {
 
   @override
   void dispose() {
-    _messageSubscription?.cancel();
+    _messageSubscription?.unsubscribe();
     _messageController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -101,7 +101,7 @@ class _MessagingScreenState extends State<MessagingScreen> {
   void _subscribeToMessages() {
     if (_selectedChatId == null) return;
     
-    _messageSubscription?.cancel();
+    _messageSubscription?.unsubscribe();
     _messageSubscription = _supabase
         .channel('messages')
         .onPostgresChanges(
@@ -202,7 +202,7 @@ class _MessagingScreenState extends State<MessagingScreen> {
   }
 
   void _selectChat(String chatId, String chatName) {
-    _messageSubscription?.cancel();
+    _messageSubscription?.unsubscribe();
     setState(() {
       _selectedChatId = chatId;
       _selectedChatName = chatName;

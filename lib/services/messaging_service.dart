@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/auth_service.dart';
+import 'package:flutter/foundation.dart';
 
 class MessagingService {
   static final MessagingService _instance = MessagingService._internal();
@@ -37,7 +38,7 @@ class MessagingService {
 
       return messagesResponse.length;
     } catch (e) {
-      print('Error getting unread message count: $e');
+      debugPrint('Error getting unread message count: $e');
       return 0;
     }
   }
@@ -54,7 +55,7 @@ class MessagingService {
 
       return List<Map<String, dynamic>>.from(response ?? []);
     } catch (e) {
-      print('Error getting chat rooms: $e');
+      debugPrint('Error getting chat rooms: $e');
       return [];
     }
   }
@@ -80,7 +81,7 @@ class MessagingService {
 
       return List<Map<String, dynamic>>.from(response);
     } catch (e) {
-      print('Error getting chat messages: $e');
+      debugPrint('Error getting chat messages: $e');
       return [];
     }
   }
@@ -112,7 +113,7 @@ class MessagingService {
 
       return true;
     } catch (e) {
-      print('Error sending message: $e');
+      debugPrint('Error sending message: $e');
       return false;
     }
   }
@@ -130,7 +131,7 @@ class MessagingService {
           .neq('sender_id', currentUser.id); // Only mark messages not sent by current user
 
     } catch (e) {
-      print('Error marking messages as read: $e');
+      debugPrint('Error marking messages as read: $e');
     }
   }
 
@@ -160,7 +161,7 @@ class MessagingService {
 
       return newRoom['id'];
     } catch (e) {
-      print('Error creating/getting chat room: $e');
+      debugPrint('Error creating/getting chat room: $e');
       return null;
     }
   }

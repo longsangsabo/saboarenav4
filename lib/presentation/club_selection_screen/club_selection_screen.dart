@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sabo_arena/models/club.dart';
 import 'package:sabo_arena/services/club_service.dart';
 import 'package:sabo_arena/services/user_service.dart';
+import 'package:flutter/foundation.dart';
 
 class ClubSelectionScreen extends StatefulWidget {
   const ClubSelectionScreen({super.key});
@@ -35,7 +36,7 @@ class _ClubSelectionScreenState extends State<ClubSelectionScreen> {
       });
       return clubs;
     } catch (e) {
-      print('Error loading clubs: $e');
+      debugPrint('Error loading clubs: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

@@ -4,6 +4,7 @@ import '../../../models/user_profile.dart';
 import '../../../services/opponent_club_service.dart';
 // import '../../../services/challenge_service.dart';
 import './simple_challenge_modal_widget.dart';
+import 'package:flutter/foundation.dart';
 
 class PlayerCardWidget extends StatelessWidget {
   final UserProfile player;
@@ -898,7 +899,7 @@ class PlayerCardWidget extends StatelessWidget {
                           //   message: 'Lời mời hẹn lịch chơi bida từ ứng dụng SABO ARENA',
                           // );
                           
-                          print('📅 Schedule request - Player: ${player.fullName}, Date: $selectedDate, Slot: $selectedTimeSlot');
+                          debugPrint('📅 Schedule request - Player: ${player.fullName}, Date: $selectedDate, Slot: $selectedTimeSlot');
 
                           Navigator.pop(context);
                           final dateStr = _isToday(selectedDate) 

@@ -5,6 +5,7 @@ import '../../../models/achievement.dart';
 import '../../../services/achievement_service.dart';
 import '../../../theme/app_theme.dart';
 import '../../../widgets/custom_icon_widget.dart';
+import 'package:flutter/foundation.dart';
 
 class AchievementsSectionWidget extends StatefulWidget {
   final String userId;
@@ -51,7 +52,7 @@ class _AchievementsSectionWidgetState extends State<AchievementsSectionWidget> {
       });
     } catch (error) {
       setState(() => _isLoading = false);
-      print('Failed to load achievements: $error');
+      debugPrint('Failed to load achievements: $error');
     }
   }
 

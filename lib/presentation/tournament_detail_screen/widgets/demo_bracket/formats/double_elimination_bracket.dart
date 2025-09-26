@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import '../components/bracket_components.dart';
 import '../shared/tournament_data_generator.dart';
+import 'package:flutter/foundation.dart';
 
 class DoubleEliminationBracket extends StatelessWidget {
   final int playerCount;
@@ -44,7 +45,7 @@ class DoubleEliminationBracket extends StatelessWidget {
 
   Widget _buildWinnersBracket() {
     final winnersRounds = TournamentDataGenerator.calculateDoubleEliminationWinners(playerCount);
-    print('🏆 Double Elimination Winners Rounds: ${winnersRounds.length}'); // Debug
+    debugPrint('🏆 Double Elimination Winners Rounds: ${winnersRounds.length}'); // Debug
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,7 +120,7 @@ class DoubleEliminationBracket extends StatelessWidget {
 
   Widget _buildLosersBracket() {
     final losersRounds = TournamentDataGenerator.calculateDoubleEliminationLosers(playerCount);
-    print('🔥 Double Elimination Losers Rounds: ${losersRounds.length}'); // Debug
+    debugPrint('🔥 Double Elimination Losers Rounds: ${losersRounds.length}'); // Debug
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

@@ -8,6 +8,7 @@ import '../../../services/tournament_automation_service.dart';
 import '../../../services/realtime_tournament_service.dart';
 import '../../../core/constants/tournament_constants.dart';
 import '../../../models/tournament.dart';
+import 'package:flutter/foundation.dart';
 
 class TournamentAutomationControlPanel extends StatefulWidget {
   final Tournament tournament;
@@ -85,7 +86,7 @@ class _TournamentAutomationControlPanelState extends State<TournamentAutomationC
       setState(() => _isLoading = false);
 
     } catch (e) {
-      print('❌ Error loading automation status: $e');
+      debugPrint('❌ Error loading automation status: $e');
       setState(() => _isLoading = false);
     }
   }

@@ -12,6 +12,7 @@ import 'notification_service.dart';
 import 'realtime_tournament_service.dart';
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
 
 /// Service quản lý tự động tournament operations
 class TournamentAutomationService {
@@ -34,7 +35,7 @@ class TournamentAutomationService {
   /// Start automation for a tournament
   Future<void> startTournamentAutomation(String tournamentId) async {
     try {
-      print('🤖 Starting automation for tournament: $tournamentId');
+      debugPrint('🤖 Starting automation for tournament: $tournamentId');
 
       final tournament = await _tournamentService.getTournamentById(tournamentId);
       
@@ -56,13 +57,13 @@ class TournamentAutomationService {
           await _setupProgressAutomation(tournament);
           break;
         default:
-          print('ℹ️ No automation needed for status: ${tournament.status}');
+          debugPrint('ℹ️ No automation needed for status: ${tournament.status}');
       }
 
-      print('✅ Tournament automation started: $tournamentId');
+      debugPrint('✅ Tournament automation started: $tournamentId');
 
     } catch (e) {
-      print('❌ Error starting tournament automation: $e');
+      debugPrint('❌ Error starting tournament automation: $e');
       throw Exception('Failed to start tournament automation: $e');
     }
   }
@@ -70,7 +71,7 @@ class TournamentAutomationService {
   /// Stop automation for a tournament
   Future<void> stopTournamentAutomation(String tournamentId) async {
     try {
-      print('🛑 Stopping automation for tournament: $tournamentId');
+      debugPrint('🛑 Stopping automation for tournament: $tournamentId');
 
       // Cancel timers
       _activeTimers[tournamentId]?.cancel();
@@ -80,10 +81,10 @@ class TournamentAutomationService {
       await _activeSubscriptions[tournamentId]?.cancel();
       _activeSubscriptions.remove(tournamentId);
 
-      print('✅ Tournament automation stopped: $tournamentId');
+      debugPrint('✅ Tournament automation stopped: $tournamentId');
 
     } catch (e) {
-      print('❌ Error stopping tournament automation: $e');
+      debugPrint('❌ Error stopping tournament automation: $e');
     }
   }
 
@@ -99,7 +100,7 @@ class TournamentAutomationService {
         await _openRegistration(tournament.id);
       });
       
-      print('📅 Registration opening scheduled in ${delay.inMinutes} minutes');
+      debugPrint('📅 Registration opening scheduled in ${delay.inMinutes} minutes');
     } else if (tournament.registrationStart == null || tournament.registrationStart!.isBefore(now)) {
       // Open registration immediately if no start time or past due
       await _openRegistration(tournament.id);
@@ -132,13 +133,13 @@ class TournamentAutomationService {
         await _closeRegistration(tournament.id);
       });
       
-      print('⏰ Registration closure scheduled in ${closureDelay.inMinutes} minutes');
+      debugPrint('⏰ Registration closure scheduled in ${closureDelay.inMinutes} minutes');
     }
     }
 
   Future<void> _openRegistration(String tournamentId) async {
     try {
-      print('🚀 Auto-opening registration for tournament: $tournamentId');
+      debugPrint('🚀 Auto-opening registration for tournament: $tournamentId');
 
       await _supabase
           .from('tournaments')
@@ -162,16 +163,16 @@ class TournamentAutomationService {
         'tournament_id': tournamentId,
       });
 
-      print('✅ Registration opened automatically');
+      debugPrint('✅ Registration opened automatically');
 
     } catch (e) {
-      print('❌ Error opening registration: $e');
+      debugPrint('❌ Error opening registration: $e');
     }
   }
 
   Future<void> _closeRegistration(String tournamentId) async {
     try {
-      print('🚪 Auto-closing registration for tournament: $tournamentId');
+      debugPrint('🚪 Auto-closing registration for tournament: $tournamentId');
 
       final participants = await _supabase
           .from('tournament_participants')
@@ -204,10 +205,10 @@ class TournamentAutomationService {
         type: 'registration_closed',
       );
 
-      print('✅ Registration closed automatically');
+      debugPrint('✅ Registration closed automatically');
 
     } catch (e) {
-      print('❌ Error closing registration: $e');
+      debugPrint('❌ Error closing registration: $e');
     }
   }
 
@@ -221,7 +222,7 @@ class TournamentAutomationService {
         await _startTournament(tournament.id);
       });
       
-      print('🏁 Tournament start scheduled in ${delay.inMinutes} minutes');
+      debugPrint('🏁 Tournament start scheduled in ${delay.inMinutes} minutes');
 
       // Schedule pre-start notifications
       final preStartIntervals = [Duration(minutes: 30), Duration(minutes: 10), Duration(minutes: 5)];
@@ -243,7 +244,7 @@ class TournamentAutomationService {
 
   Future<void> _startTournament(String tournamentId) async {
     try {
-      print('🏁 Auto-starting tournament: $tournamentId');
+      debugPrint('🏁 Auto-starting tournament: $tournamentId');
 
       await _supabase
           .from('tournaments')
@@ -268,10 +269,10 @@ class TournamentAutomationService {
         type: 'tournament_started',
       );
 
-      print('✅ Tournament started automatically');
+      debugPrint('✅ Tournament started automatically');
 
     } catch (e) {
-      print('❌ Error starting tournament: $e');
+      debugPrint('❌ Error starting tournament: $e');
     }
   }
 
@@ -297,12 +298,12 @@ class TournamentAutomationService {
     // Setup automatic pairing for next rounds
     await _checkForNextRoundPairing(tournament.id);
 
-    print('⚙️ Progress automation setup complete');
+    debugPrint('⚙️ Progress automation setup complete');
   }
 
   Future<void> _handleMatchCompletion(String tournamentId, String matchId) async {
     try {
-      print('🎯 Handling match completion: $matchId');
+      debugPrint('🎯 Handling match completion: $matchId');
 
       // Update bracket progression
       await _updateBracketProgression(tournamentId, matchId);
@@ -321,10 +322,10 @@ class TournamentAutomationService {
         await _completeTournament(tournamentId);
       }
 
-      print('✅ Match completion handled');
+      debugPrint('✅ Match completion handled');
 
     } catch (e) {
-      print('❌ Error handling match completion: $e');
+      debugPrint('❌ Error handling match completion: $e');
     }
   }
 
@@ -376,7 +377,7 @@ class TournamentAutomationService {
           .update({position: match.winnerId})
           .eq('id', nextMatch['id']);
 
-      print('✅ Winner advanced to next round');
+      debugPrint('✅ Winner advanced to next round');
     }
   }
 
@@ -442,7 +443,7 @@ class TournamentAutomationService {
           .update({position: match.loserId})
           .eq('id', losersBracketMatch['id']);
 
-      print('✅ Loser dropped to loser\'s bracket');
+      debugPrint('✅ Loser dropped to loser\'s bracket');
     }
   }
 
@@ -554,7 +555,7 @@ class TournamentAutomationService {
         .eq('tournament_id', tournamentId)
         .eq('user_id', loserId);
 
-    print('✅ Ladder positions swapped');
+    debugPrint('✅ Ladder positions swapped');
   }
 
   // ==================== ROUND MANAGEMENT ====================
@@ -585,7 +586,7 @@ class TournamentAutomationService {
   }
 
   Future<void> _processRoundCompletion(String tournamentId) async {
-    print('🏆 Round completed for tournament: $tournamentId');
+    debugPrint('🏆 Round completed for tournament: $tournamentId');
 
     await _notificationService.sendTournamentNotification(
       tournamentId: tournamentId,
@@ -610,7 +611,7 @@ class TournamentAutomationService {
         break;
       // Other formats handle progression automatically through bracket structure
       default:
-        print('ℹ️ No automatic round generation needed for format: ${tournament.format}');
+        debugPrint('ℹ️ No automatic round generation needed for format: ${tournament.format}');
     }
   }
 
@@ -666,7 +667,7 @@ class TournamentAutomationService {
         .eq('tournament_id', tournamentId);
 
     if (existingMatches.length >= totalMatches) {
-      print('ℹ️ All round robin matches already generated');
+      debugPrint('ℹ️ All round robin matches already generated');
       return;
     }
 
@@ -746,7 +747,7 @@ class TournamentAutomationService {
       type: 'tournament_cancelled',
     );
 
-    print('⚠️ Tournament cancelled due to insufficient participants');
+    debugPrint('⚠️ Tournament cancelled due to insufficient participants');
   }
 
   Future<void> _startFirstRoundMatches(String tournamentId) async {
@@ -757,7 +758,7 @@ class TournamentAutomationService {
         .eq('tournament_id', tournamentId)
         .eq('round', 1);
 
-    print('✅ First round matches are now ready');
+    debugPrint('✅ First round matches are now ready');
   }
 
   Future<bool> _checkTournamentCompletion(String tournamentId) async {
@@ -772,7 +773,7 @@ class TournamentAutomationService {
   }
 
   Future<void> _completeTournament(String tournamentId) async {
-    print('🏆 Tournament completed: $tournamentId');
+    debugPrint('🏆 Tournament completed: $tournamentId');
 
     // Determine final rankings
     await _calculateFinalRankings(tournamentId);
@@ -798,7 +799,7 @@ class TournamentAutomationService {
     // Stop automation
     await stopTournamentAutomation(tournamentId);
 
-    print('✅ Tournament completion processed');
+    debugPrint('✅ Tournament completion processed');
   }
 
   Future<void> _calculateFinalRankings(String tournamentId) async {

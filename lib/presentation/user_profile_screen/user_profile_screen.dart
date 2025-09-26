@@ -15,7 +15,6 @@ import '../../services/club_service.dart';
 import '../../services/messaging_service.dart';
 import '../../services/notification_service.dart';
 import '../club_dashboard_screen/club_dashboard_screen_simple.dart';
-import '../messaging_screen/messaging_screen.dart';
 import '../../widgets/shared_bottom_navigation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -25,6 +24,7 @@ import './widgets/profile_header_widget.dart';
 import './widgets/qr_code_widget.dart';
 import './widgets/social_features_widget.dart';
 import './widgets/statistics_cards_widget.dart';
+import 'package:flutter/foundation.dart';
 
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});
@@ -81,7 +81,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
         _isLoading = true;
       });
 
-      print('🚀 Profile: Loading user data from backend...');
+      debugPrint('🚀 Profile: Loading user data from backend...');
       final currentUser = _authService.currentUser;
 
       if (currentUser != null) {
@@ -95,12 +95,12 @@ class _UserProfileScreenState extends State<UserProfileScreen>
 
         await _loadProfileData(userProfile.id);
       } else {
-        print('⚠️ Profile: No authenticated user.');
+        debugPrint('⚠️ Profile: No authenticated user.');
       }
 
-      print('✅ Profile: User data loaded successfully');
+      debugPrint('✅ Profile: User data loaded successfully');
     } catch (e) {
-      print('❌ Profile error: $e');
+      debugPrint('❌ Profile error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -120,7 +120,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
 
   Future<void> _loadProfileData(String userId) async {
     try {
-      print('🚀 Profile: Loading social data...');
+      debugPrint('🚀 Profile: Loading social data...');
 
       final friends = await _userService.getUserFollowers(userId);
       // final recentChallenges = await _socialService.fetchRecentChallenges(userId); // This method doesn't exist
@@ -137,9 +137,9 @@ class _UserProfileScreenState extends State<UserProfileScreen>
           };
         });
       }
-      print('✅ Profile: Additional data loaded successfully');
+      debugPrint('✅ Profile: Additional data loaded successfully');
     } catch (e) {
-      print('❌ Profile data error: $e');
+      debugPrint('❌ Profile data error: $e');
     }
   }
 
@@ -152,7 +152,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
         });
       }
     } catch (e) {
-      print('❌ Error loading unread message count: $e');
+      debugPrint('❌ Error loading unread message count: $e');
     }
   }
 
@@ -165,7 +165,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
         });
       }
     } catch (e) {
-      print('❌ Error loading unread notification count: $e');
+      debugPrint('❌ Error loading unread notification count: $e');
     }
   }
 
@@ -201,18 +201,11 @@ class _UserProfileScreenState extends State<UserProfileScreen>
   }
 
   void _navigateToNotifications() {
-    // Check if notification list screen route exists
-    if (AppRoutes.notificationListScreen != null) {
-      Navigator.pushNamed(context, AppRoutes.notificationListScreen).then((_) {
-        // Refresh unread count when returning from notifications
-        _loadUnreadNotificationCount();
-      });
-    } else {
-      // Show notifications modal if no dedicated screen
-      _showNotificationsModal();
-    }
+    // Show notifications modal since no dedicated screen exists
+    _showNotificationsModal();
   }
-}  @override
+
+  @override
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
@@ -763,7 +756,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
   // Upload functions
   Future<void> _uploadCoverPhoto(String imagePath) async {
     try {
-      print('🚀 Uploading cover photo: $imagePath');
+      debugPrint('🚀 Uploading cover photo: $imagePath');
       
       // Get old cover photo URL to delete later
       final oldCoverUrl = _userProfile?.coverPhotoUrl ?? '';
@@ -790,14 +783,14 @@ class _UserProfileScreenState extends State<UserProfileScreen>
         _showErrorMessage('❌ Không thể tải lên ảnh bìa. Vui lòng thử lại.');
       }
     } catch (e) {
-      print('❌ Cover photo upload error: $e');
+      debugPrint('❌ Cover photo upload error: $e');
       _showErrorMessage('Lỗi khi tải ảnh bìa: $e');
     }
   }
 
   Future<void> _uploadAvatar(String imagePath) async {
     try {
-      print('🚀 Uploading avatar: $imagePath');
+      debugPrint('🚀 Uploading avatar: $imagePath');
       
       // Get old avatar URL to delete later
       final oldAvatarUrl = _userProfile?.avatarUrl ?? '';
@@ -824,14 +817,14 @@ class _UserProfileScreenState extends State<UserProfileScreen>
         _showErrorMessage('❌ Không thể tải lên ảnh đại diện. Vui lòng thử lại.');
       }
     } catch (e) {
-      print('❌ Avatar upload error: $e');
+      debugPrint('❌ Avatar upload error: $e');
       _showErrorMessage('Lỗi khi tải ảnh đại diện: $e');
     }
   }
 
   Future<void> _removeAvatarFromServer() async {
     try {
-      print('🚀 Removing avatar from server');
+      debugPrint('🚀 Removing avatar from server');
       
       final oldAvatarUrl = _userProfile?.avatarUrl ?? '';
       
@@ -859,7 +852,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
         _showSuccessMessage('✅ Đã xóa ảnh đại diện');
       }
     } catch (e) {
-      print('❌ Avatar removal error: $e');
+      debugPrint('❌ Avatar removal error: $e');
       _showErrorMessage('Lỗi khi xóa ảnh đại diện: $e');
     }
   }
@@ -1879,12 +1872,6 @@ class _UserProfileScreenState extends State<UserProfileScreen>
     );
   }
 
-  void _openPrivacySettings() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Mở cài đặt quyền riêng tư'))
-    );
-  }
-
   void _openNotificationSettings() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Mở cài đặt thông báo'))
@@ -1945,12 +1932,6 @@ class _UserProfileScreenState extends State<UserProfileScreen>
     }
   }
 
-  void _openPaymentHistory() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Mở lịch sử thanh toán'))
-    );
-  }
-
   void _openHelpSupport() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Mở trợ giúp & hỗ trợ'))
@@ -1990,10 +1971,6 @@ class _UserProfileScreenState extends State<UserProfileScreen>
         ],
       ),
     );
-  }
-
-  void _openAbout() {
-     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('SABO Arena v1.0.0')));
   }
 
   void _handleLogout() async {
@@ -2301,7 +2278,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
         // Navigate to tournament details
         if (actionData['tournament_id'] != null) {
           Navigator.pop(context); // Close modal
-          Navigator.pushNamed(context, AppRoutes.tournamentDetailsScreen, arguments: actionData['tournament_id']);
+          Navigator.pushNamed(context, AppRoutes.tournamentDetailScreen, arguments: actionData['tournament_id']);
         }
         break;
       case 'match_result':

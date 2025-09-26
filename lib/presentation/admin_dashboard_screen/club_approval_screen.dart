@@ -5,6 +5,7 @@ import '../../core/app_export.dart';
 import '../../services/admin_service.dart';
 import '../../models/club.dart';
 import '../../widgets/custom_app_bar.dart';
+import 'package:flutter/foundation.dart';
 
 class ClubApprovalScreen extends StatefulWidget {
   final String? initialFilter;
@@ -67,7 +68,7 @@ class _ClubApprovalScreenState extends State<ClubApprovalScreen>
         _errorMessage = null;
       });
 
-      print('ClubApprovalScreen: Starting to load clubs...');
+      debugPrint('ClubApprovalScreen: Starting to load clubs...');
       
       // Load each status separately to identify which one fails
       List<Club> pendingClubs = [];
@@ -75,29 +76,29 @@ class _ClubApprovalScreenState extends State<ClubApprovalScreen>
       List<Club> rejectedClubs = [];
       
       try {
-        print('ClubApprovalScreen: Loading pending clubs...');
+        debugPrint('ClubApprovalScreen: Loading pending clubs...');
         pendingClubs = await _adminService.getClubsForAdmin(status: 'pending');
-        print('ClubApprovalScreen: Loaded ${pendingClubs.length} pending clubs');
+        debugPrint('ClubApprovalScreen: Loaded ${pendingClubs.length} pending clubs');
       } catch (e) {
-        print('ClubApprovalScreen: Error loading pending clubs: $e');
+        debugPrint('ClubApprovalScreen: Error loading pending clubs: $e');
         throw Exception('Failed to load pending clubs: $e');
       }
       
       try {
-        print('ClubApprovalScreen: Loading approved clubs...');
+        debugPrint('ClubApprovalScreen: Loading approved clubs...');
         approvedClubs = await _adminService.getClubsForAdmin(status: 'approved');
-        print('ClubApprovalScreen: Loaded ${approvedClubs.length} approved clubs');
+        debugPrint('ClubApprovalScreen: Loaded ${approvedClubs.length} approved clubs');
       } catch (e) {
-        print('ClubApprovalScreen: Error loading approved clubs: $e');
+        debugPrint('ClubApprovalScreen: Error loading approved clubs: $e');
         throw Exception('Failed to load approved clubs: $e');
       }
       
       try {
-        print('ClubApprovalScreen: Loading rejected clubs...');
+        debugPrint('ClubApprovalScreen: Loading rejected clubs...');
         rejectedClubs = await _adminService.getClubsForAdmin(status: 'rejected');
-        print('ClubApprovalScreen: Loaded ${rejectedClubs.length} rejected clubs');
+        debugPrint('ClubApprovalScreen: Loaded ${rejectedClubs.length} rejected clubs');
       } catch (e) {
-        print('ClubApprovalScreen: Error loading rejected clubs: $e');
+        debugPrint('ClubApprovalScreen: Error loading rejected clubs: $e');
         throw Exception('Failed to load rejected clubs: $e');
       }
 
@@ -108,10 +109,10 @@ class _ClubApprovalScreenState extends State<ClubApprovalScreen>
         _isLoading = false;
       });
       
-      print('ClubApprovalScreen: All clubs loaded successfully');
+      debugPrint('ClubApprovalScreen: All clubs loaded successfully');
     } catch (e, stackTrace) {
-      print('ClubApprovalScreen: Error in _loadClubs: $e');
-      print('ClubApprovalScreen: Stack trace: $stackTrace');
+      debugPrint('ClubApprovalScreen: Error in _loadClubs: $e');
+      debugPrint('ClubApprovalScreen: Stack trace: $stackTrace');
       setState(() {
         _isLoading = false;
         _errorMessage = 'Lỗi tải danh sách CLB: $e';

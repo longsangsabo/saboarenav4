@@ -8,6 +8,7 @@ import '../services/ranking_service.dart';
 import '../services/config_service.dart';
 import '../models/user_profile.dart';
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
 
 /// Service tích hợp ELO rating với tournament system
 class TournamentEloService {
@@ -381,7 +382,7 @@ class TournamentEloService {
       });
     } catch (error) {
       // Log error but don't throw
-      print('Failed to log tournament ELO changes: $error');
+      debugPrint('Failed to log tournament ELO changes: $error');
     }
   }
 
@@ -414,7 +415,7 @@ class TournamentEloService {
         'created_at': DateTime.now().toIso8601String(),
       });
     } catch (error) {
-      print('Failed to notify ranking change: $error');
+      debugPrint('Failed to notify ranking change: $error');
     }
   }
 

@@ -4,6 +4,7 @@ import 'package:sizer/sizer.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../core/app_export.dart';
 import '../../services/basic_referral_service.dart';
+import 'package:flutter/foundation.dart';
 
 /// Basic Referral Card Widget
 /// Displays user's referral code with sharing functionality
@@ -49,7 +50,7 @@ class _BasicReferralCardState extends State<BasicReferralCard> {
         await _generateNewCode();
       }
     } catch (e) {
-      print('Error loading referral code: $e');
+      debugPrint('Error loading referral code: $e');
       setState(() => _isLoading = false);
     }
   }

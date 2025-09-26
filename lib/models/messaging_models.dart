@@ -1,7 +1,9 @@
 /// Messaging models for SABO Arena app
 /// Contains comprehensive data models for chat system
+library;
 
 import 'package:flutter/material.dart';
+import 'user_profile.dart';
 
 /// Message model representing a single chat message
 class MessageModel {

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/foundation.dart';
 
 class MemberRealtimeService {
   static final MemberRealtimeService _instance = MemberRealtimeService._internal();
@@ -54,7 +55,7 @@ class MemberRealtimeService {
   Future<void> initializeForClub(String clubId) async {
     try {
       if (kDebugMode) {
-        print('🔄 Initializing real-time connections for club: $clubId');
+        debugPrint('🔄 Initializing real-time connections for club: $clubId');
       }
 
       // Disconnect existing connections
@@ -73,11 +74,11 @@ class MemberRealtimeService {
       _connectionController.add(true);
 
       if (kDebugMode) {
-        print('✅ Real-time connections initialized successfully');
+        debugPrint('✅ Real-time connections initialized successfully');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error initializing real-time connections: $e');
+        debugPrint('❌ Error initializing real-time connections: $e');
       }
       _connectionController.add(false);
       rethrow;
@@ -88,18 +89,18 @@ class MemberRealtimeService {
   Future<void> initializeForUser(String userId) async {
     try {
       if (kDebugMode) {
-        print('🔄 Initializing real-time connections for user: $userId');
+        debugPrint('🔄 Initializing real-time connections for user: $userId');
       }
 
       // Subscribe to user notifications
       await _subscribeToNotifications(userId);
 
       if (kDebugMode) {
-        print('✅ User real-time connections initialized');
+        debugPrint('✅ User real-time connections initialized');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error initializing user real-time connections: $e');
+        debugPrint('❌ Error initializing user real-time connections: $e');
       }
       rethrow;
     }
@@ -109,17 +110,17 @@ class MemberRealtimeService {
   Future<void> initializeForChatRoom(String roomId) async {
     try {
       if (kDebugMode) {
-        print('🔄 Initializing chat room connections: $roomId');
+        debugPrint('🔄 Initializing chat room connections: $roomId');
       }
 
       await _subscribeToChatMessages(roomId);
 
       if (kDebugMode) {
-        print('✅ Chat room connections initialized');
+        debugPrint('✅ Chat room connections initialized');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error initializing chat room connections: $e');
+        debugPrint('❌ Error initializing chat room connections: $e');
       }
       rethrow;
     }
@@ -129,7 +130,7 @@ class MemberRealtimeService {
   Future<void> disconnect() async {
     try {
       if (kDebugMode) {
-        print('🔄 Disconnecting real-time connections');
+        debugPrint('🔄 Disconnecting real-time connections');
       }
 
       // Unsubscribe from all channels
@@ -150,11 +151,11 @@ class MemberRealtimeService {
       _connectionController.add(false);
 
       if (kDebugMode) {
-        print('✅ Real-time connections disconnected');
+        debugPrint('✅ Real-time connections disconnected');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error disconnecting: $e');
+        debugPrint('❌ Error disconnecting: $e');
       }
     }
   }
@@ -185,11 +186,11 @@ class MemberRealtimeService {
       await _loadInitialMembers(clubId);
 
       if (kDebugMode) {
-        print('✅ Subscribed to club members');
+        debugPrint('✅ Subscribed to club members');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error subscribing to members: $e');
+        debugPrint('❌ Error subscribing to members: $e');
       }
       rethrow;
     }
@@ -217,11 +218,11 @@ class MemberRealtimeService {
       await _loadInitialRequests(clubId);
 
       if (kDebugMode) {
-        print('✅ Subscribed to membership requests');
+        debugPrint('✅ Subscribed to membership requests');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error subscribing to requests: $e');
+        debugPrint('❌ Error subscribing to requests: $e');
       }
       rethrow;
     }
@@ -249,11 +250,11 @@ class MemberRealtimeService {
       await _loadInitialChatMessages(roomId);
 
       if (kDebugMode) {
-        print('✅ Subscribed to chat messages');
+        debugPrint('✅ Subscribed to chat messages');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error subscribing to chat messages: $e');
+        debugPrint('❌ Error subscribing to chat messages: $e');
       }
       rethrow;
     }
@@ -281,11 +282,11 @@ class MemberRealtimeService {
       await _loadInitialNotifications(userId);
 
       if (kDebugMode) {
-        print('✅ Subscribed to user notifications');
+        debugPrint('✅ Subscribed to user notifications');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error subscribing to notifications: $e');
+        debugPrint('❌ Error subscribing to notifications: $e');
       }
       rethrow;
     }
@@ -313,11 +314,11 @@ class MemberRealtimeService {
       await _loadInitialActivities(clubId);
 
       if (kDebugMode) {
-        print('✅ Subscribed to member activities');
+        debugPrint('✅ Subscribed to member activities');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error subscribing to activities: $e');
+        debugPrint('❌ Error subscribing to activities: $e');
       }
       rethrow;
     }
@@ -329,7 +330,7 @@ class MemberRealtimeService {
 
   void _handleMembersChange(PostgresChangePayload payload, String clubId) {
     if (kDebugMode) {
-      print('📥 Members change: ${payload.eventType}');
+      debugPrint('📥 Members change: ${payload.eventType}');
     }
 
     final cacheKey = 'members_$clubId';
@@ -356,7 +357,7 @@ class MemberRealtimeService {
 
   void _handleRequestsChange(PostgresChangePayload payload, String clubId) {
     if (kDebugMode) {
-      print('📥 Requests change: ${payload.eventType}');
+      debugPrint('📥 Requests change: ${payload.eventType}');
     }
 
     final cacheKey = 'requests_$clubId';
@@ -383,7 +384,7 @@ class MemberRealtimeService {
 
   void _handleChatMessagesChange(PostgresChangePayload payload, String roomId) {
     if (kDebugMode) {
-      print('📥 Chat messages change: ${payload.eventType}');
+      debugPrint('📥 Chat messages change: ${payload.eventType}');
     }
 
     final cacheKey = 'messages_$roomId';
@@ -410,7 +411,7 @@ class MemberRealtimeService {
 
   void _handleNotificationsChange(PostgresChangePayload payload, String userId) {
     if (kDebugMode) {
-      print('📥 Notifications change: ${payload.eventType}');
+      debugPrint('📥 Notifications change: ${payload.eventType}');
     }
 
     final cacheKey = 'notifications_$userId';
@@ -439,7 +440,7 @@ class MemberRealtimeService {
 
   void _handleActivitiesChange(PostgresChangePayload payload, String clubId) {
     if (kDebugMode) {
-      print('📥 Activities change: ${payload.eventType}');
+      debugPrint('📥 Activities change: ${payload.eventType}');
     }
 
     final cacheKey = 'activities_$clubId';
@@ -481,7 +482,7 @@ class MemberRealtimeService {
       _membersController.add(_dataCache[cacheKey]!);
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error loading initial members: $e');
+        debugPrint('❌ Error loading initial members: $e');
       }
     }
   }
@@ -499,7 +500,7 @@ class MemberRealtimeService {
       _requestsController.add(_dataCache[cacheKey]!);
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error loading initial requests: $e');
+        debugPrint('❌ Error loading initial requests: $e');
       }
     }
   }
@@ -519,7 +520,7 @@ class MemberRealtimeService {
       _chatMessagesController.add(_dataCache[cacheKey]!);
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error loading initial messages: $e');
+        debugPrint('❌ Error loading initial messages: $e');
       }
     }
   }
@@ -538,7 +539,7 @@ class MemberRealtimeService {
       _notificationsController.add(_dataCache[cacheKey]!);
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error loading initial notifications: $e');
+        debugPrint('❌ Error loading initial notifications: $e');
       }
     }
   }
@@ -557,7 +558,7 @@ class MemberRealtimeService {
       _activitiesController.add(_dataCache[cacheKey]!);
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error loading initial activities: $e');
+        debugPrint('❌ Error loading initial activities: $e');
       }
     }
   }
@@ -571,7 +572,7 @@ class MemberRealtimeService {
     // This would integrate with flutter_local_notifications
     // For now, just log it
     if (kDebugMode) {
-      print('🔔 New notification: ${notification['title']}');
+      debugPrint('🔔 New notification: ${notification['title']}');
     }
   }
 

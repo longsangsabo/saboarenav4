@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user_profile.dart';
 import 'dart:typed_data';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 class UserService {
   static UserService? _instance;
@@ -423,7 +424,7 @@ class UserService {
               .toList();
         }
       } catch (rpcError) {
-        print('RPC function get_nearby_players not available, using fallback: $rpcError');
+        debugPrint('RPC function get_nearby_players not available, using fallback: $rpcError');
       }
       
       // Fallback: Get active users (simplified approach without location filtering)
@@ -443,7 +444,7 @@ class UserService {
           
     } catch (error) {
       // It's good practice to log the error for debugging
-      print('Error finding nearby opponents: $error');
+      debugPrint('Error finding nearby opponents: $error');
       throw Exception('Failed to find nearby opponents: $error');
     }
   }
@@ -506,7 +507,7 @@ class UserService {
         'evidence_count': evidenceUrls?.length ?? 0,
       };
     } catch (error) {
-      print('Error requesting rank registration: $error');
+      debugPrint('Error requesting rank registration: $error');
       throw Exception('Không thể gửi yêu cầu đăng ký rank: $error');
     }
   }
@@ -533,7 +534,7 @@ class UserService {
 
       return List<Map<String, dynamic>>.from(response);
     } catch (error) {
-      print('Error getting user rank requests: $error');
+      debugPrint('Error getting user rank requests: $error');
       throw Exception('Không thể tải danh sách yêu cầu đăng ký rank: $error');
     }
   }
@@ -553,7 +554,7 @@ class UserService {
 
       return true;
     } catch (error) {
-      print('Error canceling rank request: $error');
+      debugPrint('Error canceling rank request: $error');
       throw Exception('Không thể hủy yêu cầu đăng ký rank: $error');
     }
   }
@@ -577,7 +578,7 @@ class UserService {
 
       return true;
     } catch (error) {
-      print('Error updating SPA points: $error');
+      debugPrint('Error updating SPA points: $error');
       throw Exception('Không thể cập nhật điểm SPA: $error');
     }
   }
@@ -605,7 +606,7 @@ class UserService {
 
       return true;
     } catch (error) {
-      print('Error adding SPA points: $error');
+      debugPrint('Error adding SPA points: $error');
       throw Exception('Không thể thêm điểm SPA: $error');
     }
   }
@@ -629,7 +630,7 @@ class UserService {
 
       return true;
     } catch (error) {
-      print('Error updating prize pool: $error');
+      debugPrint('Error updating prize pool: $error');
       throw Exception('Không thể cập nhật prize pool: $error');
     }
   }
@@ -657,7 +658,7 @@ class UserService {
 
       return true;
     } catch (error) {
-      print('Error adding to prize pool: $error');
+      debugPrint('Error adding to prize pool: $error');
       throw Exception('Không thể thêm vào prize pool: $error');
     }
   }

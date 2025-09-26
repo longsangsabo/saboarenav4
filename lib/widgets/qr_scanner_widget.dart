@@ -4,6 +4,7 @@ import 'package:sizer/sizer.dart';
 import 'package:sabo_arena/services/integrated_qr_service.dart';
 import '../routes/app_routes.dart';
 import '../core/utils/rank_migration_helper.dart';
+import 'package:flutter/foundation.dart';
 
 class QRScannerWidget extends StatefulWidget {
   final Function(Map<String, dynamic>)? onUserFound;
@@ -222,7 +223,7 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
 
   Future<void> _processQRCode(String qrData) async {
     try {
-      print('🔍 Processing QR code: $qrData');
+      debugPrint('🔍 Processing QR code: $qrData');
       
       // Use IntegratedQRService to scan and validate
       final scanResult = await IntegratedQRService.scanIntegratedQR(qrData);
@@ -250,7 +251,7 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
         });
       }
     } catch (e) {
-      print('❌ Error processing QR: $e');
+      debugPrint('❌ Error processing QR: $e');
       setState(() {
         errorMessage = 'Lỗi xử lý QR: $e';
         isScanning = true;

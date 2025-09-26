@@ -56,20 +56,10 @@ dependencies:
   
   # Local Push Notifications (không cần Firebase với Supabase)
   flutter_local_notifications: ^18.0.1
-  awesome_notifications: ^0.9.3+1
+  awesome_notifications: ^0.10.1
   
   # Background processing cho notifications
-  workmanager: ^0.5.2
-
-  # Charts cho analytics dashboard
-  fl_chart: ^0.69.0
-
-  # Messaging system dependencies
-  crypto: ^3.0.3
-  image_picker: ^1.1.2
-  file_picker: ^8.0.7
-  
-  intl: ^0.20.2
+  # workmanager: ^0.5.2  # Temporarily disabled due to compatibility issues
 dev_dependencies:
   flutter_test:    # CRITICAL: Required for Flutter project testing - DO NOT REMOVE
     sdk: flutter   # CRITICAL: Required for Flutter project testing - DO NOT REMOVE

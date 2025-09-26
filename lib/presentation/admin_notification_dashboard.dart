@@ -8,7 +8,7 @@ import '../models/notification_models.dart';
 /// Admin Dashboard for Notification Management
 /// Allows admins to send broadcasts, view analytics, manage templates
 class AdminNotificationDashboard extends StatefulWidget {
-  const AdminNotificationDashboard({Key? key}) : super(key: key);
+  const AdminNotificationDashboard({super.key});
 
   @override
   State<AdminNotificationDashboard> createState() => _AdminNotificationDashboardState();

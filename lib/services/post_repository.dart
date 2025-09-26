@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/post_model.dart';
+import 'package:flutter/foundation.dart';
 
 class PostRepository {
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -53,7 +54,7 @@ class PostRepository {
 
       return posts;
     } catch (e) {
-      print('Error fetching posts: $e');
+      debugPrint('Error fetching posts: $e');
       return [];
     }
   }
@@ -120,7 +121,7 @@ class PostRepository {
         tags: responseHashtags?.cast<String>(),
       );
     } catch (e) {
-      print('Error creating post: $e');
+      debugPrint('Error creating post: $e');
       return null;
     }
   }
@@ -162,7 +163,7 @@ class PostRepository {
 
       return true;
     } catch (e) {
-      print('Error toggling like: $e');
+      debugPrint('Error toggling like: $e');
       return false;
     }
   }
@@ -207,7 +208,7 @@ class PostRepository {
         tags: hashtags?.cast<String>(),
       );
     } catch (e) {
-      print('Error fetching post by ID: $e');
+      debugPrint('Error fetching post by ID: $e');
       return null;
     }
   }
@@ -226,7 +227,7 @@ class PostRepository {
 
       return true;
     } catch (e) {
-      print('Error deleting post: $e');
+      debugPrint('Error deleting post: $e');
       return false;
     }
   }
@@ -276,7 +277,7 @@ class PostRepository {
 
       return posts;
     } catch (e) {
-      print('Error searching posts: $e');
+      debugPrint('Error searching posts: $e');
       return [];
     }
   }
@@ -287,7 +288,7 @@ class PostRepository {
       final user = _supabase.auth.currentUser;
       if (user == null) throw Exception('User not authenticated');
 
-      print('🧪 Attempting to like post: $postId');
+      debugPrint('🧪 Attempting to like post: $postId');
 
       // Insert like record using post_interactions table
       await _supabase.from('post_interactions').insert({
@@ -296,7 +297,7 @@ class PostRepository {
         'interaction_type': 'like',
       });
 
-      print('✅ Like record created successfully');
+      debugPrint('✅ Like record created successfully');
 
       // The database trigger should automatically increment like_count
       // But let's also do manual update as fallback
@@ -314,13 +315,13 @@ class PostRepository {
             .update({'like_count': newCount})
             .eq('id', postId);
             
-        print('✅ Like count updated manually to: $newCount');
+        debugPrint('✅ Like count updated manually to: $newCount');
       } catch (updateError) {
-        print('⚠️ Manual like count update failed: $updateError');
+        debugPrint('⚠️ Manual like count update failed: $updateError');
         // Don't rethrow - the trigger should handle it
       }
     } catch (e) {
-      print('❌ Error liking post: $e');
+      debugPrint('❌ Error liking post: $e');
       rethrow;
     }
   }
@@ -331,7 +332,7 @@ class PostRepository {
       final user = _supabase.auth.currentUser;
       if (user == null) throw Exception('User not authenticated');
 
-      print('🧪 Attempting to unlike post: $postId');
+      debugPrint('🧪 Attempting to unlike post: $postId');
 
       // Delete like record from post_interactions table
       await _supabase
@@ -341,7 +342,7 @@ class PostRepository {
           .eq('user_id', user.id)
           .eq('interaction_type', 'like');
 
-      print('✅ Like record deleted successfully');
+      debugPrint('✅ Like record deleted successfully');
 
       // The database trigger should automatically decrement like_count
       // But let's also do manual update as fallback
@@ -359,13 +360,13 @@ class PostRepository {
             .update({'like_count': newCount})
             .eq('id', postId);
             
-        print('✅ Like count updated manually to: $newCount');
+        debugPrint('✅ Like count updated manually to: $newCount');
       } catch (updateError) {
-        print('⚠️ Manual like count update failed: $updateError');
+        debugPrint('⚠️ Manual like count update failed: $updateError');
         // Don't rethrow - the trigger should handle it
       }
     } catch (e) {
-      print('❌ Error unliking post: $e');
+      debugPrint('❌ Error unliking post: $e');
       rethrow;
     }
   }
@@ -386,7 +387,7 @@ class PostRepository {
 
       return response != null;
     } catch (e) {
-      print('Error checking if user liked post: $e');
+      debugPrint('Error checking if user liked post: $e');
       return false;
     }
   }

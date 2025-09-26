@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/app_export.dart';
 import '../../routes/app_routes.dart';
 import '../../services/integrated_registration_service.dart';
+import 'package:flutter/foundation.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -60,7 +61,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           });
         }
       } catch (e) {
-        print('Error loading referral preview: $e');
+        debugPrint('Error loading referral preview: $e');
       }
     }
   }
@@ -74,7 +75,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         });
       }
     } catch (e) {
-      print('Error loading referral preview: $e');
+      debugPrint('Error loading referral preview: $e');
       if (mounted) {
         setState(() {
           _referralPreview = null;

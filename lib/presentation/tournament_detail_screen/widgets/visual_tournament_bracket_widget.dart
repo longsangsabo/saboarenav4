@@ -7,7 +7,6 @@ import 'package:sizer/sizer.dart';
 import '../../../core/constants/tournament_constants.dart';
 import '../../../services/tournament_service.dart';
 import '../../../services/realtime_tournament_service.dart';
-import 'dart:math' as math;
 
 class VisualTournamentBracketWidget extends StatefulWidget {
   final String tournamentId;

@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/club.dart';
 import '../models/user_profile.dart';
+import 'package:flutter/foundation.dart';
 
 class AdminService {
   static AdminService? _instance;
@@ -71,8 +72,8 @@ class AdminService {
         return Club.fromJson(json);
       }).toList();
     } catch (error, stackTrace) {
-      print('AdminService.getClubsForAdmin error: $error');
-      print('Stack trace: $stackTrace');
+      debugPrint('AdminService.getClubsForAdmin error: $error');
+      debugPrint('Stack trace: $stackTrace');
       throw Exception('Failed to get clubs for admin: $error');
     }
   }
@@ -132,15 +133,15 @@ class AdminService {
         },
       );
 
-      print('✅ Club approved successfully:');
-      print('  - Club ID: $clubId');
-      print('  - Owner ID: $ownerId');
-      print('  - Auto-activated: true');
-      print('  - Role updated to: club_owner');
+      debugPrint('✅ Club approved successfully:');
+      debugPrint('  - Club ID: $clubId');
+      debugPrint('  - Owner ID: $ownerId');
+      debugPrint('  - Auto-activated: true');
+      debugPrint('  - Role updated to: club_owner');
 
       return Club.fromJson(clubResponse);
     } catch (error) {
-      print('❌ Failed to approve club: $error');
+      debugPrint('❌ Failed to approve club: $error');
       throw Exception('Failed to approve club: $error');
     }
   }
@@ -281,9 +282,9 @@ class AdminService {
       final isAdmin = await isCurrentUserAdmin();
       if (!isAdmin) throw Exception('Only admins can perform this action');
 
-      print('🚀 AdminService: Calling RPC function admin_add_all_users_to_tournament');
-      print('   Tournament ID: $tournamentId');
-      print('   Admin ID: ${user.id}');
+      debugPrint('🚀 AdminService: Calling RPC function admin_add_all_users_to_tournament');
+      debugPrint('   Tournament ID: $tournamentId');
+      debugPrint('   Admin ID: ${user.id}');
 
       // Call RPC function instead of direct table operations
       final result = await _supabase.rpc(
@@ -293,8 +294,8 @@ class AdminService {
         },
       );
 
-      print('✅ AdminService: RPC call successful');
-      print('   Result: $result');
+      debugPrint('✅ AdminService: RPC call successful');
+      debugPrint('   Result: $result');
 
       // The RPC function returns a JSON object with all necessary information
       if (result is Map<String, dynamic>) {
@@ -309,8 +310,8 @@ class AdminService {
         };
       }
     } catch (error) {
-      print('❌ AdminService: RPC call failed');
-      print('   Error: $error');
+      debugPrint('❌ AdminService: RPC call failed');
+      debugPrint('   Error: $error');
       throw Exception('Failed to add all users to tournament: $error');
     }
   }
@@ -326,9 +327,9 @@ class AdminService {
       final isAdmin = await isCurrentUserAdmin();
       if (!isAdmin) throw Exception('Only admins can perform this action');
 
-      print('🚀 AdminService: Calling RPC function admin_remove_all_users_from_tournament');
-      print('   Tournament ID: $tournamentId');
-      print('   Admin ID: ${user.id}');
+      debugPrint('🚀 AdminService: Calling RPC function admin_remove_all_users_from_tournament');
+      debugPrint('   Tournament ID: $tournamentId');
+      debugPrint('   Admin ID: ${user.id}');
 
       // Call RPC function instead of direct table operations
       final result = await _supabase.rpc(
@@ -338,8 +339,8 @@ class AdminService {
         },
       );
 
-      print('✅ AdminService: RPC call successful');
-      print('   Result: $result');
+      debugPrint('✅ AdminService: RPC call successful');
+      debugPrint('   Result: $result');
 
       // The RPC function returns a JSON object with all necessary information
       if (result is Map<String, dynamic>) {
@@ -354,8 +355,8 @@ class AdminService {
         };
       }
     } catch (error) {
-      print('❌ AdminService: RPC call failed');
-      print('   Error: $error');
+      debugPrint('❌ AdminService: RPC call failed');
+      debugPrint('   Error: $error');
       throw Exception('Failed to remove all users from tournament: $error');
     }
   }
@@ -460,7 +461,7 @@ class AdminService {
       });
     } catch (error) {
       // Log error but don't throw - logging failure shouldn't break main action
-      print('Failed to log admin action: $error');
+      debugPrint('Failed to log admin action: $error');
     }
   }
 }

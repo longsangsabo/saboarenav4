@@ -6,6 +6,7 @@ import '../../../services/user_service.dart';
 import '../../widgets/rank_change_request_dialog.dart';
 import '../../../core/utils/rank_migration_helper.dart';
 import '../../../core/app_export.dart';
+import 'package:flutter/foundation.dart';
 
 class StatisticsCardsWidget extends StatefulWidget {
   final String userId;
@@ -52,7 +53,7 @@ class _StatisticsCardsWidgetState extends State<StatisticsCardsWidget> {
       setState(() {
         _isLoading = false;
       });
-      print('Failed to load statistics: $error');
+      debugPrint('Failed to load statistics: $error');
     }
   }
 

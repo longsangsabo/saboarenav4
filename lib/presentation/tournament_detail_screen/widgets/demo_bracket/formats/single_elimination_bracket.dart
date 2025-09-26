@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import '../components/bracket_components.dart';
 import '../shared/tournament_data_generator.dart';
+import 'package:flutter/foundation.dart';
 
 class SingleEliminationBracket extends StatelessWidget {
   final int playerCount;
@@ -18,7 +19,7 @@ class SingleEliminationBracket extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rounds = TournamentDataGenerator.calculateSingleEliminationRounds(playerCount);
-    print('🎾 Single Elimination Rounds: ${rounds.length}'); // Debug
+    debugPrint('🎾 Single Elimination Rounds: ${rounds.length}'); // Debug
     
     return BracketContainer(
       title: 'Single Elimination',
@@ -31,7 +32,7 @@ class SingleEliminationBracket extends StatelessWidget {
   }
 
   Widget _buildBracketContent(BuildContext context, List<Map<String, dynamic>> rounds) {
-    print('🏗️ Building Single Elimination content with ${rounds.length} rounds'); // Debug
+    debugPrint('🏗️ Building Single Elimination content with ${rounds.length} rounds'); // Debug
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(

@@ -3,6 +3,7 @@
 // Handles bracket visualization and match progression logic
 
 import '../core/constants/tournament_constants.dart';
+import 'package:flutter/foundation.dart';
 
 /// Tournament participant data
 class TournamentParticipant {
@@ -149,7 +150,7 @@ class BracketGeneratorService {
     String seedingMethod = 'elo_based',
     Map<String, dynamic>? options,
   }) async {
-    print('$_tag: Generating bracket for $format with ${participants.length} participants');
+    debugPrint('$_tag: Generating bracket for $format with ${participants.length} participants');
 
     // Validate format and participants
     _validateBracketGeneration(format, participants);
@@ -227,7 +228,7 @@ class BracketGeneratorService {
       // For elimination tournaments, check if we need byes
       final powerOfTwo = _nearestPowerOfTwo(playerCount);
       if (powerOfTwo != playerCount) {
-        print('$_tag: Will generate ${powerOfTwo - playerCount} byes for $format');
+        debugPrint('$_tag: Will generate ${powerOfTwo - playerCount} byes for $format');
       }
     }
   }
@@ -238,7 +239,7 @@ class BracketGeneratorService {
     String seedingMethod,
     Map<String, dynamic>? options,
   ) async {
-    print('$_tag: Seeding participants using $seedingMethod method');
+    debugPrint('$_tag: Seeding participants using $seedingMethod method');
 
     switch (seedingMethod) {
       case 'elo_based':
@@ -431,13 +432,13 @@ class BracketGeneratorService {
     required List<TournamentParticipant> participants,
     Map<String, dynamic>? options,
   }) async {
-    print('$_tag: Generating single elimination bracket');
+    debugPrint('$_tag: Generating single elimination bracket');
     
     final bracketSize = _nearestPowerOfTwo(participants.length);
     final byeCount = bracketSize - participants.length;
     final rounds = <TournamentRound>[];
     
-    print('$_tag: Bracket size: $bracketSize, Byes needed: $byeCount');
+    debugPrint('$_tag: Bracket size: $bracketSize, Byes needed: $byeCount');
     
     // Calculate number of rounds
     int totalRounds = 0;
@@ -536,7 +537,7 @@ class BracketGeneratorService {
     required List<TournamentParticipant> participants,
     Map<String, dynamic>? options,
   }) async {
-    print('$_tag: Generating double elimination bracket');
+    debugPrint('$_tag: Generating double elimination bracket');
     
     final bracketSize = _nearestPowerOfTwo(participants.length);
     final byeCount = bracketSize - participants.length;
@@ -553,7 +554,7 @@ class BracketGeneratorService {
     // Loser bracket has approximately 2x rounds - 1
     final loserRounds = (winnerRounds * 2) - 1;
     
-    print('$_tag: Winner bracket rounds: $winnerRounds, Loser bracket rounds: $loserRounds');
+    debugPrint('$_tag: Winner bracket rounds: $winnerRounds, Loser bracket rounds: $loserRounds');
     
     // Generate Winner Bracket (same as single elimination)
     final winnerBracket = await _generateWinnerBracket(
@@ -609,7 +610,7 @@ class BracketGeneratorService {
     required List<TournamentParticipant> participants,
     Map<String, dynamic>? options,
   }) async {
-    print('$_tag: Generating Sabo Double Elimination DE16 bracket');
+    debugPrint('$_tag: Generating Sabo Double Elimination DE16 bracket');
     
     // Sabo DE16 requires exactly 16 players
     if (participants.length != 16) {
@@ -670,7 +671,7 @@ class BracketGeneratorService {
     required List<TournamentParticipant> participants,
     Map<String, dynamic>? options,
   }) async {
-    print('$_tag: Generating Sabo Double Elimination DE32 bracket');
+    debugPrint('$_tag: Generating Sabo Double Elimination DE32 bracket');
     
     // Sabo DE32 requires exactly 32 players
     if (participants.length != 32) {
@@ -868,7 +869,7 @@ class BracketGeneratorService {
     required List<TournamentParticipant> participants,
     Map<String, dynamic>? options,
   }) async {
-    print('$_tag: Generating round robin bracket');
+    debugPrint('$_tag: Generating round robin bracket');
     
     final playerCount = participants.length;
     final rounds = <TournamentRound>[];
@@ -881,7 +882,7 @@ class BracketGeneratorService {
     final totalRounds = isEven ? playerCount - 1 : playerCount;
     final matchesPerRound = playerCount ~/ 2;
     
-    print('$_tag: $playerCount players, $totalRounds rounds, $matchesPerRound matches per round');
+    debugPrint('$_tag: $playerCount players, $totalRounds rounds, $matchesPerRound matches per round');
     
     // Use circle method for round robin scheduling
     final schedule = _generateRoundRobinSchedule(participants);
@@ -972,7 +973,7 @@ class BracketGeneratorService {
     required List<TournamentParticipant> participants,
     Map<String, dynamic>? options,
   }) async {
-    print('$_tag: Generating Swiss system bracket');
+    debugPrint('$_tag: Generating Swiss system bracket');
     
     final playerCount = participants.length;
     final rounds = <TournamentRound>[];
@@ -988,7 +989,7 @@ class BracketGeneratorService {
     
     final matchesPerRound = playerCount ~/ 2;
     
-    print('$_tag: $playerCount players, $totalRounds rounds (Swiss system)');
+    debugPrint('$_tag: $playerCount players, $totalRounds rounds (Swiss system)');
     
     // Generate first round with initial seeding
     final firstRoundMatches = <TournamentMatch>[];
@@ -1076,14 +1077,14 @@ class BracketGeneratorService {
     required List<TournamentParticipant> participants,
     Map<String, dynamic>? options,
   }) async {
-    print('$_tag: Generating parallel groups bracket');
+    debugPrint('$_tag: Generating parallel groups bracket');
     
     final playerCount = participants.length;
     final groupSize = options?['groupSize'] ?? 4;
     final groupCount = (playerCount / groupSize).ceil();
     final playersPerGroup = playerCount ~/ groupCount;
     
-    print('$_tag: $playerCount players, $groupCount groups, ~$playersPerGroup players per group');
+    debugPrint('$_tag: $playerCount players, $groupCount groups, ~$playersPerGroup players per group');
     
     final rounds = <TournamentRound>[];
     

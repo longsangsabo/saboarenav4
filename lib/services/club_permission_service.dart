@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/foundation.dart';
 
 enum ClubRole {
   owner,
@@ -82,11 +83,11 @@ class ClubPermissionService {
       userId ??= _supabase.auth.currentUser?.id;
 
       if (userId == null) {
-        print('❌ DEBUG: No user ID available');
+        debugPrint('❌ DEBUG: No user ID available');
         return {'error': 'No user ID available'};
       }
 
-      print('🔍 DEBUG: Checking membership for user $userId in club $clubId');
+      debugPrint('🔍 DEBUG: Checking membership for user $userId in club $clubId');
 
       // Query all membership data
       final response = await _supabase
@@ -97,14 +98,14 @@ class ClubPermissionService {
           .maybeSingle();
 
       if (response == null) {
-        print('❌ DEBUG: No membership record found');
+        debugPrint('❌ DEBUG: No membership record found');
         return {'error': 'No membership record found'};
       }
 
-      print('✅ DEBUG: Membership data: $response');
+      debugPrint('✅ DEBUG: Membership data: $response');
       return response;
     } catch (e) {
-      print('❌ DEBUG: Error querying membership: $e');
+      debugPrint('❌ DEBUG: Error querying membership: $e');
       return {'error': e.toString()};
     }
   }
@@ -115,26 +116,26 @@ class ClubPermissionService {
       userId ??= _supabase.auth.currentUser?.id;
 
       if (userId == null) {
-        print('❌ ClubPermissionService: No user ID available');
+        debugPrint('❌ ClubPermissionService: No user ID available');
         return ClubRole.none;
       }
 
       final cacheKey = '${clubId}_$userId';
-      print('🔍 ClubPermissionService: Checking role for user $userId in club $clubId');
+      debugPrint('🔍 ClubPermissionService: Checking role for user $userId in club $clubId');
 
       // Check cache first and validate expiry
       if (_roleCache.containsKey(cacheKey)) {
         final cached = _roleCache[cacheKey]!;
         if (DateTime.now().difference(cached.timestamp) < _cacheDuration) {
-          print('✅ ClubPermissionService: Using cached role: ${cached.role}');
+          debugPrint('✅ ClubPermissionService: Using cached role: ${cached.role}');
           return cached.role;
         } else {
-          print('⏰ ClubPermissionService: Cache expired, removing entry');
+          debugPrint('⏰ ClubPermissionService: Cache expired, removing entry');
           _roleCache.remove(cacheKey);
         }
       }
 
-      print('🔄 ClubPermissionService: Querying database for role...');
+      debugPrint('🔄 ClubPermissionService: Querying database for role...');
 
       // Query database with timeout
       final response = await _supabase
@@ -144,12 +145,12 @@ class ClubPermissionService {
           .eq('user_id', userId)
           .maybeSingle()
           .timeout(Duration(seconds: 10), onTimeout: () {
-            print('⚠️ ClubPermissionService: Database query timeout');
+            debugPrint('⚠️ ClubPermissionService: Database query timeout');
             return null;
           });
 
       if (response == null) {
-        print('❌ ClubPermissionService: User not found in club members');
+        debugPrint('❌ ClubPermissionService: User not found in club members');
         final cached = _CachedRole(ClubRole.none, DateTime.now());
         _roleCache[cacheKey] = cached;
         return ClubRole.none;
@@ -157,7 +158,7 @@ class ClubPermissionService {
 
       // Check if membership is active
       if (response['status'] != 'active') {
-        print('❌ ClubPermissionService: User membership is not active: ${response['status']}');
+        debugPrint('❌ ClubPermissionService: User membership is not active: ${response['status']}');
         final cached = _CachedRole(ClubRole.none, DateTime.now());
         _roleCache[cacheKey] = cached;
         return ClubRole.none;
@@ -179,14 +180,14 @@ class ClubPermissionService {
           role = ClubRole.none;
       }
 
-      print('✅ ClubPermissionService: Found role: $role (status: ${response['status']})');
+      debugPrint('✅ ClubPermissionService: Found role: $role (status: ${response['status']})');
 
       // Cache the result with timestamp
       final cached = _CachedRole(role, DateTime.now());
       _roleCache[cacheKey] = cached;
       return role;
     } catch (e) {
-      print('❌ ClubPermissionService: Error getting user role in club: $e');
+      debugPrint('❌ ClubPermissionService: Error getting user role in club: $e');
       // Don't cache errors, allow retry
       return ClubRole.none;
     }
@@ -299,7 +300,7 @@ class ClubPermissionService {
       _roleCache.remove('${clubId}_$targetUserId');
       return true;
     } catch (e) {
-      print('Error promoting user to admin: $e');
+      debugPrint('Error promoting user to admin: $e');
       return false;
     }
   }
@@ -321,7 +322,7 @@ class ClubPermissionService {
       _roleCache.remove('${clubId}_$targetUserId');
       return true;
     } catch (e) {
-      print('Error demoting admin: $e');
+      debugPrint('Error demoting admin: $e');
       return false;
     }
   }
@@ -343,7 +344,7 @@ class ClubPermissionService {
       _roleCache.remove('${clubId}_$targetUserId');
       return true;
     } catch (e) {
-      print('Error removing member: $e');
+      debugPrint('Error removing member: $e');
       return false;
     }
   }
@@ -371,7 +372,7 @@ class ClubPermissionService {
 
       return List<Map<String, dynamic>>.from(response);
     } catch (e) {
-      print('Error getting club members with roles: $e');
+      debugPrint('Error getting club members with roles: $e');
       return [];
     }
   }

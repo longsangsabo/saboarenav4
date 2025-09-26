@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/auth_service.dart';
+import 'package:flutter/foundation.dart';
 
 class NotificationService {
   static NotificationService? _instance;
@@ -24,7 +25,7 @@ class NotificationService {
 
       return response.length;
     } catch (e) {
-      print('Error getting unread notification count: $e');
+      debugPrint('Error getting unread notification count: $e');
       return 0;
     }
   }
@@ -44,7 +45,7 @@ class NotificationService {
 
       return List<Map<String, dynamic>>.from(response);
     } catch (e) {
-      print('Error getting notifications: $e');
+      debugPrint('Error getting notifications: $e');
       return [];
     }
   }
@@ -57,7 +58,7 @@ class NotificationService {
           .update({'is_read': true, 'read_at': DateTime.now().toIso8601String()})
           .eq('id', notificationId);
     } catch (e) {
-      print('Error marking notification as read: $e');
+      debugPrint('Error marking notification as read: $e');
     }
   }
 
@@ -73,7 +74,7 @@ class NotificationService {
           .eq('user_id', currentUser.id)
           .eq('is_read', false);
     } catch (e) {
-      print('Error marking all notifications as read: $e');
+      debugPrint('Error marking all notifications as read: $e');
     }
   }
 
@@ -108,7 +109,7 @@ class NotificationService {
           .maybeSingle();
 
       if (clubAdminResponse == null) {
-        print('⚠️ No club admin found for tournament registration notification');
+        debugPrint('⚠️ No club admin found for tournament registration notification');
         return;
       }
 
@@ -135,9 +136,9 @@ Vui lòng xác nhận thanh toán khi thành viên đến thi đấu.
         'is_read': false,
       });
 
-      print('✅ Registration notification sent successfully');
+      debugPrint('✅ Registration notification sent successfully');
     } catch (error) {
-      print('❌ Failed to send registration notification: $error');
+      debugPrint('❌ Failed to send registration notification: $error');
     }
   }
 
@@ -198,9 +199,9 @@ Vui lòng xác nhận thanh toán khi thành viên đến thi đấu.
         'is_read': false,
       });
 
-      print('✅ Notification sent successfully to user: $userId');
+      debugPrint('✅ Notification sent successfully to user: $userId');
     } catch (error) {
-      print('❌ Failed to send notification: $error');
+      debugPrint('❌ Failed to send notification: $error');
       throw Exception('Failed to send notification: $error');
     }
   }

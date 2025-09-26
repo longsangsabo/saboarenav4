@@ -20,6 +20,7 @@ import './widgets/tournament_bracket_widget.dart';
 import './widgets/tournament_header_widget.dart';
 import './widgets/tournament_info_widget.dart';
 import './widgets/tournament_rules_widget.dart';
+import 'package:flutter/foundation.dart';
 
 class TournamentDetailScreen extends StatefulWidget {
   const TournamentDetailScreen({super.key});
@@ -156,9 +157,9 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
   }
 
   Future<void> _loadTournamentData() async {
-    print('📊 _loadTournamentData called with ID: $_tournamentId');
+    debugPrint('📊 _loadTournamentData called with ID: $_tournamentId');
     if (_tournamentId == null) {
-      print('❌ Tournament ID is null');
+      debugPrint('❌ Tournament ID is null');
       return;
     }
     
@@ -183,8 +184,8 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
       // Convert tournament model to UI data format
       _convertTournamentToUIData();
       
-      print('✅ Tournament data loaded successfully');
-      print('Tournament data keys: ${_tournamentData.keys}');
+      debugPrint('✅ Tournament data loaded successfully');
+      debugPrint('Tournament data keys: ${_tournamentData.keys}');
       
       setState(() {
         _isLoading = false;
@@ -486,12 +487,12 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
   }
 
   void _handleRegistration() {
-    print('🎯 _handleRegistration called!');
-    print('Tournament data: $_tournamentData');
+    debugPrint('🎯 _handleRegistration called!');
+    debugPrint('Tournament data: $_tournamentData');
     
     // Validation checks
     if (_tournamentData.isEmpty) {
-      print('❌ Tournament data is empty');
+      debugPrint('❌ Tournament data is empty');
       _showMessage('Không thể tải thông tin giải đấu', isError: true);
       return;
     }
@@ -534,7 +535,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
   }
 
   Future<void> _performRegistration() async {
-    print('🚀 Performing registration...');
+    debugPrint('🚀 Performing registration...');
     
     try {
       // Show loading message
@@ -546,7 +547,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
         paymentMethod: '0', // Default to pay at venue
       );
       
-      print('Registration result: $success');
+      debugPrint('Registration result: $success');
       
       if (success && mounted) {
         // Update UI state
@@ -564,12 +565,12 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
           duration: 5,
         );
         
-        print('✅ Registration completed successfully');
+        debugPrint('✅ Registration completed successfully');
       } else {
         throw Exception('Registration service returned false');
       }
     } catch (error) {
-      print('❌ Registration failed: $error');
+      debugPrint('❌ Registration failed: $error');
       if (mounted) {
         _showMessage(
           'Đăng ký thất bại: ${error.toString()}',

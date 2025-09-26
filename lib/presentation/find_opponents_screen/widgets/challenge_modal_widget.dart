@@ -3,6 +3,7 @@ import 'package:sizer/sizer.dart';
 
 import '../../../core/app_export.dart';
 import '../../../services/simple_challenge_service.dart';
+import 'package:flutter/foundation.dart';
 // import '../../../services/challenge_service.dart';
 // import '../../../services/challenge_service_extensions.dart';
 // import '../../../services/challenge_rules_service.dart';
@@ -68,7 +69,7 @@ class _ChallengeModalWidgetState extends State<ChallengeModalWidget> {
 
       _handicapPreview = handicapResult;
     } catch (error) {
-      print('❌ Error updating handicap preview: $error');
+      debugPrint('❌ Error updating handicap preview: $error');
       _handicapPreview = null;
     }
   }

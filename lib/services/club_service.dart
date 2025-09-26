@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/club.dart';
 import '../models/user_profile.dart';
+import 'package:flutter/foundation.dart';
 
 class ClubService {
   static ClubService? _instance;
@@ -68,7 +69,7 @@ class ClubService {
 
       return Club.fromJson(response.first);
     } catch (error) {
-      print('Error getting club by owner ID: $error');
+      debugPrint('Error getting club by owner ID: $error');
       return null;
     }
   }
@@ -96,7 +97,7 @@ class ClubService {
 
       return null;
     } catch (error) {
-      print('Error getting first club for user: $error');
+      debugPrint('Error getting first club for user: $error');
       return null;
     }
   }
@@ -347,7 +348,7 @@ class ClubService {
 
       return response != null && response['owner_id'] == user.id;
     } catch (error) {
-      print('Error checking club ownership: $error');
+      debugPrint('Error checking club ownership: $error');
       return false;
     }
   }
@@ -370,7 +371,7 @@ class ClubService {
 
       return response != null ? Club.fromJson(response) : null;
     } catch (error) {
-      print('Error getting current user club: $error');
+      debugPrint('Error getting current user club: $error');
       return null;
     }
   }

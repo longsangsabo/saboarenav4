@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:sabo_arena/models/user_profile.dart';
 import 'package:sabo_arena/services/user_code_service.dart';
 import 'basic_referral_service.dart';
+import 'package:flutter/foundation.dart';
 
 class IntegratedQRService {
   static final SupabaseClient _supabase = Supabase.instance.client;
@@ -46,7 +47,7 @@ class IntegratedQRService {
       };
       
     } catch (e) {
-      print('❌ Error generating QR data with referral: $e');
+      debugPrint('❌ Error generating QR data with referral: $e');
       rethrow;
     }
   }
@@ -68,11 +69,11 @@ class IntegratedQRService {
         code: referralCode,
       );
       
-      print('✅ Created new referral code: $referralCode for user: ${user.fullName}');
+      debugPrint('✅ Created new referral code: $referralCode for user: ${user.fullName}');
       return referralCode;
       
     } catch (e) {
-      print('❌ Error ensuring referral code: $e');
+      debugPrint('❌ Error ensuring referral code: $e');
       // Fallback to basic format
       return 'SABO-${user.id.substring(0, 6).toUpperCase()}';
     }
@@ -104,14 +105,14 @@ class IntegratedQRService {
           })
           .eq('id', userId);
       
-      print('✅ Updated integrated QR for user: $userId');
-      print('   QR Data: ${qrData['qr_data']}');
-      print('   Referral Code: ${qrData['referral_code']}');
+      debugPrint('✅ Updated integrated QR for user: $userId');
+      debugPrint('   QR Data: ${qrData['qr_data']}');
+      debugPrint('   Referral Code: ${qrData['referral_code']}');
       
       return true;
       
     } catch (e) {
-      print('❌ Error updating integrated QR: $e');
+      debugPrint('❌ Error updating integrated QR: $e');
       return false;
     }
   }
@@ -119,7 +120,7 @@ class IntegratedQRService {
   /// Scan integrated QR code and return profile + referral info
   static Future<Map<String, dynamic>?> scanIntegratedQR(String qrData) async {
     try {
-      print('🔍 Scanning integrated QR: $qrData');
+      debugPrint('🔍 Scanning integrated QR: $qrData');
       
       // Parse URL: https://saboarena.com/user/SABO123456?ref=SABO-USERNAME
       final uri = Uri.tryParse(qrData);
@@ -128,8 +129,8 @@ class IntegratedQRService {
         final userCode = uri.pathSegments[1]; // SABO123456
         final referralCode = uri.queryParameters['ref']; // SABO-USERNAME
         
-        print('   User Code: $userCode');
-        print('   Referral Code: $referralCode');
+        debugPrint('   User Code: $userCode');
+        debugPrint('   Referral Code: $referralCode');
         
         // Find user by user_code
         final userProfile = await _findUserByCode(userCode);
@@ -188,7 +189,7 @@ class IntegratedQRService {
       return null;
       
     } catch (e) {
-      print('❌ Error scanning integrated QR: $e');
+      debugPrint('❌ Error scanning integrated QR: $e');
       return null;
     }
   }
@@ -204,7 +205,7 @@ class IntegratedQRService {
       
       return response;
     } catch (e) {
-      print('❌ User not found by code: $userCode');
+      debugPrint('❌ User not found by code: $userCode');
       return null;
     }
   }
@@ -222,7 +223,7 @@ class IntegratedQRService {
       return await generateQRDataWithReferral(user);
       
     } catch (e) {
-      print('❌ Error getting integrated QR: $e');
+      debugPrint('❌ Error getting integrated QR: $e');
       return null;
     }
   }
@@ -266,7 +267,7 @@ class IntegratedQRService {
       }
       
     } catch (e) {
-      print('❌ Error applying QR referral: $e');
+      debugPrint('❌ Error applying QR referral: $e');
       return {
         'success': false,
         'message': 'Error applying referral: $e',

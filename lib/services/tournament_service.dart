@@ -5,6 +5,7 @@ import '../core/constants/tournament_constants.dart';
 import 'notification_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
 
 class TournamentService {
   static TournamentService? _instance;
@@ -54,7 +55,7 @@ class TournamentService {
     int pageSize = 100,
   }) async {
     try {
-      print('🔍 TournamentService: Loading tournaments for club $clubId');
+      debugPrint('🔍 TournamentService: Loading tournaments for club $clubId');
       
       var query = _supabase.from('tournaments').select();
       
@@ -76,10 +77,10 @@ class TournamentService {
           .map<Tournament>((json) => Tournament.fromJson(json))
           .toList();
           
-      print('✅ TournamentService: Found ${tournaments.length} tournaments for club');
+      debugPrint('✅ TournamentService: Found ${tournaments.length} tournaments for club');
       return tournaments;
     } catch (error) {
-      print('❌ TournamentService: Error loading club tournaments: $error');
+      debugPrint('❌ TournamentService: Error loading club tournaments: $error');
       // Return mock data as fallback
       return _getMockTournamentsForClub(clubId);
     }
@@ -160,27 +161,27 @@ class TournamentService {
   Future<List<UserProfile>> getTournamentParticipants(
       String tournamentId) async {
     try {
-      print('🔍 TournamentService: Querying participants for tournament $tournamentId');
+      debugPrint('🔍 TournamentService: Querying participants for tournament $tournamentId');
       final response =
           await _supabase.from('tournament_participants').select('''
             *,
             users (*)
           ''').eq('tournament_id', tournamentId).order('registered_at');
 
-      print('📊 TournamentService: Raw response count: ${response.length}');
+      debugPrint('📊 TournamentService: Raw response count: ${response.length}');
       for (int i = 0; i < response.length; i++) {
         final item = response[i];
-        print('  ${i + 1}. User: ${item['users']?['full_name']} - Status: ${item['status']}');
+        debugPrint('  ${i + 1}. User: ${item['users']?['full_name']} - Status: ${item['status']}');
       }
 
       final participants = response
           .map<UserProfile>((json) => UserProfile.fromJson(json['users']))
           .toList();
       
-      print('✅ TournamentService: Returning ${participants.length} participants');
+      debugPrint('✅ TournamentService: Returning ${participants.length} participants');
       return participants;
     } catch (error) {
-      print('❌ TournamentService: Error getting participants: $error');
+      debugPrint('❌ TournamentService: Error getting participants: $error');
       throw Exception('Failed to get tournament participants: $error');
     }
   }
@@ -204,16 +205,16 @@ class TournamentService {
 
       Map<String, dynamic> userProfiles = {};
       if (playerIds.isNotEmpty) {
-        print('🔍 TournamentService: Fetching profiles for ${playerIds.length} players');
+        debugPrint('🔍 TournamentService: Fetching profiles for ${playerIds.length} players');
         final profiles = await _supabase
             .from('users')
             .select('id, full_name, avatar_url, elo_rating, rank')
             .inFilter('id', playerIds.toSet().toList());
         
-        print('📊 TournamentService: Found ${profiles.length} profiles');
+        debugPrint('📊 TournamentService: Found ${profiles.length} profiles');
         for (var profile in profiles) {
           userProfiles[profile['id']] = profile;
-          print('  Profile: ${profile['id']} - ${profile['full_name']}');
+          debugPrint('  Profile: ${profile['id']} - ${profile['full_name']}');
         }
       }
 
@@ -299,7 +300,7 @@ class TournamentService {
           paymentMethod: paymentMethod,
         );
       } catch (e) {
-        print('⚠️ Failed to send notification: $e');
+        debugPrint('⚠️ Failed to send notification: $e');
       }
 
       return true;
@@ -484,20 +485,20 @@ class TournamentService {
   Future<List<Map<String, dynamic>>> getTournamentParticipantsWithPaymentStatus(
       String tournamentId) async {
     try {
-      print('🔍 WithPaymentStatus: Querying participants for tournament $tournamentId');
+      debugPrint('🔍 WithPaymentStatus: Querying participants for tournament $tournamentId');
       
       // Check authentication status
       final currentUser = _supabase.auth.currentUser;
-      print('🔐 Auth status: ${currentUser != null ? "Authenticated as ${currentUser.email}" : "NOT AUTHENTICATED"}');
+      debugPrint('🔐 Auth status: ${currentUser != null ? "Authenticated as ${currentUser.email}" : "NOT AUTHENTICATED"}');
       
       // First check total participants without JOIN
       final totalCheck = await _supabase
           .from('tournament_participants')
           .select('id, user_id, payment_status')
           .eq('tournament_id', tournamentId);
-      print('🔢 DEBUG: Total participants in DB: ${totalCheck.length}');
+      debugPrint('🔢 DEBUG: Total participants in DB: ${totalCheck.length}');
       for (int i = 0; i < totalCheck.length; i++) {
-        print('   ${i + 1}. User ID: ${totalCheck[i]['user_id']} - Payment: ${totalCheck[i]['payment_status']}');
+        debugPrint('   ${i + 1}. User ID: ${totalCheck[i]['user_id']} - Payment: ${totalCheck[i]['payment_status']}');
       }
       var response = await _supabase
           .from('tournament_participants')
@@ -515,13 +516,13 @@ class TournamentService {
           .eq('tournament_id', tournamentId)
           .order('registered_at', ascending: true);
       
-      print('📊 WithPaymentStatus: Raw response count: ${response.length}');
+      debugPrint('📊 WithPaymentStatus: Raw response count: ${response.length}');
       
 
       
       // If response is still empty or users data is missing, try without join
       if (response.isEmpty || response.any((item) => item['users'] == null)) {
-        print('⚠️ WithPaymentStatus: Join failed or empty, trying without join...');
+        debugPrint('⚠️ WithPaymentStatus: Join failed or empty, trying without join...');
         return await _getTournamentParticipantsWithoutJoin(tournamentId);
       }
 
@@ -546,10 +547,10 @@ class TournamentService {
         };
       }).toList();
       
-      print('✅ WithPaymentStatus: Returning ${result.length} participants with payment info');
+      debugPrint('✅ WithPaymentStatus: Returning ${result.length} participants with payment info');
       return result;
     } catch (error) {
-      print('❌ Error getting participants with payment status: $error');
+      debugPrint('❌ Error getting participants with payment status: $error');
       throw Exception('Failed to get tournament participants: $error');
     }
   }
@@ -557,7 +558,7 @@ class TournamentService {
   /// Backup method to get participants without join (in case of join issues)
   Future<List<Map<String, dynamic>>> _getTournamentParticipantsWithoutJoin(String tournamentId) async {
     try {
-      print('🔄 Fallback: Getting participants without join...');
+      debugPrint('🔄 Fallback: Getting participants without join...');
       
       // First get tournament participants
       var participants = await _supabase
@@ -566,7 +567,7 @@ class TournamentService {
           .eq('tournament_id', tournamentId)
           .order('registered_at', ascending: true);
       
-      print('📊 Fallback: Found ${participants.length} participant records');
+      debugPrint('📊 Fallback: Found ${participants.length} participant records');
       
 
       
@@ -598,7 +599,7 @@ class TournamentService {
             },
           });
         } catch (e) {
-          print('⚠️ Fallback: Failed to get user data for ${participant['user_id']}: $e');
+          debugPrint('⚠️ Fallback: Failed to get user data for ${participant['user_id']}: $e');
           // Add participant without user data
           result.add({
             'id': participant['id'],
@@ -620,10 +621,10 @@ class TournamentService {
         }
       }
       
-      print('✅ Fallback: Returning ${result.length} participants');
+      debugPrint('✅ Fallback: Returning ${result.length} participants');
       return result;
     } catch (e) {
-      print('❌ Fallback: Error: $e');
+      debugPrint('❌ Fallback: Error: $e');
       return [];
     }
   }
@@ -654,10 +655,10 @@ class TournamentService {
           .eq('tournament_id', tournamentId)
           .eq('user_id', userId);
 
-      print('✅ Updated payment status for user $userId to $paymentStatus');
+      debugPrint('✅ Updated payment status for user $userId to $paymentStatus');
       return true;
     } catch (error) {
-      print('❌ Error updating payment status: $error');
+      debugPrint('❌ Error updating payment status: $error');
       throw Exception('Failed to update payment status: $error');
     }
   }
@@ -683,10 +684,10 @@ class TournamentService {
       await _supabase.rpc('decrement_tournament_participants',
           params: {'tournament_id': tournamentId});
 
-      print('✅ Removed participant $userId from tournament $tournamentId');
+      debugPrint('✅ Removed participant $userId from tournament $tournamentId');
       return true;
     } catch (error) {
-      print('❌ Error removing participant: $error');
+      debugPrint('❌ Error removing participant: $error');
       throw Exception('Failed to remove participant: $error');
     }
   }

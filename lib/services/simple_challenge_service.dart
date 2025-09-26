@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'notification_service.dart';
 import 'test_user_service.dart';
+import 'package:flutter/foundation.dart';
 
 /// Simple Challenge Service for basic challenge functionality
 /// This version doesn't depend on advanced challenge rules
@@ -23,38 +24,38 @@ class SimpleChallengeService {
     String? message,
   }) async {
     try {
-      print('🚀 SimpleChallengeService.sendChallenge called');
-      print('📊 Parameters:');
-      print('   challengedUserId: $challengedUserId');
-      print('   challengeType: $challengeType');
-      print('   gameType: $gameType');
-      print('   spaPoints: $spaPoints');
-      print('   location: $location');
+      debugPrint('🚀 SimpleChallengeService.sendChallenge called');
+      debugPrint('📊 Parameters:');
+      debugPrint('   challengedUserId: $challengedUserId');
+      debugPrint('   challengeType: $challengeType');
+      debugPrint('   gameType: $gameType');
+      debugPrint('   spaPoints: $spaPoints');
+      debugPrint('   location: $location');
       
       final currentUser = _supabase.auth.currentUser;
       String? userId;
       
       if (currentUser != null) {
         userId = currentUser.id;
-        print('🔐 Using authenticated user: $userId');
+        debugPrint('🔐 Using authenticated user: $userId');
       } else {
         // Try to use test user for development
         userId = TestUserService.instance.getCurrentUserId();
         if (userId == null) {
-          print('❌ No user ID available (not authenticated and not in development)');
+          debugPrint('❌ No user ID available (not authenticated and not in development)');
           throw Exception('User not authenticated');
         }
-        print('🧪 Using test user for development: $userId');
+        debugPrint('🧪 Using test user for development: $userId');
         
         // Ensure test user exists in database
         await TestUserService.instance.getOrCreateTestUser();
       }
 
-      print('🎯 Sending challenge...');
-      print('Challenger: $userId');
-      print('Challenged: $challengedUserId');
-      print('Type: $challengeType');
-      print('SPA Points: $spaPoints');
+      debugPrint('🎯 Sending challenge...');
+      debugPrint('Challenger: $userId');
+      debugPrint('Challenged: $challengedUserId');
+      debugPrint('Type: $challengeType');
+      debugPrint('SPA Points: $spaPoints');
 
       // Get current user details
       final userResponse = await _supabase
@@ -63,7 +64,7 @@ class SimpleChallengeService {
           .eq('id', userId)
           .single();
 
-      print('✅ Current user: ${userResponse['display_name']}');
+      debugPrint('✅ Current user: ${userResponse['display_name']}');
 
       // Get challenged user details
       final challengedUserResponse = await _supabase
@@ -72,7 +73,7 @@ class SimpleChallengeService {
           .eq('id', challengedUserId)
           .single();
 
-      print('✅ Challenged user: ${challengedUserResponse['display_name']}');
+      debugPrint('✅ Challenged user: ${challengedUserResponse['display_name']}');
 
       // Create challenge record using existing table schema
       // Map our data to the existing challenges table structure
@@ -96,7 +97,7 @@ class SimpleChallengeService {
         // expires_at will be set automatically by database default
       };
 
-      print('📋 Challenge data: $challengeData');
+      debugPrint('📋 Challenge data: $challengeData');
 
       final challengeResponse = await _supabase
           .from('challenges')
@@ -104,7 +105,7 @@ class SimpleChallengeService {
           .select()
           .single();
 
-      print('✅ Challenge created: ${challengeResponse['id']}');
+      debugPrint('✅ Challenge created: ${challengeResponse['id']}');
 
       // Send notification (optional - may fail if notification service has issues)
       try {
@@ -118,15 +119,15 @@ class SimpleChallengeService {
           location: location,
           spaPoints: spaPoints,
         );
-        print('✅ Notification sent');
+        debugPrint('✅ Notification sent');
       } catch (notificationError) {
-        print('⚠️ Notification failed: $notificationError');
+        debugPrint('⚠️ Notification failed: $notificationError');
         // Don't fail the whole challenge if notification fails
       }
 
       return challengeResponse;
     } catch (error) {
-      print('❌ Challenge failed: $error');
+      debugPrint('❌ Challenge failed: $error');
       throw Exception('Không thể gửi thách đấu: $error');
     }
   }
@@ -165,7 +166,7 @@ Hãy vào ứng dụng để phản hồi!
         data: {'challenge_id': challengeId},
       );
     } catch (error) {
-      print('❌ Failed to send notification: $error');
+      debugPrint('❌ Failed to send notification: $error');
       // Don't throw - notification failure shouldn't fail the challenge
     }
   }
@@ -206,7 +207,7 @@ Hãy vào ứng dụng để phản hồi!
 
       return true; // Both users exist
     } catch (error) {
-      print('❌ Validation error: $error');
+      debugPrint('❌ Validation error: $error');
       return false;
     }
   }

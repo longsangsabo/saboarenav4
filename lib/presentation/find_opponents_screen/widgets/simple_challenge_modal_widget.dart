@@ -4,6 +4,7 @@ import 'package:sizer/sizer.dart';
 // import '../../../core/app_export.dart';
 import '../../../services/simple_challenge_service.dart';
 import '../../../services/opponent_club_service.dart';
+import 'package:flutter/foundation.dart';
 
 class SimpleChallengeModalWidget extends StatefulWidget {
   final Map<String, dynamic> player;
@@ -36,16 +37,16 @@ class _SimpleChallengeModalWidgetState extends State<SimpleChallengeModalWidget>
   @override
   void initState() {
     super.initState();
-    print('🎯 SimpleChallengeModal initState');
-    print('   _isLoading: $_isLoading');
-    print('   _selectedLocation: $_selectedLocation');
-    print('   _selectedGameType: $_selectedGameType');
+    debugPrint('🎯 SimpleChallengeModal initState');
+    debugPrint('   _isLoading: $_isLoading');
+    debugPrint('   _selectedLocation: $_selectedLocation');
+    debugPrint('   _selectedGameType: $_selectedGameType');
     _loadLocations();
   }
 
   Future<void> _loadLocations() async {
     try {
-      print('🏢 Loading club locations from Supabase...');
+      debugPrint('🏢 Loading club locations from Supabase...');
       final clubs = await OpponentClubService.instance.getActiveClubs();
       
       final clubLocations = clubs.map((club) => club.name).toList();
@@ -58,9 +59,9 @@ class _SimpleChallengeModalWidgetState extends State<SimpleChallengeModalWidget>
         });
       }
       
-      print('✅ Loaded ${clubLocations.length - 1} club locations');
+      debugPrint('✅ Loaded ${clubLocations.length - 1} club locations');
     } catch (error) {
-      print('❌ Error loading club locations: $error');
+      debugPrint('❌ Error loading club locations: $error');
       // Fallback to default locations
       final fallbackLocations = [
         'CLB SABO ARENA',
@@ -357,7 +358,7 @@ class _SimpleChallengeModalWidgetState extends State<SimpleChallengeModalWidget>
   }
 
   Widget _buildButtons() {
-    print('🔧 _buildButtons called - _isLoading: $_isLoading, locations count: ${_locations.length}');
+    debugPrint('🔧 _buildButtons called - _isLoading: $_isLoading, locations count: ${_locations.length}');
     return Row(
       children: [
         Expanded(
@@ -370,7 +371,7 @@ class _SimpleChallengeModalWidgetState extends State<SimpleChallengeModalWidget>
         Expanded(
           child: ElevatedButton(
             onPressed: _isLoading ? null : () {
-              print('🔥 Button pressed! Calling _sendChallenge()');
+              debugPrint('🔥 Button pressed! Calling _sendChallenge()');
               _sendChallenge();
             },
             style: ElevatedButton.styleFrom(
@@ -430,10 +431,10 @@ class _SimpleChallengeModalWidgetState extends State<SimpleChallengeModalWidget>
   }
 
   void _sendChallenge() async {
-    print('🎯 _sendChallenge() called!');
+    debugPrint('🎯 _sendChallenge() called!');
     
     if (_isLoading) {
-      print('⚠️ Already loading, returning...');
+      debugPrint('⚠️ Already loading, returning...');
       return;
     }
 
@@ -453,7 +454,7 @@ class _SimpleChallengeModalWidgetState extends State<SimpleChallengeModalWidget>
     });
 
     try {
-      print('📝 Preparing challenge data...');
+      debugPrint('📝 Preparing challenge data...');
       final scheduledDateTime = DateTime(
         _selectedDate.year,
         _selectedDate.month,
@@ -462,14 +463,14 @@ class _SimpleChallengeModalWidgetState extends State<SimpleChallengeModalWidget>
         _selectedTime.minute,
       );
 
-      print('🎮 Sending challenge with data:');
-      print('   - Player ID: ${widget.player['id']}');
-      print('   - Challenge Type: ${widget.challengeType}');
-      print('   - Game Type: $_selectedGameType');
-      print('   - Location: $_selectedLocation');
-      print('   - Scheduled: $scheduledDateTime');
-      print('   - SPA Points: $_spaPoints');
-      print('   - Message: ${_messageController.text.trim()}');
+      debugPrint('🎮 Sending challenge with data:');
+      debugPrint('   - Player ID: ${widget.player['id']}');
+      debugPrint('   - Challenge Type: ${widget.challengeType}');
+      debugPrint('   - Game Type: $_selectedGameType');
+      debugPrint('   - Location: $_selectedLocation');
+      debugPrint('   - Scheduled: $scheduledDateTime');
+      debugPrint('   - SPA Points: $_spaPoints');
+      debugPrint('   - Message: ${_messageController.text.trim()}');
 
       await SimpleChallengeService.instance.sendChallenge(
         challengedUserId: widget.player['id'],

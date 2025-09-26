@@ -3,6 +3,7 @@
 
 import '../routes/app_routes.dart';
 import '../services/auth_service.dart';
+import 'package:flutter/foundation.dart';
 
 /// Class to validate admin navigation flow
 class AdminNavigationValidator {
@@ -27,18 +28,18 @@ class AdminNavigationValidator {
       // 5. Check if admin screens are properly imported
       results['admin_screens_imported'] = _checkAdminScreensImported();
       
-      print('🔍 ADMIN NAVIGATION FLOW VALIDATION RESULTS:');
+      debugPrint('🔍 ADMIN NAVIGATION FLOW VALIDATION RESULTS:');
       results.forEach((test, passed) {
-        print('   ${passed ? "✅" : "❌"} $test: ${passed ? "PASSED" : "FAILED"}');
+        debugPrint('   ${passed ? "✅" : "❌"} $test: ${passed ? "PASSED" : "FAILED"}');
       });
       
       final allPassed = results.values.every((result) => result);
-      print('\n${allPassed ? "🎉" : "⚠️"} Overall Status: ${allPassed ? "ALL TESTS PASSED" : "SOME TESTS FAILED"}');
+      debugPrint('\n${allPassed ? "🎉" : "⚠️"} Overall Status: ${allPassed ? "ALL TESTS PASSED" : "SOME TESTS FAILED"}');
       
       return results;
       
     } catch (e) {
-      print('❌ Validation failed with error: $e');
+      debugPrint('❌ Validation failed with error: $e');
       return {'validation_error': false};
     }
   }
@@ -100,7 +101,7 @@ class AdminNavigationValidator {
 /// Manual test checklist for admin flow
 class AdminFlowChecklist {
   static void printChecklist() {
-    print('''
+    debugPrint('''
 📋 MANUAL ADMIN FLOW TESTING CHECKLIST:
 
 🔐 Authentication Flow:

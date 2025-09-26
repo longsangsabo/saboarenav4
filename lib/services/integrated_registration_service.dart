@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:sabo_arena/services/registration_qr_service.dart';
 import 'basic_referral_service.dart';
 import 'integrated_qr_service.dart';
+import 'package:flutter/foundation.dart';
 
 class IntegratedRegistrationService {
   static final SupabaseClient _supabase = Supabase.instance.client;
@@ -19,9 +20,9 @@ class IntegratedRegistrationService {
     String? scannedQRData, // QR data from previous scan
   }) async {
     try {
-      print('🎯 Starting integrated registration with QR referral');
-      print('   Email: $email');
-      print('   Scanned QR: $scannedQRData');
+      debugPrint('🎯 Starting integrated registration with QR referral');
+      debugPrint('   Email: $email');
+      debugPrint('   Scanned QR: $scannedQRData');
       
       // 1. Register user account
       final authResponse = await _supabase.auth.signUp(
@@ -38,7 +39,7 @@ class IntegratedRegistrationService {
       }
       
       final newUserId = authResponse.user!.id;
-      print('✅ Created user account: $newUserId');
+      debugPrint('✅ Created user account: $newUserId');
       
       // 2. Complete registration with QR system
       final registrationResult = await RegistrationQRService.completeRegistrationWithQR(
@@ -53,7 +54,7 @@ class IntegratedRegistrationService {
       );
       
       if (registrationResult['success'] != true) {
-        print('❌ Registration QR setup failed');
+        debugPrint('❌ Registration QR setup failed');
         return {
           'success': false,
           'error': 'QR setup failed',
@@ -61,16 +62,16 @@ class IntegratedRegistrationService {
         };
       }
       
-      print('✅ Completed QR registration setup');
+      debugPrint('✅ Completed QR registration setup');
       
       // 3. Create referral code for new user
       final newUserReferralCode = await _generateUserReferralCode(newUserId, username);
-      print('✅ Created referral code: $newUserReferralCode');
+      debugPrint('✅ Created referral code: $newUserReferralCode');
       
       // 4. Apply referral code from scanned QR (if any)
       Map<String, dynamic>? referralResult;
       if (scannedQRData != null && scannedQRData.isNotEmpty) {
-        print('🎁 Applying referral from scanned QR...');
+        debugPrint('🎁 Applying referral from scanned QR...');
         
         referralResult = await IntegratedQRService.applyQRReferralDuringRegistration(
           newUserId: newUserId,
@@ -78,17 +79,17 @@ class IntegratedRegistrationService {
         );
         
         if (referralResult['success'] == true) {
-          print('✅ Referral applied successfully');
-          print('   Referral Code: ${referralResult['referral_code']}');
-          print('   Reward Received: ${referralResult['referred_reward']} SPA');
+          debugPrint('✅ Referral applied successfully');
+          debugPrint('   Referral Code: ${referralResult['referral_code']}');
+          debugPrint('   Reward Received: ${referralResult['referred_reward']} SPA');
         } else {
-          print('⚠️ Referral application failed: ${referralResult['message']}');
+          debugPrint('⚠️ Referral application failed: ${referralResult['message']}');
         }
       }
       
       // 5. Update user with integrated QR (includes referral)
       await IntegratedQRService.updateUserIntegratedQR(newUserId);
-      print('✅ Updated user with integrated QR system');
+      debugPrint('✅ Updated user with integrated QR system');
       
       // 6. Return success result
       return {
@@ -103,7 +104,7 @@ class IntegratedRegistrationService {
       };
       
     } catch (e) {
-      print('❌ Error in integrated registration: $e');
+      debugPrint('❌ Error in integrated registration: $e');
       return {
         'success': false,
         'error': e.toString(),
@@ -130,7 +131,7 @@ class IntegratedRegistrationService {
       return referralCode;
       
     } catch (e) {
-      print('❌ Error creating referral code: $e');
+      debugPrint('❌ Error creating referral code: $e');
       // Return fallback code
       return 'SABO-${userId.substring(0, 6).toUpperCase()}';
     }
@@ -208,7 +209,7 @@ class IntegratedRegistrationService {
       };
       
     } catch (e) {
-      print('❌ Error previewing referral benefits: $e');
+      debugPrint('❌ Error previewing referral benefits: $e');
       return null;
     }
   }

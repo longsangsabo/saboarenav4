@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/foundation.dart';
 
 class BasicReferralService {
   static final _supabase = Supabase.instance.client;
@@ -31,7 +32,7 @@ class BasicReferralService {
 
       return response;
     } catch (e) {
-      print('Error creating referral code: $e');
+      debugPrint('Error creating referral code: $e');
       return null;
     }
   }
@@ -47,7 +48,7 @@ class BasicReferralService {
 
       return List<Map<String, dynamic>>.from(response);
     } catch (e) {
-      print('Error fetching user referral codes: $e');
+      debugPrint('Error fetching user referral codes: $e');
       return [];
     }
   }
@@ -104,7 +105,7 @@ class BasicReferralService {
         'message': 'Referral applied successfully!'
       };
     } catch (e) {
-      print('Error applying referral code: $e');
+      debugPrint('Error applying referral code: $e');
       return {'success': false, 'message': 'Error applying referral code'};
     }
   }
@@ -128,9 +129,9 @@ class BasicReferralService {
           .update({'spa_balance': newSpa})
           .eq('id', userId);
 
-      print('Awarded $spaAmount SPA to user $userId (new balance: $newSpa)');
+      debugPrint('Awarded $spaAmount SPA to user $userId (new balance: $newSpa)');
     } catch (e) {
-      print('Error awarding SPA to user: $e');
+      debugPrint('Error awarding SPA to user: $e');
     }
   }
 
@@ -146,7 +147,7 @@ class BasicReferralService {
 
       return response;
     } catch (e) {
-      print('Error fetching referral code details: $e');
+      debugPrint('Error fetching referral code details: $e');
       return null;
     }
   }
@@ -186,7 +187,7 @@ class BasicReferralService {
         'active_codes': codesResponse.length,
       };
     } catch (e) {
-      print('Error fetching referral stats: $e');
+      debugPrint('Error fetching referral stats: $e');
       return {
         'total_referrals': 0,
         'total_spa_earned': 0,

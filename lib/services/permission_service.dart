@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
 
 class PermissionService {
   static const String _cameraPermissionKey = 'camera_permission_granted';
@@ -25,13 +26,13 @@ class PermissionService {
       }
       
       if (status.isPermanentlyDenied) {
-        print('⚠️ Camera permission permanently denied');
+        debugPrint('⚠️ Camera permission permanently denied');
         return false;
       }
       
       return false;
     } catch (e) {
-      print('❌ Error checking camera permission: $e');
+      debugPrint('❌ Error checking camera permission: $e');
       return false;
     }
   }
@@ -81,13 +82,13 @@ class PermissionService {
       }
       
       if (status.isPermanentlyDenied) {
-        print('⚠️ Photos permission permanently denied');
+        debugPrint('⚠️ Photos permission permanently denied');
         return false;
       }
       
       return false;
     } catch (e) {
-      print('❌ Error checking photos permission: $e');
+      debugPrint('❌ Error checking photos permission: $e');
       return false;
     }
   }
@@ -109,7 +110,7 @@ class PermissionService {
       
       return actuallyGranted;
     } catch (e) {
-      print('❌ Error checking saved camera permission: $e');
+      debugPrint('❌ Error checking saved camera permission: $e');
       return false;
     }
   }
@@ -140,7 +141,7 @@ class PermissionService {
       
       return actuallyGranted;
     } catch (e) {
-      print('❌ Error checking saved photos permission: $e');
+      debugPrint('❌ Error checking saved photos permission: $e');
       return false;
     }
   }
@@ -150,9 +151,9 @@ class PermissionService {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_cameraPermissionKey, granted);
-      print('✅ Camera permission status saved: $granted');
+      debugPrint('✅ Camera permission status saved: $granted');
     } catch (e) {
-      print('❌ Error saving camera permission status: $e');
+      debugPrint('❌ Error saving camera permission status: $e');
     }
   }
 
@@ -161,9 +162,9 @@ class PermissionService {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_photosPermissionKey, granted);
-      print('✅ Photos permission status saved: $granted');
+      debugPrint('✅ Photos permission status saved: $granted');
     } catch (e) {
-      print('❌ Error saving photos permission status: $e');
+      debugPrint('❌ Error saving photos permission status: $e');
     }
   }
 
@@ -178,7 +179,7 @@ class PermissionService {
         'photos': photosGranted,
       };
     } catch (e) {
-      print('❌ Error checking all permissions: $e');
+      debugPrint('❌ Error checking all permissions: $e');
       return {
         'camera': false,
         'photos': false,
@@ -191,7 +192,7 @@ class PermissionService {
     try {
       return await openAppSettings();
     } catch (e) {
-      print('❌ Error opening app settings: $e');
+      debugPrint('❌ Error opening app settings: $e');
       return false;
     }
   }
@@ -203,9 +204,9 @@ class PermissionService {
       await prefs.remove(_cameraPermissionKey);
       await prefs.remove(_photosPermissionKey);
       await prefs.remove(_storagePermissionKey);
-      print('✅ Cleared saved permission statuses');
+      debugPrint('✅ Cleared saved permission statuses');
     } catch (e) {
-      print('❌ Error clearing saved permissions: $e');
+      debugPrint('❌ Error clearing saved permissions: $e');
     }
   }
 }

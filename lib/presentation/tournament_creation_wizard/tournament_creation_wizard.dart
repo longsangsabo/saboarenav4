@@ -3,6 +3,7 @@ import 'package:sabo_arena/theme/theme_extensions.dart';
 import 'package:sabo_arena/utils/size_extensions.dart';
 import '../../services/tournament_service.dart';
 import '../../core/constants/ranking_constants.dart';
+import 'package:flutter/foundation.dart';
 
 class TournamentCreationWizard extends StatefulWidget {
   final String? clubId;
@@ -828,7 +829,7 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
   }
 
   void _validateAndPublish() async {
-    print('🔍 Tournament creation validation started');
+    debugPrint('🔍 Tournament creation validation started');
     
     // Validate all forms
     bool isValid = true;
@@ -836,27 +837,27 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
 
     // Validate current step form
     if (!_validateCurrentStep()) {
-      print('❌ Current step validation failed');
+      debugPrint('❌ Current step validation failed');
       isValid = false;
     }
 
     // Manual validation of required fields - check from controllers
-    print('🔍 Validating fields:');
-    print('  Name: "${_nameController.text}"');
-    print('  Venue: "${_venueController.text}"');
-    print('  Registration Start: ${_tournamentData['registrationStartDate']}');
-    print('  Tournament Start: ${_tournamentData['tournamentStartDate']}');
+    debugPrint('🔍 Validating fields:');
+    debugPrint('  Name: "${_nameController.text}"');
+    debugPrint('  Venue: "${_venueController.text}"');
+    debugPrint('  Registration Start: ${_tournamentData['registrationStartDate']}');
+    debugPrint('  Tournament Start: ${_tournamentData['tournamentStartDate']}');
     
     if (_nameController.text.isEmpty) {
       _errors['name'] = 'Vui lòng nhập tên giải đấu';
       isValid = false;
-      print('❌ Name validation failed');
+      debugPrint('❌ Name validation failed');
     }
 
     if (_venueController.text.isEmpty) {
       _errors['venue'] = 'Vui lòng nhập địa chỉ tổ chức';
       isValid = false;
-      print('❌ Venue validation failed');
+      debugPrint('❌ Venue validation failed');
     }
 
     if (_tournamentData['registrationStartDate'] == null) {
@@ -870,12 +871,12 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
     }
 
     if (!isValid) {
-      print('❌ Validation failed with errors: $_errors');
+      debugPrint('❌ Validation failed with errors: $_errors');
       _showValidationErrors();
       return;
     }
     
-    print('✅ All validation passed, creating tournament...');
+    debugPrint('✅ All validation passed, creating tournament...');
 
     // Sync final data from controllers
     _tournamentData['name'] = _nameController.text;

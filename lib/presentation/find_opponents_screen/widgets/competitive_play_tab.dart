@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import './map_view_widget.dart';
 import './player_card_widget.dart';
 import '../../widgets/rank_change_request_dialog.dart';
+import 'package:flutter/foundation.dart';
 
 
 class CompetitivePlayTab extends StatefulWidget {
@@ -59,7 +60,7 @@ class _CompetitivePlayTabState extends State<CompetitivePlayTab> {
         }
       }
     } catch (e) {
-      print('Error loading current user: $e');
+      debugPrint('Error loading current user: $e');
       if (mounted) {
         setState(() {
           _isLoadingUser = false;

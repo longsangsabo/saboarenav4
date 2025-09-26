@@ -1,5 +1,8 @@
 /// Notification models for SABO Arena app
 /// Chứa tất cả data models liên quan đến notification system
+library;
+
+import 'package:flutter/material.dart';
 
 class NotificationModel {
   final String id;
@@ -508,5 +511,215 @@ class NotificationTemplates {
 
   static NotificationTemplate? getTemplate(NotificationType type) {
     return templates[type];
+  }
+}
+
+/// Notification preferences model for user settings
+class NotificationPreferences {
+  final String userId;
+  final bool enablePushNotifications;
+  final bool enableInAppNotifications;
+  final bool enableEmailNotifications;
+  final bool enableSmsNotifications;
+  final Map<NotificationType, NotificationTypeSetting> typeSettings;
+  final bool enableQuietHours;
+  final TimeOfDay? quietHoursStart;
+  final TimeOfDay? quietHoursEnd;
+  final NotificationSound soundSetting;
+  final bool vibrationEnabled;
+  final DateTime? lastUpdated;
+
+  NotificationPreferences({
+    required this.userId,
+    this.enablePushNotifications = true,
+    this.enableInAppNotifications = true,
+    this.enableEmailNotifications = false,
+    this.enableSmsNotifications = false,
+    this.typeSettings = const {},
+    this.enableQuietHours = false,
+    this.quietHoursStart,
+    this.quietHoursEnd,
+    this.soundSetting = NotificationSound.defaultSound,
+    this.vibrationEnabled = true,
+    this.lastUpdated,
+  });
+
+  factory NotificationPreferences.fromJson(Map<String, dynamic> json) {
+    return NotificationPreferences(
+      userId: json['user_id'] as String,
+      enablePushNotifications: json['enable_push_notifications'] as bool? ?? true,
+      enableInAppNotifications: json['enable_in_app_notifications'] as bool? ?? true,
+      enableEmailNotifications: json['enable_email_notifications'] as bool? ?? false,
+      enableSmsNotifications: json['enable_sms_notifications'] as bool? ?? false,
+      typeSettings: (json['type_settings'] as Map<String, dynamic>?)?.map(
+        (key, value) => MapEntry(
+          NotificationType.fromString(key),
+          NotificationTypeSetting.fromJson(value as Map<String, dynamic>),
+        ),
+      ) ?? {},
+      enableQuietHours: json['enable_quiet_hours'] as bool? ?? false,
+      quietHoursStart: json['quiet_hours_start'] != null 
+        ? TimeOfDay.fromDateTime(DateTime.parse(json['quiet_hours_start'] as String))
+        : null,
+      quietHoursEnd: json['quiet_hours_end'] != null
+        ? TimeOfDay.fromDateTime(DateTime.parse(json['quiet_hours_end'] as String))
+        : null,
+      soundSetting: NotificationSound.fromString(json['sound_setting'] as String? ?? 'default'),
+      vibrationEnabled: json['vibration_enabled'] as bool? ?? true,
+      lastUpdated: json['last_updated'] != null
+        ? DateTime.parse(json['last_updated'] as String)
+        : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'user_id': userId,
+      'enable_push_notifications': enablePushNotifications,
+      'enable_in_app_notifications': enableInAppNotifications,
+      'enable_email_notifications': enableEmailNotifications,
+      'enable_sms_notifications': enableSmsNotifications,
+      'type_settings': typeSettings.map(
+        (key, value) => MapEntry(key.toString(), value.toJson()),
+      ),
+      'enable_quiet_hours': enableQuietHours,
+      'quiet_hours_start': quietHoursStart?.format24Hour(),
+      'quiet_hours_end': quietHoursEnd?.format24Hour(),
+      'sound_setting': soundSetting.toString(),
+      'vibration_enabled': vibrationEnabled,
+      'last_updated': lastUpdated?.toIso8601String(),
+    };
+  }
+}
+
+/// Notification type specific settings
+class NotificationTypeSetting {
+  final NotificationType type;
+  final bool enabled;
+  final NotificationSound? customSound;
+  final bool useVibration;
+  final NotificationPriority priority;
+
+  NotificationTypeSetting({
+    required this.type,
+    this.enabled = true,
+    this.customSound,
+    this.useVibration = true,
+    this.priority = NotificationPriority.normal,
+  });
+
+  factory NotificationTypeSetting.fromJson(Map<String, dynamic> json) {
+    return NotificationTypeSetting(
+      type: NotificationType.fromString(json['type'] as String),
+      enabled: json['enabled'] as bool? ?? true,
+      customSound: json['custom_sound'] != null
+        ? NotificationSound.fromString(json['custom_sound'] as String)
+        : null,
+      useVibration: json['use_vibration'] as bool? ?? true,
+      priority: NotificationPriority.fromString(json['priority'] as String? ?? 'normal'),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'type': type.toString(),
+      'enabled': enabled,
+      'custom_sound': customSound?.toString(),
+      'use_vibration': useVibration,
+      'priority': priority.toString(),
+    };
+  }
+}
+
+/// Notification sound settings
+enum NotificationSound {
+  defaultSound,
+  none,
+  chime,
+  bell,
+  alert,
+  custom;
+
+  static NotificationSound fromString(String value) {
+    switch (value.toLowerCase()) {
+      case 'default':
+        return NotificationSound.defaultSound;
+      case 'none':
+        return NotificationSound.none;
+      case 'chime':
+        return NotificationSound.chime;
+      case 'bell':
+        return NotificationSound.bell;
+      case 'alert':
+        return NotificationSound.alert;
+      case 'custom':
+        return NotificationSound.custom;
+      default:
+        return NotificationSound.defaultSound;
+    }
+  }
+
+  @override
+  String toString() {
+    switch (this) {
+      case NotificationSound.defaultSound:
+        return 'default';
+      case NotificationSound.none:
+        return 'none';
+      case NotificationSound.chime:
+        return 'chime';
+      case NotificationSound.bell:
+        return 'bell';
+      case NotificationSound.alert:
+        return 'alert';
+      case NotificationSound.custom:
+        return 'custom';
+    }
+  }
+}
+
+/// Notification channel for Android
+class NotificationChannel {
+  final String id;
+  final String name;
+  final String description;
+  final NotificationPriority importance;
+  final NotificationSound sound;
+  final bool enableVibration;
+  final bool enableLights;
+
+  NotificationChannel({
+    required this.id,
+    required this.name,
+    required this.description,
+    this.importance = NotificationPriority.normal,
+    this.sound = NotificationSound.defaultSound,
+    this.enableVibration = true,
+    this.enableLights = true,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'importance': importance.toString(),
+      'sound': sound.toString(),
+      'enable_vibration': enableVibration,
+      'enable_lights': enableLights,
+    };
+  }
+}
+
+/// Extensions for TimeOfDay
+extension TimeOfDayExtension on TimeOfDay {
+  String format24Hour() {
+    final hour = this.hour.toString().padLeft(2, '0');
+    final minute = this.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
+  }
+
+  static TimeOfDay fromDateTime(DateTime dateTime) {
+    return TimeOfDay(hour: dateTime.hour, minute: dateTime.minute);
   }
 }

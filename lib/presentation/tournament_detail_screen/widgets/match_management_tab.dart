@@ -5,6 +5,7 @@ import 'package:sabo_arena/core/app_export.dart';
 import 'package:sabo_arena/theme/app_theme.dart';
 import 'package:sabo_arena/services/tournament_service.dart';
 import 'package:sabo_arena/services/bracket_service.dart';
+import 'package:flutter/foundation.dart';
 
 class MatchManagementTab extends StatefulWidget {
   final String tournamentId;
@@ -37,17 +38,17 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
     });
 
     try {
-      print('🔄 MatchManagementTab: Loading matches for tournament ${widget.tournamentId}');
+      debugPrint('🔄 MatchManagementTab: Loading matches for tournament ${widget.tournamentId}');
       final matches = await _tournamentService.getTournamentMatches(widget.tournamentId);
-      print('📊 MatchManagementTab: Loaded ${matches.length} matches');
+      debugPrint('📊 MatchManagementTab: Loaded ${matches.length} matches');
       
       // Debug first match
       if (matches.isNotEmpty) {
         final firstMatch = matches[0];
-        print('🎯 MatchManagementTab: First match data:');
-        print('   matchId: ${firstMatch['matchId']}');
-        print('   player1: ${firstMatch['player1']}');
-        print('   player2: ${firstMatch['player2']}');
+        debugPrint('🎯 MatchManagementTab: First match data:');
+        debugPrint('   matchId: ${firstMatch['matchId']}');
+        debugPrint('   player1: ${firstMatch['player1']}');
+        debugPrint('   player2: ${firstMatch['player2']}');
       }
       
       setState(() {
@@ -55,7 +56,7 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
         _isLoading = false;
       });
     } catch (e) {
-      print('❌ MatchManagementTab: Error loading matches: $e');
+      debugPrint('❌ MatchManagementTab: Error loading matches: $e');
       setState(() {
         _errorMessage = 'Lỗi tải trận đấu: ${e.toString()}';
         _isLoading = false;
@@ -504,12 +505,12 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
 
   Future<void> _startMatch(Map<String, dynamic> match) async {
     try {
-      print('🚀 Starting match: ${match["matchId"]}');
+      debugPrint('🚀 Starting match: ${match["matchId"]}');
       
       // Use BracketService to start match with RPC function
       await _bracketService.startMatch(match['matchId']);
 
-      print('✅ Match started successfully');
+      debugPrint('✅ Match started successfully');
       
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -520,7 +521,7 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
       
       _loadMatches(); // Refresh
     } catch (e) {
-      print('❌ Error starting match: $e');
+      debugPrint('❌ Error starting match: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Lỗi bắt đầu trận đấu: ${e.toString()}'),
@@ -562,9 +563,9 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
     String winnerId,
   ) async {
     try {
-      print('🎯 MatchManagementTab: Updating match result: ${match["matchId"]}');
-      print('   Scores: $player1Score - $player2Score');
-      print('   Winner: $winnerId');
+      debugPrint('🎯 MatchManagementTab: Updating match result: ${match["matchId"]}');
+      debugPrint('   Scores: $player1Score - $player2Score');
+      debugPrint('   Winner: $winnerId');
       
       // Update match result in database using BracketService
       final success = await _bracketService.saveMatchResultToDatabase(
@@ -574,7 +575,7 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
         player2Score: player2Score,
       );
       
-      print('✅ MatchManagementTab: Match update success: $success');
+      debugPrint('✅ MatchManagementTab: Match update success: $success');
       
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -584,14 +585,14 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
           ),
         );
         
-        print('🔄 MatchManagementTab: Refreshing matches after update...');
+        debugPrint('🔄 MatchManagementTab: Refreshing matches after update...');
         await _loadMatches(); // Refresh and wait for completion
-        print('✅ MatchManagementTab: Refresh completed');
+        debugPrint('✅ MatchManagementTab: Refresh completed');
       } else {
         throw Exception('Update failed - RPC returned false');
       }
     } catch (e) {
-      print('❌ Error updating match result: $e');
+      debugPrint('❌ Error updating match result: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Lỗi cập nhật kết quả: ${e.toString()}'),

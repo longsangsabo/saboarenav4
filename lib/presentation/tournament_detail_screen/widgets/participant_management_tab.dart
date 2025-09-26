@@ -3,6 +3,7 @@ import 'package:sizer/sizer.dart';
 import 'package:sabo_arena/core/app_export.dart';
 import 'package:sabo_arena/theme/app_theme.dart';
 import 'package:sabo_arena/services/tournament_service.dart';
+import 'package:flutter/foundation.dart';
 
 class ParticipantManagementTab extends StatefulWidget {
   final String tournamentId;
@@ -34,10 +35,10 @@ class _ParticipantManagementTabState extends State<ParticipantManagementTab> {
     try {
       final participants = await _tournamentService
           .getTournamentParticipantsWithPaymentStatus(widget.tournamentId);
-      print('🎯 UI: Loaded ${participants.length} participants');
+      debugPrint('🎯 UI: Loaded ${participants.length} participants');
       for (int i = 0; i < participants.length; i++) {
         final user = participants[i]['user'];
-        print('   ${i + 1}. ${user?['full_name'] ?? 'Unknown'} - ${participants[i]['payment_status']}');
+        debugPrint('   ${i + 1}. ${user?['full_name'] ?? 'Unknown'} - ${participants[i]['payment_status']}');
       }
       setState(() {
         _participants = participants;

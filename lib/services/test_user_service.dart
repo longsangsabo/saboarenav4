@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user_profile.dart';
+import 'package:flutter/foundation.dart';
 
 /// Service để handle test user cho development
 /// CHỈ sử dụng khi không có authentication
@@ -30,15 +31,15 @@ class TestUserService {
           .maybeSingle();
 
       if (response != null) {
-        print('📱 Using existing test user: ${response['username']}');
+        debugPrint('📱 Using existing test user: ${response['username']}');
         return UserProfile.fromJson(response);
       }
 
       // Tạo test user mới nếu chưa có
-      print('📱 Creating new test user...');
+      debugPrint('📱 Creating new test user...');
       return await _createTestUser();
     } catch (error) {
-      print('❌ Error getting/creating test user: $error');
+      debugPrint('❌ Error getting/creating test user: $error');
       return null;
     }
   }
@@ -66,7 +67,7 @@ class TestUserService {
           .select()
           .single();
 
-      print('✅ Test user created successfully!');
+      debugPrint('✅ Test user created successfully!');
       return UserProfile.fromJson(response);
     } catch (error) {
       throw Exception('Failed to create test user: $error');
@@ -94,7 +95,7 @@ class TestUserService {
       if (bio != null) updateData['bio'] = bio;
       if (displayName != null) updateData['display_name'] = displayName;
 
-      print('📱 Updating test user with: $updateData');
+      debugPrint('📱 Updating test user with: $updateData');
 
       final response = await _supabase
           .from('users')
@@ -103,10 +104,10 @@ class TestUserService {
           .select()
           .single();
 
-      print('✅ Test user updated successfully!');
+      debugPrint('✅ Test user updated successfully!');
       return UserProfile.fromJson(response);
     } catch (error) {
-      print('❌ Failed to update test user: $error');
+      debugPrint('❌ Failed to update test user: $error');
       throw Exception('Failed to update test user profile: $error');
     }
   }

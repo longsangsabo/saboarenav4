@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/foundation.dart';
 
 /// Service for testing opponent tab backend integration
 class OpponentTabBackendService {
@@ -20,14 +21,14 @@ class OpponentTabBackendService {
         },
       );
 
-      print('✅ get_nearby_players response: $response');
+      debugPrint('✅ get_nearby_players response: $response');
       
       if (response is List) {
         return List<Map<String, dynamic>>.from(response);
       }
       return [];
     } catch (e) {
-      print('❌ get_nearby_players error: $e');
+      debugPrint('❌ get_nearby_players error: $e');
       return [];
     }
   }
@@ -54,10 +55,10 @@ class OpponentTabBackendService {
         },
       );
 
-      print('✅ create_challenge response: $response');
+      debugPrint('✅ create_challenge response: $response');
       return response?.toString();
     } catch (e) {
-      print('❌ create_challenge error: $e');
+      debugPrint('❌ create_challenge error: $e');
       return null;
     }
   }
@@ -75,14 +76,14 @@ class OpponentTabBackendService {
         },
       );
 
-      print('✅ get_user_challenges response: $response');
+      debugPrint('✅ get_user_challenges response: $response');
       
       if (response is List) {
         return List<Map<String, dynamic>>.from(response);
       }
       return [];
     } catch (e) {
-      print('❌ get_user_challenges error: $e');
+      debugPrint('❌ get_user_challenges error: $e');
       return [];
     }
   }
@@ -101,10 +102,10 @@ class OpponentTabBackendService {
         },
       );
 
-      print('✅ accept_challenge response: $response');
+      debugPrint('✅ accept_challenge response: $response');
       return response?.toString();
     } catch (e) {
-      print('❌ accept_challenge error: $e');
+      debugPrint('❌ accept_challenge error: $e');
       return null;
     }
   }
@@ -123,10 +124,10 @@ class OpponentTabBackendService {
         },
       );
 
-      print('✅ decline_challenge response: $response');
+      debugPrint('✅ decline_challenge response: $response');
       return response == true;
     } catch (e) {
-      print('❌ decline_challenge error: $e');
+      debugPrint('❌ decline_challenge error: $e');
       return false;
     }
   }
@@ -134,34 +135,34 @@ class OpponentTabBackendService {
   /// Check if backend tables have required columns
   Future<void> checkBackendSchema() async {
     try {
-      print('🔍 Checking backend schema...');
+      debugPrint('🔍 Checking backend schema...');
 
       // Check matches table columns
       final matchesSchema = await _supabase
           .from('matches')
           .select('match_type,challenger_id,stakes_type')
           .limit(1);
-      print('✅ matches table has challenge columns: ${matchesSchema.isNotEmpty}');
+      debugPrint('✅ matches table has challenge columns: ${matchesSchema.isNotEmpty}');
 
       // Check users table columns  
       final usersSchema = await _supabase
           .from('users')
           .select('latitude,longitude,spa_points,is_available_for_challenges')
           .limit(1);
-      print('✅ users table has location/challenge columns: ${usersSchema.isNotEmpty}');
+      debugPrint('✅ users table has location/challenge columns: ${usersSchema.isNotEmpty}');
 
       // Check challenges table exists
       final challengesExists = await _supabase
           .from('challenges')
           .select('id')
           .limit(1);
-      print('✅ challenges table exists: ${challengesExists.isNotEmpty}');
+      debugPrint('✅ challenges table exists: ${challengesExists.isNotEmpty}');
 
     } catch (e) {
-      print('❌ Backend schema check failed: $e');
-      print('📋 Please run the SQL scripts in Supabase Dashboard:');
-      print('   1. backend_setup_complete.sql');
-      print('   2. create_test_data.sql');
+      debugPrint('❌ Backend schema check failed: $e');
+      debugPrint('📋 Please run the SQL scripts in Supabase Dashboard:');
+      debugPrint('   1. backend_setup_complete.sql');
+      debugPrint('   2. create_test_data.sql');
     }
   }
 
@@ -184,21 +185,21 @@ class OpponentTabBackendService {
         };
       }
     } catch (e) {
-      print('❌ Could not get user location: $e');
+      debugPrint('❌ Could not get user location: $e');
     }
     return null;
   }
 
   /// Run comprehensive backend tests
   Future<void> runComprehensiveTest() async {
-    print('🧪 Starting comprehensive backend test...\n');
+    debugPrint('🧪 Starting comprehensive backend test...\n');
     
     // 1. Check schema
     await checkBackendSchema();
-    print('');
+    debugPrint('');
 
     // 2. Test nearby players
-    print('🔍 Testing nearby players...');
+    debugPrint('🔍 Testing nearby players...');
     final location = await getCurrentUserLocation();
     if (location != null) {
       final nearbyPlayers = await testGetNearbyPlayers(
@@ -206,23 +207,23 @@ class OpponentTabBackendService {
         longitude: location['longitude']!,
         radiusKm: 20,
       );
-      print('Found ${nearbyPlayers.length} nearby players');
+      debugPrint('Found ${nearbyPlayers.length} nearby players');
     } else {
-      print('⚠️ User location not set, using default Hanoi coordinates');
+      debugPrint('⚠️ User location not set, using default Hanoi coordinates');
       final nearbyPlayers = await testGetNearbyPlayers(
         latitude: 21.028511,
         longitude: 105.804817,
         radiusKm: 20,
       );
-      print('Found ${nearbyPlayers.length} nearby players');
+      debugPrint('Found ${nearbyPlayers.length} nearby players');
     }
-    print('');
+    debugPrint('');
 
     // 3. Test user challenges
-    print('📋 Testing user challenges...');
+    debugPrint('📋 Testing user challenges...');
     final userChallenges = await testGetUserChallenges();
-    print('Found ${userChallenges.length} challenges for current user');
-    print('');
+    debugPrint('Found ${userChallenges.length} challenges for current user');
+    debugPrint('');
 
     // 4. Test creating challenge (if we have nearby players)
     final nearbyPlayers = await testGetNearbyPlayers(
@@ -232,7 +233,7 @@ class OpponentTabBackendService {
     );
     
     if (nearbyPlayers.isNotEmpty) {
-      print('💪 Testing create challenge...');
+      debugPrint('💪 Testing create challenge...');
       final targetUser = nearbyPlayers.first;
       final challengeId = await testCreateChallenge(
         challengedUserId: targetUser['user_id'],
@@ -242,10 +243,10 @@ class OpponentTabBackendService {
       );
       
       if (challengeId != null) {
-        print('✅ Created challenge: $challengeId');
+        debugPrint('✅ Created challenge: $challengeId');
       }
     }
 
-    print('\n🎉 Backend test completed!');
+    debugPrint('\n🎉 Backend test completed!');
   }
 }

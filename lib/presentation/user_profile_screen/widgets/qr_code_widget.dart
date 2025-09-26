@@ -57,7 +57,7 @@ class _QRCodeWidgetState extends State<QRCodeWidget> {
       setState(() {
         _isGenerating = false;
       });
-      print('Error generating QR code: $e');
+      debugPrint('Error generating QR code: $e');
     }
   }
 

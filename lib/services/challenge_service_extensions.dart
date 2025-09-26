@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'challenge_service.dart';
 import 'challenge_rules_service.dart';
+import 'package:flutter/foundation.dart';
 
 /// Enhanced Challenge Service methods for validation and handicap calculations
 extension ChallengeValidationExtension on ChallengeService {
@@ -33,7 +34,7 @@ extension ChallengeValidationExtension on ChallengeService {
 
       return _rulesService.canChallenge(challengerRank, challengedRank);
     } catch (error) {
-      print('❌ Error checking challenge eligibility: $error');
+      debugPrint('❌ Error checking challenge eligibility: $error');
       return false;
     }
   }
@@ -75,7 +76,7 @@ extension ChallengeValidationExtension on ChallengeService {
         spaBetAmount: spaBetAmount,
       );
     } catch (error) {
-      print('❌ Error calculating handicap preview: $error');
+      debugPrint('❌ Error calculating handicap preview: $error');
       return null;
     }
   }

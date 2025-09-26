@@ -7,6 +7,7 @@ import '../core/constants/tournament_constants.dart';
 import '../models/tournament.dart';
 import '../models/user_profile.dart';
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
 
 /// Service cung cấp thống kê nâng cao cho tournament system
 class TournamentStatisticsService {
@@ -21,7 +22,7 @@ class TournamentStatisticsService {
   /// Get comprehensive tournament statistics
   Future<Map<String, dynamic>> getTournamentAnalytics(String tournamentId) async {
     try {
-      print('📊 Getting tournament analytics for: $tournamentId');
+      debugPrint('📊 Getting tournament analytics for: $tournamentId');
 
       final results = await Future.wait([
         _getBasicStats(tournamentId),
@@ -42,7 +43,7 @@ class TournamentStatisticsService {
       };
 
     } catch (e) {
-      print('❌ Error getting tournament analytics: $e');
+      debugPrint('❌ Error getting tournament analytics: $e');
       throw Exception('Failed to get tournament analytics: $e');
     }
   }
@@ -445,7 +446,7 @@ class TournamentStatisticsService {
       };
 
     } catch (e) {
-      print('❌ Error getting tournament trends: $e');
+      debugPrint('❌ Error getting tournament trends: $e');
       throw Exception('Failed to get tournament trends: $e');
     }
   }

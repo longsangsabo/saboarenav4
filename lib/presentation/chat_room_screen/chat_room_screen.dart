@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../services/chat_service.dart';
 import '../member_communication_screen/member_communication_screen.dart';
+import 'package:flutter/foundation.dart';
 
 class ChatRoomScreen extends StatefulWidget {
   final ChatRoom room;
@@ -151,7 +152,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
             ChatService.updateLastReadTime(widget.room.id);
           }
         } catch (e) {
-          print('Error loading new message: $e');
+          debugPrint('Error loading new message: $e');
         }
       },
     );

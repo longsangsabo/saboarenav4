@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/foundation.dart';
 
 /// Debug utility để kiểm tra tournament participants trực tiếp
 class TournamentDebugHelper {
@@ -8,7 +9,7 @@ class TournamentDebugHelper {
   /// Kiểm tra tất cả tournaments và participants count
   static Future<void> debugAllTournaments() async {
     try {
-      print('🔍 === TOURNAMENT DEBUG START ===');
+      debugPrint('🔍 === TOURNAMENT DEBUG START ===');
       
       // 1. Lấy tất cả tournaments
       final tournaments = await _supabase
@@ -16,14 +17,14 @@ class TournamentDebugHelper {
           .select('id, title, max_participants, current_participants, status')
           .order('created_at', ascending: false);
       
-      print('📊 Found ${tournaments.length} tournaments:');
+      debugPrint('📊 Found ${tournaments.length} tournaments:');
       
       for (final tournament in tournaments) {
         final tournamentId = tournament['id'];
         final title = tournament['title'];
         
-        print('\n🏆 Tournament: $title (ID: $tournamentId)');
-        print('   Max: ${tournament['max_participants']}, Current: ${tournament['current_participants']}, Status: ${tournament['status']}');
+        debugPrint('\n🏆 Tournament: $title (ID: $tournamentId)');
+        debugPrint('   Max: ${tournament['max_participants']}, Current: ${tournament['current_participants']}, Status: ${tournament['status']}');
         
         // 2. Đếm participants thực tế trong database
         final participantsResponse = await _supabase
@@ -32,7 +33,7 @@ class TournamentDebugHelper {
             .eq('tournament_id', tournamentId);
         
         final actualCount = participantsResponse.length;
-        print('   💡 Actual participants in DB: $actualCount');
+        debugPrint('   💡 Actual participants in DB: $actualCount');
         
         // 3. Kiểm tra payment status distribution
         final participants = await _supabase
@@ -43,25 +44,25 @@ class TournamentDebugHelper {
         final confirmed = participants.where((p) => p['payment_status'] == 'confirmed').length;
         final pending = participants.where((p) => p['payment_status'] == 'pending').length;
         
-        print('   💰 Payment Status - Confirmed: $confirmed, Pending: $pending');
+        debugPrint('   💰 Payment Status - Confirmed: $confirmed, Pending: $pending');
         
         // 4. Nếu có mismatch, show chi tiết
         if (actualCount != (tournament['current_participants'] ?? 0)) {
-          print('   ⚠️  MISMATCH DETECTED!');
+          debugPrint('   ⚠️  MISMATCH DETECTED!');
           await _debugSpecificTournament(tournamentId);
         }
       }
       
-      print('\n🔍 === TOURNAMENT DEBUG END ===');
+      debugPrint('\n🔍 === TOURNAMENT DEBUG END ===');
     } catch (e) {
-      print('❌ Debug error: $e');
+      debugPrint('❌ Debug error: $e');
     }
   }
 
   /// Debug chi tiết một tournament cụ thể
   static Future<void> _debugSpecificTournament(String tournamentId) async {
     try {
-      print('\n🔍 === DETAILED DEBUG FOR $tournamentId ===');
+      debugPrint('\n🔍 === DETAILED DEBUG FOR $tournamentId ===');
       
       // Raw participants query
       final participants = await _supabase
@@ -70,11 +71,11 @@ class TournamentDebugHelper {
           .eq('tournament_id', tournamentId)
           .order('registered_at');
       
-      print('📊 Raw participants: ${participants.length}');
+      debugPrint('📊 Raw participants: ${participants.length}');
       
       for (int i = 0; i < participants.length; i++) {
         final p = participants[i];
-        print('   ${i + 1}. User ID: ${p['user_id']}, Payment: ${p['payment_status']}, Status: ${p['status']}');
+        debugPrint('   ${i + 1}. User ID: ${p['user_id']}, Payment: ${p['payment_status']}, Status: ${p['status']}');
       }
       
       // Test join query
@@ -91,19 +92,19 @@ class TournamentDebugHelper {
             ''')
             .eq('tournament_id', tournamentId);
         
-        print('📊 With users join: ${withUsers.length}');
+        debugPrint('📊 With users join: ${withUsers.length}');
         
         final nullUsers = withUsers.where((p) => p['users'] == null).length;
         if (nullUsers > 0) {
-          print('   ⚠️  $nullUsers participants have null user data!');
+          debugPrint('   ⚠️  $nullUsers participants have null user data!');
         }
         
       } catch (e) {
-        print('   ❌ Join query failed: $e');
+        debugPrint('   ❌ Join query failed: $e');
       }
       
     } catch (e) {
-      print('❌ Specific debug error: $e');
+      debugPrint('❌ Specific debug error: $e');
     }
   }
 

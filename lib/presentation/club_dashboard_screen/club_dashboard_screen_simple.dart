@@ -16,6 +16,7 @@ import '../club_reports_screen/club_reports_screen.dart';
 import '../activity_history_screen/activity_history_screen.dart';
 import '../admin_dashboard_screen/club_rank_change_management_screen.dart';
 import '../../services/club_permission_service.dart';
+import 'package:flutter/foundation.dart';
 
 // Temporary mock classes
 class ClubDashboardStats {
@@ -172,15 +173,15 @@ class _ClubDashboardScreenSimpleState extends State<ClubDashboardScreenSimple> {
           'joined_at': DateTime.now().toIso8601String(),
         });
         
-        print('✅ Added owner to club_members table');
+        debugPrint('✅ Added owner to club_members table');
         
         // Clear permission cache to force refresh
         _permissionService.clearCache(clubId: clubId, userId: userId);
       } else {
-        print('✅ Owner membership record already exists');
+        debugPrint('✅ Owner membership record already exists');
       }
     } catch (e) {
-      print('❌ Error ensuring owner membership: $e');
+      debugPrint('❌ Error ensuring owner membership: $e');
     }
   }
 
@@ -763,7 +764,7 @@ class _ClubDashboardScreenSimpleState extends State<ClubDashboardScreenSimple> {
         ),
       );
 
-      print('🔍 Checking tournament creation permission for club: ${widget.clubId}');
+      debugPrint('🔍 Checking tournament creation permission for club: ${widget.clubId}');
       
       // Get current user ID
       final currentUser = AuthService.instance.currentUser;
@@ -778,15 +779,15 @@ class _ClubDashboardScreenSimpleState extends State<ClubDashboardScreenSimple> {
         return;
       }
       
-      print('🔍 Current user ID: ${currentUser.id}');
+      debugPrint('🔍 Current user ID: ${currentUser.id}');
       
       // Debug membership first
       final membershipDebug = await _permissionService.debugMembership(widget.clubId);
-      print('🔍 Membership debug: $membershipDebug');
+      debugPrint('🔍 Membership debug: $membershipDebug');
 
       // Force refresh user role to get latest data from database
       final userRole = await _permissionService.refreshUserRole(widget.clubId);
-      print('🔍 User role in club (refreshed): $userRole');
+      debugPrint('🔍 User role in club (refreshed): $userRole');
       
       Navigator.pop(context); // Close loading dialog
       
@@ -825,7 +826,7 @@ class _ClubDashboardScreenSimpleState extends State<ClubDashboardScreenSimple> {
         return;
       }
       
-      print('✅ User has permission - navigating to tournament creation');
+      debugPrint('✅ User has permission - navigating to tournament creation');
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -848,7 +849,7 @@ class _ClubDashboardScreenSimpleState extends State<ClubDashboardScreenSimple> {
       
     } catch (e) {
       Navigator.pop(context); // Close loading dialog if still open
-      print('❌ Error checking permissions: $e');
+      debugPrint('❌ Error checking permissions: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Lỗi kiểm tra quyền: ${e.toString()}'),

@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sabo_arena/repositories/comment_repository.dart';
 import 'package:sabo_arena/theme/app_theme.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/foundation.dart';
 
 class CommentsModal extends StatefulWidget {
   final String postId;
@@ -134,12 +135,12 @@ class _CommentsModalState extends State<CommentsModal> {
   Future<void> _postComment() async {
     // Prevent double tapping
     if (_isPosting) {
-      print('🚫 Already posting, ignoring tap');
+      debugPrint('🚫 Already posting, ignoring tap');
       return;
     }
 
     final commentText = _commentController.text.trim();
-    print('🧪 Creating comment with text: "$commentText"');
+    debugPrint('🧪 Creating comment with text: "$commentText"');
     
     // Validate comment
     if (commentText.isEmpty) {
@@ -194,7 +195,7 @@ class _CommentsModalState extends State<CommentsModal> {
         );
       }
 
-      print('🧪 Post ID: ${widget.postId}');
+      debugPrint('🧪 Post ID: ${widget.postId}');
       final newComment = await _commentRepository.createComment(widget.postId, commentText);
       
       if (newComment != null) {

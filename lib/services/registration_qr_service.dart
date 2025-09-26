@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:sabo_arena/models/user_profile.dart';
 import 'package:sabo_arena/services/share_service.dart';
 import 'package:sabo_arena/services/user_code_service.dart';
+import 'package:flutter/foundation.dart';
 
 class RegistrationQRService {
   static final SupabaseClient _supabase = Supabase.instance.client;
@@ -19,11 +20,11 @@ class RegistrationQRService {
     String role = 'player',
   }) async {
     try {
-      print('🎯 Starting registration with QR for user: $userId');
+      debugPrint('🎯 Starting registration with QR for user: $userId');
       
       // 1. Generate unique user code
       final userCode = await UserCodeService.generateUniqueUserCode(userId);
-      print('📝 Generated user code: $userCode');
+      debugPrint('📝 Generated user code: $userCode');
       
       // 2. Generate QR data
       final qrData = ShareService.generateUserQRData(UserProfile(
@@ -45,7 +46,7 @@ class RegistrationQRService {
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       ));
-      print('🔗 Generated QR data: $qrData');
+      debugPrint('🔗 Generated QR data: $qrData');
       
       // 3. Create/Update user profile with QR system
       final profileData = {
@@ -79,7 +80,7 @@ class RegistrationQRService {
           .select()
           .single();
       
-      print('✅ User profile created with QR system');
+      debugPrint('✅ User profile created with QR system');
       
       // 5. Return success with user code and QR data
       return {
@@ -92,7 +93,7 @@ class RegistrationQRService {
       };
       
     } catch (e) {
-      print('❌ Error in registration with QR: $e');
+      debugPrint('❌ Error in registration with QR: $e');
       return {
         'success': false,
         'error': e.toString(),
@@ -112,7 +113,7 @@ class RegistrationQRService {
       
       return result;
     } catch (e) {
-      print('Error getting user QR info: $e');
+      debugPrint('Error getting user QR info: $e');
       return null;
     }
   }
@@ -151,7 +152,7 @@ class RegistrationQRService {
       };
       
     } catch (e) {
-      print('Error regenerating QR: $e');
+      debugPrint('Error regenerating QR: $e');
       return {
         'success': false,
         'error': e.toString(),
@@ -189,7 +190,7 @@ class RegistrationQRService {
       }
       
     } catch (e) {
-      print('Error validating QR: $e');
+      debugPrint('Error validating QR: $e');
       return {
         'success': false,
         'error': e.toString(),
@@ -217,7 +218,7 @@ class RegistrationQRService {
         }).length,
       };
     } catch (e) {
-      print('Error getting QR stats: $e');
+      debugPrint('Error getting QR stats: $e');
       return {'error': e.toString()};
     }
   }

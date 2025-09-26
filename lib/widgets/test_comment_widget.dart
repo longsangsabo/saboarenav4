@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sabo_arena/repositories/comment_repository.dart';
+import 'package:flutter/foundation.dart';
 
 class TestCommentWidget extends StatefulWidget {
   const TestCommentWidget({super.key});
@@ -26,22 +27,22 @@ class _TestCommentWidgetState extends State<TestCommentWidget> {
 
     try {
       setState(() => _isPosting = true);
-      print('🧪 Testing comment creation...');
-      print('Content: ${_commentController.text.trim()}');
+      debugPrint('🧪 Testing comment creation...');
+      debugPrint('Content: ${_commentController.text.trim()}');
       
       final result = await _commentRepository.createComment(
         'test-post-id', // Dummy post ID
         _commentController.text.trim(),
       );
       
-      print('✅ Comment created: $result');
+      debugPrint('✅ Comment created: $result');
       _commentController.clear();
       
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('✅ Comment test successful!')),
       );
     } catch (e) {
-      print('❌ Comment creation failed: $e');
+      debugPrint('❌ Comment creation failed: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('❌ Error: $e')),
       );

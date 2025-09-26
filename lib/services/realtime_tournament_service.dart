@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/constants/tournament_constants.dart';
 import '../models/tournament.dart';
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 
 /// Service quản lý real-time updates cho tournament system
 class RealTimeTournamentService {
@@ -45,7 +46,7 @@ class RealTimeTournamentService {
       // Unsubscribe if already subscribed
       await unsubscribeTournament(tournamentId);
 
-      print('🔔 Subscribing to real-time updates for tournament: $tournamentId');
+      debugPrint('🔔 Subscribing to real-time updates for tournament: $tournamentId');
 
       // Subscribe to tournament table changes
       final tournamentChannel = _supabase
@@ -108,10 +109,10 @@ class RealTimeTournamentService {
       _activeSubscriptions['matches_$tournamentId'] = matchesChannel;
       _activeSubscriptions['participants_$tournamentId'] = participantsChannel;
 
-      print('✅ Successfully subscribed to real-time updates for tournament: $tournamentId');
+      debugPrint('✅ Successfully subscribed to real-time updates for tournament: $tournamentId');
 
     } catch (e) {
-      print('❌ Error subscribing to tournament updates: $e');
+      debugPrint('❌ Error subscribing to tournament updates: $e');
       throw Exception('Failed to subscribe to real-time updates: $e');
     }
   }
@@ -139,10 +140,10 @@ class RealTimeTournamentService {
         _activeSubscriptions.remove(participantsKey);
       }
 
-      print('✅ Unsubscribed from tournament: $tournamentId');
+      debugPrint('✅ Unsubscribed from tournament: $tournamentId');
 
     } catch (e) {
-      print('❌ Error unsubscribing from tournament: $e');
+      debugPrint('❌ Error unsubscribing from tournament: $e');
     }
   }
 
@@ -153,9 +154,9 @@ class RealTimeTournamentService {
         await channel.unsubscribe();
       }
       _activeSubscriptions.clear();
-      print('✅ Unsubscribed from all tournaments');
+      debugPrint('✅ Unsubscribed from all tournaments');
     } catch (e) {
-      print('❌ Error unsubscribing from all tournaments: $e');
+      debugPrint('❌ Error unsubscribing from all tournaments: $e');
     }
   }
 
@@ -168,7 +169,7 @@ class RealTimeTournamentService {
       final newRecord = payload.newRecord;
       final oldRecord = payload.oldRecord;
 
-      print('🔔 Tournament update received: $eventType');
+      debugPrint('🔔 Tournament update received: $eventType');
 
       final updateData = {
         'type': 'tournament_update',
@@ -196,7 +197,7 @@ class RealTimeTournamentService {
       _tournamentUpdatesController.add(updateData);
 
     } catch (e) {
-      print('❌ Error handling tournament update: $e');
+      debugPrint('❌ Error handling tournament update: $e');
     }
   }
 
@@ -207,7 +208,7 @@ class RealTimeTournamentService {
       final newRecord = payload.newRecord;
       final oldRecord = payload.oldRecord;
 
-      print('🔔 Match update received: $eventType');
+      debugPrint('🔔 Match update received: $eventType');
 
       final updateData = {
         'type': 'match_update',
@@ -248,7 +249,7 @@ class RealTimeTournamentService {
       _matchUpdatesController.add(updateData);
 
     } catch (e) {
-      print('❌ Error handling match update: $e');
+      debugPrint('❌ Error handling match update: $e');
     }
   }
 
@@ -259,7 +260,7 @@ class RealTimeTournamentService {
       final newRecord = payload.newRecord;
       final oldRecord = payload.oldRecord;
 
-      print('🔔 Participant update received: $eventType');
+      debugPrint('🔔 Participant update received: $eventType');
 
       final updateData = {
         'type': 'participant_update',
@@ -294,7 +295,7 @@ class RealTimeTournamentService {
       _participantUpdatesController.add(updateData);
 
     } catch (e) {
-      print('❌ Error handling participant update: $e');
+      debugPrint('❌ Error handling participant update: $e');
     }
   }
 
@@ -343,9 +344,9 @@ class RealTimeTournamentService {
       await _matchUpdatesController.close();
       await _participantUpdatesController.close();
 
-      print('✅ RealTimeTournamentService disposed');
+      debugPrint('✅ RealTimeTournamentService disposed');
     } catch (e) {
-      print('❌ Error disposing RealTimeTournamentService: $e');
+      debugPrint('❌ Error disposing RealTimeTournamentService: $e');
     }
   }
 }

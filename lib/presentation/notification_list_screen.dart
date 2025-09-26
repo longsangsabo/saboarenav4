@@ -3,6 +3,7 @@ import 'package:sizer/sizer.dart';
 import 'package:intl/intl.dart';
 import '../services/enhanced_notification_service.dart';
 import '../models/notification_models.dart';
+import 'package:flutter/foundation.dart';
 
 /// Notification List Screen hiển thị danh sách notifications với actions
 class NotificationListScreen extends StatefulWidget {
@@ -600,7 +601,7 @@ class _NotificationListScreenState extends State<NotificationListScreen>
     // Handle action URL or navigation based on notification type
     if (notification.actionUrl != null) {
       // TODO: Navigate to specific screen based on actionUrl
-      print('Navigate to: ${notification.actionUrl}');
+      debugPrint('Navigate to: ${notification.actionUrl}');
     } else {
       // Handle based on notification type and data
       switch (notification.type) {

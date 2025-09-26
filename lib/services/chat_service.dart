@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/foundation.dart';
 
 class ChatService {
   static final SupabaseClient _supabase = Supabase.instance.client;
@@ -187,7 +188,7 @@ class ChatService {
           .eq('room_id', roomId)
           .eq('user_id', user.id);
     } catch (e) {
-      print('Failed to update last read time: $e');
+      debugPrint('Failed to update last read time: $e');
     }
   }
   
@@ -329,7 +330,7 @@ class ChatService {
       
       return response.length;
     } catch (e) {
-      print('Failed to get unread count: $e');
+      debugPrint('Failed to get unread count: $e');
       return 0;
     }
   }

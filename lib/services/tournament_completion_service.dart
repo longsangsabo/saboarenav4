@@ -9,6 +9,7 @@ import 'tournament_elo_service.dart';
 import 'social_service.dart';
 import 'notification_service.dart';
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
 
 /// Service xử lý hoàn thành tournament và các tác vụ liên quan
 class TournamentCompletionService {
@@ -33,7 +34,7 @@ class TournamentCompletionService {
     bool distributePrizes = true,
   }) async {
     try {
-      print('🏆 Starting tournament completion workflow for $tournamentId');
+      debugPrint('🏆 Starting tournament completion workflow for $tournamentId');
 
       // 1. Validate tournament can be completed
       final validationResult = await _validateTournamentCompletion(tournamentId);
@@ -43,20 +44,20 @@ class TournamentCompletionService {
 
       // 2. Calculate final standings
       final standings = await _calculateFinalStandings(tournamentId);
-      print('✅ Final standings calculated: ${standings.length} participants');
+      debugPrint('✅ Final standings calculated: ${standings.length} participants');
 
       // 3. Update ELO ratings
       List<Map<String, dynamic>> eloChanges = [];
       if (updateElo) {
         eloChanges = await _processEloUpdates(tournamentId, standings);
-        print('✅ ELO updates processed: ${eloChanges.length} players');
+        debugPrint('✅ ELO updates processed: ${eloChanges.length} players');
       }
 
       // 4. Distribute prize pool
       List<Map<String, dynamic>> prizeDistribution = [];
       if (distributePrizes) {
         prizeDistribution = await _distributePrizes(tournamentId, standings);
-        print('✅ Prize distribution completed: ${prizeDistribution.length} recipients');
+        debugPrint('✅ Prize distribution completed: ${prizeDistribution.length} recipients');
       }
 
       // 5. Update tournament status
@@ -65,13 +66,13 @@ class TournamentCompletionService {
       // 6. Send notifications
       if (sendNotifications) {
         await _sendCompletionNotifications(tournamentId, standings, eloChanges, prizeDistribution);
-        print('✅ Completion notifications sent');
+        debugPrint('✅ Completion notifications sent');
       }
 
       // 7. Create social posts
       if (postToSocial) {
         await _createSocialPosts(tournamentId, standings);
-        print('✅ Social posts created');
+        debugPrint('✅ Social posts created');
       }
 
       // 8. Update statistics
@@ -85,7 +86,7 @@ class TournamentCompletionService {
         prizeDistribution,
       );
 
-      print('🎉 Tournament completion workflow finished successfully!');
+      debugPrint('🎉 Tournament completion workflow finished successfully!');
 
       return {
         'success': true,
@@ -100,7 +101,7 @@ class TournamentCompletionService {
       };
 
     } catch (error) {
-      print('❌ Error completing tournament: $error');
+      debugPrint('❌ Error completing tournament: $error');
       return {
         'success': false,
         'error': error.toString(),
@@ -501,10 +502,10 @@ class TournamentCompletionService {
       // );
       
       // Temporary workaround - return empty list
-      print('⚠️ ELO processing temporarily disabled due to type mismatch');
+      debugPrint('⚠️ ELO processing temporarily disabled due to type mismatch');
       return [];
     } catch (e) {
-      print('❌ Error processing ELO updates: $e');
+      debugPrint('❌ Error processing ELO updates: $e');
       return [];
     }
   }
@@ -525,7 +526,7 @@ class TournamentCompletionService {
 
     final prizePool = tournament['prize_pool'] as int? ?? 0;
     if (prizePool <= 0) {
-      print('⚠️ No prize pool to distribute');
+      debugPrint('⚠️ No prize pool to distribute');
       return [];
     }
 
@@ -576,7 +577,7 @@ class TournamentCompletionService {
       }
     }
 
-    print('💰 Prize distribution completed: ${prizeRecipients.length} recipients');
+    debugPrint('💰 Prize distribution completed: ${prizeRecipients.length} recipients');
     return prizeRecipients;
   }
 
@@ -648,7 +649,7 @@ class TournamentCompletionService {
       await _supabase.from('users').update(updates).eq('id', participantId);
       
     } catch (e) {
-      print('⚠️ Failed to update user stats for $participantId: $e');
+      debugPrint('⚠️ Failed to update user stats for $participantId: $e');
     }
   }
 
@@ -765,14 +766,14 @@ class TournamentCompletionService {
           hashtags: ['SABOArena', 'Tournament', 'Champion', tournamentTitle.replaceAll(' ', '')],
         );
 
-        print('📱 Tournament completion post created');
+        debugPrint('📱 Tournament completion post created');
       }
 
       // Champion có thể tự động share achievement (optional)
       // Implementation sau nếu cần
 
     } catch (e) {
-      print('⚠️ Failed to create social posts: $e');
+      debugPrint('⚠️ Failed to create social posts: $e');
     }
   }
 
@@ -815,10 +816,10 @@ class TournamentCompletionService {
         }).eq('id', tournament['club_id']);
       }
 
-      print('📊 Tournament statistics updated');
+      debugPrint('📊 Tournament statistics updated');
 
     } catch (e) {
-      print('⚠️ Failed to update statistics: $e');
+      debugPrint('⚠️ Failed to update statistics: $e');
     }
   }
 

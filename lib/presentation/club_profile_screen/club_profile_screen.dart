@@ -12,6 +12,7 @@ import './widgets/club_photo_gallery_widget.dart';
 import './widgets/club_tournaments_widget.dart';
 import '../tournament_creation_wizard/tournament_creation_wizard.dart';
 import '../rank_registration_screen/rank_registration_screen.dart';
+import 'package:flutter/foundation.dart';
 
 class ClubProfileScreen extends StatefulWidget {
   const ClubProfileScreen({super.key});
@@ -229,7 +230,7 @@ class _ClubProfileScreenState extends State<ClubProfileScreen>
         });
       }
     } catch (error) {
-      print('Error loading user data: $error');
+      debugPrint('Error loading user data: $error');
     } finally {
       setState(() {
         _isLoadingUser = false;

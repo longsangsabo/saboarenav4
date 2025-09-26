@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sabo_arena/services/club_permission_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/foundation.dart';
 
 class ActivityHistoryScreen extends StatefulWidget {
   final String clubId;
@@ -111,7 +112,7 @@ class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
         );
       }).toList();
     } catch (e) {
-      print('Error fetching activities: $e');
+      debugPrint('Error fetching activities: $e');
       // Return mock data for development
       return _getMockActivities();
     }
