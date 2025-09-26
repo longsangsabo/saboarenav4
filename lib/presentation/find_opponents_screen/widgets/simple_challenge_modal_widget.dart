@@ -314,7 +314,7 @@ class _SimpleChallengeModalWidgetState extends State<SimpleChallengeModalWidget>
             isDense: true,
           ),
           items: [
-            DropdownMenuItem(value: 0, child: Text('Không cược SPA')),
+            DropdownMenuItem(value: 0, child: Text('Không bonus SPA')),
             ...spaBettingOptions.map((option) {
               return DropdownMenuItem(
                 value: option['amount'] as int,
