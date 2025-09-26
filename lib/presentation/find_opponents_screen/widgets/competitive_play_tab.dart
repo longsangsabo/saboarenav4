@@ -90,7 +90,7 @@ class _CompetitivePlayTabState extends State<CompetitivePlayTab> {
             const SizedBox(width: 12),
             const Expanded(
               child: Text(
-                'Đăng ký hạng để tham gia thách đấu có cược điểm SPA',
+                'Đăng ký hạng để tham gia thách đấu có bonus điểm SPA',
                 style: TextStyle(fontSize: 14),
               ),
             ),
@@ -114,7 +114,7 @@ class _CompetitivePlayTabState extends State<CompetitivePlayTab> {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                'Hạng hiện tại: ${_currentUser!.rank} - Có thể thách đấu có cược SPA',
+                'Hạng hiện tại: ${_currentUser!.rank} - Có thể thách đấu có bonus SPA',
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   color: Colors.green.shade800,
@@ -141,7 +141,7 @@ class _CompetitivePlayTabState extends State<CompetitivePlayTab> {
           const SizedBox(width: 12),
           const Expanded(
             child: Text(
-              'Đăng ký hạng để tham gia thách đấu có cược điểm SPA',
+              'Đăng ký hạng để tham gia thách đấu có bonus điểm SPA',
               style: TextStyle(fontSize: 14),
             ),
           ),
@@ -194,7 +194,7 @@ class _CompetitivePlayTabState extends State<CompetitivePlayTab> {
           children: [
             CircularProgressIndicator(),
             SizedBox(height: 16),
-            Text('Đang tìm đối thủ để thách đấu có cược SPA...'),
+            Text('Đang tìm đối thủ để thách đấu có bonus SPA...'),
           ],
         ),
       );
@@ -229,7 +229,7 @@ class _CompetitivePlayTabState extends State<CompetitivePlayTab> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Thách đấu có cược SPA',
+                      'Thách đấu có bonus SPA',
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         color: Colors.orange[800],
@@ -402,21 +402,21 @@ class _CompetitivePlayTabState extends State<CompetitivePlayTab> {
 
   Map<String, dynamic> _getChallengeInfo(UserProfile player) {
     // Generate dynamic challenge info based on player stats
-    final spaBet = _calculateSpaBet(player.eloRating);
+    final spaBonus = _calculateSpaBonus(player.eloRating);
     final raceTo = _calculateRaceTo(player.eloRating);
     final playTime = _getAvailablePlayTime();
     final availability = _getPlayerAvailability();
 
     return {
-      'spaBet': spaBet,
+      'spaBonus': spaBonus,
       'raceTo': raceTo,
       'playTime': playTime,
       'availability': availability,
     };
   }
 
-  int _calculateSpaBet(int eloRating) {
-    // SPA bet based on ELO rating
+  int _calculateSpaBonus(int eloRating) {
+    // SPA bonus based on ELO rating
     if (eloRating >= 2000) return 1000;
     if (eloRating >= 1800) return 800;
     if (eloRating >= 1600) return 600;

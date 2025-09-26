@@ -171,14 +171,14 @@ class PlayerCardWidget extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    // Challenge Info Row 1: SPA Bet & Race To
+                    // Challenge Info Row 1: SPA Bonus & Race To
                     Row(
                       children: [
                         Expanded(
                           child: _buildChallengeInfoItem(
                             Icons.monetization_on,
-                            'SPA Cược',
-                            '${challengeInfo?['spaBet'] ?? 300}',
+                            'SPA Bonus',
+                            '${challengeInfo?['spaBonus'] ?? 300}',
                             Colors.amber,
                           ),
                         ),
@@ -476,7 +476,7 @@ class PlayerCardWidget extends StatelessWidget {
     if (challengeType == 'thach_dau') {
       final hasRank = await _checkUserRank(context);
       if (!hasRank) {
-        _showRegistrationRequiredDialog(context, 'thách đấu có cược SPA');
+        _showRegistrationRequiredDialog(context, 'thách đấu có bonus SPA');
         return;
       }
     }
@@ -508,7 +508,7 @@ class PlayerCardWidget extends StatelessWidget {
     if (mode == 'thach_dau') {
       final hasRank = await _checkUserRank(context);
       if (!hasRank) {
-        _showRegistrationRequiredDialog(context, 'hẹn lịch thách đấu có cược SPA');
+        _showRegistrationRequiredDialog(context, 'hẹn lịch thách đấu có bonus SPA');
         return;
       }
     }
