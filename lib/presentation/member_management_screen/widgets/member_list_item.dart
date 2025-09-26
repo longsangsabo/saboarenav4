@@ -25,7 +25,7 @@ class _MemberListItemState extends State<MemberListItem>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
-  late Animation<Color?> _colorAnimation;
+  Animation<Color?>? _colorAnimation;
 
   @override
   void initState() {
@@ -38,11 +38,17 @@ class _MemberListItemState extends State<MemberListItem>
     _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
-    
-    _colorAnimation = ColorTween(
-      begin: Colors.transparent,
-      end: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-    ).animate(_controller);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_colorAnimation == null) {
+      _colorAnimation = ColorTween(
+        begin: Colors.transparent,
+        end: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+      ).animate(_controller);
+    }
   }
 
   @override
@@ -72,7 +78,7 @@ class _MemberListItemState extends State<MemberListItem>
           scale: _scaleAnimation.value,
           child: Container(
             decoration: BoxDecoration(
-              color: _colorAnimation.value,
+              color: _colorAnimation?.value ?? Colors.transparent,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: widget.isSelected
@@ -90,7 +96,7 @@ class _MemberListItemState extends State<MemberListItem>
                     : () => widget.onAction('view-profile'),
                 onLongPress: () => widget.onSelectionChanged(!widget.isSelected),
                 child: Padding(
-                  padding: EdgeInsets.all(16),
+                  padding: EdgeInsets.all(12),
                   child: Row(
                     children: [
                       // Selection checkbox
@@ -137,30 +143,35 @@ class _MemberListItemState extends State<MemberListItem>
     return Stack(
       children: [
         Container(
-          width: 56,
-          height: 56,
+          width: 44,
+          height: 44,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
               color: _getMembershipColor().withOpacity(0.3),
-              width: 2,
+              width: 1.5,
             ),
           ),
           child: CircleAvatar(
-            radius: 26,
-            backgroundImage: NetworkImage(widget.member.user.avatar),
+            radius: 20,
+            backgroundImage: widget.member.user.avatar.isNotEmpty 
+                ? NetworkImage(widget.member.user.avatar) 
+                : null,
             backgroundColor: Theme.of(context).colorScheme.surface,
+            child: widget.member.user.avatar.isEmpty 
+                ? Icon(Icons.person, size: 20, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6))
+                : null,
           ),
         ),
         
         // Online status
         if (widget.member.user.isOnline)
           Positioned(
-            bottom: 2,
-            right: 2,
+            bottom: 1,
+            right: 1,
             child: Container(
-              width: 16,
-              height: 16,
+              width: 12,
+              height: 12,
               decoration: BoxDecoration(
                 color: Colors.green,
                 shape: BoxShape.circle,
@@ -200,7 +211,7 @@ class _MemberListItemState extends State<MemberListItem>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Name and username
+        // Name and status badge
         Row(
           children: [
             Flexible(
@@ -212,35 +223,26 @@ class _MemberListItemState extends State<MemberListItem>
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            SizedBox(width: 4),
+            SizedBox(width: 6),
             _buildStatusBadge(),
           ],
         ),
         
-        SizedBox(height: 2),
+        SizedBox(height: 6),
         
-        Text(
-          '@${widget.member.user.username}',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-          ),
-        ),
-        
-        SizedBox(height: 4),
-        
-        // Rank and ELO
+        // Rank and ELO in compact row
         Row(
           children: [
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
-                color: _getRankColor().withOpacity(0.1),
-                borderRadius: BorderRadius.circular(4),
+                color: _getRankColor().withOpacity(0.15),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
                 _getRankLabel(),
                 style: TextStyle(
-                  fontSize: 10,
+                  fontSize: 11,
                   fontWeight: FontWeight.w600,
                   color: _getRankColor(),
                 ),
@@ -253,6 +255,7 @@ class _MemberListItemState extends State<MemberListItem>
               'ELO: ${widget.member.user.elo}',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.w500,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
               ),
             ),
           ],
@@ -260,11 +263,12 @@ class _MemberListItemState extends State<MemberListItem>
         
         SizedBox(height: 4),
         
-        // Join date and membership info
+        // Join date only (compact)
         Text(
-          'Tham gia: ${_formatDate(widget.member.membershipInfo.joinDate)} • ID: ${widget.member.membershipInfo.membershipId}',
+          'Tham gia: ${_formatDate(widget.member.membershipInfo.joinDate)}',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+            fontSize: 11,
           ),
         ),
       ],
@@ -274,63 +278,33 @@ class _MemberListItemState extends State<MemberListItem>
   Widget _buildMemberStats() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        // Activity score
+        // Win rate compact
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
           decoration: BoxDecoration(
-            color: _getActivityColor().withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
+            color: Colors.green.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.local_fire_department,
-                size: 12,
-                color: _getActivityColor(),
-              ),
-              SizedBox(width: 4),
-              Text(
-                '${widget.member.activityStats.activityScore}',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: _getActivityColor(),
-                ),
-              ),
-            ],
+          child: Text(
+            '${(widget.member.activityStats.winRate * 100).toInt()}%',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: Colors.green,
+            ),
           ),
         ),
         
         SizedBox(height: 4),
-        
-        // Win rate
-        Text(
-          'Tỷ lệ thắng: ${(widget.member.activityStats.winRate * 100).toInt()}%',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        
-        SizedBox(height: 2),
         
         // Matches count
         Text(
           '${widget.member.activityStats.totalMatches} trận',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-          ),
-        ),
-        
-        SizedBox(height: 2),
-        
-        // Last active
-        Text(
-          _getLastActiveText(),
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
-            fontSize: 10,
+            fontSize: 11,
           ),
         ),
       ],
@@ -507,27 +481,7 @@ class _MemberListItemState extends State<MemberListItem>
     }
   }
 
-  Color _getActivityColor() {
-    if (widget.member.activityStats.activityScore >= 80) return Colors.green;
-    if (widget.member.activityStats.activityScore >= 60) return Colors.orange;
-    return Colors.red;
-  }
 
-  String _getLastActiveText() {
-    final now = DateTime.now();
-    final lastActive = widget.member.activityStats.lastActive;
-    final difference = now.difference(lastActive);
-    
-    if (difference.inMinutes < 1) {
-      return 'Vừa xong';
-    } else if (difference.inHours < 1) {
-      return '${difference.inMinutes}p trước';
-    } else if (difference.inDays < 1) {
-      return '${difference.inHours}h trước';
-    } else {
-      return '${difference.inDays}d trước';
-    }
-  }
 
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';

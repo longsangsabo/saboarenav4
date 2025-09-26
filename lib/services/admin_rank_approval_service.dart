@@ -29,20 +29,20 @@ class AdminRankApprovalService {
       final userId = request['user_id'];
       final currentUserId = _supabase.auth.currentUser?.id;
 
-      // Step 2: Check authorization (club admin)
+      // Step 2: Check authorization (club owner)
       if (currentUserId != null) {
         final clubMemberResponse = await _supabase
             .from('club_members')
             .select('role')
             .eq('user_id', currentUserId)
             .eq('club_id', request['club_id'])
-            .eq('role', 'admin')
+            .eq('role', 'owner')
             .maybeSingle();
 
         if (clubMemberResponse == null) {
           return {
             'success': false,
-            'error': 'Not authorized - user is not club admin'
+            'error': 'Not authorized - user is not club owner'
           };
         }
       }
@@ -82,9 +82,30 @@ class AdminRankApprovalService {
             })
             .eq('id', userId);
 
+        // Add user to club as member (if not already a member)
+        final clubId = request['club_id'];
+        final existingMember = await _supabase
+            .from('club_members')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('club_id', clubId)
+            .maybeSingle();
+
+        if (existingMember == null) {
+          // Add user as member
+          await _supabase
+              .from('club_members')
+              .insert({
+                'user_id': userId,
+                'club_id': clubId,
+                'role': 'member',
+                'joined_at': DateTime.now().toIso8601String(),
+              });
+        }
+
         return {
           'success': true,
-          'message': 'Request approved successfully',
+          'message': 'Request approved successfully - User added to club',
           'user_id': userId,
           'new_rank': newRank,
         };
@@ -103,7 +124,7 @@ class AdminRankApprovalService {
     }
   }
 
-  /// Get pending rank requests for the current club admin
+  /// Get pending rank requests for the current club owner
   Future<List<Map<String, dynamic>>> getPendingRankRequests() async {
     try {
       final currentUserId = _supabase.auth.currentUser?.id;
@@ -116,39 +137,50 @@ class AdminRankApprovalService {
           .from('club_members')
           .select('club_id')
           .eq('user_id', currentUserId)
-          .eq('role', 'admin')
+          .eq('role', 'owner')
           .maybeSingle();
 
       if (clubMemberResponse == null) {
-        return []; // Not a club admin
+        return []; // Not a club owner
       }
 
       final clubId = clubMemberResponse['club_id'];
 
-      // Get pending requests for this club
+      // Get pending requests for this club (simplified query without join)
       final response = await _supabase
           .from('rank_requests')
-          .select('''
-            id,
-            user_id,
-            club_id,
-            status,
-            notes,
-            evidence_urls,
-            requested_at,
-            users!inner(
-              display_name,
-              rank
-            ),
-            clubs!inner(
-              name
-            )
-          ''')
+          .select('*')
           .eq('club_id', clubId)
           .eq('status', 'pending')
           .order('requested_at', ascending: false);
 
-      return List<Map<String, dynamic>>.from(response);
+      // Manually fetch user and club details for each request
+      final enrichedRequests = <Map<String, dynamic>>[];
+      
+      for (final request in response) {
+        // Get user details
+        final userResponse = await _supabase
+            .from('users')
+            .select('display_name, rank, avatar_url, email')
+            .eq('id', request['user_id'])
+            .single();
+            
+        // Get club details  
+        final clubResponse = await _supabase
+            .from('clubs')
+            .select('name')
+            .eq('id', request['club_id'])
+            .single();
+            
+        // Combine the data
+        enrichedRequests.add({
+          ...request,
+          'users': userResponse,
+          'clubs': clubResponse,
+        });
+      }
+
+      return enrichedRequests;
 
     } catch (e) {
       throw Exception('Failed to load rank requests: $e');
@@ -172,7 +204,7 @@ class AdminRankApprovalService {
             )
           ''')
           .eq('user_id', currentUserId)
-          .eq('role', 'admin')
+          .eq('role', 'owner')
           .maybeSingle();
 
       return response;

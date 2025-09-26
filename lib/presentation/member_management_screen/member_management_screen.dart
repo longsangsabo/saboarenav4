@@ -38,14 +38,14 @@ class _MemberManagementScreenState extends State<MemberManagementScreen>
   bool _showAdvancedFilters = false;
   final List<String> _selectedMembers = [];
   
-  // Mock data - replace with actual API calls
+  // Real data from API
   List<MemberData> _allMembers = [];
   List<MemberData> _filteredMembers = [];
-  final MemberAnalytics _analytics = const MemberAnalytics(
-    totalMembers: 100,
-    activeMembers: 78,
-    newThisMonth: 15,
-    growthRate: 25.0,
+  MemberAnalytics _analytics = const MemberAnalytics(
+    totalMembers: 0,
+    activeMembers: 0,
+    newThisMonth: 0,
+    growthRate: 0.0,
   );
   
   bool _isLoading = true;
@@ -76,25 +76,59 @@ class _MemberManagementScreenState extends State<MemberManagementScreen>
 
   Future<void> _loadMemberData() async {
     try {
-      // Fetch real member data from the service
+      print('🚀 Loading member data for club: ${widget.clubId}');
+      // Fetch real member data from the service - get all members first
       final membersData = await MemberManagementService.getClubMembers(
         clubId: widget.clubId,
-        status: 'active',
+        // Don't filter by status initially, get all members
       );
       
+      print('✅ Got ${membersData.length} members from service');
+      
+      // Calculate real analytics
+      final totalMembers = membersData.length;
+      final activeMembers = membersData.where((m) => m['status'] == 'active').length;
+      
+      // Calculate new members this month
+      final now = DateTime.now();
+      final thisMonth = DateTime(now.year, now.month, 1);
+      final newThisMonth = membersData.where((m) {
+        if (m['joined_at'] != null) {
+          final joinDate = DateTime.parse(m['joined_at']);
+          return joinDate.isAfter(thisMonth);
+        }
+        return false;
+      }).length;
+      
+      final convertedMembers = _convertToMemberData(membersData);
+      print('✅ Converted ${convertedMembers.length} members to MemberData objects');
+      
       setState(() {
-        _allMembers = _convertToMemberData(membersData);
+        _allMembers = convertedMembers;
         _filteredMembers = _allMembers;
+        _analytics = MemberAnalytics(
+          totalMembers: totalMembers,
+          activeMembers: activeMembers,
+          newThisMonth: newThisMonth,
+          growthRate: totalMembers > 0 ? (newThisMonth / totalMembers * 100) : 0.0,
+        );
         _isLoading = false;
       });
       
       _animationController.forward();
     } catch (e) {
+      print('Error loading member data: $e');
       setState(() {
         _isLoading = false;
         // Fallback to empty list or show error
         _allMembers = [];
         _filteredMembers = [];
+        _analytics = const MemberAnalytics(
+          totalMembers: 0,
+          activeMembers: 0,
+          newThisMonth: 0,
+          growthRate: 0.0,
+        );
       });
       
       if (mounted) {

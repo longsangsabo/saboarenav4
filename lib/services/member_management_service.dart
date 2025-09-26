@@ -17,6 +17,9 @@ class MemberManagementService {
     int? offset,
   }) async {
     try {
+      print('🔍 MemberManagementService: Getting members for club $clubId');
+      print('🔍 Status filter: $status, Role filter: $membershipType');
+      
       var query = _supabase
           .from('club_members')
           .select('*, users(*)');
@@ -32,6 +35,7 @@ class MemberManagementService {
       }
 
       final response = await query;
+      print('✅ MemberManagementService: Found ${response.length} members');
       
       if (limit != null) {
         final startIndex = offset ?? 0;

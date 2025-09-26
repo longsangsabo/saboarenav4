@@ -2,7 +2,7 @@
 /// Simplified ELO system for SABO Arena tournaments
 class EloConstants {
   // Starting ELO for new players
-  static const int STARTING_ELO = 1200;
+  static const int STARTING_ELO = 1000;
 
   // Fixed ELO rewards - Simple system
   static const int ELO_1ST_PLACE = 75;        // 1st place

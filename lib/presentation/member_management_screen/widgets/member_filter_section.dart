@@ -275,22 +275,24 @@ class _MemberFilterSectionState extends State<MemberFilterSection>
   }
 
   Widget _buildRankRangeFilter() {
-    return _FilterGroup(
-      title: 'Phạm vi xếp hạng',
-      child: Row(
-        children: [
-          Expanded(
-            child: DropdownButtonFormField<String>(
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.4, // Fixed width for Wrap
+      child: _FilterGroup(
+        title: 'Xếp hạng',
+        child: Column(
+          children: [
+            DropdownButtonFormField<String>(
               initialValue: _currentFilters.minRank,
               decoration: InputDecoration(
                 labelText: 'Từ',
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                isDense: true,
               ),
               items: ['beginner', 'amateur', 'intermediate', 'advanced', 'professional'].map((rank) {
                 return DropdownMenuItem(
                   value: rank,
-                  child: Text(_getRankLabelFromString(rank)),
+                  child: Text(_getRankLabelFromString(rank), style: TextStyle(fontSize: 12)),
                 );
               }).toList(),
               onChanged: (value) {
@@ -308,22 +310,19 @@ class _MemberFilterSectionState extends State<MemberFilterSection>
                 });
               },
             ),
-          ),
-          SizedBox(width: 8),
-          Text('đến'),
-          SizedBox(width: 8),
-          Expanded(
-            child: DropdownButtonFormField<String>(
+            SizedBox(height: 8),
+            DropdownButtonFormField<String>(
               initialValue: _currentFilters.maxRank,
               decoration: InputDecoration(
                 labelText: 'Đến',
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                isDense: true,
               ),
               items: ['beginner', 'amateur', 'intermediate', 'advanced', 'professional'].map((rank) {
                 return DropdownMenuItem(
                   value: rank,
-                  child: Text(_getRankLabelFromString(rank)),
+                  child: Text(_getRankLabelFromString(rank), style: TextStyle(fontSize: 12)),
                 );
               }).toList(),
               onChanged: (value) {
@@ -341,8 +340,8 @@ class _MemberFilterSectionState extends State<MemberFilterSection>
                 });
               },
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
