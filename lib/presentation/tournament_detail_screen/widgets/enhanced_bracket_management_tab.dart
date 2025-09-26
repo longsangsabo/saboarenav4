@@ -9,6 +9,11 @@ import '../../../services/bracket_generator_service.dart';
 import '../../../services/tournament_service.dart' as TournamentSvc;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/utils/rank_migration_helper.dart';
+import 'demo_bracket/formats/single_elimination_bracket.dart';
+import 'demo_bracket/formats/double_elimination_bracket.dart';
+import 'demo_bracket/formats/round_robin_bracket.dart';
+import 'demo_bracket/formats/swiss_system_bracket.dart';
+import 'quick_match_input_widget.dart';
 
 // Tournament format constants
 class TournamentFormats {
@@ -47,6 +52,13 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
   List<UserProfile> _realParticipants = [];
   bool _isLoadingParticipants = false;
   final _tournamentService = TournamentSvc.TournamentService.instance;
+  final SupabaseClient supabase = Supabase.instance.client;
+  
+  // Tournament progression state
+  bool _canAdvanceTournament = false;
+  bool _isAdvancing = false;
+  String? _tournamentProgressInfo;
+  Map<int, Map<String, dynamic>>? _roundsInfo;
   
   final List<Map<String, String>> _tournamentFormats = [
     {'key': TournamentFormats.singleElimination, 'label': 'Loại trực tiếp'},
@@ -67,6 +79,7 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
   void initState() {
     super.initState();
     _loadRealParticipants();
+    _checkTournamentProgress();
   }
 
   Future<void> _loadRealParticipants() async {
@@ -92,23 +105,39 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(16.sp),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildBracketStatus(),
-          SizedBox(height: 20.sp),
-          _buildBracketGenerator(),
-          SizedBox(height: 20.sp),
-          _buildBracketPreview(),
-          SizedBox(height: 20.sp),
-          _buildBracketActions(),
-          if (_generatedBracket != null) ...[
-            SizedBox(height: 20.sp),
-            _buildGeneratedBracketInfo(),
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.all(12.sp),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+
+            
+            // Main bracket management content
+            _buildBracketStatus(),
+            SizedBox(height: 16.sp),
+            _buildTournamentProgress(),
+            SizedBox(height: 16.sp),
+            _buildBracketGenerator(),
+            SizedBox(height: 16.sp),
+            _buildCurrentMatches(),
+            SizedBox(height: 16.sp), 
+            _buildBracketPreview(),
+            SizedBox(height: 16.sp),
+            _buildBracketActions(),
+            if (_generatedBracket != null) ...[
+              SizedBox(height: 16.sp),
+              _buildGeneratedBracketInfo(),
+            ],
+            // Debug actions for development
+            if (_realParticipants.isEmpty) ...[
+              SizedBox(height: 16.sp),
+              _buildDebugActions(),
+            ],
+            // Bottom padding for better scrolling
+            SizedBox(height: 100.sp),
           ],
-        ],
+        ),
       ),
     );
   }
@@ -169,6 +198,119 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
                 ),
               ),
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTournamentProgress() {
+    if (_tournamentProgressInfo == null && _roundsInfo == null) {
+      return SizedBox.shrink();
+    }
+
+    return Container(
+      padding: EdgeInsets.all(16.sp),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: _canAdvanceTournament 
+            ? [Colors.green.shade400, Colors.teal.shade500]
+            : [Colors.blue.shade400, Colors.indigo.shade500],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12.sp),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                _canAdvanceTournament ? Icons.rocket_launch : Icons.hourglass_empty,
+                color: Colors.white,
+                size: 20.sp,
+              ),
+              SizedBox(width: 8.sp),
+              Text(
+                "Tournament Progress",
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.sp),
+          
+          if (_tournamentProgressInfo != null)
+            Text(
+              _tournamentProgressInfo!,
+              style: TextStyle(
+                fontSize: 14.sp,
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          
+          if (_roundsInfo != null) ...[
+            SizedBox(height: 12.sp),
+            ...(_roundsInfo!.entries.map((entry) {
+              final roundNum = entry.key;
+              final info = entry.value;
+              final isComplete = info['isComplete'] as bool;
+              
+              return Padding(
+                padding: EdgeInsets.symmetric(vertical: 2.sp),
+                child: Row(
+                  children: [
+                    Icon(
+                      isComplete ? Icons.check_circle : Icons.radio_button_unchecked,
+                      color: Colors.white70,
+                      size: 16.sp,
+                    ),
+                    SizedBox(width: 8.sp),
+                    Text(
+                      'Round $roundNum: ${info['completed']}/${info['total']} matches',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            })),
+          ],
+          
+          if (_canAdvanceTournament) ...[
+            SizedBox(height: 16.sp),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _isAdvancing ? null : _advanceTournament,
+                icon: _isAdvancing 
+                  ? SizedBox(
+                      width: 16.sp,
+                      height: 16.sp,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Icon(Icons.arrow_forward),
+                label: Text(_isAdvancing ? "Creating Next Round..." : "🚀 Advance Tournament"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.green.shade600,
+                  padding: EdgeInsets.symmetric(vertical: 12.sp),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.sp),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -311,17 +453,144 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "📊 Xem trước cấu trúc",
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.textPrimaryLight,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "📊 Xem trước cấu trúc",
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimaryLight,
+                ),
+              ),
+              TextButton.icon(
+                onPressed: () => _showBracketVisualPreview(),
+                icon: Icon(Icons.visibility, size: 16.sp),
+                label: Text("Xem bracket"),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppTheme.primaryLight,
+                ),
+              ),
+            ],
           ),
           SizedBox(height: 12.sp),
           
           _buildFormatInfo(),
+          
+          SizedBox(height: 16.sp),
+          
+          // Participants preview
+          Container(
+            padding: EdgeInsets.all(12.sp),
+            decoration: BoxDecoration(
+              color: AppTheme.backgroundLight,
+              borderRadius: BorderRadius.circular(8.sp),
+              border: Border.all(color: AppTheme.dividerLight),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.people, color: AppTheme.primaryLight, size: 18.sp),
+                    SizedBox(width: 8.sp),
+                    Text(
+                      "Người tham gia (${_realParticipants.length})",
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textPrimaryLight,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8.sp),
+                if (_realParticipants.isEmpty) 
+                  Text(
+                    "Chưa có người tham gia nào. Hãy thêm demo users để test.",
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: AppTheme.textSecondaryLight,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  )
+                else
+                  SizedBox(
+                    height: 60.sp,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _realParticipants.length > 5 ? 5 : _realParticipants.length,
+                      itemBuilder: (context, index) {
+                        if (index == 4 && _realParticipants.length > 5) {
+                          return Container(
+                            width: 50.sp,
+                            margin: EdgeInsets.only(right: 8.sp),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primaryLight.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8.sp),
+                              border: Border.all(color: AppTheme.primaryLight.withOpacity(0.3)),
+                            ),
+                            child: Center(
+                              child: Text(
+                                '+${_realParticipants.length - 4}',
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.primaryLight,
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+                        
+                        final participant = _realParticipants[index];
+                        return Container(
+                          width: 50.sp,
+                          margin: EdgeInsets.only(right: 8.sp),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryLight.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8.sp),
+                            border: Border.all(color: AppTheme.primaryLight.withOpacity(0.3)),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CircleAvatar(
+                                radius: 12.sp,
+                                backgroundColor: AppTheme.primaryLight,
+                                child: Text(
+                                  participant.fullName.isNotEmpty 
+                                    ? participant.fullName[0].toUpperCase()
+                                    : 'U',
+                                  style: TextStyle(
+                                    fontSize: 10.sp,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 4.sp),
+                              Text(
+                                participant.fullName.length > 8 
+                                  ? '${participant.fullName.substring(0, 8)}...'
+                                  : participant.fullName,
+                                style: TextStyle(
+                                  fontSize: 8.sp,
+                                  color: AppTheme.textSecondaryLight,
+                                ),
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -393,6 +662,85 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
         ),
       ),
     );
+  }
+
+  /// Build current matches section with Quick Match Input
+  Widget _buildCurrentMatches() {
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: _loadCurrentMatches(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Container(
+            padding: EdgeInsets.all(16.sp),
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return Container(
+            padding: EdgeInsets.all(16.sp),
+            decoration: BoxDecoration(
+              color: Colors.red.shade50,
+              borderRadius: BorderRadius.circular(12.sp),
+              border: Border.all(color: Colors.red.shade200),
+            ),
+            child: Text(
+              'Error loading matches: ${snapshot.error}',
+              style: TextStyle(color: Colors.red.shade700),
+            ),
+          );
+        }
+
+        final matches = snapshot.data ?? [];
+        final pendingMatches = matches.where((m) => m['status'] == 'pending').toList();
+
+        return QuickMatchInputWidget(
+          tournamentId: widget.tournamentId,
+          pendingMatches: pendingMatches,
+          onMatchUpdated: () {
+            setState(() {}); // Trigger rebuild
+            _checkTournamentProgress(); // Check for auto-advancement
+          },
+        );
+      },
+    );
+  }
+
+  /// Load current matches from database
+  Future<List<Map<String, dynamic>>> _loadCurrentMatches() async {
+    try {
+      final response = await supabase
+          .from('matches')
+          .select('''
+            id,
+            round_number,
+            match_number, 
+            player1_id,
+            player2_id,
+            winner_id,
+            player1_score,
+            player2_score,
+            status,
+            player1:player1_id(full_name),
+            player2:player2_id(full_name)
+          ''')
+          .eq('tournament_id', widget.tournamentId)
+          .order('round_number, match_number');
+
+      return response.map<Map<String, dynamic>>((match) {
+        return {
+          ...match,
+          'player1_name': match['player1']?['full_name'] ?? 'Player 1',
+          'player2_name': match['player2']?['full_name'] ?? 'Player 2',
+        };
+      }).toList();
+
+    } catch (e) {
+      debugPrint('❌ Error loading matches: $e');
+      return [];
+    }
   }
 
   Widget _buildBracketActions() {
@@ -789,7 +1137,11 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
         seedingMethod: _selectedSeeding,
       );
       
-      debugPrint('✅ Bracket generated successfully: ${bracket.toString()}');
+      debugPrint('✅ Bracket generated successfully');
+      
+      // Save bracket to database
+      await _saveBracketToDatabase(bracket);
+      
       setState(() {
         _generatedBracket = bracket;
       });
@@ -797,7 +1149,7 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('✅ Đã tạo bảng đấu ${_getFormatName(_selectedFormat)} với ${participants.length} người chơi thật!'),
+            content: Text('✅ Đã tạo và lưu bảng đấu ${_getFormatName(_selectedFormat)} với ${participants.length} người chơi!'),
             backgroundColor: AppTheme.successLight,
           ),
         );
@@ -823,45 +1175,238 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
 
 
 
-  void _showBracketDemo() {
+  void _showBracketVisualPreview() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.visibility, color: AppTheme.primaryLight),
-            SizedBox(width: 8.sp),
-            Text('Demo: ${_getFormatName(_selectedFormat)}'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('🏆 Thể thức: ${_getFormatName(_selectedFormat)}'),
-            SizedBox(height: 8.sp),
-            Text('👥 Số người chơi: 16'),
-            SizedBox(height: 8.sp),
-            Text('🎯 Seeding: ${_seedingMethods.firstWhere((m) => m['key'] == _selectedSeeding)['label']}'),
-            SizedBox(height: 16.sp),
-            Text('Đây sẽ là demo cho bảng đấu $_selectedFormat với seeding $_selectedSeeding'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Đóng'),
+      barrierDismissible: true,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          height: MediaQuery.of(context).size.height * 0.8,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16.sp),
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _generateBracket();
-            },
-            child: Text('Tạo thật'),
+          child: Column(
+            children: [
+              // Header
+              Container(
+                padding: EdgeInsets.all(16.sp),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [AppTheme.primaryLight, AppTheme.primaryLight.withOpacity(0.8)],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16.sp),
+                    topRight: Radius.circular(16.sp),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.visibility, color: Colors.white, size: 24.sp),
+                    SizedBox(width: 12.sp),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Xem trước: ${_getFormatName(_selectedFormat)}',
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            '${_realParticipants.length} người chơi • ${_seedingMethods.firstWhere((m) => m['key'] == _selectedSeeding)['label']}',
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              color: Colors.white.withOpacity(0.9),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: Icon(Icons.close, color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Bracket Preview Content
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.all(16.sp),
+                  child: _buildVisualBracketPreview(),
+                ),
+              ),
+              
+              // Actions
+              Container(
+                padding: EdgeInsets.all(16.sp),
+                decoration: BoxDecoration(
+                  color: AppTheme.backgroundLight,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(16.sp),
+                    bottomRight: Radius.circular(16.sp),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text('Đóng'),
+                      ),
+                    ),
+                    SizedBox(width: 12.sp),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _generateBracket();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primaryLight,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: Text('🚀 Tạo bảng đấu'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
+  }
+
+  Widget _buildVisualBracketPreview() {
+    if (_realParticipants.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.people_outline,
+              size: 64.sp,
+              color: AppTheme.textSecondaryLight,
+            ),
+            SizedBox(height: 16.sp),
+            Text(
+              'Chưa có người tham gia',
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.textSecondaryLight,
+              ),
+            ),
+            SizedBox(height: 8.sp),
+            Text(
+              'Hãy thêm người chơi để xem preview bảng đấu',
+              style: TextStyle(
+                fontSize: 12.sp,
+                color: AppTheme.textSecondaryLight,
+              ),
+            ),
+            SizedBox(height: 20.sp),
+            ElevatedButton.icon(
+              onPressed: _addDemoParticipantsToDatabase,
+              icon: Icon(Icons.add, size: 16.sp),
+              label: Text('Thêm demo players'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryLight,
+                foregroundColor: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Determine player count for demo (use actual or simulate with 8/16)
+    int demoPlayerCount = _realParticipants.length;
+    if (demoPlayerCount < 4) demoPlayerCount = 8;
+    if (demoPlayerCount > 32) demoPlayerCount = 32;
+    
+    // Adjust to next power of 2 for single/double elimination
+    if (_selectedFormat == TournamentFormats.singleElimination || 
+        _selectedFormat == TournamentFormats.doubleElimination) {
+      final powers = [4, 8, 16, 32];
+      demoPlayerCount = powers.firstWhere((p) => p >= demoPlayerCount, orElse: () => 16);
+    }
+
+    return _buildFormatSpecificPreview(demoPlayerCount);
+  }
+
+  Widget _buildFormatSpecificPreview(int playerCount) {
+    switch (_selectedFormat) {
+      case TournamentFormats.singleElimination:
+        return SingleEliminationBracket(
+          playerCount: playerCount,
+          onFullscreenTap: null, // Disable fullscreen in preview
+        );
+      case TournamentFormats.doubleElimination:
+        return DoubleEliminationBracket(
+          playerCount: playerCount,
+          onFullscreenTap: null,
+        );
+      case TournamentFormats.roundRobin:
+        return RoundRobinBracket(
+          playerCount: playerCount,
+          onFullscreenTap: null,
+        );
+      case TournamentFormats.swiss:
+        return SwissSystemBracket(
+          playerCount: playerCount,
+          onFullscreenTap: null,
+        );
+      default:
+        return Container(
+          padding: EdgeInsets.all(20.sp),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.construction,
+                  size: 48.sp,
+                  color: AppTheme.textSecondaryLight,
+                ),
+                SizedBox(height: 16.sp),
+                Text(
+                  'Preview chưa sẵn sàng',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textSecondaryLight,
+                  ),
+                ),
+                SizedBox(height: 8.sp),
+                Text(
+                  'Format ${_getFormatName(_selectedFormat)} đang được phát triển',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    color: AppTheme.textSecondaryLight,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        );
+    }
+  }
+
+  void _showBracketDemo() {
+    _showBracketVisualPreview();
   }
 
   void _showSeededParticipants() {
@@ -1116,6 +1661,324 @@ class _EnhancedBracketManagementTabState extends State<EnhancedBracketManagement
           backgroundColor: Colors.red,
         ),
       );
+    }
+  }
+
+  /// Save bracket to database - store all matches with tournament info
+  Future<void> _saveBracketToDatabase(TournamentBracket bracket) async {
+    try {
+      debugPrint('💾 Saving bracket to database...');
+      
+      final List<Map<String, dynamic>> matchesToInsert = [];
+      
+      // Process all rounds and matches
+      for (final round in bracket.rounds) {
+        for (final match in round.matches) {
+          matchesToInsert.add({
+            'tournament_id': widget.tournamentId,
+            'round_number': match.roundNumber,
+            'match_number': match.matchNumber,
+            'player1_id': match.player1?.id,
+            'player2_id': match.player2?.id,
+            'player1_score': null,
+            'player2_score': null,
+            'winner_id': null,
+            'status': 'pending',
+            'scheduled_time': null,
+            'created_at': DateTime.now().toIso8601String(),
+            'updated_at': DateTime.now().toIso8601String(),
+          });
+        }
+      }
+      
+      if (matchesToInsert.isNotEmpty) {
+        // Delete existing matches for this tournament first
+        await supabase
+            .from('matches')
+            .delete()
+            .eq('tournament_id', widget.tournamentId);
+            
+        // Insert new matches
+        await supabase.from('matches').insert(matchesToInsert);
+        
+        debugPrint('✅ Saved ${matchesToInsert.length} matches to database');
+      }
+      
+      // Update tournament status to indicate bracket is created
+      await supabase
+          .from('tournaments')
+          .update({
+            'status': 'bracket_created',
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', widget.tournamentId);
+          
+      debugPrint('✅ Tournament status updated to bracket_created');
+      
+      // Refresh tournament progress after saving
+      await _checkTournamentProgress();
+      
+    } catch (e) {
+      debugPrint('❌ Error saving bracket to database: $e');
+      rethrow;
+    }
+  }
+
+  /// Check tournament progress and determine if advancement is possible
+  Future<void> _checkTournamentProgress() async {
+    try {
+      debugPrint('🔍 Checking tournament progress...');
+      
+      // Get current matches
+      final matchesResponse = await supabase
+          .from('matches')
+          .select('*')
+          .eq('tournament_id', widget.tournamentId)
+          .order('round_number, match_number');
+      
+      if (matchesResponse.isEmpty) {
+        setState(() {
+          _canAdvanceTournament = false;
+          _tournamentProgressInfo = 'No matches found - Generate bracket first';
+          _roundsInfo = null;
+        });
+        return;
+      }
+
+      // Group matches by round
+      final roundsMap = <int, List<Map<String, dynamic>>>{};
+      for (final match in matchesResponse) {
+        final roundNum = match['round_number'] as int;
+        if (!roundsMap.containsKey(roundNum)) {
+          roundsMap[roundNum] = [];
+        }
+        roundsMap[roundNum]!.add(match);
+      }
+
+      // Analyze each round
+      final roundsInfo = <int, Map<String, dynamic>>{};
+      bool canAdvance = false;
+      String progressInfo = '';
+      
+      final sortedRounds = roundsMap.keys.toList()..sort();
+      
+      for (final roundNum in sortedRounds) {
+        final roundMatches = roundsMap[roundNum]!;
+        final completedCount = roundMatches.where((m) => m['status'] == 'completed').length;
+        final pendingCount = roundMatches.where((m) => m['status'] == 'pending').length;
+        
+        roundsInfo[roundNum] = {
+          'total': roundMatches.length,
+          'completed': completedCount,
+          'pending': pendingCount,
+          'isComplete': completedCount == roundMatches.length,
+        };
+      }
+
+      // Find the highest completed round
+      int? completedRound;
+      for (final roundNum in sortedRounds.reversed) {
+        if (roundsInfo[roundNum]!['isComplete'] == true) {
+          completedRound = roundNum;
+          break;
+        }
+      }
+
+      if (completedRound != null) {
+        final nextRoundNum = completedRound + 1;
+        final hasNextRound = roundsMap.containsKey(nextRoundNum);
+        
+        if (!hasNextRound) {
+          // Check if tournament is finished (only 1 winner)
+          final completedMatches = roundsMap[completedRound]!;
+          final winners = completedMatches.where((m) => m['winner_id'] != null).length;
+          
+          if (winners == 1) {
+            progressInfo = 'Tournament completed! 🏆';
+            canAdvance = false;
+          } else {
+            final roundName = _getRoundName(winners);
+            progressInfo = 'Round $completedRound completed - Ready to create $roundName!';
+            canAdvance = true;
+          }
+        } else {
+          progressInfo = 'All rounds created - Tournament in progress';
+          canAdvance = false;
+        }
+      } else {
+        final currentRound = sortedRounds.first;
+        final currentInfo = roundsInfo[currentRound]!;
+        progressInfo = 'Round $currentRound: ${currentInfo['completed']}/${currentInfo['total']} matches completed';
+        canAdvance = false;
+      }
+
+      setState(() {
+        _canAdvanceTournament = canAdvance;
+        _tournamentProgressInfo = progressInfo;
+        _roundsInfo = roundsInfo;
+      });
+
+      debugPrint('✅ Tournament progress checked: $progressInfo');
+      
+      // 🚀 AUTO-ADVANCE: Tự động tiến hành tournament khi ready
+      if (canAdvance && !_isAdvancing) {
+        debugPrint('🚀 Auto-advancing tournament...');
+        await _advanceTournament();
+      }
+      
+    } catch (e) {
+      debugPrint('❌ Error checking tournament progress: $e');
+      setState(() {
+        _canAdvanceTournament = false;
+        _tournamentProgressInfo = 'Error checking progress';
+        _roundsInfo = null;
+      });
+    }
+  }
+
+  /// Get Vietnamese round name based on number of winners
+  String _getRoundName(int winnerCount) {
+    switch (winnerCount) {
+      case 1:
+        return 'Chung kết';
+      case 2:
+        return 'Bán kết';
+      case 4:
+        return 'Tứ kết';
+      case 8:
+        return 'Vòng 16';
+      default:
+        return 'Vòng tiếp theo';
+    }
+  }
+
+  /// Advance tournament to next round
+  Future<void> _advanceTournament() async {
+    if (!_canAdvanceTournament || _isAdvancing) return;
+
+    setState(() => _isAdvancing = true);
+
+    try {
+      debugPrint('🚀 Advancing tournament...');
+      
+      // Get participants as TournamentParticipant objects
+      final participants = _realParticipants.map((p) => TournamentParticipant(
+        id: p.id,
+        name: p.fullName,
+        seed: p.eloRating,
+      )).toList();
+
+      // Get current matches
+      final matchesResponse = await supabase
+          .from('matches')
+          .select('*')
+          .eq('tournament_id', widget.tournamentId)
+          .order('round_number, match_number');
+
+      final currentMatches = matchesResponse.map((m) {
+        TournamentParticipant? player1, player2, winner;
+        
+        if (m['player1_id'] != null) {
+          player1 = participants.firstWhere(
+            (p) => p.id == m['player1_id'],
+            orElse: () => TournamentParticipant(id: m['player1_id'], name: 'Unknown'),
+          );
+        }
+        
+        if (m['player2_id'] != null) {
+          player2 = participants.firstWhere(
+            (p) => p.id == m['player2_id'],
+            orElse: () => TournamentParticipant(id: m['player2_id'], name: 'Unknown'),
+          );
+        }
+        
+        if (m['winner_id'] != null) {
+          winner = participants.firstWhere(
+            (p) => p.id == m['winner_id'],
+            orElse: () => TournamentParticipant(id: m['winner_id'], name: 'Winner'),
+          );
+        }
+        
+        return TournamentMatch(
+          id: m['id'],
+          roundId: 'round_${m['round_number']}',
+          roundNumber: m['round_number'],
+          matchNumber: m['match_number'],
+          player1: player1,
+          player2: player2,
+          winner: winner,
+          status: m['status'] ?? 'pending',
+        );
+      }).toList();
+
+      // Use BracketGeneratorService to advance tournament
+      final bracketService = BracketGeneratorService();
+      final result = await bracketService.advanceTournament(
+        tournamentId: widget.tournamentId,
+        participants: participants,
+        currentMatches: currentMatches,
+        format: _selectedFormat,
+      );
+
+      if (result['success'] == true) {
+        final newMatches = result['newMatches'] as List<TournamentMatch>;
+        final roundName = result['roundName'] ?? 'Next Round';
+        
+        debugPrint('✅ Generated ${newMatches.length} new matches for $roundName');
+
+        // Save new matches to database
+        for (final match in newMatches) {
+          await supabase.from('matches').insert({
+            'id': match.id,
+            'tournament_id': widget.tournamentId,
+            'round_number': match.roundNumber,
+            'match_number': match.matchNumber,
+            'player1_id': match.player1?.id,
+            'player2_id': match.player2?.id,
+            'status': match.status,
+            'created_at': DateTime.now().toIso8601String(),
+          });
+        }
+
+        // Show success message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('🎉 $roundName created with ${newMatches.length} matches!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+
+        // Refresh tournament progress
+        await _checkTournamentProgress();
+        
+      } else {
+        final message = result['message'] ?? 'Failed to advance tournament';
+        debugPrint('❌ Tournament advancement failed: $message');
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('❌ $message'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+
+    } catch (e) {
+      debugPrint('❌ Error advancing tournament: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Error advancing tournament: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      setState(() => _isAdvancing = false);
     }
   }
 }

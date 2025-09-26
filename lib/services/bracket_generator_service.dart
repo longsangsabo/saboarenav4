@@ -1952,4 +1952,334 @@ class BracketGeneratorService {
     
     return rounds;
   }
+
+  /// Generic tournament advancement method
+  /// Analyzes current tournament state and creates next round if ready
+  Future<Map<String, dynamic>> advanceTournament({
+    required String tournamentId,
+    required List<TournamentParticipant> participants,
+    required List<TournamentMatch> currentMatches,
+    required String format,
+  }) async {
+    try {
+      // Group matches by round
+      final roundsMap = <int, List<TournamentMatch>>{};
+      for (final match in currentMatches) {
+        final roundNum = match.roundNumber;
+        if (!roundsMap.containsKey(roundNum)) {
+          roundsMap[roundNum] = [];
+        }
+        roundsMap[roundNum]!.add(match);
+      }
+
+      final sortedRounds = roundsMap.keys.toList()..sort();
+      
+      if (sortedRounds.isEmpty) {
+        return {
+          'success': false,
+          'message': 'No matches found in tournament',
+          'newMatches': <TournamentMatch>[],
+        };
+      }
+
+      // Find the highest completed round
+      int? completedRound;
+      for (final roundNum in sortedRounds.reversed) {
+        final roundMatches = roundsMap[roundNum]!;
+        final completedCount = roundMatches.where((m) => m.status == 'completed').length;
+        
+        if (completedCount == roundMatches.length) {
+          // This round is fully completed
+          completedRound = roundNum;
+          break;
+        }
+      }
+
+      if (completedRound == null) {
+        return {
+          'success': false,
+          'message': 'No completed rounds found. Wait for current matches to finish.',
+          'newMatches': <TournamentMatch>[],
+        };
+      }
+
+      // Check if next round already exists
+      final nextRoundNum = completedRound + 1;
+      if (roundsMap.containsKey(nextRoundNum)) {
+        return {
+          'success': false,
+          'message': 'Next round already exists',
+          'newMatches': <TournamentMatch>[],
+        };
+      }
+
+      // Generate next round based on format
+      return await _generateNextRound(
+        tournamentId: tournamentId,
+        participants: participants,
+        completedRound: completedRound,
+        completedMatches: roundsMap[completedRound]!,
+        format: format,
+        allMatches: currentMatches,
+      );
+
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Error advancing tournament: $e',
+        'newMatches': <TournamentMatch>[],
+      };
+    }
+  }
+
+  /// Generate next round matches based on tournament format
+  Future<Map<String, dynamic>> _generateNextRound({
+    required String tournamentId,
+    required List<TournamentParticipant> participants,
+    required int completedRound,
+    required List<TournamentMatch> completedMatches,
+    required String format,
+    required List<TournamentMatch> allMatches,
+  }) async {
+    final nextRoundNum = completedRound + 1;
+
+    // Extract winners from completed matches
+    final winners = <TournamentParticipant>[];
+    for (final match in completedMatches) {
+      if (match.winner != null) {
+        winners.add(match.winner!);
+      }
+    }
+
+    if (winners.isEmpty) {
+      return {
+        'success': false,
+        'message': 'No winners found in completed matches',
+        'newMatches': <TournamentMatch>[],
+      };
+    }
+
+    // Format-specific logic
+    switch (format.toLowerCase()) {
+      case 'single_elimination':
+      case 'single elimination':
+        return _generateSingleEliminationNextRound(
+          tournamentId: tournamentId,
+          roundNumber: nextRoundNum,
+          winners: winners,
+          completedRound: completedRound,
+        );
+
+      case 'double_elimination':
+      case 'double elimination':
+        return _generateDoubleEliminationNextRound(
+          tournamentId: tournamentId,
+          roundNumber: nextRoundNum,
+          winners: winners,
+          completedMatches: completedMatches,
+          allMatches: allMatches,
+        );
+
+      case 'round_robin':
+      case 'round robin':
+        return {
+          'success': false,
+          'message': 'Round Robin tournaments do not advance - all matches are scheduled at once',
+          'newMatches': <TournamentMatch>[],
+        };
+
+      case 'swiss_system':
+      case 'swiss system':
+        return _generateSwissSystemNextRound(
+          tournamentId: tournamentId,
+          roundNumber: nextRoundNum,
+          participants: participants,
+          allMatches: allMatches,
+        );
+
+      case 'sabo_de16':
+      case 'sabo_de32':
+        return _generateSaboNextRound(
+          tournamentId: tournamentId,
+          roundNumber: nextRoundNum,
+          winners: winners,
+          format: format,
+          completedRound: completedRound,
+        );
+
+      default:
+        return {
+          'success': false,
+          'message': 'Unsupported tournament format: $format',
+          'newMatches': <TournamentMatch>[],
+        };
+    }
+  }
+
+  /// Generate next round for Single Elimination with Vietnamese titles
+  Map<String, dynamic> _generateSingleEliminationNextRound({
+    required String tournamentId,
+    required int roundNumber,
+    required List<TournamentParticipant> winners,
+    required int completedRound,
+  }) {
+    if (winners.length < 2) {
+      return {
+        'success': false,
+        'message': 'Need at least 2 winners to create next round',
+        'newMatches': <TournamentMatch>[],
+      };
+    }
+
+    if (winners.length == 1) {
+      return {
+        'success': true,
+        'message': '🏆 Tournament completed! Winner: ${winners.first.name}',
+        'newMatches': <TournamentMatch>[],
+        'isCompleted': true,
+        'winner': winners.first,
+      };
+    }
+
+    final matches = <TournamentMatch>[];
+    final matchCount = winners.length ~/ 2;
+
+    // Determine Vietnamese round name using demo logic
+    String roundName = _calculateVietnameseRoundTitle(winners.length);
+    
+    print('🚀 Generating $roundName with ${winners.length} players → $matchCount matches');
+
+    // Create matches by pairing winners sequentially
+    for (int i = 0; i < matchCount; i++) {
+      final player1 = winners[i * 2];
+      final player2 = winners[i * 2 + 1];
+
+      final match = TournamentMatch(
+        id: 'R${roundNumber}M${i + 1}',
+        roundId: _generateRoundId(tournamentId, roundNumber, 'main'),
+        roundNumber: roundNumber,
+        matchNumber: i + 1,
+        player1: player1,
+        player2: player2,
+        status: 'pending',
+        metadata: {
+          'roundName': roundName,
+          'matchName': '$roundName - Match ${i + 1}',
+          'totalMatches': matchCount,
+        },
+      );
+
+      matches.add(match);
+    }
+
+    return {
+      'success': true,
+      'message': 'Created $roundName with $matchCount matches',
+      'newMatches': matches,
+      'roundName': roundName,
+      'roundNumber': roundNumber,
+    };
+  }
+
+  /// Generate next round for Double Elimination (simplified)
+  Map<String, dynamic> _generateDoubleEliminationNextRound({
+    required String tournamentId,
+    required int roundNumber,
+    required List<TournamentParticipant> winners,
+    required List<TournamentMatch> completedMatches,
+    required List<TournamentMatch> allMatches,
+  }) {
+    // This is a simplified implementation
+    // Full double elimination requires tracking winners and losers brackets
+    return {
+      'success': false,
+      'message': 'Double Elimination advancement requires more complex logic - implement based on specific needs',
+      'newMatches': <TournamentMatch>[],
+    };
+  }
+
+  /// Generate next round for Swiss System
+  Map<String, dynamic> _generateSwissSystemNextRound({
+    required String tournamentId,
+    required int roundNumber,
+    required List<TournamentParticipant> participants,
+    required List<TournamentMatch> allMatches,
+  }) {
+    // Swiss system pairs players based on performance
+    return {
+      'success': false,
+      'message': 'Swiss System advancement requires performance tracking - implement based on specific needs',
+      'newMatches': <TournamentMatch>[],
+    };
+  }
+
+  /// Generate next round for SABO formats
+  Map<String, dynamic> _generateSaboNextRound({
+    required String tournamentId,
+    required int roundNumber,
+    required List<TournamentParticipant> winners,
+    required String format,
+    required int completedRound,
+  }) {
+    // SABO formats follow specific progression rules
+    return {
+      'success': false,
+      'message': 'SABO format advancement requires specific implementation - implement based on SABO rules',
+      'newMatches': <TournamentMatch>[],
+    };
+  }
+
+  /// Calculate Vietnamese round title based on player count (from demo logic)
+  String _calculateVietnameseRoundTitle(int playerCount) {
+    if (playerCount == 2) {
+      return 'Chung kết';
+    } else if (playerCount == 4) {
+      return 'Bán kết';
+    } else if (playerCount == 8) {
+      return 'Tứ kết';
+    } else {
+      // Calculate round number for early rounds
+      int roundNum = 1;
+      int originalPlayers = playerCount;
+      
+      // Find original tournament size by working backwards
+      while (originalPlayers > 16) {
+        originalPlayers = originalPlayers * 2;
+      }
+      
+      // Calculate current round number from original size
+      int tempPlayers = originalPlayers;
+      while (tempPlayers > playerCount) {
+        tempPlayers = tempPlayers ~/ 2;
+        roundNum++;
+      }
+      
+      return 'Vòng $roundNum';
+    }
+  }
+
+  /// Generate all tournament rounds structure (from demo logic)
+  List<Map<String, dynamic>> calculateAllTournamentRounds(int initialPlayerCount) {
+    final rounds = <Map<String, dynamic>>[];
+    int currentPlayers = initialPlayerCount;
+    int roundNumber = 1;
+    
+    while (currentPlayers > 1) {
+      String title = _calculateVietnameseRoundTitle(currentPlayers);
+      int matchCount = currentPlayers ~/ 2;
+      
+      rounds.add({
+        'round': roundNumber,
+        'title': title,
+        'players': currentPlayers,
+        'matches': matchCount,
+        'winners': matchCount,
+      });
+      
+      currentPlayers = matchCount;
+      roundNumber++;
+    }
+    
+    return rounds;
+  }
 }
