@@ -6,6 +6,7 @@ import '../../../core/app_export.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import './map_view_widget.dart';
 import './player_card_widget.dart';
+import './create_spa_challenge_modal.dart';
 
 
 
@@ -156,9 +157,24 @@ class _CompetitivePlayTabState extends State<CompetitivePlayTab> {
     Navigator.pushNamed(context, AppRoutes.clubSelectionScreen);
   }
 
-
-
-
+  void _showCreateChallengeModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.85,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: CreateSpaChallengeModal(
+          currentUser: _currentUser,
+          opponents: widget.players,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -175,15 +191,39 @@ class _CompetitivePlayTabState extends State<CompetitivePlayTab> {
           ),
         ],
       ),
-      // Always show register rank button at bottom right
-      floatingActionButton: FloatingActionButton.extended(
+      // Dynamic button based on rank status
+      floatingActionButton: _buildFloatingActionButton(context),
+    );
+  }
+
+  Widget _buildFloatingActionButton(BuildContext context) {
+    if (_isLoadingUser) {
+      return FloatingActionButton(
+        onPressed: null,
+        backgroundColor: Colors.grey,
+        child: const CircularProgressIndicator(strokeWidth: 2),
+      );
+    }
+
+    if (_hasRank) {
+      // User has rank - show create challenge button
+      return FloatingActionButton.extended(
+        onPressed: () => _showCreateChallengeModal(context),
+        backgroundColor: Colors.green.shade600,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.sports_martial_arts),
+        label: const Text('Tạo thách đấu'),
+      );
+    } else {
+      // User doesn't have rank - show register rank button
+      return FloatingActionButton.extended(
         onPressed: () => _navigateToRankRegistration(context),
         backgroundColor: Colors.orange.shade600,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.emoji_events),
-        label: Text(_hasRank ? 'Đăng ký lại hạng' : 'Đăng ký hạng'),
-      ),
-    );
+        label: const Text('Đăng ký hạng'),
+      );
+    }
   }
 
   Widget _buildBody(BuildContext context) {
