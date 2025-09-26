@@ -405,7 +405,7 @@ class _ProductionBracketManagementTabState extends State<ProductionBracketManage
             Text('Thể thức thi đấu:'),
             SizedBox(height: 4.sp),
             DropdownButtonFormField<String>(
-              value: _selectedFormat,
+              initialValue: _selectedFormat,
               onChanged: (value) {
                 setState(() {
                   _selectedFormat = value!;
@@ -429,7 +429,7 @@ class _ProductionBracketManagementTabState extends State<ProductionBracketManage
             Text('Phương thức xếp hạt giống:'),
             SizedBox(height: 4.sp),
             DropdownButtonFormField<String>(
-              value: _selectedSeeding,
+              initialValue: _selectedSeeding,
               onChanged: (value) {
                 setState(() {
                   _selectedSeeding = value!;

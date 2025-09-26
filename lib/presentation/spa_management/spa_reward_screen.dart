@@ -9,10 +9,10 @@ class SpaRewardScreen extends StatefulWidget {
   final String clubName;
 
   const SpaRewardScreen({
-    Key? key,
+    super.key,
     required this.clubId,
     required this.clubName,
-  }) : super(key: key);
+  });
 
   @override
   State<SpaRewardScreen> createState() => _SpaRewardScreenState();
@@ -371,7 +371,7 @@ class _SpaRewardScreenState extends State<SpaRewardScreen>
                           ),
                         ),
                       );
-                    }).toList(),
+                    }),
                     if (_spaTransactions.isEmpty)
                       const Padding(
                         padding: EdgeInsets.all(20),

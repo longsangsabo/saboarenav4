@@ -172,7 +172,7 @@ class _PricingSettingsScreenState extends State<PricingSettingsScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            _formatCurrency(item['hourlyRate']) + '/giờ',
+            '${_formatCurrency(item['hourlyRate'])}/giờ',
             style: TextStyle(
               color: AppTheme.primaryLight,
               fontWeight: FontWeight.w600,
@@ -219,7 +219,7 @@ class _PricingSettingsScreenState extends State<PricingSettingsScreen> {
             children: [
               Expanded(
                 child: Text(
-                  _formatCurrency(item['monthlyFee']) + '/tháng',
+                  '${_formatCurrency(item['monthlyFee'])}/tháng',
                   style: TextStyle(
                     color: AppTheme.primaryLight,
                     fontWeight: FontWeight.w600,
@@ -230,7 +230,7 @@ class _PricingSettingsScreenState extends State<PricingSettingsScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  _formatCurrency(item['yearlyFee']) + '/năm',
+                  '${_formatCurrency(item['yearlyFee'])}/năm',
                   style: TextStyle(
                     color: AppTheme.primaryLight,
                     fontWeight: FontWeight.w500,
@@ -279,7 +279,7 @@ class _PricingSettingsScreenState extends State<PricingSettingsScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            _formatCurrency(item['price']) + '/${item['unit']}',
+            '${_formatCurrency(item['price'])}/${item['unit']}',
             style: TextStyle(
               color: AppTheme.primaryLight,
               fontWeight: FontWeight.w600,
@@ -399,7 +399,7 @@ class _PricingSettingsScreenState extends State<PricingSettingsScreen> {
                           item['isActive'] = value;
                         });
                       },
-                      activeColor: AppTheme.primaryLight,
+                      activeThumbColor: AppTheme.primaryLight,
                     ),
                     PopupMenuButton(
                       icon: Icon(Icons.more_vert, color: AppTheme.textSecondaryLight),

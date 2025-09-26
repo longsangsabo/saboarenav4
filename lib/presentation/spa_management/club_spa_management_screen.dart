@@ -7,10 +7,10 @@ class ClubSpaManagementScreen extends StatefulWidget {
   final String clubName;
 
   const ClubSpaManagementScreen({
-    Key? key,
+    super.key,
     required this.clubId,
     required this.clubName,
-  }) : super(key: key);
+  });
 
   @override
   State<ClubSpaManagementScreen> createState() => _ClubSpaManagementScreenState();
@@ -108,7 +108,7 @@ class _ClubSpaManagementScreenState extends State<ClubSpaManagementScreen>
                     labelText: 'Loại phần thưởng',
                     border: OutlineInputBorder(),
                   ),
-                  value: rewardType,
+                  initialValue: rewardType,
                   items: const [
                     DropdownMenuItem(value: 'discount_code', child: Text('Mã giảm giá')),
                     DropdownMenuItem(value: 'physical_item', child: Text('Hiện vật')),
@@ -374,7 +374,7 @@ class _ClubSpaManagementScreenState extends State<ClubSpaManagementScreen>
                         ),
                         isThreeLine: true,
                       );
-                    }).toList(),
+                    }),
                     if (_clubTransactions.isEmpty)
                       const Padding(
                         padding: EdgeInsets.all(20),
@@ -576,7 +576,7 @@ class _ClubSpaManagementScreenState extends State<ClubSpaManagementScreen>
                 ),
                 _buildAnalyticsCard(
                   'SPA đã chi',
-                  '${totalSpentOnRewards.toStringAsFixed(0)}',
+                  totalSpentOnRewards.toStringAsFixed(0),
                   Icons.payments,
                   Colors.orange,
                 ),

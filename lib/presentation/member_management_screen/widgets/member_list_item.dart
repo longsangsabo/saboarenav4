@@ -43,12 +43,10 @@ class _MemberListItemState extends State<MemberListItem>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_colorAnimation == null) {
-      _colorAnimation = ColorTween(
+    _colorAnimation ??= ColorTween(
         begin: Colors.transparent,
         end: Theme.of(context).colorScheme.primary.withOpacity(0.1),
       ).animate(_controller);
-    }
   }
 
   @override

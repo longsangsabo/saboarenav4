@@ -51,7 +51,7 @@ void main() {
   print('  - Only getRankFromElo() standardized to RankingConstants');
   print('  - This maintains existing UI styling while fixing consistency');
   
-  print('\n' + '=' * 60);
+  print('\n${'=' * 60}');
   print('🎉 CRITICAL INCONSISTENCY ISSUES RESOLVED!');
   print('Frontend-Backend ELO-rank calculations now CONSISTENT!');
 }

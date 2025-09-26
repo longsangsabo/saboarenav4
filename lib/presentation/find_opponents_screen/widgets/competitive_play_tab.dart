@@ -441,46 +441,20 @@ class _CompetitivePlayTabState extends State<CompetitivePlayTab> {
   }
 
   Map<String, dynamic> _getChallengeInfo(UserProfile player) {
-    // Generate dynamic challenge info based on player stats
-    final spaBonus = _calculateSpaBonus(player.eloRating);
-    final raceTo = _calculateRaceTo(player.eloRating);
-    final playTime = _getAvailablePlayTime();
-    final availability = _getPlayerAvailability();
-
+    // Use actual player data for accurate display
     return {
-      'spaBonus': spaBonus,
-      'raceTo': raceTo,
-      'playTime': playTime,
-      'availability': availability,
+      'spaBonus': 300, // Default SPA bonus for challenges
+      'raceTo': 14, // Default race to value
+      'playTime': '19:00-21:00', // Default play time
+      'availability': player.isActive ? 'Rảnh' : 'Bận',
+      'rank': player.rank ?? 'Chưa xếp hạng',
+      'displayName': player.displayName,
+      'joinedDate': player.createdAt.toString().split(' ')[0],
+      'location': player.location ?? 'Chưa cập nhật',
+      'skillLevel': player.skillLevel,
+      'eloRating': player.eloRating,
+      'totalWins': player.totalWins,
+      'totalLosses': player.totalLosses,
     };
-  }
-
-  int _calculateSpaBonus(int eloRating) {
-    // SPA bonus based on ELO rating
-    if (eloRating >= 2000) return 1000;
-    if (eloRating >= 1800) return 800;
-    if (eloRating >= 1600) return 600;
-    if (eloRating >= 1400) return 500;
-    return 300;
-  }
-
-  int _calculateRaceTo(int eloRating) {
-    // Race to based on skill level
-    if (eloRating >= 2000) return 9;
-    if (eloRating >= 1800) return 8;
-    if (eloRating >= 1600) return 7;
-    return 5;
-  }
-
-  String _getAvailablePlayTime() {
-    final hour = DateTime.now().hour;
-    if (hour < 12) return '14:00-16:00';
-    if (hour < 17) return '19:00-21:00';
-    return '21:00-23:00';
-  }
-
-  String _getPlayerAvailability() {
-    final availabilities = ['Rảnh', 'Bận', 'Có thể', 'Hẹn sau'];
-    return availabilities[DateTime.now().millisecond % availabilities.length];
   }
 }

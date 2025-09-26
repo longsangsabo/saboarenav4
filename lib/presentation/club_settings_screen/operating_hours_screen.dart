@@ -123,7 +123,7 @@ class _OperatingHoursScreenState extends State<OperatingHoursScreen> {
                             operatingHours[day]!['isOpen'] = value;
                           });
                         },
-                        activeColor: AppTheme.primaryLight,
+                        activeThumbColor: AppTheme.primaryLight,
                       ),
                     ),
                     if (hours['isOpen']) ...[

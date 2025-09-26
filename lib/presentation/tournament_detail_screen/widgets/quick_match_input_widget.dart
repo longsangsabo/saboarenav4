@@ -24,8 +24,8 @@ class QuickMatchInputWidget extends StatefulWidget {
 class _QuickMatchInputWidgetState extends State<QuickMatchInputWidget> {
   final SupabaseClient supabase = Supabase.instance.client;
   bool _isUpdating = false;
-  Map<String, String?> _selectedWinners = {};
-  Map<String, TextEditingController> _scoreControllers = {};
+  final Map<String, String?> _selectedWinners = {};
+  final Map<String, TextEditingController> _scoreControllers = {};
 
   @override
   void initState() {

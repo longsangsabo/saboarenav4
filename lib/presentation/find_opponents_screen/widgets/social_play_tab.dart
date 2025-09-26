@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../models/user_profile.dart';
 import './map_view_widget.dart';
 import './player_card_widget.dart';
+import './create_social_challenge_modal.dart';
 
-class SocialPlayTab extends StatelessWidget {
+class SocialPlayTab extends StatefulWidget {
   final bool isLoading;
   final String? errorMessage;
   final List<UserProfile> players;
@@ -21,15 +22,40 @@ class SocialPlayTab extends StatelessWidget {
   });
 
   @override
+  State<SocialPlayTab> createState() => _SocialPlayTabState();
+}
+
+class _SocialPlayTabState extends State<SocialPlayTab> {
+  void _showCreateSocialChallengeModal() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => CreateSocialChallengeModal(
+        opponents: widget.players,
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: () async => onRefresh(),
-      child: _buildBody(context),
+    return Scaffold(
+      body: RefreshIndicator(
+        onRefresh: () async => widget.onRefresh(),
+        child: _buildBody(context),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _showCreateSocialChallengeModal,
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.add),
+        label: const Text('Tạo giao lưu'),
+      ),
     );
   }
 
   Widget _buildBody(BuildContext context) {
-    if (isLoading) {
+    if (widget.isLoading) {
       return const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -42,11 +68,11 @@ class SocialPlayTab extends StatelessWidget {
       );
     }
 
-    if (errorMessage != null) {
+    if (widget.errorMessage != null) {
       return _buildErrorState(context);
     }
 
-    if (players.isEmpty) {
+    if (widget.players.isEmpty) {
       return _buildEmptyState(context);
     }
 
@@ -93,14 +119,14 @@ class SocialPlayTab extends StatelessWidget {
         ),
         // Players list/map
         Expanded(
-          child: isMapView
-              ? MapViewWidget(players: players.map((p) => p.toJson()).toList())
+          child: widget.isMapView
+              ? MapViewWidget(players: widget.players.map((p) => p.toJson()).toList())
               : ListView.builder(
                   padding: const EdgeInsets.only(left: 16, right: 16, bottom: 80),
-                  itemCount: players.length,
+                  itemCount: widget.players.length,
                   itemBuilder: (context, index) {
                     return PlayerCardWidget(
-                      player: players[index],
+                      player: widget.players[index],
                       mode: 'giao_luu',
                     );
                   },
@@ -133,7 +159,7 @@ class SocialPlayTab extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              errorMessage ?? 'Không thể tải danh sách người chơi. Vui lòng thử lại.',
+              widget.errorMessage ?? 'Không thể tải danh sách người chơi. Vui lòng thử lại.',
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.grey[600],
@@ -142,7 +168,7 @@ class SocialPlayTab extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: onRefresh,
+              onPressed: widget.onRefresh,
               child: const Text('Thử lại'),
             ),
           ],
@@ -183,7 +209,7 @@ class SocialPlayTab extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: onRefresh,
+              onPressed: widget.onRefresh,
               child: const Text('Tải lại'),
             ),
           ],

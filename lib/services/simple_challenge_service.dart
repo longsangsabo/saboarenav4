@@ -66,20 +66,26 @@ class SimpleChallengeService {
 
       debugPrint('✅ Current user: ${userResponse['display_name']}');
 
-      // Get challenged user details
-      final challengedUserResponse = await _supabase
-          .from('users')
-          .select('display_name, elo_rating')
-          .eq('id', challengedUserId)
-          .single();
-
-      debugPrint('✅ Challenged user: ${challengedUserResponse['display_name']}');
+      // Get challenged user details (skip for open challenge)
+      Map<String, dynamic>? challengedUserResponse;
+      bool isOpenChallenge = challengedUserId.isEmpty;
+      
+      if (!isOpenChallenge) {
+        challengedUserResponse = await _supabase
+            .from('users')
+            .select('display_name, elo_rating')
+            .eq('id', challengedUserId)
+            .single();
+        debugPrint('✅ Challenged user: ${challengedUserResponse['display_name']}');
+      } else {
+        debugPrint('🌐 Open Challenge - Anyone can accept');
+      }
 
       // Create challenge record using existing table schema
       // Map our data to the existing challenges table structure
       Map<String, dynamic> challengeData = {
         'challenger_id': userId,
-        'challenged_id': challengedUserId,
+        'challenged_id': isOpenChallenge ? null : challengedUserId,
         'challenge_type': challengeType,
         'message': message ?? '',
         'stakes_type': spaPoints > 0 ? 'spa_points' : 'none', // Map spa betting
@@ -107,22 +113,26 @@ class SimpleChallengeService {
 
       debugPrint('✅ Challenge created: ${challengeResponse['id']}');
 
-      // Send notification (optional - may fail if notification service has issues)
-      try {
-        await _sendChallengeNotification(
-          challengeId: challengeResponse['id'],
-          challengerName: userResponse['display_name'] ?? 'Người chơi',
-          challengedUserId: challengedUserId,
-          challengeType: challengeType,
-          gameType: gameType,
-          scheduledTime: scheduledTime,
-          location: location,
-          spaPoints: spaPoints,
-        );
-        debugPrint('✅ Notification sent');
-      } catch (notificationError) {
-        debugPrint('⚠️ Notification failed: $notificationError');
-        // Don't fail the whole challenge if notification fails
+      // Send notification (skip for open challenge)
+      if (!isOpenChallenge) {
+        try {
+          await _sendChallengeNotification(
+            challengeId: challengeResponse['id'],
+            challengerName: userResponse['display_name'] ?? 'Người chơi',
+            challengedUserId: challengedUserId,
+            challengeType: challengeType,
+            gameType: gameType,
+            scheduledTime: scheduledTime,
+            location: location,
+            spaPoints: spaPoints,
+          );
+          debugPrint('✅ Notification sent');
+        } catch (notificationError) {
+          debugPrint('⚠️ Notification failed: $notificationError');
+          // Don't fail the whole challenge if notification fails
+        }
+      } else {
+        debugPrint('🌐 Open Challenge - No individual notification needed');
       }
 
       return challengeResponse;

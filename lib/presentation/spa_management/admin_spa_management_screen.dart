@@ -3,7 +3,7 @@ import '../../../services/club_spa_service.dart';
 
 /// Screen for admins to manage SPA allocation to clubs
 class AdminSpaManagementScreen extends StatefulWidget {
-  const AdminSpaManagementScreen({Key? key}) : super(key: key);
+  const AdminSpaManagementScreen({super.key});
 
   @override
   State<AdminSpaManagementScreen> createState() => _AdminSpaManagementScreenState();

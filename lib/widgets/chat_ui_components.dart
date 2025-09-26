@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import '../models/messaging_models.dart';
-import '../models/user_profile.dart';
 
 /// Chat App Bar widget for chat screen
 class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {

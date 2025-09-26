@@ -193,23 +193,23 @@ class PlayerCardWidget extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    // Challenge Info Row 2: Play Time
+                    // Challenge Info Row 2: User Details
                     Row(
                       children: [
                         Expanded(
                           child: _buildChallengeInfoItem(
-                            Icons.schedule,
-                            'Thời gian',
-                            challengeInfo?['playTime'] ?? '19:00-21:00',
+                            Icons.calendar_today,
+                            'Tham gia',
+                            challengeInfo?['joinedDate'] ?? 'N/A',
                             Colors.purple,
                           ),
                         ),
                         Expanded(
                           child: _buildChallengeInfoItem(
-                            Icons.today,
-                            'Hôm nay',
-                            challengeInfo?['availability'] ?? 'Rảnh',
-                            Colors.green,
+                            Icons.location_on,
+                            'Vị trí',
+                            challengeInfo?['location'] ?? 'Chưa cập nhật',
+                            Colors.orange,
                           ),
                         ),
                       ],

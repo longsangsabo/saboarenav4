@@ -416,7 +416,8 @@ class UserService {
           final usersResponse = await _supabase
               .from('users')
               .select()
-              .filter('id', 'in', userIds);
+              .filter('id', 'in', userIds)
+              .order('created_at', ascending: false);
               
           return usersResponse
               .map<UserProfile>((json) => UserProfile.fromJson(json))
@@ -434,7 +435,7 @@ class UserService {
           .from('users')
           .select()
           .neq('id', currentUser.id)
-          .order('elo_rating', ascending: false)
+          .order('created_at', ascending: false)
           .limit(20);
 
       return response

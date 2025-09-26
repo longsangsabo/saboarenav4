@@ -275,7 +275,7 @@ class _MemberFilterSectionState extends State<MemberFilterSection>
   }
 
   Widget _buildRankRangeFilter() {
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width * 0.4, // Fixed width for Wrap
       child: _FilterGroup(
         title: 'Xếp hạng',

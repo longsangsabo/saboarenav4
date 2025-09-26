@@ -64,7 +64,7 @@ void main() {
   print('  Tournament calculates: $lowEloConstants');
   print('  Consistent: ${lowEloSabo == lowEloConstants ? '✅' : '❌ CRITICAL PROBLEM!'}');
   
-  print('\n' + '=' * 60);
+  print('\n${'=' * 60}');
   print('🚨 CRITICAL FINDINGS SUMMARY:');
   
   // Check for any inconsistencies

@@ -169,6 +169,11 @@ class _FindOpponentsScreenState extends State<FindOpponentsScreen>
             },
             icon: Icon(_isMapView ? Icons.list : Icons.map),
           ),
+          IconButton(
+            onPressed: _showQRScanner,
+            icon: const Icon(Icons.qr_code_scanner),
+            tooltip: 'Quét QR để tìm người chơi',
+          ),
         ],
         bottom: TabBar(
           controller: _tabController,
@@ -206,12 +211,6 @@ class _FindOpponentsScreenState extends State<FindOpponentsScreen>
           ),
         ],
       ),
-      floatingActionButton: _tabController.index == 1 ? FloatingActionButton(
-        onPressed: _showQRScanner,
-        backgroundColor: Theme.of(context).primaryColor,
-        tooltip: 'Quét QR để tìm người chơi',
-        child: Icon(Icons.qr_code_scanner, color: Colors.white),
-      ) : null,
       bottomNavigationBar: SafeArea(
         child: Container(
           decoration: BoxDecoration(

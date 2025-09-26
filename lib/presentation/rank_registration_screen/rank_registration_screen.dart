@@ -827,10 +827,10 @@ ${imageUrls.isNotEmpty ? '\nHình ảnh bằng chứng: ${imageUrls.length} ản
                 width: double.infinity,
                 child: OutlinedButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text('Đóng'),
                   style: OutlinedButton.styleFrom(
                     padding: EdgeInsets.symmetric(vertical: 12),
                   ),
+                  child: Text('Đóng'),
                 ),
               ),
             ],

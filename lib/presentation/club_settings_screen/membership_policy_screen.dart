@@ -228,7 +228,7 @@ class _MembershipPolicyScreenState extends State<MembershipPolicyScreen> {
             onEdit: () => _editMembershipType(index),
             onDelete: () => _deleteMembershipType(index),
           );
-        }).toList(),
+        }),
         _buildAddButton(
           title: 'Thêm loại thành viên',
           onTap: _addMembershipType,
@@ -251,7 +251,7 @@ class _MembershipPolicyScreenState extends State<MembershipPolicyScreen> {
             onEdit: () => _editMemberBenefit(index),
             onDelete: () => _deleteMemberBenefit(index),
           );
-        }).toList(),
+        }),
         _buildAddButton(
           title: 'Thêm quyền lợi',
           onTap: _addMemberBenefit,
@@ -274,7 +274,7 @@ class _MembershipPolicyScreenState extends State<MembershipPolicyScreen> {
             onEdit: () => _editRegistrationRequirement(index),
             onDelete: () => _deleteRegistrationRequirement(index),
           );
-        }).toList(),
+        }),
         _buildAddButton(
           title: 'Thêm yêu cầu',
           onTap: _addRegistrationRequirement,
@@ -368,7 +368,7 @@ class _MembershipPolicyScreenState extends State<MembershipPolicyScreen> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: AppTheme.primaryLight,
+            activeThumbColor: AppTheme.primaryLight,
           ),
         ],
       ),

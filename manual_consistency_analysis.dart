@@ -69,7 +69,7 @@ void main() {
     print('$rank\t| $saboElo\t\t\t| $rangeStr\t\t| $icon');
   }
   
-  print('\n' + '=' * 60);
+  print('\n${'=' * 60}');
   
   if (allCompatible) {
     print('✅ SUCCESS: Mappings are COMPATIBLE!');
@@ -86,25 +86,25 @@ void main() {
   
   // Test: "rank I thì elo là 1200"
   print('\n• Requirement: rank I thì elo là 1200');
-  int rankI_saboElo = saboMapping['I']!;
-  Map<String, int>? rankI_constantsRange = constantsRanges['I'];
+  int rankiSaboelo = saboMapping['I']!;
+  Map<String, int>? rankiConstantsrange = constantsRanges['I'];
   
-  print('  SaboSystem: I rank starts at ELO $rankI_saboElo');
-  if (rankI_constantsRange != null) {
-    print('  Constants: I rank range ${rankI_constantsRange['min']}-${rankI_constantsRange['max']}');
-    bool matches1200 = (rankI_saboElo == 1200 && rankI_constantsRange['min'] == 1200);
+  print('  SaboSystem: I rank starts at ELO $rankiSaboelo');
+  if (rankiConstantsrange != null) {
+    print('  Constants: I rank range ${rankiConstantsrange['min']}-${rankiConstantsrange['max']}');
+    bool matches1200 = (rankiSaboelo == 1200 && rankiConstantsrange['min'] == 1200);
     print('  Business rule satisfied: ${matches1200 ? '✅' : '❌'}');
   }
   
   // Test: "elo đạt 1300 thì user lên hạng I+"
   print('\n• Requirement: elo đạt 1300 thì user lên hạng I+');
-  int rankIPlus_saboElo = saboMapping['I+']!;
-  Map<String, int>? rankIPlus_constantsRange = constantsRanges['I+'];
+  int rankiplusSaboelo = saboMapping['I+']!;
+  Map<String, int>? rankiplusConstantsrange = constantsRanges['I+'];
   
-  print('  SaboSystem: I+ rank starts at ELO $rankIPlus_saboElo');
-  if (rankIPlus_constantsRange != null) {
-    print('  Constants: I+ rank range ${rankIPlus_constantsRange['min']}-${rankIPlus_constantsRange['max']}');
-    bool matches1300 = (rankIPlus_saboElo == 1300 && rankIPlus_constantsRange['min'] == 1300);
+  print('  SaboSystem: I+ rank starts at ELO $rankiplusSaboelo');
+  if (rankiplusConstantsrange != null) {
+    print('  Constants: I+ rank range ${rankiplusConstantsrange['min']}-${rankiplusConstantsrange['max']}');
+    bool matches1300 = (rankiplusSaboelo == 1300 && rankiplusConstantsrange['min'] == 1300);
     print('  Business rule satisfied: ${matches1300 ? '✅' : '❌'}');
   }
   
@@ -131,6 +131,6 @@ void main() {
   print('3. Test critical paths: registration, tournaments, UI display');
   print('4. Verify business rules are satisfied end-to-end');
   
-  print('\n' + '=' * 60);
+  print('\n${'=' * 60}');
   print('ANALYSIS COMPLETED - Review above for critical action items!');
 }

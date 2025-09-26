@@ -276,7 +276,7 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
           Switch(
             value: isEnabled,
             onChanged: onChanged,
-            activeColor: AppTheme.primaryLight,
+            activeThumbColor: AppTheme.primaryLight,
           ),
         ],
       ),
@@ -412,7 +412,7 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
                 account['isActive'] = value;
               });
             },
-            activeColor: AppTheme.primaryLight,
+            activeThumbColor: AppTheme.primaryLight,
           ),
           PopupMenuButton(
             icon: Icon(Icons.more_vert, color: AppTheme.textSecondaryLight),
@@ -584,7 +584,7 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
                 wallet['isActive'] = value;
               });
             },
-            activeColor: AppTheme.primaryLight,
+            activeThumbColor: AppTheme.primaryLight,
           ),
           PopupMenuButton(
             icon: Icon(Icons.more_vert, color: AppTheme.textSecondaryLight),

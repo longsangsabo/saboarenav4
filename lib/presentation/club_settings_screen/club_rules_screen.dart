@@ -246,7 +246,7 @@ class _ClubRulesScreenState extends State<ClubRulesScreen> {
                   rule['isActive'] = value;
                 });
               },
-              activeColor: AppTheme.primaryLight,
+              activeThumbColor: AppTheme.primaryLight,
             ),
             PopupMenuButton(
               icon: Icon(Icons.more_vert, color: AppTheme.textSecondaryLight),

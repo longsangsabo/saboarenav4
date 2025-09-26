@@ -7,9 +7,9 @@ class ProductionBracketWidget extends StatefulWidget {
   final String tournamentId;
   
   const ProductionBracketWidget({
-    Key? key,
+    super.key,
     required this.tournamentId,
-  }) : super(key: key);
+  });
 
   @override
   State<ProductionBracketWidget> createState() => _ProductionBracketWidgetState();
@@ -284,7 +284,7 @@ class _ProductionBracketWidgetState extends State<ProductionBracketWidget> {
                   SizedBox(height: 8.sp),
                   
                   DropdownButtonFormField<String>(
-                    value: _selectedFormat,
+                    initialValue: _selectedFormat,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
                       contentPadding: EdgeInsets.symmetric(horizontal: 12.sp, vertical: 8.sp),
