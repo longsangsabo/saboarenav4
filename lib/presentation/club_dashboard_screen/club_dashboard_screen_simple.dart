@@ -74,6 +74,82 @@ class _ClubDashboardScreenSimpleState extends State<ClubDashboardScreenSimple> {
   // Permission service
   final ClubPermissionService _permissionService = ClubPermissionService();
 
+  Future<ClubDashboardStats> _loadRealClubStats(String clubId) async {
+    try {
+      // Get real member count
+      final memberCount = await Supabase.instance.client
+          .from('club_members')
+          .select('id')
+          .eq('club_id', clubId)
+          .eq('status', 'active')
+          .count();
+
+      // Get tournament count (if tournaments table exists)
+      int tournamentCount = 0;
+      try {
+        final tournamentResult = await Supabase.instance.client
+            .from('tournaments')
+            .select('id')
+            .eq('club_id', clubId)
+            .count();
+        tournamentCount = tournamentResult.count;
+      } catch (e) {
+        // Tournaments table might not exist, use 0
+        tournamentCount = 0;
+      }
+
+      return ClubDashboardStats(
+        totalMembers: memberCount.count,
+        activeMembers: memberCount.count,
+        monthlyRevenue: 0.0, // Can be calculated later if needed
+        totalTournaments: tournamentCount,
+        tournaments: tournamentCount,
+        ranking: 0, // Can be calculated later if needed
+      );
+    } catch (e) {
+      // Fallback to zero values if error
+      return ClubDashboardStats(
+        totalMembers: 0,
+        activeMembers: 0,
+        monthlyRevenue: 0.0,
+        totalTournaments: 0,
+        tournaments: 0,
+        ranking: 0,
+      );
+    }
+  }
+
+  Future<List<ClubActivity>> _loadRecentActivities(String clubId) async {
+    try {
+      final activities = <ClubActivity>[];
+      
+      // Get recent member joins
+      final recentJoins = await Supabase.instance.client
+          .from('club_members')
+          .select('''
+            joined_at,
+            users!inner(display_name)
+          ''')
+          .eq('club_id', clubId)
+          .order('joined_at', ascending: false)
+          .limit(5);
+
+      for (final join in recentJoins) {
+        final userName = join['users']['display_name'] ?? 'Thành viên mới';
+        activities.add(ClubActivity(
+          title: 'Thành viên mới tham gia',
+          subtitle: '$userName đã tham gia club',
+          type: 'member_join',
+          timestamp: DateTime.parse(join['joined_at']),
+        ));
+      }
+
+      return activities;
+    } catch (e) {
+      // Return empty list if error
+      return [];
+    }
+  }
 
   @override
   void initState() {
@@ -101,30 +177,10 @@ class _ClubDashboardScreenSimpleState extends State<ClubDashboardScreenSimple> {
       if (isOwner) {
         // Load dashboard data for club owner
         final results = await Future.wait([
-          // Mock data for club stats
-          Future.value(ClubDashboardStats(
-            totalMembers: 25,
-            activeMembers: 18,
-            monthlyRevenue: 15000000,
-            totalTournaments: 3,
-            tournaments: 3,
-            ranking: 5,
-          )),
-          // Mock data for recent activities
-          Future.value([
-            ClubActivity(
-              title: 'Thành viên mới tham gia',
-              subtitle: 'Nguyễn Văn A đã tham gia club',
-              type: 'member_join',
-              timestamp: DateTime.now().subtract(Duration(hours: 2)),
-            ),
-            ClubActivity(
-              title: 'Giải đấu kết thúc',
-              subtitle: 'Giải đấu tháng 12 đã hoàn thành',
-              type: 'tournament_end',
-              timestamp: DateTime.now().subtract(Duration(days: 1)),
-            ),
-          ]),
+          // Real data for club stats
+          _loadRealClubStats(widget.clubId),
+          // Real data for recent activities  
+          _loadRecentActivities(widget.clubId),
         ]);
 
         setState(() {

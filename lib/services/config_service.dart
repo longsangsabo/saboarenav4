@@ -477,7 +477,7 @@ class EloConfig {
 
   factory EloConfig.fromJson(Map<String, dynamic> json) {
     return EloConfig(
-      startingElo: json['starting_elo'] ?? 1200,
+      startingElo: json['starting_elo'] ?? 1000,
       kFactorNew: json['k_factor_new'] ?? 32,
       kFactorRegular: json['k_factor_regular'] ?? 24,
       kFactorExpert: json['k_factor_expert'] ?? 16,

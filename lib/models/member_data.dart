@@ -48,16 +48,22 @@ class MemberData {
   }
 
   factory MemberData.fromSupabaseData(Map<String, dynamic> data) {
+    print('🔍 Converting member data: ${data.keys}');
+    print('🔍 Users data: ${data['users']}');
+    
+    // Handle nested users data
+    final userData = data['users'] ?? {};
+    
     return MemberData(
       id: data['id'] ?? '',
       user: UserInfo(
-        id: data['user_id'] ?? '',
-        name: data['user_name'] ?? '',
-        username: data['username'] ?? '',
-        avatar: data['avatar_url'] ?? '',
-        elo: data['elo_rating'] ?? 1000,
-        rank: data['rank'] ?? 'beginner',
-        isOnline: data['is_online'] ?? false,
+        id: userData['id'] ?? data['user_id'] ?? '',
+        name: userData['name'] ?? data['user_name'] ?? userData['display_name'] ?? 'Chưa có tên',
+        username: userData['username'] ?? data['username'] ?? 'user',
+        avatar: userData['avatar_url'] ?? data['avatar_url'] ?? '',
+        elo: userData['elo_rating'] ?? data['elo_rating'] ?? 1000,
+        rank: userData['rank'] ?? data['rank'] ?? 'beginner',
+        isOnline: userData['is_online'] ?? data['is_online'] ?? false,
       ),
       membershipInfo: MembershipInfo(
         membershipId: data['id'] ?? '',

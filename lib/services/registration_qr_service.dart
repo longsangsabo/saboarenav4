@@ -38,7 +38,7 @@ class RegistrationQRService {
         totalWins: 0,
         totalLosses: 0,
         totalTournaments: 0,
-        eloRating: 1200,
+        eloRating: 1000, // Starting ELO for unranked users
         spaPoints: 0,
         totalPrizePool: 0.0,
         isVerified: false,
@@ -61,7 +61,7 @@ class RegistrationQRService {
         'user_code': userCode,
         'qr_data': qrData,
         'qr_generated_at': DateTime.now().toIso8601String(),
-        'elo_rating': 1200,
+        'elo_rating': 1000, // Starting ELO for unranked users
         'total_wins': 0,
         'total_losses': 0,
         'total_tournaments': 0,

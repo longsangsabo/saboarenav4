@@ -4,6 +4,12 @@ import 'package:sabo_arena/theme/app_theme.dart';
 import 'package:sabo_arena/routes/app_routes.dart';
 import '../club_profile_edit_screen/club_profile_edit_screen_simple.dart';
 import 'club_logo_settings_screen.dart';
+import 'operating_hours_screen.dart';
+import 'club_rules_screen.dart';
+import 'pricing_settings_screen.dart';
+import 'payment_settings_screen.dart';
+import 'color_settings_screen.dart';
+import 'membership_policy_screen.dart';
 
 class ClubSettingsScreen extends StatefulWidget {
   final String clubId;
@@ -289,26 +295,38 @@ class _ClubSettingsScreenState extends State<ClubSettingsScreen> {
   }
 
   void _showOperatingHours() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Tính năng giờ hoạt động đang được phát triển')),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => OperatingHoursScreen(clubId: widget.clubId),
+      ),
     );
   }
 
   void _showClubRules() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Tính năng quy định CLB đang được phát triển')),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ClubRulesScreen(clubId: widget.clubId),
+      ),
     );
   }
 
   void _showPricingSettings() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Tính năng bảng giá đang được phát triển')),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PricingSettingsScreen(clubId: widget.clubId),
+      ),
     );
   }
 
   void _showPaymentSettings() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Tính năng thanh toán đang được phát triển')),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PaymentSettingsScreen(clubId: widget.clubId),
+      ),
     );
   }
 
@@ -319,8 +337,11 @@ class _ClubSettingsScreenState extends State<ClubSettingsScreen> {
   }
 
   void _showMembershipPolicy() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Tính năng chính sách thành viên đang được phát triển')),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MembershipPolicyScreen(clubId: widget.clubId),
+      ),
     );
   }
 
@@ -364,8 +385,11 @@ class _ClubSettingsScreenState extends State<ClubSettingsScreen> {
   }
 
   void _showColorSettings() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Tính năng màu sắc đang được phát triển')),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ColorSettingsScreen(clubId: widget.clubId),
+      ),
     );
   }
 

@@ -4,7 +4,7 @@ import 'dart:io';
 
 import '../../../core/app_export.dart';
 import '../../../core/utils/sabo_rank_system.dart';
-import '../../../core/utils/rank_migration_helper.dart';
+
 
 import './rank_registration_info_modal.dart';
 
@@ -413,10 +413,18 @@ class ProfileHeaderWidget extends StatelessWidget {
           ),
           SizedBox(height: 0.5.h),
           Text(
-            RankMigrationHelper.getNewDisplayName(userRank), // Sử dụng tên mới
+            rank, // Hiển thị rank code (K, I+, etc.)
             style: AppTheme.lightTheme.textTheme.headlineMedium?.copyWith(
               color: rankColor,
               fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 0.3.h),
+          Text(
+            SaboRankSystem.getRankDisplayName(rank), // Mô tả rank (Người mới, Thợ 3, etc.)
+            style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
+              color: rankColor.withOpacity(0.8),
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
