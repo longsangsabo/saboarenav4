@@ -12,7 +12,6 @@ import '../club_settings_screen/club_settings_screen.dart';
 import '../../services/club_service.dart';
 import '../../services/auth_service.dart';
 import '../../models/club.dart';
-import 'package:flutter/foundation.dart';
 
 // Temporary mock classes
 class ClubDashboardStats {

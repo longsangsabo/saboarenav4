@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sabo_arena/services/club_permission_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter/foundation.dart';
 
 class ActivityHistoryScreen extends StatefulWidget {
   final String clubId;

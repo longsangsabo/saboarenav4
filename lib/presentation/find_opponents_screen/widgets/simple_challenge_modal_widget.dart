@@ -4,7 +4,6 @@ import 'package:sizer/sizer.dart';
 // import '../../../core/app_export.dart';
 import '../../../services/simple_challenge_service.dart';
 import '../../../services/opponent_club_service.dart';
-import 'package:flutter/foundation.dart';
 
 class SimpleChallengeModalWidget extends StatefulWidget {
   final Map<String, dynamic> player;

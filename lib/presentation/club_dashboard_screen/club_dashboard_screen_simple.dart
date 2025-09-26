@@ -16,7 +16,6 @@ import '../club_reports_screen/club_reports_screen.dart';
 import '../activity_history_screen/activity_history_screen.dart';
 import '../admin_dashboard_screen/club_rank_change_management_screen.dart';
 import '../../services/club_permission_service.dart';
-import 'package:flutter/foundation.dart';
 
 // Temporary mock classes
 class ClubDashboardStats {

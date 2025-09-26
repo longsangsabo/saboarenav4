@@ -7,7 +7,6 @@ import '../../../core/utils/sabo_rank_system.dart';
 import '../../../core/utils/rank_migration_helper.dart';
 
 import './rank_registration_info_modal.dart';
-import 'package:flutter/foundation.dart';
 
 class ProfileHeaderWidget extends StatelessWidget {
   final Map<String, dynamic> userData;

@@ -7,7 +7,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import './map_view_widget.dart';
 import './player_card_widget.dart';
 
-import 'package:flutter/foundation.dart';
 
 
 class CompetitivePlayTab extends StatefulWidget {

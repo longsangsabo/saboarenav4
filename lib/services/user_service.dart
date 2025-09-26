@@ -1,6 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user_profile.dart';
-import 'dart:typed_data';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 
@@ -509,6 +508,35 @@ class UserService {
     } catch (error) {
       debugPrint('Error requesting rank registration: $error');
       throw Exception('Không thể gửi yêu cầu đăng ký rank: $error');
+    }
+  }
+
+  /// Check if user has pending rank request for a specific club
+  Future<Map<String, dynamic>?> getPendingRankRequest(String clubId) async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) throw Exception('User not authenticated');
+
+      final response = await _supabase
+          .from('rank_requests')
+          .select('''
+            *,
+            club:clubs (
+              id,
+              name,
+              address,
+              logo_url
+            )
+          ''')
+          .eq('user_id', user.id)
+          .eq('club_id', clubId)
+          .eq('status', 'pending')
+          .maybeSingle();
+
+      return response;
+    } catch (error) {
+      debugPrint('Error checking pending rank request: $error');
+      return null;
     }
   }
 

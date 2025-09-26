@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../models/user_profile.dart';
 import '../../../services/opponent_club_service.dart';
@@ -7,7 +6,6 @@ import '../../../services/user_service.dart';
 import '../../../routes/app_routes.dart';
 // import '../../../services/challenge_service.dart';
 import './simple_challenge_modal_widget.dart';
-import 'package:flutter/foundation.dart';
 
 class PlayerCardWidget extends StatelessWidget {
   final UserProfile player;

@@ -5,7 +5,6 @@ import '../../../models/achievement.dart';
 import '../../../services/achievement_service.dart';
 import '../../../theme/app_theme.dart';
 import '../../../widgets/custom_icon_widget.dart';
-import 'package:flutter/foundation.dart';
 
 class AchievementsSectionWidget extends StatefulWidget {
   final String userId;

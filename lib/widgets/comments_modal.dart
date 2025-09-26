@@ -3,7 +3,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sabo_arena/repositories/comment_repository.dart';
 import 'package:sabo_arena/theme/app_theme.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter/foundation.dart';
 
 class CommentsModal extends StatefulWidget {
   final String postId;

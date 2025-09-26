@@ -3,7 +3,6 @@ import 'package:sizer/sizer.dart';
 import 'package:sabo_arena/core/app_export.dart';
 import 'package:sabo_arena/theme/app_theme.dart';
 import 'package:sabo_arena/services/tournament_service.dart';
-import 'package:flutter/foundation.dart';
 
 class TournamentOverviewTab extends StatefulWidget {
   final String tournamentId;

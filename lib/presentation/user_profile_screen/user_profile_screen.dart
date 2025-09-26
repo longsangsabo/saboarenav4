@@ -24,7 +24,6 @@ import './widgets/profile_header_widget.dart';
 import './widgets/qr_code_widget.dart';
 import './widgets/social_features_widget.dart';
 import './widgets/statistics_cards_widget.dart';
-import 'package:flutter/foundation.dart';
 
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});

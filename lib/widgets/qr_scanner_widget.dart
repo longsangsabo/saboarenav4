@@ -4,7 +4,6 @@ import 'package:sizer/sizer.dart';
 import 'package:sabo_arena/services/integrated_qr_service.dart';
 import '../routes/app_routes.dart';
 import '../core/utils/rank_migration_helper.dart';
-import 'package:flutter/foundation.dart';
 
 class QRScannerWidget extends StatefulWidget {
   final Function(Map<String, dynamic>)? onUserFound;

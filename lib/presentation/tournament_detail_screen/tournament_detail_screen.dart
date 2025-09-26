@@ -20,7 +20,6 @@ import './widgets/tournament_bracket_widget.dart';
 import './widgets/tournament_header_widget.dart';
 import './widgets/tournament_info_widget.dart';
 import './widgets/tournament_rules_widget.dart';
-import 'package:flutter/foundation.dart';
 
 class TournamentDetailScreen extends StatefulWidget {
   const TournamentDetailScreen({super.key});

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import '../../core/app_export.dart';
 import '../../theme/app_theme.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/utils/rank_migration_helper.dart';
+import '../../services/admin_rank_approval_service.dart';
 
 class ClubRankChangeManagementScreen extends StatefulWidget {
   const ClubRankChangeManagementScreen({super.key});
@@ -15,7 +15,7 @@ class ClubRankChangeManagementScreen extends StatefulWidget {
 class _ClubRankChangeManagementScreenState extends State<ClubRankChangeManagementScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final SupabaseClient _supabase = Supabase.instance.client;
+  final AdminRankApprovalService _adminService = AdminRankApprovalService();
   
   List<Map<String, dynamic>> _pendingRequests = [];
   final List<Map<String, dynamic>> _reviewedRequests = [];
@@ -42,23 +42,13 @@ class _ClubRankChangeManagementScreenState extends State<ClubRankChangeManagemen
         _errorMessage = null;
       });
 
-      // Get pending requests for club review
-      final response = await _supabase
-          .rpc('get_pending_rank_change_requests');
-
-      if (response != null) {
-        final List<dynamic> requests = response as List<dynamic>;
-        
-        setState(() {
-          _pendingRequests = requests.cast<Map<String, dynamic>>();
-          _isLoading = false;
-        });
-      } else {
-        setState(() {
-          _pendingRequests = [];
-          _isLoading = false;
-        });
-      }
+      // Use new service instead of RPC function
+      final requests = await _adminService.getPendingRankRequests();
+      
+      setState(() {
+        _pendingRequests = requests;
+        _isLoading = false;
+      });
     } catch (e) {
       setState(() {
         _errorMessage = 'Lỗi khi tải yêu cầu: ${e.toString()}';
@@ -69,12 +59,12 @@ class _ClubRankChangeManagementScreenState extends State<ClubRankChangeManagemen
 
   Future<void> _reviewRequest(String requestId, bool approved, {String? comments}) async {
     try {
-      final response = await _supabase
-          .rpc('club_review_rank_change_request', params: {
-        'p_request_id': requestId,
-        'p_approved': approved,
-        'p_club_comments': comments,
-      });
+      // Use new service instead of RPC function
+      final response = await _adminService.approveRankRequest(
+        requestId: requestId,
+        approved: approved,
+        comments: comments,
+      );
 
       if (response['success'] == true) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -86,6 +76,13 @@ class _ClubRankChangeManagementScreenState extends State<ClubRankChangeManagemen
         
         // Reload data
         await _loadRankChangeRequests();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi: ${response['error'] ?? 'Unknown error'}'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

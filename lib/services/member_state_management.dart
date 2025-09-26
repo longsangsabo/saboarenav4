@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/foundation.dart';
 
 /// State management for Member Management System
 /// Using a simple state management pattern similar to Redux

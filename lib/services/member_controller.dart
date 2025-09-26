@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import '../services/member_realtime_service.dart';
 import '../services/member_management_service.dart';
 import 'member_state_management.dart';
-import 'package:flutter/foundation.dart';
 
 /// Central controller for Member Management System
 /// Combines state management, real-time updates, and business logic

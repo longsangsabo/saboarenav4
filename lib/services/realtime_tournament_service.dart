@@ -3,8 +3,6 @@
 // Handles real-time bracket updates, match results, and notifications
 
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../core/constants/tournament_constants.dart';
-import '../models/tournament.dart';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 

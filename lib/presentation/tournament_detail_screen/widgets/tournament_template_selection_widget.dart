@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import '../../../core/constants/tournament_constants.dart';
 import '../../../services/tournament_template_service.dart';
-import 'package:flutter/foundation.dart';
 
 class TournamentTemplateSelectionWidget extends StatefulWidget {
   final Function(String templateId, Map<String, dynamic> templateConfig) onTemplateSelected;

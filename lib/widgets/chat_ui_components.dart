@@ -13,14 +13,14 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
 
   const ChatAppBar({
-    Key? key,
+    super.key,
     required this.title,
     this.subtitle,
     this.avatarUrl,
     this.onBackPressed,
     this.onUserPressed,
     this.actions,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -126,14 +126,14 @@ class MessageInput extends StatefulWidget {
   final String? hintText;
 
   const MessageInput({
-    Key? key,
+    super.key,
     required this.onSendMessage,
     this.onTyping,
     this.onAttachFile,
     this.onRecordVoice,
     this.isEnabled = true,
     this.hintText,
-  }) : super(key: key);
+  });
 
   @override
   State<MessageInput> createState() => _MessageInputState();
@@ -264,14 +264,14 @@ class MessageBubble extends StatelessWidget {
   final bool showTimestamp;
 
   const MessageBubble({
-    Key? key,
+    super.key,
     required this.message,
     required this.isFromCurrentUser,
     this.onTap,
     this.onLongPress,
     this.showAvatar = true,
     this.showTimestamp = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -571,9 +571,9 @@ class TypingIndicatorWidget extends StatefulWidget {
   final List<String> usernames;
 
   const TypingIndicatorWidget({
-    Key? key,
+    super.key,
     required this.usernames,
-  }) : super(key: key);
+  });
 
   @override
   State<TypingIndicatorWidget> createState() => _TypingIndicatorWidgetState();

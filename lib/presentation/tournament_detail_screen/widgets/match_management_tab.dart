@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:sabo_arena/core/app_export.dart';
 import 'package:sabo_arena/theme/app_theme.dart';
 import 'package:sabo_arena/services/tournament_service.dart';
 import 'package:sabo_arena/services/bracket_service.dart';
-import 'package:flutter/foundation.dart';
 
 class MatchManagementTab extends StatefulWidget {
   final String tournamentId;

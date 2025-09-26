@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 
 /// Notification List Screen hiển thị danh sách notifications với actions
 class NotificationListScreen extends StatefulWidget {
-  const NotificationListScreen({Key? key}) : super(key: key);
+  const NotificationListScreen({super.key});
 
   @override
   State<NotificationListScreen> createState() => _NotificationListScreenState();

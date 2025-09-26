@@ -4,7 +4,6 @@
 import 'package:flutter/material.dart';
 import '../components/bracket_components.dart';
 import '../shared/tournament_data_generator.dart';
-import 'package:flutter/foundation.dart';
 
 class SingleEliminationBracket extends StatelessWidget {
   final int playerCount;

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../core/app_export.dart';
 import '../services/messaging_service.dart';
 import '../services/notification_service.dart';
-import 'package:flutter/foundation.dart';
 
 class SharedBottomNavigation extends StatefulWidget {
   final int currentIndex;

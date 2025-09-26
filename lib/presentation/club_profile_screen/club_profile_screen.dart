@@ -12,7 +12,6 @@ import './widgets/club_photo_gallery_widget.dart';
 import './widgets/club_tournaments_widget.dart';
 import '../tournament_creation_wizard/tournament_creation_wizard.dart';
 import '../rank_registration_screen/rank_registration_screen.dart';
-import 'package:flutter/foundation.dart';
 
 class ClubProfileScreen extends StatefulWidget {
   const ClubProfileScreen({super.key});

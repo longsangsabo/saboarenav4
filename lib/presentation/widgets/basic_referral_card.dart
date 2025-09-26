@@ -4,7 +4,6 @@ import 'package:sizer/sizer.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../core/app_export.dart';
 import '../../services/basic_referral_service.dart';
-import 'package:flutter/foundation.dart';
 
 /// Basic Referral Card Widget
 /// Displays user's referral code with sharing functionality

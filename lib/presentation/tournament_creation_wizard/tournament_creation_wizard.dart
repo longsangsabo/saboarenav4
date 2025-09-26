@@ -3,7 +3,6 @@ import 'package:sabo_arena/theme/theme_extensions.dart';
 import 'package:sabo_arena/utils/size_extensions.dart';
 import '../../services/tournament_service.dart';
 import '../../core/constants/ranking_constants.dart';
-import 'package:flutter/foundation.dart';
 
 class TournamentCreationWizard extends StatefulWidget {
   final String? clubId;

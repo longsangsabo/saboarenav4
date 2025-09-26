@@ -9,7 +9,6 @@ import '../../../services/bracket_generator_service.dart';
 import '../../../services/tournament_service.dart' as TournamentSvc;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/utils/rank_migration_helper.dart';
-import 'package:flutter/foundation.dart';
 
 // Tournament format constants
 class TournamentFormats {

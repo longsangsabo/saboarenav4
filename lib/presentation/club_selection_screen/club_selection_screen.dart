@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sabo_arena/models/club.dart';
 import 'package:sabo_arena/services/club_service.dart';
-import 'package:sabo_arena/services/user_service.dart';
-import 'package:flutter/foundation.dart';
+import 'package:sabo_arena/presentation/rank_registration_screen/rank_registration_screen.dart';
 
 class ClubSelectionScreen extends StatefulWidget {
   const ClubSelectionScreen({super.key});
@@ -13,12 +12,10 @@ class ClubSelectionScreen extends StatefulWidget {
 
 class _ClubSelectionScreenState extends State<ClubSelectionScreen> {
   final ClubService _clubService = ClubService.instance;
-  final UserService _userService = UserService.instance;
   late Future<List<Club>> _clubsFuture;
   List<Club> _allClubs = [];
   List<Club> _filteredClubs = [];
   final TextEditingController _searchController = TextEditingController();
-  bool _isLoading = false;
 
   @override
   void initState() {
@@ -60,95 +57,21 @@ class _ClubSelectionScreenState extends State<ClubSelectionScreen> {
   }
 
   Future<void> _sendRankRequest(Club club) async {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Xác nhận yêu cầu'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Bạn có chắc chắn muốn gửi yêu cầu đăng ký rank tại:'),
-            SizedBox(height: 8),
-            Text(
-              '"${club.name}"',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            if (club.address != null) ...[
-              SizedBox(height: 4),
-              Text(
-                '📍 ${club.address}',
-                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-              ),
-            ],
-            SizedBox(height: 12),
-            Text(
-              'Chủ câu lạc bộ sẽ xem xét và phê duyệt yêu cầu của bạn.',
-              style: TextStyle(fontSize: 12, color: Colors.grey[700]),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: _isLoading ? null : () => Navigator.pop(context),
-            child: Text('Hủy'),
-          ),
-          ElevatedButton(
-            onPressed: _isLoading ? null : () => _submitRankRequest(club),
-            child: _isLoading
-                ? SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text('Gửi yêu cầu'),
-          ),
-        ],
+    // Navigate to the improved rank registration screen
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RankRegistrationScreen(clubId: club.id),
       ),
-    );
-  }
-
-  Future<void> _submitRankRequest(Club club) async {
-    setState(() {
-      _isLoading = true;
+    ).then((result) {
+      if (result == true) {
+        // Request was submitted successfully, go back to previous screen
+        Navigator.pop(context, true);
+      }
     });
-
-    try {
-      final result = await _userService.requestRankRegistration(
-        clubId: club.id,
-        notes: 'Yêu cầu đăng ký rank từ ứng dụng SABO Arena',
-      );
-
-      if (mounted) {
-        Navigator.pop(context); // Close dialog
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('✅ ${result['message']}'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 3),
-          ),
-        );
-        Navigator.pop(context); // Go back to profile screen
-      }
-    } catch (error) {
-      if (mounted) {
-        Navigator.pop(context); // Close dialog
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('❌ $error'),
-            backgroundColor: Colors.red,
-            duration: Duration(seconds: 4),
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
   }
+
+
 
   @override
   void dispose() {

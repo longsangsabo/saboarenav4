@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import '../../core/app_export.dart';
 import '../../services/basic_referral_service.dart';
-import 'package:flutter/foundation.dart';
 
 /// Basic Referral Stats Widget
 /// Simple dashboard showing referral statistics and SPA earned

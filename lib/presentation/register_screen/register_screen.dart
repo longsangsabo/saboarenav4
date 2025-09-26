@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../core/app_export.dart';
 import '../../routes/app_routes.dart';
 import '../../services/integrated_registration_service.dart';
-import 'package:flutter/foundation.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});

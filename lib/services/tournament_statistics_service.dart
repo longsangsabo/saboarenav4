@@ -3,9 +3,6 @@
 // Provides detailed statistics, trends, and insights for tournaments
 
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../core/constants/tournament_constants.dart';
-import '../models/tournament.dart';
-import '../models/user_profile.dart';
 import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 
