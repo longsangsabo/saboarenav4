@@ -5,6 +5,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/constants/tournament_constants.dart';
 import 'notification_service.dart';
+import 'club_spa_service.dart';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 
@@ -16,13 +17,14 @@ class MatchProgressionService {
 
   final SupabaseClient _supabase = Supabase.instance.client;
   final NotificationService _notificationService = NotificationService.instance;
+  final ClubSpaService _clubSpaService = ClubSpaService();
 
   // ==================== MAIN PROGRESSION LOGIC ====================
 
-  /// Update match result và tự động advance winners đến next round
+  /// Update match result và tự động advance winners đến next round OR process challenge rewards
   Future<Map<String, dynamic>> updateMatchResult({
     required String matchId,
-    required String tournamentId,
+    String? tournamentId, // Now optional - if null, this is a challenge match
     required String winnerId,
     required String loserId,
     required Map<String, int> scores,
@@ -34,43 +36,84 @@ class MatchProgressionService {
       // 1. Update match result in database
       await _updateMatchInDatabase(matchId, winnerId, loserId, scores, notes);
 
-      // 2. Get tournament format để xác định progression logic
-      final tournament = await _getTournamentInfo(tournamentId);
-      final format = tournament['format'] ?? tournament['tournament_type'];
-
-      // 3. Get bracket structure và current match info
-      final bracketInfo = await _getBracketInfo(tournamentId, matchId);
-
-      // 4. Execute format-specific progression
-      final progressionResult = await _executeProgression(
-        tournamentId: tournamentId,
+      // 1.5. Process SPA bonuses if this is a challenge match
+      await _processChallengeSpaBonuses(
         matchId: matchId,
         winnerId: winnerId,
         loserId: loserId,
-        format: format,
-        bracketInfo: bracketInfo,
       );
 
-      // 5. Check if tournament is complete
-      final isComplete = await _checkTournamentCompletion(tournamentId, format);
+      // Check if this is a tournament match or challenge match
+      if (tournamentId != null) {
+        // This is a tournament match - do bracket progression
+        
+        // 2. Get tournament format để xác định progression logic
+        final tournament = await _getTournamentInfo(tournamentId);
+        final format = tournament['format'] ?? tournament['tournament_type'];
 
-      // 6. Send notifications
-      await _sendProgressionNotifications(
-        tournamentId: tournamentId,
-        winnerId: winnerId,
-        loserId: loserId,
-        progressionResult: progressionResult,
-        isComplete: isComplete,
-      );
+        // 3. Get bracket structure và current match info
+        final bracketInfo = await _getBracketInfo(tournamentId, matchId);
 
-      return {
-        'success': true,
-        'match_updated': true,
-        'progression_completed': progressionResult['advancement_made'] ?? false,
-        'tournament_complete': isComplete,
-        'next_matches': progressionResult['next_matches'] ?? [],
-        'message': 'Match result updated and bracket progressed successfully',
-      };
+        // 4. Execute format-specific progression
+        final progressionResult = await _executeProgression(
+          tournamentId: tournamentId,
+          matchId: matchId,
+          winnerId: winnerId,
+          loserId: loserId,
+          format: format,
+          bracketInfo: bracketInfo,
+        );
+
+        // 5. Check if tournament is complete
+        final isComplete = await _checkTournamentCompletion(tournamentId, format);
+
+        // 6. Send notifications
+        await _sendProgressionNotifications(
+          tournamentId: tournamentId,
+          winnerId: winnerId,
+          loserId: loserId,
+          progressionResult: progressionResult,
+          isComplete: isComplete,
+        );
+
+        return {
+          'success': true,
+          'match_updated': true,
+          'progression_completed': progressionResult['advancement_made'] ?? false,
+          'tournament_complete': isComplete,
+          'next_matches': progressionResult['next_matches'] ?? [],
+          'message': 'Match result updated and bracket progressed successfully',
+        };
+        
+      } else {
+        // This is a challenge match - just basic notifications
+        await _notificationService.sendNotification(
+          userId: winnerId,
+          type: 'match_victory',
+          title: 'Chiến thắng thách đấu! 🎉',
+          message: 'Bạn đã thắng trận thách đấu và nhận được phần thưởng SPA!',
+          data: {'match_id': matchId},
+        );
+        
+        await _notificationService.sendNotification(
+          userId: loserId,
+          type: 'match_defeat',
+          title: 'Kết thúc trận đấu',
+          message: 'Trận thách đấu đã kết thúc. Hãy tiếp tục luyện tập!',
+          data: {'match_id': matchId},
+        );
+        
+        return {
+          'success': true,
+          'match_updated': true,
+          'progression_completed': false,
+          'tournament_complete': false,
+          'next_matches': [],
+          'message': 'Challenge match completed and rewards processed',
+        };
+      }
+
+
 
     } catch (error) {
       debugPrint('❌ Error in match progression: $error');
@@ -532,5 +575,89 @@ class MatchProgressionService {
       'ready_matches': readyMatches,
       'completion_percentage': totalMatches > 0 ? (completedMatches / totalMatches * 100).round() : 0,
     };
+  }
+
+  // ==================== SPA CHALLENGE INTEGRATION ====================
+
+  /// Process SPA bonus for challenge match completion
+  Future<void> _processChallengeSpaBonuses({
+    required String matchId,
+    required String winnerId,
+    required String loserId,
+  }) async {
+    try {
+      debugPrint('🎯 Processing SPA bonuses for challenge match $matchId');
+      
+      // Get match details to check if it's a SPA challenge
+      final matchData = await _supabase
+          .from('matches')
+          .select('stakes_type, spa_stakes_amount, spa_payout_processed, player1_id, player2_id')
+          .eq('id', matchId)
+          .single();
+      
+      final stakesType = matchData['stakes_type'] as String?;
+      final spaAmount = matchData['spa_stakes_amount'] as int?;
+      final payoutProcessed = matchData['spa_payout_processed'] as bool?;
+      
+      // Skip if not a SPA challenge or already processed
+      if (stakesType != 'spa_points' || spaAmount == null || spaAmount <= 0 || payoutProcessed == true) {
+        debugPrint('⏭️ Skipping SPA processing: stakes_type=$stakesType, amount=$spaAmount, processed=$payoutProcessed');
+        return;
+      }
+      
+      debugPrint('💰 Processing SPA bonus: $spaAmount points to winner $winnerId');
+      
+      // Determine club ID - check match_conditions first, then use default
+      String clubId = 'default-club-id'; // fallback
+      final matchConditions = matchData['match_conditions'] as Map<String, dynamic>?;
+      if (matchConditions != null && matchConditions['club_id'] != null) {
+        clubId = matchConditions['club_id'] as String;
+      }
+      
+      debugPrint('💳 Using club ID: $clubId for SPA award');
+      
+      // Award SPA bonus to winner from club pool
+      final result = await _clubSpaService.awardSpaBonus(
+        winnerId,
+        clubId,
+        spaAmount.toDouble(),
+        matchId: matchId,
+        description: 'Challenge victory bonus',
+      );
+      
+      if (result == true) {
+        // Mark SPA payout as processed to prevent double payments
+        await _supabase.from('matches').update({
+          'spa_payout_processed': true,
+        }).eq('id', matchId);
+        
+        debugPrint('✅ SPA bonus awarded and marked as processed');
+        
+        // Send notification to winner about SPA bonus
+        await _notificationService.sendNotification(
+          userId: winnerId,
+          type: 'spa_bonus_awarded',
+          title: 'Thưởng SPA từ thách đấu! 🎉',
+          message: 'Bạn đã nhận được $spaAmount điểm SPA từ chiến thắng trong thách đấu!',
+          data: {
+            'match_id': matchId,
+            'spa_amount': spaAmount,
+            'bonus_type': 'challenge_victory'
+          },
+        );
+        
+      } else {
+        debugPrint('❌ Failed to award SPA bonus - club may not have sufficient balance');
+        // Still mark as processed to avoid infinite retries, but with a note
+        await _supabase.from('matches').update({
+          'spa_payout_processed': true,
+          'notes': 'SPA award failed - insufficient club balance',
+        }).eq('id', matchId);
+      }
+      
+    } catch (error) {
+      debugPrint('❌ Error processing SPA bonuses: $error');
+      // Don't throw error to avoid breaking match completion
+    }
   }
 }
