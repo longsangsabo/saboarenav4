@@ -4,6 +4,7 @@ import 'package:sizer/sizer.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../core/app_export.dart';
+import '../../../core/utils/rank_migration_helper.dart';
 import '../../../services/integrated_qr_service.dart';
 
 class QRCodeWidget extends StatefulWidget {
@@ -177,7 +178,7 @@ class _QRCodeWidgetState extends State<QRCodeWidget> {
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            'Rank ${widget.userData["rank"] as String? ?? "Chưa xếp hạng"} • ELO ${widget.userData["elo_rating"] ?? widget.userData["eloRating"] ?? 1450}',
+                            'Rank ${RankMigrationHelper.getNewDisplayName(widget.userData["rank"] as String?)} • ELO ${widget.userData["elo_rating"] ?? widget.userData["eloRating"] ?? 1450}',
                             style: AppTheme.lightTheme.textTheme.bodySmall
                                 ?.copyWith(
                               color: AppTheme
