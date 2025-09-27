@@ -15,6 +15,7 @@ import '../../services/club_service.dart';
 import '../../services/messaging_service.dart';
 import '../../services/notification_service.dart';
 import '../club_dashboard_screen/club_dashboard_screen_simple.dart';
+import '../club_registration_screen/club_registration_screen.dart';
 import '../../widgets/shared_bottom_navigation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -958,7 +959,8 @@ class _UserProfileScreenState extends State<UserProfileScreen>
       Navigator.pop(context);
 
       if (club == null) {
-        _showErrorMessage('Bạn chưa có club nào để quản lý. Vui lòng tạo hoặc tham gia club trước.');
+        // Show club creation options for club owner without clubs
+        _showClubCreationOptions();
         return;
       }
 
@@ -1113,8 +1115,17 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                       },
                     ),
                     
-                    // Show Club Management if user is club owner
-                    if (_userProfile?.role == 'club_owner')
+                    // Show Club options if user is club owner
+                    if (_userProfile?.role == 'club_owner') ...[
+                      _buildOptionItem(
+                        icon: Icons.add_business,
+                        title: 'Đăng ký CLB',
+                        subtitle: 'Tạo câu lạc bộ mới',
+                        onTap: () {
+                          Navigator.pop(context);
+                          _navigateToClubRegistration();
+                        },
+                      ),
                       _buildOptionItem(
                         icon: Icons.business,
                         title: 'Quản lý CLB',
@@ -1124,6 +1135,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                           _navigateToClubManagement();
                         },
                       ),
+                    ],
                     
                     Divider(height: 30),
                     
@@ -2320,4 +2332,121 @@ class _UserProfileScreenState extends State<UserProfileScreen>
       );
     }
   }
+
+  void _showClubCreationOptions() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              Icons.sports_soccer,
+              color: AppTheme.lightTheme.colorScheme.primary,
+              size: 28,
+            ),
+            SizedBox(width: 2.w),
+            Expanded(
+              child: Text(
+                'Quản lý CLB',
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.lightTheme.colorScheme.primary,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Bạn chưa có câu lạc bộ nào để quản lý.',
+              style: TextStyle(fontSize: 14.sp, height: 1.4),
+            ),
+            SizedBox(height: 2.h),
+            Container(
+              padding: EdgeInsets.all(3.w),
+              decoration: BoxDecoration(
+                color: Colors.green.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.green.shade200),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Tạo CLB mới:',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.green.shade800,
+                    ),
+                  ),
+                  SizedBox(height: 1.h),
+                  Text(
+                    '🏢 Đăng ký thông tin CLB của bạn\n'
+                    '⏳ Chờ admin phê duyệt (24-48 giờ)\n'
+                    '🎯 Bắt đầu quản lý và tổ chức giải đấu\n'
+                    '👥 Thu hút thành viên và người chơi',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      height: 1.5,
+                      color: Colors.green.shade700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Đóng',
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 14.sp,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close dialog
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ClubRegistrationScreen(),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.lightTheme.colorScheme.primary,
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
+            ),
+            child: Text(
+              'Đăng ký CLB',
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _navigateToClubRegistration() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const ClubRegistrationScreen(),
+      ),
+    );
+  }
+}
 }

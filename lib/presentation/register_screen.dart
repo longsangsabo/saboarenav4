@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import '../../routes/app_routes.dart';
 import '../../services/auth_service.dart';
+import '../club_registration_screen/club_registration_screen.dart';
+import '../../widgets/player_welcome_guide.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -68,11 +70,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (mounted) {
         // Check if user is immediately confirmed (no email confirmation needed)
         if (response.session != null && response.user != null) {
-          // User is logged in immediately, go to home
-          Navigator.of(context).pushNamedAndRemoveUntil(
-            AppRoutes.homeFeedScreen,
-            (route) => false,
-          );
+          // Check role and redirect accordingly
+          if (_selectedRole == 'club_owner') {
+            _showClubOwnerWelcomeDialog();
+          } else {
+            // Show player welcome guide first
+            _showPlayerWelcomeGuide();
+          }
         } else {
           // Email confirmation required
           _showEmailConfirmationDialog();
@@ -254,10 +258,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
           _secondsRemaining = 0;
         });
 
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          AppRoutes.homeFeedScreen,
-          (route) => false,
-        );
+        // Check role and redirect accordingly
+        if (_selectedRole == 'club_owner') {
+          _showClubOwnerWelcomeDialog();
+        } else {
+          // Show player welcome guide first
+          _showPlayerWelcomeGuide();
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -913,6 +920,135 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+
+  void _showPlayerWelcomeGuide() {
+    // Navigate to home feed first
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      AppRoutes.homeFeedScreen,
+      (route) => false,
+    );
+    
+    // Then show welcome guide
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (context) => const PlayerWelcomeGuide(),
+      );
+    });
+  }
+
+  void _showClubOwnerWelcomeDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              Icons.sports_soccer,
+              color: Theme.of(context).primaryColor,
+              size: 28,
+            ),
+            SizedBox(width: 2.w),
+            Expanded(
+              child: Text(
+                'Chào mừng Chủ CLB!',
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Chúc mừng bạn đã tạo tài khoản thành công với vai trò Chủ câu lạc bộ!',
+              style: TextStyle(fontSize: 14.sp, height: 1.4),
+            ),
+            SizedBox(height: 2.h),
+            Container(
+              padding: EdgeInsets.all(3.w),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.blue.shade200),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Bước tiếp theo:',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.blue.shade800,
+                    ),
+                  ),
+                  SizedBox(height: 1.h),
+                  Text(
+                    '📝 Đăng ký thông tin câu lạc bộ của bạn\n'
+                    '⏳ Chờ admin phê duyệt (24-48 giờ)\n'
+                    '🎯 Bắt đầu quản lý và tổ chức giải đấu',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      height: 1.5,
+                      color: Colors.blue.shade700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close dialog
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                AppRoutes.homeFeedScreen,
+                (route) => false,
+              );
+            },
+            child: Text(
+              'Để sau',
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 14.sp,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close dialog
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => const ClubRegistrationScreen(),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).primaryColor,
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
+            ),
+            child: Text(
+              'Đăng ký CLB ngay',
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ],
       ),
     );

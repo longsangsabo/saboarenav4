@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import './sabo_rank_system.dart';
 import '../constants/ranking_constants.dart';
@@ -23,6 +24,8 @@ class RankMigrationHelper {
     'Giỏi+': 'F+',
     'Xuất Sắc': 'E',
     'Chuyên Gia': 'E+',
+    // Legacy rank codes that shouldn't exist
+    'B': 'I', // Map legacy "B" to appropriate rank "I" (Thợ 3)
   };
 
   /// Mapping từ tên rank mới sang mã rank
@@ -80,7 +83,9 @@ class RankMigrationHelper {
       return SaboRankSystem.getRankDisplayName(code);
     }
     
-    return input; // Fallback: return input gốc
+    // ⚠️ FIXED: Nếu rank không hợp lệ (như "B"), trả về "Chưa xếp hạng" thay vì giá trị gốc
+    debugPrint('⚠️ RankMigrationHelper: Invalid rank "$input" found. Returning "Chưa xếp hạng"');
+    return 'Chưa xếp hạng'; // Fallback: trả về giá trị mặc định thay vì input gốc
   }
 
   /// Kiểm tra xem có phải là tên rank cũ không

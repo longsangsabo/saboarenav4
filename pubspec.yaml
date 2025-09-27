@@ -56,7 +56,7 @@ dependencies:
   
   # Local Push Notifications (không cần Firebase với Supabase)
   flutter_local_notifications: ^18.0.1
-  awesome_notifications: ^0.10.1
+  awesome_notifications: ^0.10.0
   
   # Background processing cho notifications
   # workmanager: ^0.5.2  # Temporarily disabled due to compatibility issues
@@ -65,7 +65,7 @@ dev_dependencies:
     sdk: flutter   # CRITICAL: Required for Flutter project testing - DO NOT REMOVE
   flutter_lints: ^5.0.0 # CRITICAL: Required for code quality - DO NOT REMOVE
   flutter_launcher_icons: ^0.14.4 # For generating app icons
-  flutter_native_splash: ^2.4.6 # For generating splash screens
+  flutter_native_splash: ^2.4.1 # For generating splash screens
 
 flutter:
   uses-material-design: true # CRITICAL: Required for Material icon font - DO NOT REMOVE

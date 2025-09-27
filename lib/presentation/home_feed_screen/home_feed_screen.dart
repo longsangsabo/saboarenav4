@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sizer/sizer.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/app_export.dart';
 import '../../widgets/custom_app_bar.dart';
+import '../../widgets/player_welcome_guide.dart';
 
 import '../../models/post_model.dart';
 import '../../services/post_repository.dart';
+import '../../services/auth_service.dart';
+import '../../services/club_service.dart';
+import '../club_registration_screen/club_registration_screen.dart';
 import '../../widgets/comments_modal.dart';
 import '../../widgets/share_bottom_sheet.dart';
 import './widgets/create_post_modal_widget.dart';
@@ -37,6 +42,14 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
   List<PostModel> _followingPosts = [];
   String? _errorMessage;
 
+  // Club owner status
+  bool _isClubOwner = false;
+  bool _hasClub = false;
+  
+  // Player status
+  bool _isPlayer = false;
+  bool _showPlayerQuickActions = false;
+
   @override
   void initState() {
     super.initState();
@@ -66,6 +79,8 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
     
     // Load posts AFTER animation controllers are initialized
     _loadPosts();
+    // Check club owner status
+    _checkClubOwnerStatus();
   }
 
   Future<void> _loadPosts() async {
@@ -435,10 +450,27 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
                       child: ListView.builder(
                         controller: _scrollController,
                         physics: const AlwaysScrollableScrollPhysics(),
-                        padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
-                        itemCount: _currentPosts.length + (_isLoading ? 1 : 0),
+                        padding: EdgeInsets.only(bottom: 1.h),
+                        itemCount: (_isClubOwner && !_hasClub ? 1 : 0) + (_isPlayer && _showPlayerQuickActions ? 1 : 0) + _currentPosts.length + (_isLoading ? 1 : 0),
                         itemBuilder: (context, index) {
-                          if (index == _currentPosts.length) {
+                          // Show club owner banner first if applicable
+                          if (_isClubOwner && !_hasClub && index == 0) {
+                            return _buildClubOwnerBanner();
+                          }
+                          
+                          // Show player quick actions if applicable
+                          if (_isPlayer && _showPlayerQuickActions) {
+                            if ((_isClubOwner && !_hasClub && index == 1) || (!_isClubOwner && index == 0)) {
+                              return _buildPlayerQuickActions();
+                            }
+                          }
+                          
+                          // Adjust index for actual posts
+                          int adjustedIndex = index;
+                          if (_isClubOwner && !_hasClub) adjustedIndex--;
+                          if (_isPlayer && _showPlayerQuickActions) adjustedIndex--;
+                          final postIndex = adjustedIndex;
+                          if (postIndex == _currentPosts.length) {
                             return Container(
                               padding: EdgeInsets.all(4.w),
                               child: const Center(
@@ -447,7 +479,7 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
                             );
                           }
 
-                          final post = _currentPosts[index];
+                          final post = _currentPosts[postIndex];
                           return FeedPostCardWidget(
                             post: post,
                             onLike: () => _handlePostAction('like', post),
@@ -586,5 +618,336 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
         ),
       ),
     );
+  }
+
+  Future<void> _checkClubOwnerStatus() async {
+    try {
+      final user = AuthService.instance.currentUser;
+      if (user == null) return;
+
+      // Check user role
+      final userRole = await AuthService.instance.getCurrentUserRole();
+      
+      if (userRole == 'club_owner') {
+        // Check if user has any clubs
+        final club = await ClubService.instance.getFirstClubForUser(user.id);
+        
+        if (mounted) {
+          setState(() {
+            _isClubOwner = true;
+            _hasClub = club != null;
+            _isPlayer = false;
+          });
+        }
+      } else if (userRole == 'player') {
+        // Check if we should show quick actions (e.g., for new users)
+        final prefs = await SharedPreferences.getInstance();
+        final showQuickActions = prefs.getBool('show_player_quick_actions_${user.id}') ?? true;
+        
+        if (mounted) {
+          setState(() {
+            _isPlayer = true;
+            _showPlayerQuickActions = showQuickActions;
+            _isClubOwner = false;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error checking user status: $e');
+    }
+  }
+
+  Widget _buildClubOwnerBanner() {
+    if (!_isClubOwner || _hasClub) return const SizedBox.shrink();
+
+    return Container(
+      margin: EdgeInsets.all(4.w),
+      padding: EdgeInsets.all(4.w),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.blue.shade50, Colors.green.shade50],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.blue.shade200, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.shade100,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.sports_soccer,
+                  color: Colors.blue.shade700,
+                  size: 24,
+                ),
+              ),
+              SizedBox(width: 3.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Chủ CLB',
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue.shade800,
+                      ),
+                    ),
+                    Text(
+                      'Bạn chưa đăng ký câu lạc bộ',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: Colors.blue.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ClubRegistrationScreen(),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue.shade600,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: Text(
+                  'Đăng ký CLB',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 2.h),
+          Text(
+            '🏢 Tạo và quản lý câu lạc bộ của bạn\n'
+            '🎯 Tổ chức giải đấu và sự kiện\n'
+            '👥 Thu hút thành viên mới',
+            style: TextStyle(
+              fontSize: 11.sp,
+              color: Colors.blue.shade700,
+              height: 1.4,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPlayerQuickActions() {
+    return Container(
+      margin: EdgeInsets.all(4.w),
+      padding: EdgeInsets.all(4.w),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.green.shade50, Colors.blue.shade50],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.green.shade200, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.green.shade100,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header with close button
+          Row(
+            children: [
+              Icon(
+                Icons.sports_handball,
+                color: Colors.green.shade600,
+                size: 6.w,
+              ),
+              SizedBox(width: 2.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Bắt đầu hành trình bida! 🎱',
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green.shade700,
+                      ),
+                    ),
+                    Text(
+                      'Khám phá tính năng hữu ích cho người chơi mới',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                onPressed: () => _hidePlayerQuickActions(),
+                icon: Icon(
+                  Icons.close,
+                  color: Colors.grey.shade500,
+                  size: 5.w,
+                ),
+              ),
+            ],
+          ),
+          
+          SizedBox(height: 3.h),
+          
+          // Quick action buttons
+          Row(
+            children: [
+              Expanded(
+                child: _buildQuickActionButton(
+                  icon: Icons.group_add,
+                  label: 'Tìm đối thủ',
+                  color: Colors.blue,
+                  onTap: () => Navigator.pushNamed(context, AppRoutes.findOpponentsScreen),
+                ),
+              ),
+              SizedBox(width: 3.w),
+              Expanded(
+                child: _buildQuickActionButton(
+                  icon: Icons.military_tech,
+                  label: 'Xếp hạng',
+                  color: Colors.purple,
+                  onTap: () => Navigator.pushNamed(context, AppRoutes.userProfileScreen),
+                ),
+              ),
+              SizedBox(width: 3.w),
+              Expanded(
+                child: _buildQuickActionButton(
+                  icon: Icons.emoji_events,
+                  label: 'Giải đấu',
+                  color: Colors.orange,
+                  onTap: () => Navigator.pushNamed(context, AppRoutes.tournamentListScreen),
+                ),
+              ),
+            ],
+          ),
+          
+          SizedBox(height: 2.h),
+          
+          // Show guide button
+          Center(
+            child: TextButton.icon(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  barrierDismissible: true,
+                  builder: (context) => const PlayerWelcomeGuide(),
+                );
+              },
+              icon: Icon(
+                Icons.help_outline,
+                color: Colors.green.shade600,
+                size: 4.w,
+              ),
+              label: Text(
+                'Xem hướng dẫn đầy đủ',
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: Colors.green.shade600,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickActionButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 2.h, horizontal: 2.w),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: color.withOpacity(0.3)),
+          ),
+          child: Column(
+            children: [
+              Icon(
+                icon,
+                color: color,
+                size: 6.w,
+              ),
+              SizedBox(height: 1.h),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 10.sp,
+                  color: color.shade700,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _hidePlayerQuickActions() async {
+    try {
+      final user = AuthService.instance.currentUser;
+      if (user != null) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('show_player_quick_actions_${user.id}', false);
+        
+        setState(() {
+          _showPlayerQuickActions = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error hiding player quick actions: $e');
+    }
   }
 }

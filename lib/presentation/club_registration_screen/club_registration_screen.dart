@@ -658,19 +658,79 @@ class _ClubRegistrationScreenState extends State<ClubRegistrationScreen> {
           size: 48,
         ),
         title: const Text(
-          'Đăng ký thành công!',
+          'Đăng ký CLB thành công!',
           textAlign: TextAlign.center,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
         ),
-        content: const Text(
-          'Câu lạc bộ của bạn đã được gửi để xét duyệt. Chúng tôi sẽ liên hệ với bạn trong vòng 24-48 giờ.',
-          textAlign: TextAlign.center,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Câu lạc bộ của bạn đã được gửi để xét duyệt.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.blue.shade200),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Bước tiếp theo:',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.blue.shade800,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '⏳ Chờ admin phê duyệt (24-48 giờ)\n'
+                    '📧 Nhận email thông báo kết quả\n'
+                    '🎯 Bắt đầu quản lý CLB của bạn',
+                    style: TextStyle(
+                      fontSize: 12,
+                      height: 1.5,
+                      color: Colors.blue.shade700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
         actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close dialog
+              Navigator.of(context).pop(); // Go back to previous screen
+            },
+            child: Text(
+              'Quay lại',
+              style: TextStyle(color: Colors.grey.shade600),
+            ),
+          ),
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop(); // Close dialog
-              Navigator.of(context).pop(); // Go back to club screen
+              // Navigate to home with club owner context
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                '/user_profile', // Or appropriate home route for club owner
+                (route) => false,
+              );
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+            ),
             child: const Text('Về trang chủ'),
           ),
         ],
