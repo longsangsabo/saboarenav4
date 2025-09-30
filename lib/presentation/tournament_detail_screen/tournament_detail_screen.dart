@@ -200,7 +200,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
     _tournamentData = {
       "id": _tournament!.id,
       "title": _tournament!.title,
-      "format": _tournament!.tournamentType,
+      "format": _tournament!.tournamentType, // Game type (8-ball, 9-ball)
       "coverImage": _tournament!.coverImageUrl ?? 
           "https://images.unsplash.com/photo-1578662996442-48f60103fc96?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
       "location": "Từ dữ liệu CLB", // TODO: Get from club data
@@ -209,7 +209,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
       "registrationDeadline": _formatDate(_tournament!.registrationDeadline),
       "currentParticipants": _tournament!.currentParticipants,
       "maxParticipants": _tournament!.maxParticipants,
-      "eliminationType": _tournament!.tournamentType,
+      "eliminationType": _tournament!.formatDisplayName, // Use formatDisplayName for proper display
       "status": _getStatusText(_tournament!.status),
       "entryFee": _tournament!.entryFee > 0 ? "${_tournament!.entryFee.toStringAsFixed(0)} VNĐ" : "Miễn phí",
       "rankRequirement": _tournament!.skillLevelRequired ?? "Tất cả",

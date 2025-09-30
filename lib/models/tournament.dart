@@ -13,7 +13,8 @@ class Tournament {
   final double prizePool;
   final String status;
   final String? skillLevelRequired;
-  final String tournamentType;
+  final String format; // Tournament elimination format (single_elimination, double_elimination)
+  final String tournamentType; // Game type (8-ball, 9-ball, 10-ball)
   final String? rules;
   final String? requirements;
   final bool isPublic;
@@ -37,7 +38,8 @@ class Tournament {
     required this.prizePool,
     required this.status,
     this.skillLevelRequired,
-    required this.tournamentType,
+    required this.format, // Tournament elimination format
+    required this.tournamentType, // Game type
     this.rules,
     this.requirements,
     required this.isPublic,
@@ -64,7 +66,9 @@ class Tournament {
       prizePool: (json['prize_pool'] ?? 0).toDouble(),
       status: json['status'] ?? 'upcoming',
       skillLevelRequired: json['skill_level_required'],
-      tournamentType: json['tournament_type'] ?? 'single_elimination',
+      // NOTE: Current database has fields swapped, adapting to existing data
+      format: json['tournament_type'] ?? 'single_elimination', // Tournament format from tournament_type field
+      tournamentType: json['format'] ?? '8-ball', // Game type from format field
       rules: json['rules'],
       requirements: json['requirements'],
       isPublic: json['is_public'] ?? true,
@@ -94,7 +98,9 @@ class Tournament {
       'prize_pool': prizePool,
       'status': status,
       'skill_level_required': skillLevelRequired,
-      'tournament_type': tournamentType,
+      // NOTE: Saving to match current database structure
+      'tournament_type': format, // Tournament format saved to tournament_type field
+      'format': tournamentType, // Game type saved to format field
       'rules': rules,
       'requirements': requirements,
       'is_public': isPublic,
@@ -116,6 +122,8 @@ class Tournament {
     double? prizePool,
     String? status,
     String? skillLevelRequired,
+    String? format,
+    String? tournamentType,
     String? rules,
     String? requirements,
     String? coverImageUrl,
@@ -135,7 +143,8 @@ class Tournament {
       prizePool: prizePool ?? this.prizePool,
       status: status ?? this.status,
       skillLevelRequired: skillLevelRequired ?? this.skillLevelRequired,
-      tournamentType: tournamentType,
+      format: format ?? this.format,
+      tournamentType: tournamentType ?? this.tournamentType,
       rules: rules ?? this.rules,
       requirements: requirements ?? this.requirements,
       isPublic: isPublic,
@@ -148,9 +157,26 @@ class Tournament {
 
   // Helper getters for UI compatibility
   String get clubName => 'Unknown Club';
-  String get format => tournamentType == 'single_elimination'
-      ? 'Single Elimination'
-      : 'Round Robin';
+
+  // Format display name getter
+  String get formatDisplayName {
+    switch (format) {
+      case 'single_elimination':
+        return 'Single Elimination';
+      case 'double_elimination':
+        return 'Double Elimination';
+      case 'round_robin':
+        return 'Round Robin';
+      case 'swiss':
+        return 'Swiss System';
+      case 'sabo_double_elimination':
+        return 'SABO DE16';
+      case 'sabo_double_elimination_32':
+        return 'SABO DE32';
+      default:
+        return format.replaceAll('_', ' ').toUpperCase();
+    }
+  }
 
   bool get isRegistrationOpen {
     return DateTime.now().isBefore(registrationDeadline) &&

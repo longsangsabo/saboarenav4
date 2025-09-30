@@ -2,6 +2,7 @@
 // Handles match generation and tournament calculation logic
 
 import 'dart:math';
+import 'package:flutter/material.dart';
 
 class TournamentDataGenerator {
   /// Calculate rounds for Single Elimination format
@@ -604,8 +605,49 @@ class TournamentDataGenerator {
 
   /// Calculate Winners Bracket rounds for Double Elimination
   static List<Map<String, dynamic>> calculateDoubleEliminationWinners(int playerCount) {
-    // Same as single elimination but tracks eliminated players
-    return calculateSingleEliminationRounds(playerCount);
+    // Winners bracket for Double Elimination has same structure as Single Elimination
+    // BUT stops at Winners Final (2 players remaining) instead of Grand Final
+    final List<Map<String, dynamic>> rounds = [];
+    int currentPlayerCount = playerCount;
+    int roundNumber = 1;
+    
+    // Continue until we have 2 players for Winners Final
+    while (currentPlayerCount > 2) {
+      String title;
+      if (currentPlayerCount == 4) {
+        title = 'Winners Final';
+      } else if (currentPlayerCount == 8) {
+        title = 'Winners Semifinals';  
+      } else if (currentPlayerCount == 16) {
+        title = 'Winners Round 1';
+      } else if (currentPlayerCount == 32) {
+        title = 'Winners Round 1';
+      } else {
+        title = 'Winners Round $roundNumber';
+      }
+      
+      final matchCount = currentPlayerCount ~/ 2;
+      rounds.add({
+        'title': title,
+        'matches': generateSingleEliminationMatches(roundNumber, currentPlayerCount),
+        'matchCount': matchCount,
+      });
+      
+      currentPlayerCount = matchCount;
+      roundNumber++;
+    }
+    
+    // Add Winners Final (2 players → 1 winner goes to Grand Final)
+    if (currentPlayerCount == 2) {
+      rounds.add({
+        'title': 'Winners Final',
+        'matches': generateSingleEliminationMatches(roundNumber, 2),
+        'matchCount': 1,
+      });
+    }
+    
+    debugPrint('🏆 Double Elimination Winners Bracket: $playerCount players → ${rounds.length} rounds'); // Debug fix
+    return rounds;
   }
 
   /// Calculate Losers Bracket rounds for Double Elimination

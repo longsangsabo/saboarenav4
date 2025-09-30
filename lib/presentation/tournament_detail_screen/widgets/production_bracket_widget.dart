@@ -20,8 +20,9 @@ class _ProductionBracketWidgetState extends State<ProductionBracketWidget> {
   
   bool _isLoading = false;
   Map<String, dynamic>? _existingBracket;
+  Map<String, dynamic>? _tournamentInfo;
   List<Map<String, dynamic>> _participants = [];
-  String _selectedFormat = 'single_elimination';
+  String _selectedFormat = 'single_elimination'; // default fallback
   
   @override
   void initState() {
@@ -33,6 +34,13 @@ class _ProductionBracketWidgetState extends State<ProductionBracketWidget> {
     setState(() => _isLoading = true);
     
     try {
+      // Load tournament info to get the actual format
+      _tournamentInfo = await _bracketService.getTournamentInfo(widget.tournamentId);
+      if (_tournamentInfo != null && _tournamentInfo!['format'] != null) {
+        String format = _tournamentInfo!['format'].toString().trim();
+        _selectedFormat = format.isNotEmpty ? format : 'single_elimination';
+      }
+      
       // Load existing bracket if any
       final bracketData = await _bracketService.loadTournamentBracket(widget.tournamentId);
       
@@ -77,6 +85,44 @@ class _ProductionBracketWidgetState extends State<ProductionBracketWidget> {
     } finally {
       setState(() => _isLoading = false);
     }
+  }
+
+  String _getFormatDisplayName(String? format) {
+    // Handle null or empty format
+    if (format == null || format.isEmpty) {
+      return '❓ Chưa xác định thể thức';
+    }
+    
+    switch (format.toLowerCase()) {
+      case 'single_elimination':
+        return '🏆 Single Elimination - Loại trực tiếp';
+      case 'double_elimination':
+        return '🔄 Double Elimination - Loại kép truyền thống';
+      case 'sabo_de16':
+        return '🎯 SABO DE16 - Double Elimination 16 người';
+      case 'sabo_de32':
+        return '🎯 SABO DE32 - Double Elimination 32 người';
+      case 'round_robin':
+        return '🔄 Round Robin - Vòng tròn';
+      case 'swiss_system':
+      case 'swiss':
+        return '🇨🇭 Swiss System - Hệ thống Thụy Sĩ';
+      // Handle potential raw format values from database
+      case 'knockout':
+        return '🏆 Single Elimination - Loại trực tiếp';
+      case 'sabo_double_elimination':
+        return '🎯 SABO Double Elimination';
+      case 'sabo_double_elimination_32':
+        return '🎯 SABO DE32 - Double Elimination 32 người';
+      default:
+        // If it's a recognizable word, return it formatted nicely
+        return '🎮 ${_capitalizeFirst(format)}';
+    }
+  }
+  
+  String _capitalizeFirst(String text) {
+    if (text.isEmpty) return text;
+    return text[0].toUpperCase() + text.substring(1).toLowerCase();
   }
 
   void _showError(String message) {
@@ -276,42 +322,38 @@ class _ProductionBracketWidgetState extends State<ProductionBracketWidget> {
                   
                   SizedBox(height: 12.sp),
                   
-                  // Format selection
+                  // Format selection - hiển thị format hiện tại của tournament
                   Text(
-                    'Chọn thể thức thi đấu:',
+                    'Thể thức thi đấu hiện tại:',
                     style: TextStyle(fontWeight: FontWeight.w600),
                   ),
                   SizedBox(height: 8.sp),
                   
-                  DropdownButtonFormField<String>(
-                    initialValue: _selectedFormat,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12.sp, vertical: 8.sp),
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(12.sp),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.grey.shade50,
                     ),
-                    items: [
-                      DropdownMenuItem(
-                        value: 'single_elimination',
-                        child: Text('🏆 Single Elimination'),
+                    child: Text(
+                      _getFormatDisplayName(_selectedFormat),
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
                       ),
-                      DropdownMenuItem(
-                        value: 'double_elimination',
-                        child: Text('🔄 Double Elimination'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'round_robin',
-                        child: Text('🔄 Round Robin'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'swiss_system',
-                        child: Text('🇨🇭 Swiss System'),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() => _selectedFormat = value);
-                      }
-                    },
+                    ),
+                  ),
+                  
+                  SizedBox(height: 8.sp),
+                  Text(
+                    'ℹ️ Thể thức được thiết lập khi tạo giải và không thể thay đổi',
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      color: Colors.grey[600],
+                      fontStyle: FontStyle.italic,
+                    ),
                   ),
                   
                   SizedBox(height: 12.sp),

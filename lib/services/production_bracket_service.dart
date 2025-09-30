@@ -5,6 +5,42 @@ import 'bracket_generator_service.dart';
 class ProductionBracketService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
+  /// Convert tournament creation format to bracket generator format
+  String _mapTournamentFormat(String tournamentFormat) {
+    switch (tournamentFormat) {
+      case 'single_elimination':
+        return 'single_elimination';
+      case 'double_elimination':
+        return 'double_elimination';
+      case 'sabo_de16':
+        return 'sabo_double_elimination';
+      case 'sabo_de32':
+        return 'sabo_double_elimination_32';
+      case 'round_robin':
+        return 'round_robin';
+      case 'swiss_system':
+        return 'swiss';
+      default:
+        return 'single_elimination'; // Fallback
+    }
+  }
+
+  /// Get tournament information including format
+  Future<Map<String, dynamic>?> getTournamentInfo(String tournamentId) async {
+    try {
+      final response = await _supabase
+          .from('tournaments')
+          .select('id, name, format, max_participants, status, start_date')
+          .eq('id', tournamentId)
+          .single();
+      
+      return response;
+    } catch (e) {
+      print('❌ Error loading tournament info: $e');
+      return null;
+    }
+  }
+
   /// Get tournaments that are ready for bracket creation
   Future<List<Map<String, dynamic>>> getTournamentsReadyForBracket() async {
     try {
@@ -123,7 +159,7 @@ class ProductionBracketService {
       final bracket = await BracketGeneratorService.generateBracket(
         tournamentId: tournamentId,
         participants: participantList,
-        format: format,
+        format: _mapTournamentFormat(format), // Use mapped format
       );
 
       // Save bracket matches to database

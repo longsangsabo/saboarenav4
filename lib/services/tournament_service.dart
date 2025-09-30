@@ -102,7 +102,8 @@ class TournamentService {
         entryFee: 100000,
         prizePool: 5000000,
         status: 'upcoming',
-        tournamentType: '8-ball',
+        format: 'single_elimination', // Tournament format
+        tournamentType: '8-ball', // Game type
         isPublic: true,
         createdAt: now.subtract(Duration(days: 30)),
         updatedAt: now.subtract(Duration(days: 1)),
@@ -119,7 +120,8 @@ class TournamentService {
         entryFee: 50000,
         prizePool: 1000000,
         status: 'ongoing',
-        tournamentType: '9-ball',
+        format: 'double_elimination', // Tournament format
+        tournamentType: '9-ball', // Game type
         isPublic: true,
         createdAt: now.subtract(Duration(days: 20)),
         updatedAt: now.subtract(Duration(hours: 2)),
@@ -136,7 +138,8 @@ class TournamentService {
         entryFee: 0,
         prizePool: 500000,
         status: 'completed',
-        tournamentType: '8-ball',
+        format: 'round_robin', // Tournament format
+        tournamentType: '8-ball', // Game type
         isPublic: true,
         createdAt: now.subtract(Duration(days: 60)),
         updatedAt: now.subtract(Duration(days: 45)),
@@ -357,6 +360,8 @@ class TournamentService {
     required int maxParticipants,
     required double entryFee,
     required double prizePool,
+    String format = 'single_elimination', // Tournament elimination format
+    String gameType = '8-ball', // Game type (8-ball, 9-ball, 10-ball)
     String? rules,
     String? requirements,
   }) async {
@@ -374,6 +379,9 @@ class TournamentService {
         'max_participants': maxParticipants,
         'entry_fee': entryFee,
         'prize_pool': prizePool,
+        // NOTE: Database has fields swapped, adapting to existing structure
+        'tournament_type': format, // Tournament elimination format saved to tournament_type field
+        'format': gameType, // Game type saved to format field
         // 'skill_level_required': removed - không dùng nữa
         'rules': rules,
         'requirements': requirements,

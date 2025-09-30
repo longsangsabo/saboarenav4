@@ -4,7 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/app_export.dart';
 import '../../models/tournament.dart';
 import '../../services/tournament_service.dart';
-import '../../../services/correct_bracket_logic_service.dart';
+import '../../services/bracket_service.dart';
 import '../tournament_detail_screen/widgets/match_management_tab.dart';
 import '../tournament_detail_screen/widgets/participant_management_tab.dart';
 import '../tournament_detail_screen/widgets/tournament_rankings_widget.dart';
@@ -24,7 +24,7 @@ class TournamentManagementCenterScreen extends StatefulWidget {
 
 class _TournamentManagementCenterScreenState extends State<TournamentManagementCenterScreen> {
   final TournamentService _tournamentService = TournamentService.instance;
-  final CorrectBracketLogicService _bracketService = CorrectBracketLogicService.instance;
+  final BracketService _bracketService = BracketService.instance;
   final SupabaseClient _supabase = Supabase.instance.client;
   
   List<Tournament> _tournaments = [];
@@ -181,7 +181,7 @@ class _TournamentManagementCenterScreenState extends State<TournamentManagementC
     }
 
     return Container(
-      height: 40.sp,
+      height: 50.sp,  // Increased height for 2 lines
       padding: EdgeInsets.symmetric(horizontal: 10.sp, vertical: 2.sp),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -218,16 +218,33 @@ class _TournamentManagementCenterScreenState extends State<TournamentManagementC
                     ),
                   ),
                   SizedBox(width: 6.sp),
-                  // Tournament title and info in one row
+                  // Tournament title and info with format
                   Expanded(
-                    child: Text(
-                      '${tournament.title} • ${tournament.currentParticipants}/${tournament.maxParticipants}',
-                      style: TextStyle(
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '${tournament.title} • ${tournament.currentParticipants}/${tournament.maxParticipants}',
+                          style: TextStyle(
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(height: 2.sp),
+                        Text(
+                          '${_getFormatDisplayName(tournament.format)} (${tournament.tournamentType})',
+                          style: TextStyle(
+                            fontSize: 8.sp,
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w400,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -544,15 +561,38 @@ class _TournamentManagementCenterScreenState extends State<TournamentManagementC
           'full_name': profile.fullName.isNotEmpty ? profile.fullName : profile.username,
           'username': profile.username,
           'avatar_url': profile.avatarUrl,
+          'payment_status': 'confirmed', // Add this for BracketService validation
         }).toList();
         
-        final result = await _bracketService.generateSingleEliminationBracket(
+        // 🔧 DETECT TOURNAMENT FORMAT AND USE APPROPRIATE SERVICE
+        final tournamentFormat = _selectedTournament!.format;
+        debugPrint('🎯 Detected tournament format: $tournamentFormat');
+        debugPrint('🏆 Creating $tournamentFormat bracket for ${participants.length} players');
+        
+        final result = _bracketService.generateBracket(
           tournamentId: _selectedTournament!.id,
-          participants: participants,
+          format: tournamentFormat,
+          confirmedParticipants: participants,
+          shufflePlayers: false, // Keep seeding order
         );
         
-        if (!result['success']) {
-          throw Exception(result['message']);
+        // Save bracket to database
+        final saveSuccess = await _bracketService.saveBracketToDatabase(result);
+        if (!saveSuccess) {
+          throw Exception('Failed to save bracket to database');
+        }
+        
+        debugPrint('✅ Bracket created and saved successfully');
+        debugPrint('📊 Generated ${result['total_matches']} matches for $tournamentFormat');
+        
+        if (!result.containsKey('success')) {
+          // Convert bracket result to success format
+          result['success'] = true;
+          result['message'] = 'Bảng đấu $tournamentFormat đã được tạo với ${result['total_matches']} trận đấu';
+        }
+        
+        if (!result.containsKey('success') || !result['success']) {
+          throw Exception(result['message'] ?? 'Lỗi không xác định khi tạo bảng đấu');
         }
         debugPrint('✅ Bracket created successfully');
       } catch (e) {
@@ -627,6 +667,7 @@ class _TournamentManagementCenterScreenState extends State<TournamentManagementC
     switch (status) {
       case 'recruiting': return Colors.orange;
       case 'ready': return Colors.blue;
+      case 'upcoming': return Colors.teal;
       case 'active': return Colors.green;
       case 'completed': return Colors.purple;
       default: return Colors.grey;
@@ -637,9 +678,22 @@ class _TournamentManagementCenterScreenState extends State<TournamentManagementC
     switch (status) {
       case 'recruiting': return 'Đang tuyển';
       case 'ready': return 'Sẵn sàng';
+      case 'upcoming': return 'Sắp diễn ra';
       case 'active': return 'Đang diễn ra';
       case 'completed': return 'Hoàn thành';
       default: return 'Không xác định';
+    }
+  }
+
+  String _getFormatDisplayName(String format) {
+    switch (format) {
+      case 'single_elimination': return 'Single Elimination';
+      case 'double_elimination': return 'Double Elimination';
+      case 'round_robin': return 'Round Robin';
+      case 'swiss': return 'Swiss System';
+      case 'sabo_double_elimination': return 'SABO DE16';
+      case 'sabo_double_elimination_32': return 'SABO DE32';
+      default: return format.replaceAll('_', ' ').toUpperCase();
     }
   }
 }

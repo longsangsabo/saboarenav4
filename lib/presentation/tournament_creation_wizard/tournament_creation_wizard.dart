@@ -278,7 +278,7 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
                         ? null 
                         : (_currentStep < _stepTitles.length - 1
                             ? _nextStep
-                            : _createTournament),
+                            : _validateAndPublish),
                     child: _isCreating
                         ? Row(
                             mainAxisSize: MainAxisSize.min,
@@ -312,7 +312,7 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
     final theme = Theme.of(context);
     
     return SingleChildScrollView(
-      padding: EdgeInsets.all(20.h),
+      padding: EdgeInsets.all(12.h),
       child: Form(
         key: _basicInfoFormKey,
         child: Column(
@@ -320,11 +320,11 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
         children: [
           Text(
             'Thông tin cơ bản về giải đấu',
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
             ),
           ),
-          SizedBox(height: 20.h),
+          SizedBox(height: 12.h),
           
           // Tournament name (3-100 chars, required)
           TextFormField(
@@ -335,6 +335,7 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
               hintText: 'Ví dụ: SABO Championship 2025',
               border: OutlineInputBorder(),
               helperText: 'Tối thiểu 3 ký tự, tối đa 100 ký tự',
+              isDense: true,
             ),
             validator: (value) {
               if (value == null || value.length < 3) return 'Tên giải đấu phải có ít nhất 3 ký tự';
@@ -345,32 +346,33 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
             },
           ),
           
-          SizedBox(height: 16.h),
+          SizedBox(height: 10.h),
           
           // Description (10-1000 chars, optional)
           TextFormField(
             controller: _descriptionController,
-            maxLines: 3,
+            maxLines: 2,
             maxLength: 1000,
             decoration: InputDecoration(
               labelText: 'Mô tả giải đấu',
-              hintText: 'Mô tả mục tiêu và đặc điểm của giải đấu...',
+              hintText: 'Mô tả mục tiêu và đặc điểm...',
               border: OutlineInputBorder(),
               helperText: 'Tùy chọn - từ 10 đến 1000 ký tự',
+              isDense: true,
             ),
             onChanged: (value) {
               _onDataChanged({'description': value});
             },
           ),
           
-          SizedBox(height: 16.h),
-          
+          SizedBox(height: 12.h),
           // Game Type
           DropdownButtonFormField<String>(
             initialValue: _tournamentData['gameType'],
             decoration: InputDecoration(
               labelText: 'Môn thi đấu *',
               border: OutlineInputBorder(),
+              isDense: true,
             ),
             items: [
               DropdownMenuItem(value: '8-ball', child: Text('8-Ball')),
@@ -383,7 +385,7 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
             },
           ),
           
-          SizedBox(height: 16.h),
+          SizedBox(height: 10.h),
           
           // Tournament Format
           DropdownButtonFormField<String>(
@@ -391,73 +393,122 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
             decoration: InputDecoration(
               labelText: 'Hình thức thi đấu *',
               border: OutlineInputBorder(),
-              helperText: 'Chọn format phù hợp với số lượng người tham gia',
+              helperText: 'Chọn format phù hợp với SL người tham gia',
+              isDense: true,
             ),
             items: [
               DropdownMenuItem(
                 value: 'single_elimination', 
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('Single Elimination'),
-                    Text('Loại trực tiếp - Nhanh gọn', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-                  ],
+                child: Container(
+                  constraints: BoxConstraints(minHeight: 56),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('Single Elimination'),
+                      SizedBox(height: 2),
+                      Text('Loại trực tiếp - Nhanh gọn', 
+                        style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
               ),
               DropdownMenuItem(
                 value: 'double_elimination', 
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('Double Elimination'),
-                    Text('Loại kép - Cân bằng hơn', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-                  ],
+                child: Container(
+                  constraints: BoxConstraints(minHeight: 56),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('Double Elimination'),
+                      SizedBox(height: 2),
+                      Text('Loại kép - Cân bằng hơn', 
+                        style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
               ),
               DropdownMenuItem(
                 value: 'sabo_de16', 
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('SABO DE16'),
-                    Text('Double Elimination 16 người - Chuyên nghiệp', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-                  ],
+                child: Container(
+                  constraints: BoxConstraints(minHeight: 56),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('SABO DE16'),
+                      SizedBox(height: 2),
+                      Text('Double Elimination 16 người - Chuyên nghiệp', 
+                        style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
               ),
               DropdownMenuItem(
                 value: 'sabo_de32', 
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('SABO DE32'),
-                    Text('Double Elimination 32 người - Quy mô lớn', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-                  ],
+                child: Container(
+                  constraints: BoxConstraints(minHeight: 56),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('SABO DE32'),
+                      SizedBox(height: 2),
+                      Text('Double Elimination 32 người - Quy mô lớn', 
+                        style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
               ),
               DropdownMenuItem(
                 value: 'round_robin', 
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('Round Robin'),
-                    Text('Vòng tròn - Tất cả đấu với tất cả', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-                  ],
+                child: Container(
+                  constraints: BoxConstraints(minHeight: 56),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('Round Robin'),
+                      SizedBox(height: 2),
+                      Text('Vòng tròn - Tất cả đấu với tất cả', 
+                        style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
               ),
               DropdownMenuItem(
                 value: 'swiss_system', 
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('Swiss System'),
-                    Text('Hệ thống Thụy Sĩ - Linh hoạt', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-                  ],
+                child: Container(
+                  constraints: BoxConstraints(minHeight: 56),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('Swiss System'),
+                      SizedBox(height: 2),
+                      Text('Hệ thống Thụy Sĩ - Linh hoạt', 
+                        style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -467,7 +518,7 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
             },
           ),
           
-          SizedBox(height: 16.h),
+          SizedBox(height: 10.h),
           
           // Max Participants
           DropdownButtonFormField<int>(
@@ -475,6 +526,7 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
             decoration: InputDecoration(
               labelText: 'Số lượng tham gia *',
               border: OutlineInputBorder(),
+              isDense: true,
             ),
             items: [4, 6, 8, 12, 16, 24, 32, 64].map((count) => 
               DropdownMenuItem(
@@ -487,7 +539,7 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
             },
           ),
           
-          SizedBox(height: 16.h),
+          SizedBox(height: 10.h),
           
           // Third Place Match Toggle
           Row(
@@ -982,6 +1034,8 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
         maxParticipants: _tournamentData['maxParticipants'] ?? 16,
         entryFee: _tournamentData['entryFee'] ?? 0.0,
         prizePool: _tournamentData['prizePool'] ?? 0.0,
+        format: _tournamentData['format'] ?? 'single_elimination', // Tournament elimination format
+        gameType: _tournamentData['gameType'] ?? '8-ball', // Game type
         // skillLevelRequired: removed - không dùng nữa
         rules: _tournamentData['rules'],
         requirements: _buildRequirements(),
@@ -1097,58 +1151,5 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
       ),
     );
   }
-
-  Future<void> _createTournament() async {
-    setState(() {
-      _isCreating = true;
-    });
-
-    try {
-      // Create tournament
-      debugPrint('🏆 Creating tournament...');
-      
-      // Call tournament service to create tournament with named parameters
-      final tournament = await _tournamentService.createTournament(
-        clubId: widget.clubId ?? '',
-        title: _tournamentData['name'] ?? '',
-        description: _tournamentData['description'] ?? '',
-        startDate: _tournamentData['tournamentStartDate'] ?? DateTime.now().add(Duration(days: 7)),
-        registrationDeadline: _tournamentData['registrationEndDate'] ?? DateTime.now().add(Duration(days: 3)),
-        maxParticipants: _tournamentData['maxParticipants'] ?? 16,
-        entryFee: double.tryParse(_entryFeeController.text) ?? 0.0,
-        prizePool: double.tryParse(_prizePoolController.text) ?? 0.0,
-        rules: _tournamentData['rules'],
-        requirements: _tournamentData['requirements'],
-      );
-      
-      // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('✅ Tạo giải đấu thành công!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-
-      // Navigate back with tournament ID
-      Navigator.of(context).pop(tournament.id);
-
-    } catch (e) {
-      debugPrint('❌ Error creating tournament: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('❌ Lỗi tạo giải đấu: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isCreating = false;
-        });
-      }
-    }
-  }
-
-
 
 }

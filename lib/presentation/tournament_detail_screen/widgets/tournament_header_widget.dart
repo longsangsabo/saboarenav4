@@ -140,11 +140,11 @@ class TournamentHeaderWidget extends StatelessWidget {
                       vertical: Gaps.sm,
                     ),
                     decoration: BoxDecoration(
-                      color: _getFormatColor(tournament["format"] as String),
+                      color: _getEliminationTypeColor(tournament["eliminationType"] as String),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      tournament["format"] as String,
+                      tournament["eliminationType"] as String, // Show elimination type instead of game type
                       style:
                           AppTheme.lightTheme.textTheme.labelMedium?.copyWith(
                         color: Colors.white,
@@ -194,6 +194,26 @@ class TournamentHeaderWidget extends StatelessWidget {
     );
   }
 
+  Color _getEliminationTypeColor(String eliminationType) {
+    switch (eliminationType.toLowerCase()) {
+      case 'single elimination':
+        return Colors.red;
+      case 'double elimination':
+        return Colors.purple;
+      case 'round robin':
+        return Colors.green;
+      case 'swiss system':
+        return Colors.blue;
+      case 'sabo de16':
+        return Colors.orange;
+      case 'sabo de32':
+        return Colors.deepOrange;
+      default:
+        return AppTheme.lightTheme.colorScheme.primary;
+    }
+  }
+
+  // Keep for game type colors if needed elsewhere
   Color _getFormatColor(String format) {
     switch (format.toLowerCase()) {
       case '8-ball':
