@@ -6,8 +6,11 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "postgis";
 
 -- ========================================
--- CORE TABLES
+-- CORE TABLES - UPDATED TO MATCH ACTUAL DATABASE
 -- ========================================
+-- NOTE: This schema was corrected based on actual Supabase database structure
+-- discovered during development. Some fields in the original schema file
+-- did not match the production database.
 
 -- Users/Players Table
 CREATE TABLE users (
@@ -148,7 +151,11 @@ CREATE TABLE tournament_participants (
   UNIQUE(tournament_id, user_id)
 );
 
--- Matches Table (Individual games)
+-- Matches Table (Individual games) - FIXED SCHEMA BASED ON ACTUAL DATABASE
+-- IMPORTANT: The actual database uses 'scheduled_time' NOT 'scheduled_at'
+-- IMPORTANT: Status enum values include 'pending', 'live', 'completed', 'cancelled'  
+-- IMPORTANT: Fields like 'started_at', 'completed_at', 'match_data', 'table_number' do NOT exist
+-- IMPORTANT: Field 'format' DOES exist in actual database
 CREATE TABLE matches (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   tournament_id UUID REFERENCES tournaments(id) ON DELETE CASCADE,
@@ -168,16 +175,17 @@ CREATE TABLE matches (
   -- Result
   winner_id UUID REFERENCES users(id) ON DELETE SET NULL,
   
-  -- Status
-  status VARCHAR(20) DEFAULT 'scheduled', -- scheduled, live, completed, cancelled
+  -- Status (enum: pending, live, completed, cancelled)
+  status VARCHAR(20) DEFAULT 'pending',
   
-  -- Match Time
-  scheduled_at TIMESTAMPTZ,
-  started_at TIMESTAMPTZ,
-  completed_at TIMESTAMPTZ,
+  -- Match Time - FIXED: uses scheduled_time NOT scheduled_at
+  scheduled_time TIMESTAMPTZ,
   
-  -- Match Data (JSON for flexibility)
-  match_data JSONB, -- can store detailed game info, fouls, etc.
+  -- Format (this field exists in actual database)
+  format VARCHAR(20),
+  
+  -- Notes field exists
+  notes TEXT,
   
   -- Metadata
   created_at TIMESTAMPTZ DEFAULT NOW(),

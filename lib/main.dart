@@ -6,6 +6,7 @@ import 'package:sizer/sizer.dart';
 import '../core/app_export.dart';
 import '../widgets/custom_error_widget.dart';
 import './services/supabase_service.dart';
+import './services/tournament_cache_service_complete.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,6 +16,13 @@ void main() async {
     await SupabaseService.initialize();
   } catch (e) {
     debugPrint('Failed to initialize Supabase: $e');
+  }
+
+  // Initialize cache service silently
+  try {
+    await TournamentCacheService.initialize();
+  } catch (e) {
+    debugPrint('Cache service initialization failed (non-critical): $e');
   }
 
   bool hasShownError = false;

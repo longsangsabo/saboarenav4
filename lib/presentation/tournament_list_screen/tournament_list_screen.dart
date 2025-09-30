@@ -51,6 +51,45 @@ class _TournamentListScreenState extends State<TournamentListScreen>
 
     try {
       final tournaments = await _tournamentService.getTournaments(status: _selectedTab);
+      
+      // Apply sorting logic: newest created first, then by start date
+      tournaments.sort((a, b) {
+        // First priority: creation time (newest first)
+        final aCreated = a.createdAt;
+        final bCreated = b.createdAt;
+        
+        // If created within 24 hours of each other, sort by start date (closest first)
+        final timeDiff = aCreated.difference(bCreated).inHours.abs();
+        if (timeDiff < 24) {
+          final aStart = a.startDate;
+          final bStart = b.startDate;
+          
+          // For upcoming tournaments, show earliest start date first
+          if (_selectedTab == 'upcoming') {
+            return aStart.compareTo(bStart);
+          }
+          // For ongoing tournaments, show earliest start date first  
+          else if (_selectedTab == 'live') {
+            return aStart.compareTo(bStart);
+          }
+          // For completed tournaments, show latest end date first
+          else if (_selectedTab == 'completed') {
+            final aEnd = a.endDate ?? a.startDate;
+            final bEnd = b.endDate ?? b.startDate;
+            return bEnd.compareTo(aEnd);
+          }
+        }
+        
+        // Otherwise, newest created first
+        return bCreated.compareTo(aCreated);
+      });
+      
+      debugPrint('📋 Tournament list sorting applied for tab "$_selectedTab":');
+      for (int i = 0; i < tournaments.take(3).length; i++) {
+        final t = tournaments[i];
+        debugPrint('   ${i+1}. "${t.title}" - Created: ${t.createdAt.toString().substring(0, 19)}, Start: ${t.startDate.toString().substring(0, 19)}');
+      }
+      
       if (mounted) {
         setState(() {
           _allTournaments = tournaments;
@@ -67,61 +106,6 @@ class _TournamentListScreenState extends State<TournamentListScreen>
         });
       }
     }
-  }
-
-  List<Tournament> _getMockTournaments() {
-    return [
-      Tournament(
-        id: '1',
-        title: 'Giải Bi-da Mùa Xuân 2025',
-        description: 'Giải đấu bi-da lớn nhất trong năm dành cho tất cả các cấp độ',
-        startDate: DateTime.now().add(const Duration(days: 7)),
-        registrationDeadline: DateTime.now().add(const Duration(days: 5)),
-        maxParticipants: 32,
-        currentParticipants: 18,
-        entryFee: 200000,
-        prizePool: 5000000,
-        status: 'upcoming',
-        skillLevelRequired: 'intermediate',
-        tournamentType: '8-ball',
-        isPublic: true,
-        createdAt: DateTime.now().subtract(const Duration(days: 10)),
-        updatedAt: DateTime.now(),
-      ),
-      Tournament(
-        id: '2',
-        title: 'Giải Tốc Độ Hàng Tuần',
-        description: 'Giải đấu nhanh gọn trong 1 ngày, phù hợp mọi người chơi',
-        startDate: DateTime.now().add(const Duration(days: 3)),
-        registrationDeadline: DateTime.now().add(const Duration(days: 2)),
-        maxParticipants: 16,
-        currentParticipants: 8,
-        entryFee: 50000,
-        prizePool: 800000,
-        status: 'upcoming',
-        tournamentType: '9-ball',
-        isPublic: true,
-        createdAt: DateTime.now().subtract(const Duration(days: 5)),
-        updatedAt: DateTime.now(),
-      ),
-      Tournament(
-        id: '3',
-        title: 'Giải Đấu Miễn Phí Newbie',
-        description: 'Dành cho người mới bắt đầu, hoàn toàn miễn phí',
-        startDate: DateTime.now().add(const Duration(days: 14)),
-        registrationDeadline: DateTime.now().add(const Duration(days: 12)),
-        maxParticipants: 24,
-        currentParticipants: 5,
-        entryFee: 0,
-        prizePool: 0,
-        status: 'upcoming',
-        skillLevelRequired: 'beginner',
-        tournamentType: '8-ball',
-        isPublic: true,
-        createdAt: DateTime.now().subtract(const Duration(days: 2)),
-        updatedAt: DateTime.now(),
-      ),
-    ];
   }
 
   @override

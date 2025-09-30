@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../services/tournament_service.dart';
 
 class TournamentRankingsWidget extends StatefulWidget {
@@ -17,7 +18,7 @@ class TournamentRankingsWidget extends StatefulWidget {
 }
 
 class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
-  final TournamentService _tournamentService = TournamentService();
+  final TournamentService _tournamentService = TournamentService.instance;
   List<Map<String, dynamic>> _rankings = [];
   bool _isLoading = true;
   String? _error;
@@ -35,7 +36,76 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
         _error = null;
       });
 
-      final rankings = await _tournamentService.getTournamentRankings(widget.tournamentId);
+      // Get tournament participants
+      final participants = await _tournamentService.getTournamentParticipants(widget.tournamentId);
+      
+      // Get matches to calculate stats
+      final matchesResponse = await Supabase.instance.client
+          .from('matches')
+          .select('''
+            *,
+            player1:player1_id(id, username, full_name, avatar_url),
+            player2:player2_id(id, username, full_name, avatar_url),
+            winner:winner_id(id, username, full_name, avatar_url)
+          ''')
+          .eq('tournament_id', widget.tournamentId);
+      
+      final matches = matchesResponse as List<dynamic>;
+      
+      // Calculate stats for each participant
+      final rankings = participants.map((participant) {
+        int wins = 0;
+        int losses = 0;
+        int totalGames = 0;
+        
+        for (final match in matches) {
+          final player1Id = match['player1_id'];
+          final player2Id = match['player2_id'];
+          final winnerId = match['winner_id'];
+          final status = match['status'];
+          
+          // Skip pending matches
+          if (status != 'completed' || winnerId == null) continue;
+          
+          if (participant.id == player1Id || participant.id == player2Id) {
+            totalGames++;
+            if (participant.id == winnerId) {
+              wins++;
+            } else {
+              losses++;
+            }
+          }
+        }
+        
+        // Calculate win rate
+        double winRate = totalGames > 0 ? (wins / totalGames) * 100 : 0.0;
+        
+        return {
+          'user_id': participant.id,
+          'full_name': participant.fullName.isNotEmpty ? participant.fullName : participant.username,
+          'username': participant.username,
+          'avatar_url': participant.avatarUrl,
+          'wins': wins,
+          'losses': losses,
+          'draws': 0, // No draws for now
+          'total_games': totalGames,
+          'win_rate': winRate,
+          'points': wins * 3, // 3 points per win
+          'total_points': wins * 3, // Same as points for compatibility
+        };
+      }).toList();
+      
+      // Sort by points (wins), then by win rate
+      rankings.sort((a, b) {
+        int pointsCompare = (b['points'] as int).compareTo(a['points'] as int);
+        if (pointsCompare != 0) return pointsCompare;
+        return (b['win_rate'] as double).compareTo(a['win_rate'] as double);
+      });
+      
+      // Assign ranks
+      for (int i = 0; i < rankings.length; i++) {
+        rankings[i]['rank'] = i + 1;
+      }
       
       if (mounted) {
         setState(() {
@@ -84,7 +154,7 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
               Text(
                 'Bảng xếp hạng',
                 style: TextStyle(
-                  fontSize: 18.sp,
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.bold,
                   color: Colors.grey[800],
                 ),
@@ -98,17 +168,25 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
                 ),
             ],
           ),
-          SizedBox(height: 16.sp),
+          SizedBox(height: 12.sp),
 
           // Content
-          if (_isLoading)
-            _buildLoadingState()
-          else if (_error != null)
-            _buildErrorState()
-          else if (_rankings.isEmpty)
-            _buildEmptyState()
-          else
-            _buildRankingsList(),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  if (_isLoading)
+                    _buildLoadingState()
+                  else if (_error != null)
+                    _buildErrorState()
+                  else if (_rankings.isEmpty)
+                    _buildEmptyState()
+                  else
+                    _buildRankingsList(),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -200,20 +278,20 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
       children: [
         // Header Row
         Container(
-          padding: EdgeInsets.symmetric(vertical: 8.sp, horizontal: 12.sp),
+          padding: EdgeInsets.symmetric(vertical: 6.sp, horizontal: 8.sp),
           decoration: BoxDecoration(
             color: Colors.grey[100],
-            borderRadius: BorderRadius.circular(8.sp),
+            borderRadius: BorderRadius.circular(6.sp),
           ),
           child: Row(
             children: [
               SizedBox(
-                width: 40.sp,
+                width: 35.sp,
                 child: Text(
                   'Hạng',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 12.sp,
+                    fontSize: 10.sp,
                     color: Colors.grey[700],
                   ),
                 ),
@@ -224,7 +302,19 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
                   'Người chơi',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 12.sp,
+                    fontSize: 10.sp,
+                    color: Colors.grey[700],
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 50.sp,
+                child: Text(
+                  'Điểm',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 10.sp,
                     color: Colors.grey[700],
                   ),
                 ),
@@ -232,23 +322,11 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
               SizedBox(
                 width: 60.sp,
                 child: Text(
-                  'Điểm',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12.sp,
-                    color: Colors.grey[700],
-                  ),
-                ),
-              ),
-              SizedBox(
-                width: 70.sp,
-                child: Text(
                   'T-B-H',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 12.sp,
+                    fontSize: 10.sp,
                     color: Colors.grey[700],
                   ),
                 ),
@@ -256,7 +334,7 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
             ],
           ),
         ),
-        SizedBox(height: 8.sp),
+        SizedBox(height: 6.sp),
 
         // Rankings List
         ...List.generate(_rankings.length, (index) {
@@ -273,24 +351,24 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
     final textColor = isTopThree ? Colors.white : Colors.grey[800];
 
     return Container(
-      margin: EdgeInsets.only(bottom: 4.sp),
-      padding: EdgeInsets.symmetric(vertical: 12.sp, horizontal: 12.sp),
+      margin: EdgeInsets.only(bottom: 3.sp),
+      padding: EdgeInsets.symmetric(vertical: 8.sp, horizontal: 8.sp),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(8.sp),
+        borderRadius: BorderRadius.circular(6.sp),
         border: !isTopThree ? Border.all(color: Colors.grey[200]!) : null,
       ),
       child: Row(
         children: [
           // Position
           SizedBox(
-            width: 40.sp,
+            width: 35.sp,
             child: Row(
               children: [
                 if (isTopThree)
                   Icon(
                     _getPositionIcon(position),
-                    size: 16.sp,
+                    size: 14.sp,
                     color: Colors.white,
                   )
                 else
@@ -298,17 +376,17 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
                     '$position',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 14.sp,
+                      fontSize: 12.sp,
                       color: textColor,
                     ),
                   ),
-                if (isTopThree) SizedBox(width: 4.sp),
+                if (isTopThree) SizedBox(width: 2.sp),
                 if (isTopThree)
                   Text(
                     '$position',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 12.sp,
+                      fontSize: 10.sp,
                       color: Colors.white,
                     ),
                   ),
@@ -323,10 +401,10 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  ranking['player_name'] ?? 'N/A',
+                  ranking['full_name'] ?? 'N/A',
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    fontSize: 14.sp,
+                    fontSize: 12.sp,
                     color: textColor,
                   ),
                 ),
@@ -334,7 +412,7 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
                   Text(
                     ranking['club_name'],
                     style: TextStyle(
-                      fontSize: 11.sp,
+                      fontSize: 10.sp,
                       color: isTopThree ? Colors.white70 : Colors.grey[500],
                     ),
                   ),
@@ -344,13 +422,13 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
 
           // Points
           SizedBox(
-            width: 60.sp,
+            width: 50.sp,
             child: Text(
               '${ranking['total_points'] ?? 0}',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 14.sp,
+                fontSize: 12.sp,
                 color: textColor,
               ),
             ),
@@ -358,12 +436,12 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
 
           // Win-Loss-Draw Record
           SizedBox(
-            width: 70.sp,
+            width: 60.sp,
             child: Text(
               '${ranking['wins'] ?? 0}-${ranking['losses'] ?? 0}-${ranking['draws'] ?? 0}',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 12.sp,
+                fontSize: 10.sp,
                 color: isTopThree ? Colors.white70 : Colors.grey[600],
               ),
             ),

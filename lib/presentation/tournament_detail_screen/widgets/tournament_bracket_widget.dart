@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
 // Removed Sizer dependency
 import '../../../core/layout/responsive.dart';
-
 import '../../../core/app_export.dart';
+import '../../../services/tournament_service.dart';
+import '../../../services/cached_tournament_service.dart';
 
-class TournamentBracketWidget extends StatelessWidget {
+// Safe debug print wrapper to avoid null debug service errors
+void _safeDebugPrint(String message) {
+  try {
+    debugPrint(message);
+  } catch (e) {
+    // Ignore debug service errors in production
+    print(message);
+  }
+}
+
+class TournamentBracketWidget extends StatefulWidget {
   final Map<String, dynamic> tournament;
   final List<Map<String, dynamic>> bracketData;
 
@@ -15,8 +26,87 @@ class TournamentBracketWidget extends StatelessWidget {
   });
 
   @override
+  _TournamentBracketWidgetState createState() => _TournamentBracketWidgetState();
+}
+
+class _TournamentBracketWidgetState extends State<TournamentBracketWidget> {
+  final TournamentService _tournamentService = TournamentService.instance;
+  
+  List<Map<String, dynamic>> _matches = [];
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMatches();
+  }
+
+  // Chuyển đổi round number thành tên tiếng Việt
+  String _getRoundDisplayName(int roundNumber, int totalParticipants) {
+    // Xác định tên round dựa trên số người còn lại sau round này
+    int playersAfterRound = totalParticipants ~/ (1 << roundNumber); // 2^roundNumber
+    
+    switch (playersAfterRound) {
+      case 1:
+        return 'CHUNG KẾT'; // Final - còn 1 người
+      case 2:
+        return 'BÁN KẾT'; // Semi-final - còn 2 người
+      case 4:
+        return 'TỨ KẾT'; // Quarter-final - còn 4 người
+      default:
+        return 'VÒNG ${roundNumber}'; // Regular rounds
+    }
+  }
+
+  Future<void> _loadMatches() async {
+    try {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+      });
+
+      _safeDebugPrint('🔄 Loading matches for tournament: ${widget.tournament['id']}');
+      
+      // Use cached service for better performance instead of direct database calls
+      List<Map<String, dynamic>> matches;
+      try {
+        matches = await CachedTournamentService.loadMatches(widget.tournament['id']);
+        _safeDebugPrint('📋 Loaded ${matches.length} matches from cache/service');
+      } catch (e) {
+        _safeDebugPrint('⚠️ Cache failed, using direct service: $e');
+        matches = await _tournamentService.getTournamentMatches(widget.tournament['id']);
+      }
+      
+      _safeDebugPrint('📊 TournamentBracketWidget: Loaded ${matches.length} matches');
+      
+      setState(() {
+        _matches = matches;
+        _isLoading = false;
+      });
+    } catch (e) {
+      _safeDebugPrint('❌ Error loading matches: $e');
+      setState(() {
+        _errorMessage = 'Không thể tải danh sách trận đấu: $e';
+        _isLoading = false;
+      });
+    }
+  }
+
+  /// Force refresh data from server
+  Future<void> refreshData() async {
+    _safeDebugPrint('🔄 Force refreshing bracket data from server...');
+    try {
+      await CachedTournamentService.refreshTournamentData(widget.tournament['id']);
+      await _loadMatches();
+    } catch (e) {
+      _safeDebugPrint('❌ Failed to refresh data: $e');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final eliminationType = tournament["eliminationType"] as String;
+    final eliminationType = widget.tournament["eliminationType"] as String;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: Gaps.xl),
@@ -51,6 +141,17 @@ class TournamentBracketWidget extends StatelessWidget {
                 ),
               ),
               const Spacer(),
+              // Cache status indicator and refresh button
+              IconButton(
+                onPressed: _isLoading ? null : refreshData,
+                icon: Icon(
+                  Icons.refresh,
+                  color: AppTheme.lightTheme.colorScheme.primary,
+                  size: 20,
+                ),
+                tooltip: 'Làm mới dữ liệu',
+              ),
+              const SizedBox(width: Gaps.sm),
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: Gaps.lg,
@@ -72,10 +173,74 @@ class TournamentBracketWidget extends StatelessWidget {
             ],
           ),
           const SizedBox(height: Gaps.lg),
-          if (bracketData.isNotEmpty)
+          if (_isLoading)
+            _buildLoadingState()
+          else if (_errorMessage != null)
+            _buildErrorState()
+          else if (_matches.isNotEmpty)
             _buildBracketTree()
           else
             _buildEmptyBracket(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Container(
+      padding: const EdgeInsets.all(Gaps.xxl),
+      child: Center(
+        child: Column(
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: Gaps.lg),
+            Text(
+              'Đang tải bảng đấu...',
+              style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+                color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Container(
+      padding: const EdgeInsets.all(Gaps.xxl),
+      child: Column(
+        children: [
+          CustomIconWidget(
+            iconName: 'error_outline',
+            color: AppTheme.lightTheme.colorScheme.error,
+            size: 48,
+          ),
+          const SizedBox(height: Gaps.lg),
+          Text(
+            'Có lỗi xảy ra',
+            style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
+              color: AppTheme.lightTheme.colorScheme.error,
+            ),
+          ),
+          const SizedBox(height: Gaps.sm),
+          Text(
+            _errorMessage ?? '',
+            style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+              color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: Gaps.lg),
+          ElevatedButton.icon(
+            onPressed: _loadMatches,
+            icon: CustomIconWidget(
+              iconName: 'refresh',
+              color: AppTheme.lightTheme.colorScheme.onPrimary,
+              size: 20,
+            ),
+            label: const Text('Thử lại'),
+          ),
         ],
       ),
     );
@@ -98,57 +263,96 @@ class TournamentBracketWidget extends StatelessWidget {
   }
 
   Widget _buildRoundHeader() {
-    final rounds = ['Vòng 1/8', 'Tứ kết', 'Bán kết', 'Chung kết'];
-
+    if (_matches.isEmpty) return Container();
+    
+    // Nhóm matches theo round để tạo header
+    Map<int, List<Map<String, dynamic>>> roundMatches = {};
+    int totalParticipants = 0;
+    
+    for (var match in _matches) {
+      final roundNumber = match['roundNumber'] ?? match['round_number'] ?? 1;
+      if (!roundMatches.containsKey(roundNumber)) {
+        roundMatches[roundNumber] = [];
+      }
+      roundMatches[roundNumber]!.add(match);
+      
+      if (roundNumber == 1) {
+        totalParticipants += 2;
+      }
+    }
+    
+    final sortedRounds = roundMatches.keys.toList()..sort();
+    
     return Row(
-      children: rounds
-          .map((round) => Container(
-                width: 260,
-                margin: const EdgeInsets.only(right: Gaps.xl),
-                child: Text(
-                  round,
-                  textAlign: TextAlign.center,
-                  style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.lightTheme.colorScheme.primary,
-                  ),
-                ),
-              ))
-          .toList(),
+      children: sortedRounds.map((roundNumber) {
+        final roundDisplayName = _getRoundDisplayName(roundNumber, totalParticipants);
+        return Container(
+          width: 260,
+          margin: const EdgeInsets.only(right: Gaps.xl),
+          child: Text(
+            roundDisplayName,
+            textAlign: TextAlign.center,
+            style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppTheme.lightTheme.colorScheme.primary,
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 
   Widget _buildBracketRounds() {
+    // Nhóm matches theo round
+    Map<int, List<Map<String, dynamic>>> roundMatches = {};
+    int totalParticipants = 0;
+    
+    for (var match in _matches) {
+      final roundNumber = match['roundNumber'] ?? match['round_number'] ?? 1;
+      if (!roundMatches.containsKey(roundNumber)) {
+        roundMatches[roundNumber] = [];
+      }
+      roundMatches[roundNumber]!.add(match);
+      
+      // Tính số người tham gia từ round 1
+      if (roundNumber == 1) {
+        totalParticipants += 2; // Mỗi trận round 1 có 2 người
+      }
+    }
+    
+    // Sắp xếp các round theo thứ tự
+    final sortedRounds = roundMatches.keys.toList()..sort();
+    
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildRound(bracketData.take(8).toList(), 0),
-        _buildRound(bracketData.skip(8).take(4).toList(), 1),
-        _buildRound(bracketData.skip(12).take(2).toList(), 2),
-        _buildRound(bracketData.skip(14).take(1).toList(), 3),
-      ],
+      children: sortedRounds.map((roundNumber) {
+        final matches = roundMatches[roundNumber] ?? [];
+        return _buildRound(matches, roundNumber, totalParticipants);
+      }).toList(),
     );
   }
 
-  Widget _buildRound(List<Map<String, dynamic>> matches, int roundIndex) {
+  Widget _buildRound(List<Map<String, dynamic>> matches, int roundNumber, int totalParticipants) {
     return Container(
       width: 260,
       margin: const EdgeInsets.only(right: Gaps.xl),
       child: Column(
-        children:
-            matches.map((match) => _buildMatchCard(match, roundIndex)).toList(),
+        children: matches.map((match) => _buildMatchCard(match, roundNumber)).toList(),
       ),
     );
   }
 
-  Widget _buildMatchCard(Map<String, dynamic> match, int roundIndex) {
-    final player1 = match["player1"] as Map<String, dynamic>?;
-    final player2 = match["player2"] as Map<String, dynamic>?;
-    final winner = match["winner"] as String?;
-    final status = match["status"] as String;
+  Widget _buildMatchCard(Map<String, dynamic> match, int roundNumber) {
+    // Lấy thông tin người chơi từ database
+    final player1Data = match['player1Data'] as Map<String, dynamic>?;
+    final player2Data = match['player2Data'] as Map<String, dynamic>?;
+    final status = match['status'] as String? ?? 'pending';
+    final winnerId = match['winnerId'] ?? match['winner_id'];
+    final player1Score = match['player1Score'] ?? match['player1_score'] ?? 0;
+    final player2Score = match['player2Score'] ?? match['player2_score'] ?? 0;
 
     return Container(
-  margin: const EdgeInsets.only(bottom: Gaps.lg),
+      margin: const EdgeInsets.only(bottom: Gaps.lg),
       decoration: BoxDecoration(
         color: AppTheme.lightTheme.colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
@@ -159,18 +363,28 @@ class TournamentBracketWidget extends StatelessWidget {
       ),
       child: Column(
         children: [
-          if (player1 != null)
-            _buildPlayerRow(player1, winner == "player1", true),
-            Container(
-              height: 1,
-              color: AppTheme.lightTheme.colorScheme.outline
-                  .withValues(alpha: 0.3),
+          if (player1Data != null)
+            _buildPlayerRow(
+              player1Data, 
+              winnerId == match['player1Id'] || winnerId == match['player1_id'], 
+              true,
+              player1Score,
             ),
-          if (player2 != null)
-            _buildPlayerRow(player2, winner == "player2", false)
+          Container(
+            height: 1,
+            color: AppTheme.lightTheme.colorScheme.outline
+                .withValues(alpha: 0.3),
+          ),
+          if (player2Data != null)
+            _buildPlayerRow(
+              player2Data, 
+              winnerId == match['player2Id'] || winnerId == match['player2_id'], 
+              false,
+              player2Score,
+            )
           else
             _buildEmptyPlayerRow(),
-          if (status == "live")
+          if (status == 'in_progress')
             Container(
               padding: const EdgeInsets.symmetric(vertical: Gaps.sm),
               decoration: BoxDecoration(
@@ -193,7 +407,6 @@ class TournamentBracketWidget extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: Gaps.md),
-                  const SizedBox(width: Gaps.md),
                   Text(
                     'ĐANG DIỄN RA',
                     style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
@@ -210,9 +423,9 @@ class TournamentBracketWidget extends StatelessWidget {
   }
 
   Widget _buildPlayerRow(
-      Map<String, dynamic> player, bool isWinner, bool isTop) {
+      Map<String, dynamic> player, bool isWinner, bool isTop, int? score) {
     return Container(
-  padding: const EdgeInsets.all(Gaps.lg),
+      padding: const EdgeInsets.all(Gaps.lg),
       decoration: BoxDecoration(
         color: isWinner
             ? AppTheme.lightTheme.colorScheme.primary.withValues(alpha: 0.1)
@@ -245,7 +458,7 @@ class TournamentBracketWidget extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(24),
               child: CustomImageWidget(
-                imageUrl: player["avatar"] as String,
+                imageUrl: player["avatar"] ?? player["avatar_url"] ?? '',
                 width: 48,
                 height: 48,
                 fit: BoxFit.cover,
@@ -258,7 +471,7 @@ class TournamentBracketWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  player["name"] as String,
+                  player["name"] ?? player["full_name"] ?? player["username"] ?? 'Tên không có',
                   style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
                     fontWeight: isWinner ? FontWeight.bold : FontWeight.w500,
                     color: isWinner
@@ -269,7 +482,7 @@ class TournamentBracketWidget extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  'Rank ${player["rank"]}',
+                  'Rank ${player["rank"] ?? player["current_rank"] ?? 'N/A'}',
                   style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
                     color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
                   ),
@@ -277,9 +490,9 @@ class TournamentBracketWidget extends StatelessWidget {
               ],
             ),
           ),
-          if (player["score"] != null)
+          if (score != null && score > 0)
             Text(
-              '${player["score"]}',
+              '$score',
               style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: isWinner

@@ -20,7 +20,7 @@ class ProductionBracketService {
             max_participants,
             tournament_participants!inner (
               id,
-              user_profiles!inner (
+              users!inner (
                 id,
                 full_name,
                 avatar_url
@@ -62,7 +62,7 @@ class ProductionBracketService {
             seed_number,
             registration_date,
             payment_status,
-            user_profiles!inner (
+            users!inner (
               id,
               full_name,
               avatar_url,
@@ -109,12 +109,12 @@ class ProductionBracketService {
 
       // Generate bracket using existing service
       final participantList = participants.map((p) => TournamentParticipant(
-        id: p['user_profiles']['id'],
-        name: p['user_profiles']['full_name'] ?? 'Unknown',
+        id: p['users']['id'],
+        name: p['users']['full_name'] ?? 'Unknown',
         seed: p['seed_number'] ?? 0,
-        elo: p['user_profiles']['ranking_points'] ?? 0,
+        elo: p['users']['ranking_points'] ?? 0,
         metadata: {
-          'avatar_url': p['user_profiles']['avatar_url'],
+          'avatar_url': p['users']['avatar_url'],
           'registration_date': p['registration_date'],
           'payment_status': p['payment_status'],
         },
@@ -160,8 +160,8 @@ class ProductionBracketService {
   List<Map<String, dynamic>> _autoSeedParticipants(List<Map<String, dynamic>> participants) {
     // Sort by ranking points (desc) or registration date (asc)
     participants.sort((a, b) {
-      final pointsA = a['user_profiles']['ranking_points'] ?? 0;
-      final pointsB = b['user_profiles']['ranking_points'] ?? 0;
+      final pointsA = a['users']['ranking_points'] ?? 0;
+      final pointsB = b['users']['ranking_points'] ?? 0;
       
       if (pointsA != pointsB) {
         return pointsB.compareTo(pointsA); // Higher points = better seed
@@ -229,9 +229,9 @@ class ProductionBracketService {
           .from('matches')
           .select('''
             *,
-            player1:user_profiles!matches_player1_id_fkey(id, full_name, avatar_url),
-            player2:user_profiles!matches_player2_id_fkey(id, full_name, avatar_url),
-            winner:user_profiles!matches_winner_id_fkey(id, full_name, avatar_url)
+            player1:users!matches_player1_id_fkey(id, full_name, avatar_url),
+            player2:users!matches_player2_id_fkey(id, full_name, avatar_url),
+            winner:users!matches_winner_id_fkey(id, full_name, avatar_url)
           ''')
           .eq('tournament_id', tournamentId)
           .order('round_number')

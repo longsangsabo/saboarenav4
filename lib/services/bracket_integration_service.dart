@@ -9,6 +9,16 @@ class BracketIntegrationService {
   static const String _tag = '🎯 BracketIntegration';
   static final _supabase = Supabase.instance.client;
 
+  /// Calculate rank from ELO rating
+  static String _calculateRankFromElo(int elo) {
+    if (elo < 800) return 'Beginner';
+    if (elo < 1000) return 'Amateur'; 
+    if (elo < 1200) return 'Intermediate';
+    if (elo < 1500) return 'Advanced';
+    if (elo < 1800) return 'Expert';
+    return 'Master';
+  }
+
   /// Tạo và lưu bracket vào database
   static Future<Map<String, dynamic>> createTournamentBracket({
     required String tournamentId,
@@ -73,8 +83,7 @@ class BracketIntegrationService {
             id,
             email,
             full_name,
-            elo_rating,
-            current_rank
+            elo_rating
           )
         ''')
         .eq('tournament_id', tournamentId)
@@ -92,7 +101,7 @@ class BracketIntegrationService {
         participants.add(TournamentParticipant(
           id: user['id'],
           name: user['full_name'] ?? user['email'],
-          rank: user['current_rank'],
+          rank: _calculateRankFromElo(user['elo_rating'] ?? 1000),
           elo: user['elo_rating'] ?? 1000,
           metadata: {
             'participantId': participant['id'],
@@ -234,9 +243,9 @@ class BracketIntegrationService {
           .from('matches')
           .select('''
             *,
-            player1:player1_id (id, full_name, current_rank),
-            player2:player2_id (id, full_name, current_rank),
-            winner:winner_id (id, full_name, current_rank)
+            player1:player1_id (id, full_name, elo_rating),
+            player2:player2_id (id, full_name, elo_rating),
+            winner:winner_id (id, full_name, elo_rating)
           ''')
           .eq('tournament_id', tournamentId)
           .eq('match_type', 'tournament')

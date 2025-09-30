@@ -11,6 +11,18 @@ class BracketService {
   
   final SupabaseClient _supabase = Supabase.instance.client;
 
+  /// Generate UUID for matches
+  String _generateMatchId() {
+    return '${_randomHex(8)}-${_randomHex(4)}-${_randomHex(4)}-${_randomHex(4)}-${_randomHex(12)}';
+  }
+  
+  String _randomHex(int length) {
+    final random = Random();
+    final chars = '0123456789abcdef';
+    return String.fromCharCodes(Iterable.generate(
+        length, (_) => chars.codeUnitAt(random.nextInt(chars.length))));
+  }
+
   /// Generate tournament bracket based on format and confirmed participants
   Map<String, dynamic> generateBracket({
     required String tournamentId,
@@ -190,7 +202,7 @@ class BracketService {
       final player2 = bracketPlayers[i + 1];
 
       matches.add({
-        'id': 'match_wb_$matchNumber',
+        'id': _generateMatchId(),
         'tournament_id': tournamentId,
         'round_number': 1,
         'match_number': matchNumber,
@@ -215,7 +227,7 @@ class BracketService {
       
       for (int i = 0; i < matchesInRound; i++) {
         matches.add({
-          'id': 'match_wb_$matchNumber',
+          'id': _generateMatchId(),
           'tournament_id': tournamentId,
           'round_number': round,
           'match_number': matchNumber,
@@ -265,7 +277,7 @@ class BracketService {
     for (int i = 0; i < bracketPlayers.length; i++) {
       for (int j = i + 1; j < bracketPlayers.length; j++) {
         matches.add({
-          'id': 'match_rr_$matchNumber',
+          'id': _generateMatchId(),
           'tournament_id': tournamentId,
           'round_number': 1, // Round robin has flexible rounds
           'match_number': matchNumber,
@@ -329,7 +341,7 @@ class BracketService {
 
       for (int i = 0; i < matchesInRound; i++) {
         matches.add({
-          'id': 'match_lb_$matchNumber',
+          'id': _generateMatchId(),
           'tournament_id': tournamentId,
           'round_number': round,
           'match_number': matchNumber,
@@ -350,7 +362,7 @@ class BracketService {
 
     // Grand Final
     matches.add({
-      'id': 'match_gf_$matchNumber',
+      'id': _generateMatchId(),
       'tournament_id': tournamentId,
       'round_number': losersRounds + 1,
       'match_number': matchNumber,

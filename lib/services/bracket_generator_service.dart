@@ -1,9 +1,10 @@
-// 🏆 SABO ARENA - Tournament Bracket Generator Service
-// Generates tournament brackets for all supported formats
-// Handles bracket visualization and match progression logic
+// 🏆 SABO ARENA - REFACTORED Tournament Bracket Generator Service
+// SEPARATED LOGIC FOR EACH FORMAT TO AVOID CONFUSION
+// Each format has its own dedicated generation method
 
 import '../core/constants/tournament_constants.dart';
 import 'package:flutter/foundation.dart';
+import 'dart:math' as math;
 
 /// Tournament participant data
 class TournamentParticipant {

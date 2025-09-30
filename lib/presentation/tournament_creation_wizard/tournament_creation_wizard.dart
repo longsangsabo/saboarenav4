@@ -41,12 +41,6 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
   // Services
   final _tournamentService = TournamentService.instance;
   
-  // Bracket creation variables
-  String _selectedBracketFormat = 'single_elimination';
-  String _selectedSeedingMethod = 'elo_rating';
-  bool _createBracketNow = false;
-  String? _createdTournamentId;
-  
   // Validation errors
   final Map<String, String> _errors = {};
   
@@ -91,7 +85,6 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
     'Thời gian & Địa điểm',
     'Tài chính & Điều kiện', 
     'Quy định & Xem lại',
-    'Tạo bảng đấu',
   ];
 
   @override
@@ -259,9 +252,6 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
                 
                 // Step 4: Rules & Review (Updated)
                 _buildRulesReviewStep(context),
-                
-                // Step 5: Bracket Creation (New)
-                _buildBracketCreationStep(context),
               ],
             ),
           ),
@@ -401,15 +391,79 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
             decoration: InputDecoration(
               labelText: 'Hình thức thi đấu *',
               border: OutlineInputBorder(),
+              helperText: 'Chọn format phù hợp với số lượng người tham gia',
             ),
             items: [
-              DropdownMenuItem(value: 'single_elimination', child: Text('Single Elimination (Loại trực tiếp)')),
-              DropdownMenuItem(value: 'double_elimination', child: Text('Double Elimination (Loại kép)')),
-              DropdownMenuItem(value: 'round_robin', child: Text('Round Robin (Vòng tròn)')),
-              DropdownMenuItem(value: 'swiss', child: Text('Swiss System')),
+              DropdownMenuItem(
+                value: 'single_elimination', 
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Single Elimination'),
+                    Text('Loại trực tiếp - Nhanh gọn', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                  ],
+                ),
+              ),
+              DropdownMenuItem(
+                value: 'double_elimination', 
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Double Elimination'),
+                    Text('Loại kép - Cân bằng hơn', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                  ],
+                ),
+              ),
+              DropdownMenuItem(
+                value: 'sabo_de16', 
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('SABO DE16'),
+                    Text('Double Elimination 16 người - Chuyên nghiệp', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                  ],
+                ),
+              ),
+              DropdownMenuItem(
+                value: 'sabo_de32', 
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('SABO DE32'),
+                    Text('Double Elimination 32 người - Quy mô lớn', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                  ],
+                ),
+              ),
+              DropdownMenuItem(
+                value: 'round_robin', 
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Round Robin'),
+                    Text('Vòng tròn - Tất cả đấu với tất cả', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                  ],
+                ),
+              ),
+              DropdownMenuItem(
+                value: 'swiss_system', 
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Swiss System'),
+                    Text('Hệ thống Thụy Sĩ - Linh hoạt', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                  ],
+                ),
+              ),
             ],
             onChanged: (value) {
               _onDataChanged({'format': value});
+              _updateRecommendedParticipants(value);
             },
           ),
           
@@ -977,6 +1031,41 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
     return requirements.join('; ');
   }
 
+  /// Update recommended participants based on tournament format
+  void _updateRecommendedParticipants(String? format) {
+    if (format == null) return;
+    
+    int recommendedParticipants;
+    switch (format) {
+      case 'single_elimination':
+      case 'double_elimination':
+        recommendedParticipants = 16; // Standard bracket size
+        break;
+      case 'sabo_de16':
+        recommendedParticipants = 16; // Fixed for DE16
+        break;
+      case 'sabo_de32':
+        recommendedParticipants = 32; // Fixed for DE32
+        break;
+      case 'round_robin':
+        recommendedParticipants = 8; // Manageable for round robin
+        break;
+      case 'swiss_system':
+        recommendedParticipants = 12; // Good for swiss
+        break;
+      default:
+        recommendedParticipants = 16;
+    }
+    
+    // Update max participants if not manually set
+    if (_tournamentData['maxParticipants'] == null || 
+        _tournamentData['maxParticipants'] == 0) {
+      setState(() {
+        _tournamentData['maxParticipants'] = recommendedParticipants;
+      });
+    }
+  }
+
   bool _validateCurrentStep() {
     switch (_currentStep) {
       case 0:
@@ -987,471 +1076,8 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
         return _financialFormKey.currentState?.validate() ?? false;
       case 3:
         return _reviewFormKey.currentState?.validate() ?? false;
-      case 4:
-        // Bracket creation step - always valid (optional step)
-        return true;
       default:
         return true;
-    }
-  }
-
-  Widget _buildBracketCreationStep(BuildContext context) {
-    final theme = Theme.of(context);
-    
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(20.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Container(
-            padding: EdgeInsets.all(16.w),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.blue.shade50, Colors.blue.shade100],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(12.w),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(8.w),
-                  decoration: BoxDecoration(
-                    color: appTheme.primary,
-                    borderRadius: BorderRadius.circular(8.w),
-                  ),
-                  child: Icon(
-                    Icons.account_tree,
-                    color: Colors.white,
-                    size: 24.w,
-                  ),
-                ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Tạo bảng đấu',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: appTheme.primary,
-                        ),
-                      ),
-                      SizedBox(height: 4.h),
-                      Text(
-                        'Tùy chọn tạo bảng đấu ngay sau khi tạo giải đấu thành công',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          SizedBox(height: 24.h),
-          
-          // Create bracket option
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(8.w),
-            ),
-            child: CheckboxListTile(
-              value: _createBracketNow,
-              onChanged: (value) {
-                setState(() {
-                  _createBracketNow = value ?? false;
-                });
-              },
-              title: Text(
-                'Tạo bảng đấu ngay',
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              subtitle: Text(
-                'Tự động tạo bảng đấu dựa trên thể thức và seeding đã chọn',
-                style: theme.textTheme.bodySmall,
-              ),
-              controlAffinity: ListTileControlAffinity.leading,
-            ),
-          ),
-          
-          if (_createBracketNow) ...[
-            SizedBox(height: 20.h),
-            
-            // Tournament format selection
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(8.w),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 8.h),
-                    child: Text(
-                      'Thể thức thi đấu',
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  
-                  ..._buildFormatOptions(),
-                  
-                  SizedBox(height: 8.h),
-                ],
-              ),
-            ),
-            
-            SizedBox(height: 16.h),
-            
-            // Seeding method selection
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(8.w),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 8.h),
-                    child: Text(
-                      'Phương thức xếp hạng (Seeding)',
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  
-                  ..._buildSeedingOptions(),
-                  
-                  SizedBox(height: 8.h),
-                ],
-              ),
-            ),
-            
-            SizedBox(height: 20.h),
-            
-            // Preview info
-            Container(
-              padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(
-                color: Colors.orange.shade50,
-                borderRadius: BorderRadius.circular(8.w),
-                border: Border.all(color: Colors.orange.shade200),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    color: Colors.orange.shade700,
-                    size: 20.w,
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Thông tin bảng đấu',
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: Colors.orange.shade700,
-                          ),
-                        ),
-                        SizedBox(height: 4.h),
-                        Text(
-                          'Format: ${_getFormatDisplayName(_selectedBracketFormat)}\n'
-                          'Seeding: ${_getSeedingDisplayName(_selectedSeedingMethod)}\n'
-                          'Số người tối đa: ${_tournamentData['maxParticipants'] ?? 16} người',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.orange.shade600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-          
-          if (!_createBracketNow) ...[
-            SizedBox(height: 20.h),
-            Container(
-              padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(8.w),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.schedule,
-                    color: Colors.grey.shade600,
-                    size: 20.w,
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: Text(
-                      'Bạn có thể tạo bảng đấu sau khi giải đấu đã có đủ người tham gia trong phần quản lý giải đấu.',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-          
-          SizedBox(height: 40.h),
-        ],
-      ),
-    );
-  }
-
-  List<Widget> _buildFormatOptions() {
-    final formats = [
-      {'key': 'single_elimination', 'name': 'Loại trực tiếp', 'desc': 'Thua 1 trận bị loại'},
-      {'key': 'double_elimination', 'name': 'Loại kép', 'desc': 'Thua 2 trận mới bị loại'},
-      {'key': 'round_robin', 'name': 'Vòng tròn', 'desc': 'Mọi người đấu với nhau'},
-      {'key': 'swiss_system', 'name': 'Hệ thống Thụy Sĩ', 'desc': 'Ghép cặp theo điểm'},
-    ];
-    
-    return formats.map((format) => RadioListTile<String>(
-      value: format['key']!,
-      groupValue: _selectedBracketFormat,
-      onChanged: (value) {
-        setState(() {
-          _selectedBracketFormat = value!;
-        });
-      },
-      title: Text(format['name']!),
-      subtitle: Text(format['desc']!),
-      dense: true,
-    )).toList();
-  }
-
-  List<Widget> _buildSeedingOptions() {
-    final methods = [
-      {'key': 'elo_rating', 'name': 'Theo ELO Rating', 'desc': 'Xếp hạng theo điểm ELO'},
-      {'key': 'ranking', 'name': 'Theo Rank', 'desc': 'Xếp hạng theo cấp độ'},
-      {'key': 'random', 'name': 'Ngẫu nhiên', 'desc': 'Xáo trộn ngẫu nhiên'},
-      {'key': 'manual', 'name': 'Thủ công', 'desc': 'Sắp xếp thủ công sau'},
-    ];
-    
-    return methods.map((method) => RadioListTile<String>(
-      value: method['key']!,
-      groupValue: _selectedSeedingMethod,
-      onChanged: (value) {
-        setState(() {
-          _selectedSeedingMethod = value!;
-        });
-      },
-      title: Text(method['name']!),
-      subtitle: Text(method['desc']!),
-      dense: true,
-    )).toList();
-  }
-
-  String _getFormatDisplayName(String format) {
-    switch (format) {
-      case 'single_elimination': return 'Loại trực tiếp';
-      case 'double_elimination': return 'Loại kép';
-      case 'round_robin': return 'Vòng tròn';
-      case 'swiss_system': return 'Hệ thống Thụy Sĩ';
-      default: return format;
-    }
-  }
-
-  String _getSeedingDisplayName(String seeding) {
-    switch (seeding) {
-      case 'elo_rating': return 'Theo ELO Rating';
-      case 'ranking': return 'Theo Rank';
-      case 'random': return 'Ngẫu nhiên';
-      case 'manual': return 'Thủ công';
-      default: return seeding;
-    }
-  }
-
-  Future<void> _createTournament() async {
-    setState(() {
-      _isCreating = true;
-    });
-
-    try {
-      // Create tournament data
-      final tournamentData = {
-        'title': _tournamentData['name'],
-        'description': _tournamentData['description'],
-        'format': _selectedBracketFormat,
-        'game_type': _tournamentData['gameType'],
-        'max_participants': _tournamentData['maxParticipants'],
-        'registration_start_date': _tournamentData['registrationStartDate']?.toIso8601String(),
-        'registration_end_date': _tournamentData['registrationEndDate']?.toIso8601String(),
-        'start_date': _tournamentData['tournamentStartDate']?.toIso8601String(),
-        'end_date': _tournamentData['tournamentEndDate']?.toIso8601String(),
-        'entry_fee': double.tryParse(_entryFeeController.text) ?? 0.0,
-        'prize_pool': double.tryParse(_prizePoolController.text) ?? 0.0,
-        'venue': _tournamentData['venue'],
-        'contact_info': _tournamentData['contactInfo'],
-        'rules': _tournamentData['rules'],
-        'club_id': widget.clubId,
-        'status': 'upcoming',
-        'has_third_place_match': _tournamentData['hasThirdPlaceMatch'] ?? false,
-      };
-
-      // Create tournament
-      debugPrint('🏆 Creating tournament with data: ${tournamentData.toString()}');
-      
-      // Here you would call your tournament service
-      // final tournamentId = await _tournamentService.createTournament(tournamentData);
-      // For now, simulate the creation
-      await Future.delayed(Duration(seconds: 2));
-      final tournamentId = 'mock_tournament_${DateTime.now().millisecondsSinceEpoch}';
-      
-      _createdTournamentId = tournamentId;
-      
-      // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('✅ Tạo giải đấu thành công!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-
-      // If user chose to create bracket, show bracket creation dialog
-      if (_createBracketNow) {
-        await _showBracketCreationDialog();
-      } else {
-        // Navigate back or to tournament detail
-        Navigator.of(context).pop(tournamentId);
-      }
-
-    } catch (e) {
-      debugPrint('❌ Error creating tournament: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('❌ Lỗi tạo giải đấu: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isCreating = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _showBracketCreationDialog() async {
-    return showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.account_tree, color: Colors.blue),
-            SizedBox(width: 8.w),
-            Text('Tạo bảng đấu'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Giải đấu đã được tạo thành công!'),
-            SizedBox(height: 12.h),
-            Text('Bạn có muốn tạo bảng đấu ngay bây giờ không?'),
-            SizedBox(height: 12.h),
-            Container(
-              padding: EdgeInsets.all(12.w),
-              decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(8.w),
-                border: Border.all(color: Colors.blue.shade200),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Thông tin bảng đấu:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 4.h),
-                  Text('• Format: ${_getFormatDisplayName(_selectedBracketFormat)}'),
-                  Text('• Seeding: ${_getSeedingDisplayName(_selectedSeedingMethod)}'),
-                  Text('• Số người tối đa: ${_tournamentData['maxParticipants'] ?? 16}'),
-                ],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.of(context).pop(_createdTournamentId);
-            },
-            child: Text('Tạo sau'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await _createBracketForTournament();
-              Navigator.of(context).pop(_createdTournamentId);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-            ),
-            child: Text('Tạo ngay'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _createBracketForTournament() async {
-    try {
-      debugPrint('🏗️ Creating bracket for tournament: $_createdTournamentId');
-      debugPrint('   Format: $_selectedBracketFormat');
-      debugPrint('   Seeding: $_selectedSeedingMethod');
-      
-      // Here you would call bracket generator service
-      // For now, just show success message
-      await Future.delayed(Duration(seconds: 1));
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('✅ Bảng đấu đã được tạo thành công!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-      
-    } catch (e) {
-      debugPrint('❌ Error creating bracket: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('❌ Lỗi tạo bảng đấu: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
     }
   }
 
@@ -1470,6 +1096,57 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
         ],
       ),
     );
+  }
+
+  Future<void> _createTournament() async {
+    setState(() {
+      _isCreating = true;
+    });
+
+    try {
+      // Create tournament
+      debugPrint('🏆 Creating tournament...');
+      
+      // Call tournament service to create tournament with named parameters
+      final tournament = await _tournamentService.createTournament(
+        clubId: widget.clubId ?? '',
+        title: _tournamentData['name'] ?? '',
+        description: _tournamentData['description'] ?? '',
+        startDate: _tournamentData['tournamentStartDate'] ?? DateTime.now().add(Duration(days: 7)),
+        registrationDeadline: _tournamentData['registrationEndDate'] ?? DateTime.now().add(Duration(days: 3)),
+        maxParticipants: _tournamentData['maxParticipants'] ?? 16,
+        entryFee: double.tryParse(_entryFeeController.text) ?? 0.0,
+        prizePool: double.tryParse(_prizePoolController.text) ?? 0.0,
+        rules: _tournamentData['rules'],
+        requirements: _tournamentData['requirements'],
+      );
+      
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('✅ Tạo giải đấu thành công!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Navigate back with tournament ID
+      Navigator.of(context).pop(tournament.id);
+
+    } catch (e) {
+      debugPrint('❌ Error creating tournament: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('❌ Lỗi tạo giải đấu: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCreating = false;
+        });
+      }
+    }
   }
 
 

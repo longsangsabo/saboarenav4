@@ -59,14 +59,15 @@ class Match {
       roundNumber: json['round_number'] ?? 1,
       matchNumber: json['match_number'] ?? 1,
       status: json['status'] ?? 'pending',
-      scheduledTime: json['scheduled_time'] != null
-          ? DateTime.parse(json['scheduled_time'])
+      scheduledTime: json['scheduled_at'] != null  // Fixed: scheduled_time -> scheduled_at
+          ? DateTime.parse(json['scheduled_at'])
           : null,
-      startTime: json['start_time'] != null
-          ? DateTime.parse(json['start_time'])
+      startTime: json['started_at'] != null       // Fixed: start_time -> started_at  
+          ? DateTime.parse(json['started_at'])
           : null,
-      endTime:
-          json['end_time'] != null ? DateTime.parse(json['end_time']) : null,
+      endTime: json['completed_at'] != null        // Fixed: end_time -> completed_at
+          ? DateTime.parse(json['completed_at']) 
+          : null,
       notes: json['notes'],
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
@@ -159,9 +160,9 @@ class MatchService {
             winner:users!matches_winner_id_fkey (full_name),
             tournament:tournaments (title)
           ''')
-          .eq('status', 'pending')
-          .gte('scheduled_time', DateTime.now().toIso8601String())
-          .order('scheduled_time')
+          .eq('status', 'pending')  // REVERT: scheduled -> pending (correct enum)
+          .gte('scheduled_time', DateTime.now().toIso8601String())  // REVERT: scheduled_at -> scheduled_time
+          .order('scheduled_time')  // REVERT: scheduled_at -> scheduled_time
           .limit(limit);
 
       return response.map<Match>((json) => Match.fromJson(json)).toList();

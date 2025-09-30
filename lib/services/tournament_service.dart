@@ -702,6 +702,8 @@ class TournamentService {
     String seedingMethod = SeedingMethods.eloRating,
   }) async {
     try {
+      debugPrint('🎯 GenerateBracket: Starting bracket generation for tournament $tournamentId with ${participants.length} participants');
+      
       // Validate format và số người chơi
       if (!TournamentHelper.isValidPlayerCount(format, participants.length)) {
         throw Exception('Invalid player count for format $format');
@@ -709,12 +711,23 @@ class TournamentService {
 
       // Seeding participants
       final seededParticipants = await _seedParticipants(participants, seedingMethod);
+      debugPrint('✅ GenerateBracket: Participants seeded successfully');
 
       // Generate bracket structure dựa trên format
       final bracketStructure = _generateBracketStructure(format, seededParticipants);
+      debugPrint('✅ GenerateBracket: Bracket structure generated');
 
       // Tạo matches
       final matches = _generateMatches(tournamentId, bracketStructure, format);
+      debugPrint('📊 GenerateBracket: Generated ${matches.length} matches');
+
+      // Save matches to database
+      await _saveMatchesToDatabase(matches);
+      debugPrint('✅ GenerateBracket: Matches saved to database');
+
+      // Update tournament status to ongoing
+      await updateTournamentStatus(tournamentId, 'ongoing');
+      debugPrint('✅ GenerateBracket: Tournament status updated to ongoing');
 
       return TournamentBracket(
         tournamentId: tournamentId,
@@ -726,6 +739,7 @@ class TournamentService {
         createdAt: DateTime.now(),
       );
     } catch (error) {
+      debugPrint('🔥 GenerateBracket error: $error');
       throw Exception('Failed to generate bracket: $error');
     }
   }
@@ -962,6 +976,43 @@ class TournamentService {
     return matches;
   }
 
+  /// Save generated matches to database
+  Future<void> _saveMatchesToDatabase(List<TournamentMatch> matches) async {
+    try {
+      debugPrint('🔄 Saving ${matches.length} matches to database...');
+      
+      for (final match in matches) {
+        final matchData = {
+          'id': match.id,
+          'tournament_id': match.tournamentId,
+          'round': match.round,
+          'match_number': match.matchNumber,
+          'player1_id': match.player1Id,
+          'player2_id': match.player2Id,
+          'status': match.status,
+          'scheduled_time': match.scheduledTime?.toIso8601String(), // REVERT: scheduled_at -> scheduled_time
+          'winner_id': match.winnerId,
+          'format': match.format, // REVERT: format tồn tại trong DB thực tế
+          'player1_score': null, // Changed from 'score' to separate scores
+          'player2_score': null,
+          'created_at': match.createdAt.toIso8601String(),
+          'updated_at': DateTime.now().toIso8601String(),
+        };
+        
+        debugPrint('💾 Saving match: R${match.round} M${match.matchNumber} - ${match.player1Id} vs ${match.player2Id}');
+        
+        await Supabase.instance.client
+            .from('matches')
+            .insert(matchData);
+      }
+      
+      debugPrint('✅ All matches saved successfully');
+    } catch (e) {
+      debugPrint('🔥 Error saving matches: $e');
+      throw Exception('Failed to save matches to database: $e');
+    }
+  }
+
   /// Generate single elimination matches
   List<TournamentMatch> _generateSingleEliminationMatches(
     String tournamentId,
@@ -978,7 +1029,7 @@ class TournamentService {
         player2Id: pairing['player2']?.participant?.id,
         round: pairing['round'],
         matchNumber: pairing['matchNumber'],
-        status: MatchStatus.scheduled,
+        status: MatchStatus.pending,
         format: 'single_elimination',
         createdAt: DateTime.now(),
       ));
@@ -1003,7 +1054,7 @@ class TournamentService {
         player2Id: pairing['player2'].participant.id,
         round: pairing['round'],
         matchNumber: pairing['matchNumber'],
-        status: MatchStatus.scheduled,
+        status: MatchStatus.pending,
         format: 'round_robin',
         createdAt: DateTime.now(),
       ));
@@ -1028,7 +1079,7 @@ class TournamentService {
         player2Id: pairing['player2'].participant.id,
         round: pairing['round'],
         matchNumber: pairing['matchNumber'],
-        status: MatchStatus.scheduled,
+        status: MatchStatus.pending,
         format: 'swiss',
         createdAt: DateTime.now(),
       ));
@@ -1083,7 +1134,15 @@ class TournamentService {
 
   /// Generate unique match ID
   String _generateMatchId() {
-    return 'match_${DateTime.now().millisecondsSinceEpoch}_${math.Random().nextInt(1000)}';
+    // Generate a UUID-like string using random values
+    return '${_randomHex(8)}-${_randomHex(4)}-${_randomHex(4)}-${_randomHex(4)}-${_randomHex(12)}';
+  }
+  
+  String _randomHex(int length) {
+    final random = math.Random();
+    final chars = '0123456789abcdef';
+    return String.fromCharCodes(Iterable.generate(
+        length, (_) => chars.codeUnitAt(random.nextInt(chars.length))));
   }
 
   /// Calculate ELO changes cho tournament results
@@ -1252,11 +1311,9 @@ class TournamentMatch {
 
 /// Match Status Constants
 class MatchStatus {
-  static const String scheduled = 'scheduled';
-  static const String ongoing = 'ongoing';
+  static const String pending = 'pending';
+  static const String inProgress = 'in_progress';
   static const String completed = 'completed';
-  static const String cancelled = 'cancelled';
-  static const String postponed = 'postponed';
 }
 
 /// Tournament Result Model

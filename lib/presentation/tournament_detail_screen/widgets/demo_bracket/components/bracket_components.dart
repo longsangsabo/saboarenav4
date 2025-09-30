@@ -138,6 +138,20 @@ class MatchCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Extract match score for winner determination
+    final scoreText = match['score'] ?? '0-0';
+    final scores = scoreText.split('-');
+    final player1Score = scores.isNotEmpty ? int.tryParse(scores[0]) ?? 0 : 0;
+    final player2Score = scores.length > 1 ? int.tryParse(scores[1]) ?? 0 : 0;
+    
+    final isCompleted = match['status'] == 'completed';
+    final winnerId = match['winner_id'];
+    final player1Id = match['player1_id'];
+    final player2Id = match['player2_id'];
+    
+    final player1IsWinner = isCompleted && winnerId == player1Id;
+    final player2IsWinner = isCompleted && winnerId == player2Id;
+
     return Container(
       width: 160, // Giảm width từ 200 xuống 160
       margin: const EdgeInsets.only(bottom: 8), // Giảm margin từ 16 xuống 8
@@ -157,31 +171,52 @@ class MatchCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Match ID header
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), // Giảm padding
-            decoration: BoxDecoration(
-              color: const Color(0xFF2E86AB).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8), // Giảm border radius
-            ),
-            child: Text(
-              match['matchId'] ?? '',
-              style: const TextStyle(
-                fontSize: 9, // Giảm font size từ 10 xuống 9
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF2E86AB),
+          // Match status indicator
+          if (isCompleted)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.green.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                'Hoàn thành',
+                style: const TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
+                ),
+              ),
+            )
+          else
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2E86AB).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                'Chờ đấu',
+                style: const TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF2E86AB),
+                ),
               ),
             ),
-          ),
           const SizedBox(height: 4), // Giảm spacing từ 8 xuống 4
           PlayerRow(
-            playerName: match['player1']!,
-            score: match['score1'],
+            playerName: match['player1'] ?? 'TBD',
+            score: player1Score.toString(),
+            avatarUrl: match['player1_avatar'],
+            isWinner: player1IsWinner,
           ),
           const Divider(height: 8), // Giảm height từ 16 xuống 8
           PlayerRow(
-            playerName: match['player2']!,
-            score: match['score2'],
+            playerName: match['player2'] ?? 'TBD',
+            score: player2Score.toString(),
+            avatarUrl: match['player2_avatar'],
+            isWinner: player2IsWinner,
           ),
         ],
       ),
@@ -193,31 +228,42 @@ class MatchCard extends StatelessWidget {
 class PlayerRow extends StatelessWidget {
   final String playerName;
   final String? score;
+  final String? avatarUrl;
+  final bool isWinner;
 
   const PlayerRow({
     super.key,
     required this.playerName,
     this.score,
+    this.avatarUrl,
+    this.isWinner = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final hasScore = score != null && score!.isNotEmpty;
-    final isWinner = hasScore && score == '2';
+    final hasScore = score != null && score!.isNotEmpty && score != '0';
 
     return Row(
       children: [
+        // Avatar with fallback to initials
         CircleAvatar(
           radius: 12, // Giảm radius từ 16 xuống 12
-          backgroundColor: const Color(0xFF2E86AB).withOpacity(0.1),
-          child: Text(
-            playerName.substring(0, 1).toUpperCase(),
-            style: const TextStyle(
-              color: Color(0xFF2E86AB),
-              fontWeight: FontWeight.bold,
-              fontSize: 10, // Giảm font size
-            ),
-          ),
+          backgroundColor: isWinner 
+              ? const Color(0xFF2E86AB)
+              : const Color(0xFF2E86AB).withOpacity(0.1),
+          backgroundImage: avatarUrl != null && avatarUrl!.isNotEmpty
+              ? NetworkImage(avatarUrl!)
+              : null,
+          child: avatarUrl == null || avatarUrl!.isEmpty
+              ? Text(
+                  playerName.isNotEmpty ? playerName.substring(0, 1).toUpperCase() : '?',
+                  style: TextStyle(
+                    color: isWinner ? Colors.white : const Color(0xFF2E86AB),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 10, // Giảm font size
+                  ),
+                )
+              : null,
         ),
         const SizedBox(width: 6), // Giảm width từ 8 xuống 6
         Expanded(

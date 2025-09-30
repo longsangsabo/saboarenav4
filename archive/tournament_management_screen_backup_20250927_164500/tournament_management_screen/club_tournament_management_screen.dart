@@ -13,19 +13,19 @@ import 'widgets/tournament_stats_overview.dart';
 import 'widgets/tournament_list_section.dart';
 import 'widgets/tournament_quick_actions.dart';
 
-class TournamentManagementScreen extends StatefulWidget {
+class ClubTournamentManagementScreen extends StatefulWidget {
   final String clubId;
 
-  const TournamentManagementScreen({
+  const ClubTournamentManagementScreen({
     super.key,
     required this.clubId,
   });
 
   @override
-  _TournamentManagementScreenState createState() => _TournamentManagementScreenState();
+  _ClubTournamentManagementScreenState createState() => _ClubTournamentManagementScreenState();
 }
 
-class _TournamentManagementScreenState extends State<TournamentManagementScreen>
+class _ClubTournamentManagementScreenState extends State<ClubTournamentManagementScreen>
     with TickerProviderStateMixin {
   late TabController _tabController;
   final TournamentService _tournamentService = TournamentService.instance;
@@ -63,17 +63,60 @@ class _TournamentManagementScreenState extends State<TournamentManagementScreen>
       _canCreateTournaments = true; // TODO: Re-enable proper permission check later
       // _canCreateTournaments = await _permissionService.canManageTournaments(widget.clubId);
 
-      // Load tournaments for this club (including private ones)
+      // Load tournaments for this club (including private ones) - fresh from DB
       final tournaments = await _tournamentService.getClubTournaments(
         widget.clubId,
         pageSize: 100,
       );
 
-      // Filter tournaments by status
+      // Sort tournaments: newest created first, then by start date (upcoming first)
+      tournaments.sort((a, b) {
+        // First priority: creation time (newest first)
+        final aCreated = a.createdAt;
+        final bCreated = b.createdAt;
+        
+        // If created within 24 hours of each other, sort by start date (closest first)
+        final timeDiff = aCreated.difference(bCreated).inHours.abs();
+        if (timeDiff < 24) {
+          final aStart = a.startDate;
+          final bStart = b.startDate;
+          return aStart.compareTo(bStart);
+        }
+        
+        // Otherwise, newest created first
+        return bCreated.compareTo(aCreated);
+      });
+
+      // Filter tournaments by status with same sorting
       _allTournaments = tournaments;
-      _upcomingTournaments = tournaments.where((t) => t.status == 'upcoming').toList();
-      _ongoingTournaments = tournaments.where((t) => t.status == 'ongoing').toList();
-      _completedTournaments = tournaments.where((t) => t.status == 'completed').toList();
+      
+      debugPrint('📋 Tournament sorting applied:');
+      for (int i = 0; i < tournaments.take(3).length; i++) {
+        final t = tournaments[i];
+        debugPrint('   ${i+1}. "${t.title}" - Created: ${t.createdAt.toString().substring(0, 19)}, Start: ${t.startDate.toString().substring(0, 19)}');
+      }
+      
+      // Sort each category by start date (upcoming tournaments by closest date)
+      _upcomingTournaments = tournaments.where((t) => t.status == 'upcoming').toList()
+        ..sort((a, b) {
+          final aStart = a.startDate;
+          final bStart = b.startDate;
+          return aStart.compareTo(bStart);
+        });
+        
+      _ongoingTournaments = tournaments.where((t) => t.status == 'ongoing').toList()
+        ..sort((a, b) {
+          final aStart = a.startDate;
+          final bStart = b.startDate;
+          return aStart.compareTo(bStart);
+        });
+        
+      _completedTournaments = tournaments.where((t) => t.status == 'completed').toList()
+        ..sort((a, b) {
+          final aEnd = a.endDate ?? a.startDate;
+          final bEnd = b.endDate ?? b.startDate;
+          return bEnd.compareTo(aEnd); // Most recently completed first
+        });
 
       setState(() {
         _isLoading = false;
@@ -86,12 +129,62 @@ class _TournamentManagementScreenState extends State<TournamentManagementScreen>
     }
   }
 
+  Future<void> _refreshTournamentList() async {
+    // Show a snackbar to indicate refresh is happening
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            ),
+            SizedBox(width: 12),
+            Text('Đang làm mới danh sách giải đấu...'),
+          ],
+        ),
+        duration: Duration(seconds: 2),
+        backgroundColor: AppTheme.primaryLight,
+      ),
+    );
+
+    // Force reload data by clearing local state and reloading
+    setState(() {
+      _allTournaments.clear();
+      _upcomingTournaments.clear();
+      _ongoingTournaments.clear();
+      _completedTournaments.clear();
+    });
+    
+    await _loadData();
+    
+    // Show success message
+    if (!_isLoading && _errorMessage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Đã cập nhật danh sách giải đấu từ database!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 1),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Quản lý Giải đấu',
         actions: [
+          IconButton(
+            onPressed: _refreshTournamentList,
+            icon: Icon(Icons.refresh),
+            tooltip: 'Làm mới danh sách',
+          ),
           if (_canCreateTournaments)
             IconButton(
               onPressed: _navigateToCreateTournament,

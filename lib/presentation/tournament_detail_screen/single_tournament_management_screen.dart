@@ -5,12 +5,12 @@ import 'widgets/tournament_status_panel.dart';
 import 'widgets/match_management_tab.dart';
 import 'widgets/tournament_rankings_widget.dart';
 
-class TournamentManagementScreen extends StatefulWidget {
+class SingleTournamentManagementScreen extends StatefulWidget {
   final String tournamentId;
   final String tournamentName;
   final bool canManage;
 
-  const TournamentManagementScreen({
+  const SingleTournamentManagementScreen({
     super.key,
     required this.tournamentId,
     required this.tournamentName,
@@ -18,13 +18,13 @@ class TournamentManagementScreen extends StatefulWidget {
   });
 
   @override
-  State<TournamentManagementScreen> createState() => _TournamentManagementScreenState();
+  State<SingleTournamentManagementScreen> createState() => _SingleTournamentManagementScreenState();
 }
 
-class _TournamentManagementScreenState extends State<TournamentManagementScreen>
+class _SingleTournamentManagementScreenState extends State<SingleTournamentManagementScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final TournamentService _tournamentService = TournamentService();
+  final TournamentService _tournamentService = TournamentService.instance;
   
   Map<String, dynamic>? _tournamentData;
   bool _isLoading = true;
@@ -50,11 +50,11 @@ class _TournamentManagementScreenState extends State<TournamentManagementScreen>
         _error = null;
       });
 
-      final tournamentData = await _tournamentService.getTournamentDetails(widget.tournamentId);
+      final tournamentData = await _tournamentService.getTournamentById(widget.tournamentId);
       
       if (mounted) {
         setState(() {
-          _tournamentData = tournamentData;
+          _tournamentData = tournamentData.toJson();
           _isLoading = false;
         });
       }

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Tạo matches từ tournament_participants cho các tournaments đã có participants
+🎯 SABO ARENA - Tournament Match Creation System
+Uses format-specific factories for professional tournament generation
 """
 
 import os
@@ -9,12 +10,15 @@ from supabase import create_client, Client
 import uuid
 from datetime import datetime
 
+# Import our new factory system
+from tournament_match_factory import create_tournament_matches_factory
+
 # Database connection
 SUPABASE_URL = "https://mogjjvscxjwvhtpkrlqr.supabase.co"
 ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vZ2pqdnNjeGp3dmh0cGtybHFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc5MTk1ODAsImV4cCI6MjA3MzQ5NTU4MH0.u1urXd3uiT0fuqWlJ1Nhp7uJhgdiyOdLSdSWJWczHoQ"
 
-def create_single_elimination_matches(tournament_id, participants):
-    """Tạo matches cho single elimination bracket"""
+def create_single_elimination_matches_legacy(tournament_id, participants):
+    """🔧 Legacy single elimination logic - kept as fallback"""
     matches = []
     
     # Tính số rounds
@@ -75,8 +79,8 @@ def create_single_elimination_matches(tournament_id, participants):
     
     return matches
 
-def create_round_robin_matches(tournament_id, participants):
-    """Tạo matches cho round robin (mọi người đấu với mọi người)"""
+def create_round_robin_matches_legacy(tournament_id, participants):
+    """🔧 Legacy round robin logic - kept as fallback"""
     matches = []
     match_number = 1
     
@@ -100,7 +104,7 @@ def create_round_robin_matches(tournament_id, participants):
     return matches
 
 def generate_matches_for_tournament(supabase, tournament_id, tournament_format='single_elimination'):
-    """Tạo matches cho một tournament cụ thể"""
+    """🎯 Generate matches using format-specific factory system"""
     
     # Lấy participants
     participants_response = supabase.table('tournament_participants').select('*').eq('tournament_id', tournament_id).execute()
@@ -110,19 +114,43 @@ def generate_matches_for_tournament(supabase, tournament_id, tournament_format='
         print(f"   ⚠️ Tournament chỉ có {len(participants)} participants, không thể tạo matches")
         return []
     
-    print(f"   👥 Generating matches for {len(participants)} participants")
+    print(f"   👥 Generating matches for {len(participants)} participants using {tournament_format}")
     
-    # Tạo matches dựa trên format
-    matches = []
-    if tournament_format.lower() in ['single_elimination', 'single', 'elimination']:
-        matches = create_single_elimination_matches(tournament_id, participants)
-    elif tournament_format.lower() in ['round_robin', 'round', 'robin']:
-        matches = create_round_robin_matches(tournament_id, participants)
-    else:
-        # Default to single elimination
-        matches = create_single_elimination_matches(tournament_id, participants)
+    # Tạo matches using factory system
+    try:
+        factory = create_tournament_matches_factory(tournament_format, tournament_id, participants)
+        matches = factory.generate_matches()
+        
+        print(f"   🏗️ Factory generated {len(matches)} matches ({factory.get_total_rounds()} rounds)")
+        
+        # Insert matches vào database
+        if matches:
+            supabase.table('matches').insert(matches).execute()
+            print(f"   ✅ Inserted {len(matches)} matches into database")
+            return matches
+        
+    except Exception as e:
+        print(f"   ❌ Error generating matches with factory: {e}")
+        print(f"   🔄 Falling back to legacy system...")
+        
+        # Fallback to legacy system
+        if tournament_format.lower() in ['single_elimination', 'single', 'elimination']:
+            matches = create_single_elimination_matches_legacy(tournament_id, participants)
+        elif tournament_format.lower() in ['round_robin', 'round', 'robin']:
+            matches = create_round_robin_matches_legacy(tournament_id, participants)
+        else:
+            matches = create_single_elimination_matches_legacy(tournament_id, participants)
+        
+        if matches:
+            try:
+                supabase.table('matches').insert(matches).execute()
+                print(f"   ✅ Inserted {len(matches)} matches using legacy system")
+                return matches
+            except Exception as e2:
+                print(f"   ❌ Error inserting matches: {e2}")
+                return []
     
-    # Insert matches vào database
+    return []
     if matches:
         try:
             supabase.table('matches').insert(matches).execute()

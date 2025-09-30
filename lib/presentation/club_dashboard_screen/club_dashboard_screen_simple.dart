@@ -9,7 +9,7 @@ import 'package:sabo_arena/services/auth_service.dart';
 // import 'package:sabo_arena/services/club_dashboard_service.dart';
 import '../member_management_screen/member_management_screen.dart';
 import '../tournament_creation_wizard/tournament_creation_wizard.dart';
-import '../tournament_management_screen/tournament_management_screen.dart';
+import '../tournament_management_center/tournament_management_center_screen.dart';
 import '../club_notification_screen/club_notification_screen_simple.dart';
 import '../club_settings_screen/club_settings_screen.dart';
 import '../club_reports_screen/club_reports_screen.dart';
@@ -803,7 +803,7 @@ class _ClubDashboardScreenSimpleState extends State<ClubDashboardScreenSimple> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => TournamentManagementScreen(clubId: widget.clubId),
+        builder: (context) => TournamentManagementCenterScreen(clubId: widget.clubId),
       ),
     );
   }

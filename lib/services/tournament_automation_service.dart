@@ -5,7 +5,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/constants/tournament_constants.dart';
 import '../models/tournament.dart';
-import '../models/match.dart';
+import '../models/match.dart' as MatchModel;
 import 'tournament_service.dart';
 import 'match_service.dart';
 import 'notification_service.dart';

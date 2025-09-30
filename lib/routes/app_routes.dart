@@ -21,7 +21,6 @@ import '../presentation/admin_dashboard_screen/admin_tournament_main_screen.dart
 import '../presentation/admin_dashboard_screen/admin_user_management_main_screen.dart';
 import '../presentation/admin_dashboard_screen/admin_more_main_screen.dart';
 import '../presentation/my_clubs_screen/my_clubs_screen.dart';
-import '../presentation/messaging_screen/messaging_screen.dart';
 
 class AppRoutes {
   static const String splashScreen = '/splash';
@@ -72,7 +71,7 @@ class AppRoutes {
         adminMoreScreen: (context) => const AdminMoreMainScreen(),
         myClubsScreen: (context) => const MyClubsScreen(),
         clubSelectionScreen: (context) => ClubSelectionScreen(),
-        messagingScreen: (context) => const MessagingScreen(),
+        // messagingScreen: (context) => const MessagingScreen(),
         // clubDashboardScreen: (context) => const ClubDashboardScreenSimple(clubId: ''),
       };
 }

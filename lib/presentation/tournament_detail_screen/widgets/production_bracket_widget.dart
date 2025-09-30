@@ -177,7 +177,7 @@ class _ProductionBracketWidgetState extends State<ProductionBracketWidget> {
                       itemCount: _participants.length,
                       itemBuilder: (context, index) {
                         final participant = _participants[index];
-                        final profile = participant['user_profiles'];
+                        final profile = participant['users'];
                         
                         return Container(
                           width: 50.sp,

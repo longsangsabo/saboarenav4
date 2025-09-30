@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import 'package:sabo_arena/core/app_export.dart';
 import 'package:sabo_arena/theme/app_theme.dart';
-import 'enhanced_bracket_management_tab.dart';
 import 'tournament_overview_tab.dart';
 import 'participant_management_tab.dart';
 import 'match_management_tab.dart';
@@ -31,6 +30,16 @@ class _TournamentManagementPanelState extends State<TournamentManagementPanel>
 
   int _selectedTab = 0;
   final List<String> _tabs = ['Tổng quan', 'Người chơi', 'Bảng đấu', 'Trận đấu', 'Cài đặt'];
+  
+  // Callback to refresh bracket when match scores are updated
+  void _onMatchScoreUpdated() {
+    // Force rebuild to trigger bracket data refresh
+    if (mounted) {
+      setState(() {
+        // This will trigger a rebuild which will refresh the bracket tab
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -176,9 +185,19 @@ class _TournamentManagementPanelState extends State<TournamentManagementPanel>
       case 1:
         return ParticipantManagementTab(tournamentId: widget.tournamentId);
       case 2:
-        return EnhancedBracketManagementTab(tournamentId: widget.tournamentId);
+        // TODO: Replace with proper Tournament object when available
+        return Center(
+          child: Text(
+            'Bracket Management Tab\n(Chuyển đổi sang Tournament Management Center)',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 14.sp),
+          ),
+        );
       case 3:
-        return MatchManagementTab(tournamentId: widget.tournamentId);
+        return MatchManagementTab(
+          tournamentId: widget.tournamentId,
+          onMatchScoreUpdated: _onMatchScoreUpdated,
+        );
       case 4:
         return TournamentSettingsTab(
           tournamentId: widget.tournamentId,

@@ -16,7 +16,7 @@ import '../../widgets/custom_bottom_bar.dart';
 import './widgets/participants_list_widget.dart';
 import './widgets/prize_pool_widget.dart';
 import './widgets/registration_widget.dart';
-import './widgets/tournament_bracket_widget.dart';
+import './widgets/live_tournament_bracket_widget.dart';
 import './widgets/tournament_header_widget.dart';
 import './widgets/tournament_info_widget.dart';
 import './widgets/tournament_rules_widget.dart';
@@ -40,7 +40,6 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
   // State variables
   Tournament? _tournament;
   List<UserProfile> _participants = [];
-  List<Map<String, dynamic>> _matches = [];
   bool _isLoading = true;
   String? _error;
   String? _tournamentId;
@@ -173,9 +172,6 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
       
       // Load participants
       _participants = await _tournamentService.getTournamentParticipants(_tournamentId!);
-      
-      // Load matches
-      _matches = await _tournamentService.getTournamentMatches(_tournamentId!);
       
       // Check if user is already registered
       _isRegistered = await _tournamentService.isRegisteredForTournament(_tournamentId!);
@@ -403,32 +399,13 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
       child: Column(
         children: [
           const SizedBox(height: Gaps.lg),
-          TournamentBracketWidget(
-            tournament: _tournamentData,
-            bracketData: _matches.isNotEmpty ? _matches : _getDefaultBracketData(),
-          ),
+          if (_tournamentId != null)
+            LiveTournamentBracketWidget(
+              tournamentId: _tournamentId!,
+            ),
         ],
       ),
     );
-  }
-
-  List<Map<String, dynamic>> _getDefaultBracketData() {
-    // Return empty or placeholder bracket data when no matches exist
-    if (_participants.isEmpty) {
-      return [];
-    }
-    
-    // Generate placeholder matches from participants if tournament hasn't started
-    return [
-      {
-        "matchId": "placeholder_001",
-        "round": 1,
-        "player1": null,
-        "player2": null,
-        "winner": null,
-        "status": "pending"
-      }
-    ];
   }
 
   Widget _buildParticipantsTab() {
