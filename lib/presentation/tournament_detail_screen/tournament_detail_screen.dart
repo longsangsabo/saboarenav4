@@ -12,6 +12,7 @@ import 'widgets/tournament_bracket_view.dart';
 import 'widgets/participant_management_tab.dart';
 import 'widgets/match_management_tab.dart';
 import 'widgets/tournament_stats_view.dart';
+import 'widgets/tournament_rankings_widget.dart';
 import '../../widgets/custom_bottom_bar.dart';
 import './widgets/participants_list_widget.dart';
 import './widgets/prize_pool_widget.dart';
@@ -139,7 +140,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
   void initState() {
     super.initState();
     _scrollController = ScrollController();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
   }
 
   @override
@@ -344,6 +345,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
                   Tab(text: 'Bảng đấu'),
                   Tab(text: 'Thành viên'),
                   Tab(text: 'Luật thi đấu'),
+                  Tab(text: 'Kết quả'),
                 ],
                 labelColor: AppTheme.lightTheme.colorScheme.primary,
                 unselectedLabelColor:
@@ -359,6 +361,7 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
                   _buildBracketTab(),
                   _buildParticipantsTab(),
                   _buildRulesTab(),
+                  _buildResultsTab(),
                 ],
               ),
             ),
@@ -439,6 +442,22 @@ class _TournamentDetailScreenState extends State<TournamentDetailScreen>
           const SizedBox(height: Gaps.lg),
           TournamentRulesWidget(rules: rules),
         ],
+      ),
+    );
+  }
+
+  Widget _buildResultsTab() {
+    if (_tournamentId == null) {
+      return const Center(
+        child: Text('Không có thông tin giải đấu'),
+      );
+    }
+    
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(Gaps.lg),
+      child: TournamentRankingsWidget(
+        tournamentId: _tournamentId!,
+        tournamentStatus: _tournament?.status ?? 'not_started',
       ),
     );
   }

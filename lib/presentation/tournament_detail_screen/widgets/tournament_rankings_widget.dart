@@ -80,6 +80,10 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
         // Calculate win rate
         double winRate = totalGames > 0 ? (wins / totalGames) * 100 : 0.0;
         
+        // Calculate bonuses based on performance - simplified
+        int eloBonus = wins * 10; // Simple: 10 points per win
+        int spaBonus = wins * 5;  // Simple: 5 points per win
+        
         return {
           'user_id': participant.id,
           'full_name': participant.fullName.isNotEmpty ? participant.fullName : participant.username,
@@ -92,6 +96,8 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
           'win_rate': winRate,
           'points': wins * 3, // 3 points per win
           'total_points': wins * 3, // Same as points for compatibility
+          'elo_bonus': eloBonus,
+          'spa_bonus': spaBonus,
         };
       }).toList();
       
@@ -126,7 +132,6 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.all(16.sp),
       padding: EdgeInsets.all(16.sp),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -141,6 +146,7 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Header
           Row(
@@ -171,22 +177,14 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
           SizedBox(height: 12.sp),
 
           // Content
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  if (_isLoading)
-                    _buildLoadingState()
-                  else if (_error != null)
-                    _buildErrorState()
-                  else if (_rankings.isEmpty)
-                    _buildEmptyState()
-                  else
-                    _buildRankingsList(),
-                ],
-              ),
-            ),
-          ),
+          if (_isLoading)
+            _buildLoadingState()
+          else if (_error != null)
+            _buildErrorState()
+          else if (_rankings.isEmpty)
+            _buildEmptyState()
+          else
+            _buildRankingsList(),
         ],
       ),
     );
@@ -286,7 +284,7 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
           child: Row(
             children: [
               SizedBox(
-                width: 35.sp,
+                width: 25.sp,
                 child: Text(
                   'Hạng',
                   style: TextStyle(
@@ -297,9 +295,8 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
                 ),
               ),
               Expanded(
-                flex: 3,
                 child: Text(
-                  'Người chơi',
+                  'Player',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 10.sp,
@@ -308,9 +305,9 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
                 ),
               ),
               SizedBox(
-                width: 50.sp,
+                width: 30.sp,
                 child: Text(
-                  'Điểm',
+                  'W/L',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
@@ -320,9 +317,21 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
                 ),
               ),
               SizedBox(
-                width: 60.sp,
+                width: 35.sp,
                 child: Text(
-                  'T-B-H',
+                  '+ELO',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 10.sp,
+                    color: Colors.grey[700],
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 35.sp,
+                child: Text(
+                  '+SPA',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
@@ -362,7 +371,7 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
         children: [
           // Position
           SizedBox(
-            width: 35.sp,
+            width: 25.sp,
             child: Row(
               children: [
                 if (isTopThree)
@@ -396,7 +405,6 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
 
           // Player Info
           Expanded(
-            flex: 3,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -407,6 +415,7 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
                     fontSize: 12.sp,
                     color: textColor,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
                 if (ranking['club_name'] != null)
                   Text(
@@ -415,34 +424,50 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
                       fontSize: 10.sp,
                       color: isTopThree ? Colors.white70 : Colors.grey[500],
                     ),
+                    overflow: TextOverflow.ellipsis,
                   ),
               ],
             ),
           ),
 
-          // Points
+          // Win/Loss Record
           SizedBox(
-            width: 50.sp,
+            width: 30.sp,
             child: Text(
-              '${ranking['total_points'] ?? 0}',
+              '${ranking['wins'] ?? 0}/${ranking['losses'] ?? 0}',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 12.sp,
+                fontSize: 11.sp,
                 color: textColor,
               ),
             ),
           ),
 
-          // Win-Loss-Draw Record
+          // Elo Bonus
           SizedBox(
-            width: 60.sp,
+            width: 35.sp,
             child: Text(
-              '${ranking['wins'] ?? 0}-${ranking['losses'] ?? 0}-${ranking['draws'] ?? 0}',
+              '+${(ranking['elo_bonus'] ?? 0).toString()}',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 10.sp,
-                color: isTopThree ? Colors.white70 : Colors.grey[600],
+                color: isTopThree ? Colors.white70 : Colors.green[600],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+
+          // Spa Bonus
+          SizedBox(
+            width: 35.sp,
+            child: Text(
+              '+${(ranking['spa_bonus'] ?? 0).toString()}',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 10.sp,
+                color: isTopThree ? Colors.white70 : Colors.blue[600],
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),
@@ -476,4 +501,5 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
         return Icons.circle;
     }
   }
+
 }

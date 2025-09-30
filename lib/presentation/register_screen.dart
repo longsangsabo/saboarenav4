@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import '../../routes/app_routes.dart';
 import '../../services/auth_service.dart';
-import '../club_registration_screen/club_registration_screen.dart';
+import 'club_registration_screen/club_registration_screen.dart';
 import '../../widgets/player_welcome_guide.dart';
 
 class RegisterScreen extends StatefulWidget {

@@ -692,7 +692,7 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
                 ),
                 child: Icon(
                   Icons.sports_soccer,
-                  color: Colors.blue.shade700,
+                  color: Colors.blue[700],
                   size: 24,
                 ),
               ),
@@ -753,7 +753,7 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
             '👥 Thu hút thành viên mới',
             style: TextStyle(
               fontSize: 11.sp,
-              color: Colors.blue.shade700,
+              color: Colors.blue[700],
               height: 1.4,
             ),
           ),
@@ -803,7 +803,7 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
                       style: TextStyle(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.bold,
-                        color: Colors.green.shade700,
+                        color: Colors.green[700],
                       ),
                     ),
                     Text(
@@ -923,7 +923,7 @@ class _HomeFeedScreenState extends State<HomeFeedScreen>
                 label,
                 style: TextStyle(
                   fontSize: 10.sp,
-                  color: color.shade700,
+                  color: color.withOpacity(0.8),
                   fontWeight: FontWeight.w500,
                 ),
                 textAlign: TextAlign.center,

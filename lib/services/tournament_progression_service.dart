@@ -10,36 +10,105 @@ class TournamentProgressionService {
     try {
       print('🔄 Triggering auto progression for tournament: $tournamentId');
       
-      // Call Python auto-fill logic via RPC function
-      // Note: SQL function cần được tạo trong Supabase dashboard trước
-      final result = await _supabase.rpc('auto_tournament_progression', 
-        params: {'tournament_id_param': tournamentId}
-      );
-      
-      print('✅ Tournament auto progression result: $result');
-      return true;
+      // Direct implementation of auto-fill logic
+      return await _performAutoFill(tournamentId);
       
     } catch (e) {
       print('❌ Error in auto progression: $e');
-      
-      // Fallback: Sử dụng alternative approach
-      return await _fallbackProgression(tournamentId);
+      return false;
     }
   }
   
   /// Fallback method khi RPC function chưa sẵn sàng
-  static Future<bool> _fallbackProgression(String tournamentId) async {
+  static Future<bool> _performAutoFill(String tournamentId) async {
     try {
-      print('🔄 Using fallback auto progression...');
+      print('🔄 Starting direct auto-fill logic...');
       
-      // Alternative: Call edge function hoặc custom implementation
-      // Hiện tại return true để không block UI
+      // Get all matches for this tournament
+      final matchesResponse = await _supabase
+          .from('matches')
+          .select('*')
+          .eq('tournament_id', tournamentId)
+          .order('round_number')
+          .order('match_number');
+          
+      final matches = List<Map<String, dynamic>>.from(matchesResponse);
       
-      print('💡 Fallback progression completed');
-      return true;
+      if (matches.isEmpty) {
+        print('❌ No matches found for tournament');
+        return false;
+      }
+      
+      // Group matches by round
+      final Map<int, List<Map<String, dynamic>>> rounds = {};
+      for (final match in matches) {
+        final round = match['round_number'] as int;
+        rounds[round] ??= [];
+        rounds[round]!.add(match);
+      }
+      
+      print('📊 Tournament has ${rounds.length} rounds');
+      
+      int updatedMatches = 0;
+      
+      // Check each round for completion and auto-fill next round
+      for (int roundNum = 1; roundNum < rounds.length; roundNum++) {
+        final currentRound = rounds[roundNum] ?? [];
+        final nextRound = rounds[roundNum + 1] ?? [];
+        
+        // Check if current round is complete
+        final completedMatches = currentRound.where((m) => m['winner_id'] != null).toList();
+        final isRoundComplete = completedMatches.length == currentRound.length;
+        
+        print('🔍 Round $roundNum: ${completedMatches.length}/${currentRound.length} completed');
+        
+        if (isRoundComplete && nextRound.isNotEmpty) {
+          // Check if next round needs filling
+          final nextRoundEmpty = nextRound.every((m) => 
+            m['player1_id'] == null || m['player2_id'] == null);
+            
+          if (nextRoundEmpty) {
+            print('🎯 Auto-filling Round ${roundNum + 1} with winners from Round $roundNum');
+            
+            // Fill next round with winners
+            for (int i = 0; i < completedMatches.length; i += 2) {
+              if (i + 1 < completedMatches.length) {
+                final match1 = completedMatches[i];
+                final match2 = completedMatches[i + 1];
+                final nextMatchIndex = i ~/ 2;
+                
+                if (nextMatchIndex < nextRound.length) {
+                  final nextMatch = nextRound[nextMatchIndex];
+                  
+                  // Update next round match with winners
+                  await _supabase
+                      .from('matches')
+                      .update({
+                        'player1_id': match1['winner_id'],
+                        'player2_id': match2['winner_id'],
+                        'updated_at': DateTime.now().toIso8601String(),
+                      })
+                      .eq('id', nextMatch['id']);
+                      
+                  updatedMatches++;
+                  print('✅ R${roundNum + 1}M${nextMatch['match_number']}: ${match1['winner_id']} vs ${match2['winner_id']}');
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      if (updatedMatches > 0) {
+        print('🎉 Auto-fill completed: $updatedMatches matches updated');
+        return true;
+      } else {
+        print('ℹ️ No auto-fill needed at this time');
+        return true; // Not an error, just nothing to do
+      }
       
     } catch (e) {
-      print('❌ Fallback progression failed: $e');
+      print('❌ Error in auto-fill: $e');
       return false;
     }
   }
