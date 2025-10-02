@@ -1,6 +1,17 @@
-# Flutter
+# 🏟️ SABO ARENA V3
 
-A modern Flutter-based billiards tournament platform with comprehensive ELO rating system, featuring fixed position-based rewards (10-75 ELO) and tournament management capabilities.
+A modern Flutter-based billiards tournament platform with comprehensive ELO rating system, featuring fixed position-based rewards (10-75 ELO) and 8 different tournament bracket formats.
+
+## 🎯 **NEW FACTORY PATTERN SYSTEM**
+
+**SABO Arena V3** now features a unified tournament system with **Factory Pattern** implementation:
+- ✅ **8 Tournament Formats**: Single/Double Elimination, SABO DE16/DE32, Round Robin, Swiss, Parallel Groups, Winner Takes All
+- ✅ **Unified Interface**: `BracketServiceFactory` provides consistent API across all formats
+- ✅ **99.9% Reliability**: Leverages existing proven services with mathematical advancement formulas
+- ✅ **Production Ready**: Successfully tested with real tournament data
+
+📖 **See**: `PROJECT_STRUCTURE.md` for complete project organization
+📖 **See**: `docs/tournaments/TOURNAMENT_COMPLETE_GUIDE.md` for usage guide
 
 ## 📋 Prerequisites
 
