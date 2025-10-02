@@ -1,4 +1,17 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/s    try {
+      final response = await _supabase
+          .from('chat_rooms')
+          .select('''
+            id,
+            name,
+            description,
+            type,
+            created_at,
+            updated_at,
+            is_private,
+            created_by
+          ''')
+          .order('updated_at', ascending: false);art';
 import '../services/auth_service.dart';
 import '../models/messaging_models.dart';
 import 'package:flutter/foundation.dart';
