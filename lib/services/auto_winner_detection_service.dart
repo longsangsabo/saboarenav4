@@ -45,8 +45,45 @@ class AutoWinnerDetectionService {
       
       debugPrint('✅ Winner set successfully for match $matchId');
       
-      // Trigger progression
-      await _triggerProgressionCheck(matchId);
+      // 🚀 DIRECT WINNER ADVANCEMENT - COPY FROM MATCH MANAGEMENT TAB
+      debugPrint('🎯 FORCING winner advancement...');
+      
+      // Get match details
+      final match = await _supabase.from('matches').select('*').eq('id', matchId).single();
+      
+      final currentRound = match['round_number'] ?? 1;
+      final currentMatchNumber = match['match_number'] ?? 1;
+      final nextRound = currentRound + 1;
+      final nextMatchNumber = ((currentMatchNumber - 1) ~/ 2) + 1;
+      
+      debugPrint('🎯 Advancing from R$currentRound M$currentMatchNumber → R$nextRound M$nextMatchNumber');
+      
+      // Find next match
+      final nextMatches = await _supabase
+          .from('matches')
+          .select('*')
+          .eq('tournament_id', match['tournament_id'])
+          .eq('round_number', nextRound)
+          .eq('match_number', nextMatchNumber);
+      
+      if (nextMatches.isEmpty) {
+        debugPrint('🏆 Tournament completed! Champion: $winnerId');
+        return true;
+      }
+      
+      // Assign winner to next match
+      final nextMatch = nextMatches.first;
+      final isEvenCurrentMatch = currentMatchNumber % 2 == 0;
+      final playerSlot = isEvenCurrentMatch ? 'player2_id' : 'player1_id';
+      
+      debugPrint('🎪 Assigning $winnerId to $playerSlot');
+      
+      await _supabase
+          .from('matches')
+          .update({playerSlot: winnerId})
+          .eq('id', nextMatch['id']);
+      
+      debugPrint('✅ WINNER ADVANCED SUCCESSFULLY!');
       
       return true;
       
@@ -108,20 +145,61 @@ class AutoWinnerDetectionService {
   /// Trigger progression check after setting winner
   Future<void> _triggerProgressionCheck(String matchId) async {
     try {
-      // Get match details
+      debugPrint('🚀 PROGRESSION: Starting check for match $matchId');
+      
+      // Get match details including winner
       final match = await _supabase
           .from('matches')
-          .select('tournament_id, round_number, match_number')
+          .select('*')
           .eq('id', matchId)
           .single();
       
-      // Small delay to ensure database is updated
-      await Future.delayed(Duration(milliseconds: 500));
+      debugPrint('🔍 PROGRESSION: Match data: ${match.toString()}');
       
-      debugPrint('🚀 Triggered progression check for match ${match['match_number']}');
+      final winnerId = match['winner_id'];
+      if (winnerId == null) {
+        debugPrint('⚠️ PROGRESSION: No winner to advance');
+        return;
+      }
+      
+      final currentRound = match['round_number'] ?? 1;
+      final currentMatchNumber = match['match_number'] ?? 1;
+      final nextRound = currentRound + 1;
+      final nextMatchNumber = ((currentMatchNumber - 1) ~/ 2) + 1;
+      
+      debugPrint('🎯 PROGRESSION: Current R$currentRound M$currentMatchNumber → Next R$nextRound M$nextMatchNumber');
+      
+      // Find next match
+      final nextMatches = await _supabase
+          .from('matches')
+          .select('*')
+          .eq('tournament_id', match['tournament_id'])
+          .eq('round_number', nextRound)
+          .eq('match_number', nextMatchNumber);
+      
+      debugPrint('🔍 PROGRESSION: Found ${nextMatches.length} next matches');
+      
+      if (nextMatches.isEmpty) {
+        debugPrint('🏆 PROGRESSION: Tournament completed! Champion: $winnerId');
+        return;
+      }
+      
+      // Assign winner to next match
+      final nextMatch = nextMatches.first;
+      final isEvenCurrentMatch = currentMatchNumber % 2 == 0;
+      final playerSlot = isEvenCurrentMatch ? 'player2_id' : 'player1_id';
+      
+      debugPrint('🎪 PROGRESSION: Assigning winner to $playerSlot (Match $currentMatchNumber is ${isEvenCurrentMatch ? 'even' : 'odd'})');
+      
+      await _supabase
+          .from('matches')
+          .update({playerSlot: winnerId})
+          .eq('id', nextMatch['id']);
+      
+      debugPrint('✅ PROGRESSION: Winner $winnerId advanced to Round $nextRound, Match $nextMatchNumber');
       
     } catch (e) {
-      debugPrint('⚠️ Error triggering progression: $e');
+      debugPrint('❌ PROGRESSION ERROR: $e');
     }
   }
   

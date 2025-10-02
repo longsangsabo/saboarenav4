@@ -904,18 +904,12 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
       
       debugPrint('✅ Match score updated successfully');
       
-      // 🚀 AUTOMATIC TOURNAMENT PROGRESSION
-      // Trigger auto progression if match is completed with winner
+      // 🎯 SIMPLE DIRECT WINNER ADVANCEMENT TRIGGER
+      // Immediately advance winner when user saves score
       if (status == 'completed' && winnerId.isNotEmpty) {
-        debugPrint('🎯 Match completed with winner, triggering auto progression...');
-        await TournamentProgressionService.onMatchCompleted(
-          widget.tournamentId, 
-          matchId
-        );
+        debugPrint('🚀 TRIGGER: Advancing winner directly...');
+        await _advanceWinnerDirectly(matchId, winnerId, match);
       }
-      
-      // Check if we need to create next round matches
-      await _checkAndCreateNextRound(match);
       
       // Notify parent widget about the score update to refresh bracket
       if (widget.onMatchScoreUpdated != null) {
@@ -1158,6 +1152,62 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
       debugPrint('✅ Match status updated successfully');
     } catch (e) {
       debugPrint('❌ Error updating match status: $e');
+    }
+  }
+
+  /// 🎯 SIMPLE DIRECT WINNER ADVANCEMENT
+  /// Triggered immediately when user clicks "Lưu" with match result
+  Future<void> _advanceWinnerDirectly(String completedMatchId, String winnerId, Map<String, dynamic> completedMatch) async {
+    try {
+      debugPrint('🚀 ADVANCING WINNER: $winnerId from match $completedMatchId');
+      
+      final currentRound = completedMatch['round_number'] ?? completedMatch['round'] ?? 1;
+      final currentMatchNumber = completedMatch['match_number'] ?? 1;
+      
+      debugPrint('📍 Current: Round $currentRound, Match $currentMatchNumber');
+      
+      // Calculate next round using standard single elimination formula
+      final nextRound = currentRound + 1;
+      final nextMatchNumber = ((currentMatchNumber - 1) ~/ 2) + 1;
+      
+      debugPrint('🎯 Target: Round $nextRound, Match $nextMatchNumber');
+      
+      // Find the next round match that should receive this winner
+      final nextMatches = await Supabase.instance.client
+          .from('matches')
+          .select('*')
+          .eq('tournament_id', widget.tournamentId)
+          .eq('round_number', nextRound)
+          .eq('match_number', nextMatchNumber);
+      
+      if (nextMatches.isEmpty) {
+        debugPrint('🏆 NO NEXT MATCH FOUND - TOURNAMENT COMPLETE! Champion: $winnerId');
+        return;
+      }
+      
+      final nextMatch = nextMatches.first;
+      debugPrint('📋 Next match found: ${nextMatch['id']}');
+      
+      // Determine which slot (player1_id or player2_id) to place winner
+      // Even match numbers go to player2_id, odd go to player1_id
+      final isEvenCurrentMatch = currentMatchNumber % 2 == 0;
+      final playerSlot = isEvenCurrentMatch ? 'player2_id' : 'player1_id';
+      
+      debugPrint('🎪 Assigning winner to $playerSlot (Current match $currentMatchNumber is ${isEvenCurrentMatch ? 'even' : 'odd'})');
+      
+      // Update the next round match with the winner
+      await Supabase.instance.client
+          .from('matches')
+          .update({playerSlot: winnerId})
+          .eq('id', nextMatch['id']);
+      
+      debugPrint('✅ WINNER ADVANCED SUCCESSFULLY! $winnerId → Round $nextRound, Match $nextMatchNumber');
+      
+      // Refresh the matches display to show the update
+      await _refreshMatches();
+      
+    } catch (e) {
+      debugPrint('❌ Error advancing winner: $e');
     }
   }
 }
