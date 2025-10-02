@@ -216,18 +216,6 @@ class HardcodedDoubleEliminationService {
         'created_at': DateTime.now().toIso8601String(),
       });
 
-      // Create tournament_participants records first
-      debugPrint('$_tag: 👥 Creating ${participantIds.length} participant records...');
-      final participantRecords = participantIds.map((userId) => {
-        'tournament_id': tournamentId,
-        'user_id': userId,
-        'joined_at': DateTime.now().toIso8601String(),
-        'payment_status': 'pending', // or 'completed' depending on your requirements
-      }).toList();
-      
-      await _supabase.from('tournament_participants').insert(participantRecords);
-      debugPrint('$_tag: ✅ Participants created successfully');
-
       // Save matches to database
       debugPrint('$_tag: 💾 Saving ${allMatches.length} matches to database...');
       await _supabase.from('matches').insert(allMatches);
