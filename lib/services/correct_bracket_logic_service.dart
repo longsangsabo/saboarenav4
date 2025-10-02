@@ -5,6 +5,8 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'tournament_service.dart';
+import '../models/user_profile.dart';
 
 class CorrectBracketLogicService {
   static const String _tag = 'CorrectBracketLogic';
@@ -16,36 +18,38 @@ class CorrectBracketLogicService {
 
   // ==================== SINGLE ELIMINATION FIXES ====================
 
-  /// Generate single elimination bracket (initial bracket creation)
+  /// Generate single elimination bracket with hardcore advancement
   Future<Map<String, dynamic>> generateSingleEliminationBracket({
     required String tournamentId,
     required List<Map<String, dynamic>> participants,
   }) async {
     try {
-      debugPrint('$_tag: 🎯 Generating single elimination bracket for ${participants.length} participants');
+      debugPrint('$_tag: 🚀 Generating HARDCORE ADVANCEMENT single elimination bracket for ${participants.length} participants');
       
       if (participants.isEmpty) {
         throw Exception('No participants provided for bracket generation');
       }
 
-      // Validate participant count (must be power of 2 for pure single elimination)
-      final participantCount = participants.length;
-      final expectedMatches = participantCount - 1; // n-1 rule
+      // Use TournamentService for hardcore advancement
+      final tournamentService = TournamentService.instance;
       
-      debugPrint('$_tag: 📊 Expected total matches: $expectedMatches (n-1 rule)');
-
-      // Create Round 1 matches
-      final round1Matches = await _createRound1Matches(tournamentId, participants);
+      // Use direct method call to generate hardcore advancement bracket  
+      final result = await _generateHardcoreAdvancementBracket(
+        tournamentId,
+        participants,
+      );
+      
+      debugPrint('$_tag: ✅ Hardcore advancement bracket generated: ${result['totalMatches']} matches');
       
       return {
         'success': true,
-        'message': 'Single elimination bracket created with ${round1Matches.length} Round 1 matches',
-        'round1Matches': round1Matches.length,
-        'totalExpectedMatches': expectedMatches,
+        'message': 'Hardcore advancement bracket created with ${result['totalMatches']} matches across ${result['rounds']} rounds',
+        'totalMatches': result['totalMatches'],
+        'rounds': result['rounds'],
       };
 
     } catch (e) {
-      debugPrint('$_tag: ❌ Bracket generation failed: $e');
+      debugPrint('$_tag: ❌ Hardcore advancement bracket generation failed: $e');
       return {
         'success': false,
         'error': e.toString(),
@@ -414,6 +418,139 @@ class CorrectBracketLogicService {
         debugPrint('$_tag: ⏸️ Round $currentRound not complete yet (${completedMatches.length}/${roundMatches.length})');
         break;
       }
+    }
+  }
+
+  /// Generate hardcore advancement bracket - complete tournament structure
+  Future<Map<String, dynamic>> _generateHardcoreAdvancementBracket(
+    String tournamentId,
+    List<Map<String, dynamic>> participants,
+  ) async {
+    try {
+      debugPrint('$_tag: 🚀 Creating hardcore advancement bracket');
+      
+      final participantCount = participants.length;
+      final totalMatches = participantCount - 1; // n-1 rule
+      final rounds = _calculateRounds(participantCount);
+      
+      debugPrint('$_tag: 📊 Creating $totalMatches matches across $rounds rounds');
+      
+      // Create all matches with hardcore advancement
+      final allMatches = <Map<String, dynamic>>[];
+      final hardcoreAdvancement = <String, Map<String, dynamic>>{};
+      
+      int matchCounter = 1;
+      
+      // Round 1: Real players
+      final round1MatchCount = participantCount ~/ 2;
+      for (int i = 0; i < round1MatchCount; i++) {
+        final player1 = participants[i * 2];
+        final player2 = participants[i * 2 + 1];
+        
+        final match = await _createMatch(
+          tournamentId: tournamentId,
+          round: 1,
+          matchNumber: matchCounter,
+          player1Id: player1['user_id'],
+          player2Id: player2['user_id'],
+        );
+        
+        allMatches.add(match);
+        matchCounter++;
+      }
+      
+      // Rounds 2+: Winner references
+      int currentRoundMatches = round1MatchCount;
+      for (int round = 2; round <= rounds; round++) {
+        final nextRoundMatches = currentRoundMatches ~/ 2;
+        
+        for (int i = 0; i < nextRoundMatches; i++) {
+          final prevMatch1 = ((round - 2) * round1MatchCount ~/ (1 << (round - 2))) + (i * 2) + 1;
+          final prevMatch2 = prevMatch1 + 1;
+          
+          final winnerRef1 = 'WINNER_FROM_R${round - 1}M$prevMatch1';
+          final winnerRef2 = 'WINNER_FROM_R${round - 1}M$prevMatch2';
+          
+          final match = await _createMatch(
+            tournamentId: tournamentId,
+            round: round,
+            matchNumber: matchCounter,
+            player1Id: winnerRef1,
+            player2Id: winnerRef2,
+          );
+          
+          allMatches.add(match);
+          
+          // Store hardcore advancement mapping
+          final matchKey = 'R${round}M$matchCounter';
+          hardcoreAdvancement[matchKey] = {
+            'player1_winner_from': winnerRef1,
+            'player2_winner_from': winnerRef2,
+          };
+          
+          matchCounter++;
+        }
+        
+        currentRoundMatches = nextRoundMatches;
+      }
+      
+      debugPrint('$_tag: ✅ Created ${allMatches.length} matches with hardcore advancement');
+      
+      return {
+        'matches': allMatches,
+        'hardcoreAdvancement': hardcoreAdvancement,
+        'totalMatches': allMatches.length,
+        'rounds': rounds,
+      };
+      
+    } catch (e) {
+      debugPrint('$_tag: ❌ Hardcore advancement generation failed: $e');
+      throw Exception('Failed to generate hardcore advancement bracket: $e');
+    }
+  }
+
+  /// Calculate number of rounds needed
+  int _calculateRounds(int participantCount) {
+    int rounds = 0;
+    int remaining = participantCount;
+    while (remaining > 1) {
+      remaining = remaining ~/ 2;
+      rounds++;
+    }
+    return rounds;
+  }
+
+  /// Create a single match in database
+  Future<Map<String, dynamic>> _createMatch({
+    required String tournamentId,
+    required int round,
+    required int matchNumber,
+    required String player1Id,
+    required String player2Id,
+  }) async {
+    try {
+      final matchData = {
+        'tournament_id': tournamentId,
+        'round': round,
+        'match_number': matchNumber,
+        'player1_id': player1Id,
+        'player2_id': player2Id,
+        'status': 'pending',
+        'format': 'single_elimination',
+        'created_at': DateTime.now().toIso8601String(),
+      };
+      
+      final result = await Supabase.instance.client
+          .from('matches')
+          .insert(matchData)
+          .select()
+          .single();
+      
+      return result;
+      
+    } catch (e) {
+      debugPrint('$_tag: ❌ Failed to create match R${round}M$matchNumber: $e');
+      throw Exception('Failed to create match: $e');
     }
   }
 }

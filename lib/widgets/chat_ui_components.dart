@@ -294,8 +294,8 @@ class MessageBubble extends StatelessWidget {
                 backgroundColor: Colors.grey[300],
                 child: message.sender?.avatarUrl == null
                     ? Text(
-                        message.sender?.fullName?.isNotEmpty == true
-                            ? message.sender!.fullName![0].toUpperCase()
+                        message.sender?.username.isNotEmpty == true
+                            ? message.sender!.username[0].toUpperCase()
                             : '?',
                         style: TextStyle(
                           fontSize: 10.sp,
@@ -311,11 +311,11 @@ class MessageBubble extends StatelessWidget {
                     ? CrossAxisAlignment.end 
                     : CrossAxisAlignment.start,
                 children: [
-                  if (!isFromCurrentUser && message.sender?.fullName != null)
+                  if (!isFromCurrentUser && message.sender?.username.isNotEmpty == true)
                     Padding(
                       padding: EdgeInsets.only(bottom: 0.5.h),
                       child: Text(
-                        message.sender!.fullName!,
+                        message.sender!.username,
                         style: TextStyle(
                           fontSize: 10.sp,
                           color: Colors.grey[600],
@@ -352,7 +352,7 @@ class MessageBubble extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  message.replyToMessage!.sender?.fullName ?? 'Unknown',
+                                  message.replyToMessage!.sender?.username ?? 'Unknown',
                                   style: TextStyle(
                                     fontSize: 9.sp,
                                     fontWeight: FontWeight.bold,
@@ -414,8 +414,8 @@ class MessageBubble extends StatelessWidget {
                 backgroundColor: Theme.of(context).primaryColor,
                 child: message.sender?.avatarUrl == null
                     ? Text(
-                        message.sender?.fullName?.isNotEmpty == true
-                            ? message.sender!.fullName![0].toUpperCase()
+                        message.sender?.username.isNotEmpty == true
+                            ? message.sender!.username[0].toUpperCase()
                             : '?',
                         style: TextStyle(
                           fontSize: 10.sp,

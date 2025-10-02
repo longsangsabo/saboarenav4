@@ -55,9 +55,7 @@ class _MapViewWidgetState extends State<MapViewWidget> {
       }
 
       Position position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-        ),
+        desiredAccuracy: LocationAccuracy.high,
       );
 
       setState(() {

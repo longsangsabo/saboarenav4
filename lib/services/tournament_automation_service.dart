@@ -504,8 +504,8 @@ class TournamentAutomationService {
 
   double _calculateTiebreakPoints(Match match, bool isWinner) {
     // Calculate tiebreak points based on game differential or other factors
-    if (match.player1Score != null && match.player2Score != null) {
-      final scoreDiff = (match.player1Score! - match.player2Score!).abs();
+    if (match.player2Score != null) {
+      final scoreDiff = (match.player1Score - match.player2Score).abs();
       return isWinner ? scoreDiff.toDouble() : -scoreDiff.toDouble();
     }
     return 0.0;

@@ -5,6 +5,9 @@ import '../../core/app_export.dart';
 import '../../models/tournament.dart';
 import '../../services/tournament_service.dart';
 import '../../services/bracket_service.dart';
+import '../../services/complete_sabo_de16_service.dart';
+import '../../services/complete_double_elimination_service.dart';
+import '../../services/complete_sabo_de32_service.dart';
 import '../tournament_detail_screen/widgets/match_management_tab.dart';
 import '../tournament_detail_screen/widgets/participant_management_tab.dart';
 import '../tournament_detail_screen/widgets/tournament_rankings_widget.dart';
@@ -395,7 +398,7 @@ class _TournamentManagementCenterScreenState extends State<TournamentManagementC
               tabAlignment: TabAlignment.fill,
               isScrollable: false,
               tabs: [
-                Container(
+                SizedBox(
                   height: 32.sp, // Giảm chiều cao để fit 4 tabs
                   child: Tab(
                     icon: Icon(Icons.group, size: 12.sp),
@@ -403,7 +406,7 @@ class _TournamentManagementCenterScreenState extends State<TournamentManagementC
                     iconMargin: EdgeInsets.only(bottom: 1.sp),
                   ),
                 ),
-                Container(
+                SizedBox(
                   height: 32.sp,
                   child: Tab(
                     icon: Icon(Icons.pool, size: 12.sp),
@@ -411,7 +414,7 @@ class _TournamentManagementCenterScreenState extends State<TournamentManagementC
                     iconMargin: EdgeInsets.only(bottom: 1.sp),
                   ),
                 ),
-                Container(
+                SizedBox(
                   height: 32.sp,
                   child: Tab(
                     icon: Icon(Icons.account_tree, size: 12.sp),
@@ -419,7 +422,7 @@ class _TournamentManagementCenterScreenState extends State<TournamentManagementC
                     iconMargin: EdgeInsets.only(bottom: 1.sp),
                   ),
                 ),
-                Container(
+                SizedBox(
                   height: 32.sp,
                   child: Tab(
                     icon: Icon(Icons.emoji_events, size: 12.sp),
@@ -564,22 +567,95 @@ class _TournamentManagementCenterScreenState extends State<TournamentManagementC
           'payment_status': 'confirmed', // Add this for BracketService validation
         }).toList();
         
-        // 🔧 DETECT TOURNAMENT FORMAT AND USE APPROPRIATE SERVICE
-        final tournamentFormat = _selectedTournament!.format;
+        // 🔧 DETECT TOURNAMENT FORMAT AND USE APPROPRIATE SERVICE  
+        // Use bracketFormat (which maps to tournamentType) for bracket creation
+        final tournamentFormat = _selectedTournament!.bracketFormat;
         debugPrint('🎯 Detected tournament format: $tournamentFormat');
+        debugPrint('🎯 Original format: ${_selectedTournament!.format}, bracket_format: ${_selectedTournament!.bracketFormat}');
         debugPrint('🏆 Creating $tournamentFormat bracket for ${participants.length} players');
         
-        final result = _bracketService.generateBracket(
-          tournamentId: _selectedTournament!.id,
-          format: tournamentFormat,
-          confirmedParticipants: participants,
-          shufflePlayers: false, // Keep seeding order
-        );
+        Map<String, dynamic> result;
         
-        // Save bracket to database
-        final saveSuccess = await _bracketService.saveBracketToDatabase(result);
-        if (!saveSuccess) {
-          throw Exception('Failed to save bracket to database');
+        // Use specialized service for sabo_de16
+        if (tournamentFormat == 'sabo_de16') {
+          debugPrint('🎯 Using CompleteSaboDE16Service for sabo_de16 format');
+          final saboService = CompleteSaboDE16Service();
+          
+          // Convert participants to format expected by CompleteSaboDE16Service
+          final saboParticipants = participants.map((p) => {
+            'user_id': p['user_id'], // CompleteSaboDE16Service expects user_id at root level
+            'users': {
+              'id': p['user_id'], 
+              'full_name': p['full_name'],
+              'avatar_url': p['avatar_url']
+            },
+            'payment_status': 'completed'
+          }).toList();
+          
+          result = await saboService.generateSaboDE16Bracket(
+            tournamentId: _selectedTournament!.id,
+            participants: saboParticipants,
+          );
+          
+          if (result['success'] != true) {
+            throw Exception(result['error'] ?? 'Failed to create SABO DE16 bracket');
+          }
+        } else if (tournamentFormat == 'sabo_de32' && participants.length == 32) {
+          // Use CompleteSaboDE32Service for SABO DE32 (55 matches)
+          debugPrint('🎯 Using CompleteSaboDE32Service for sabo_de32 format (55 matches)');
+          final saboDE32Service = CompleteSaboDE32Service();
+          
+          // Convert participants to format expected by CompleteSaboDE32Service
+          final saboDE32Participants = participants.map((p) => {
+            'user_id': p['user_id'], // Service expects user_id at root level
+            'full_name': p['full_name'],
+            'avatar_url': p['avatar_url'],
+            'payment_status': 'completed'
+          }).toList();
+          
+          result = await saboDE32Service.generateSaboDE32Bracket(
+            tournamentId: _selectedTournament!.id,
+            participants: saboDE32Participants,
+          );
+          
+          if (result['success'] != true) {
+            throw Exception(result['error'] ?? 'Failed to create SABO DE32 bracket');
+          }
+        } else if (tournamentFormat == 'double_elimination' && participants.length == 16) {
+          // Use CompleteDoubleEliminationService for standard DE16 (31 matches)
+          debugPrint('🚀 Using CompleteDoubleEliminationService for double_elimination format (31 matches)');
+          final de16Service = CompleteDoubleEliminationService.instance;
+          
+          // Convert participants to format expected by CompleteDoubleEliminationService
+          final de16Participants = participants.map((p) => {
+            'user_id': p['user_id'], // Service expects user_id at root level
+            'full_name': p['full_name'],
+            'avatar_url': p['avatar_url'],
+            'payment_status': 'completed'
+          }).toList();
+          
+          result = await de16Service.generateDE16Bracket(
+            tournamentId: _selectedTournament!.id,
+            participants: de16Participants,
+          );
+          
+          if (result['success'] != true) {
+            throw Exception(result['error'] ?? 'Failed to create Double Elimination bracket');
+          }
+        } else {
+          // Use existing BracketService for other formats
+          result = _bracketService.generateBracket(
+            tournamentId: _selectedTournament!.id,
+            format: tournamentFormat,
+            confirmedParticipants: participants,
+            shufflePlayers: false, // Keep seeding order
+          );
+          
+          // Save bracket to database
+          final saveSuccess = await _bracketService.saveBracketToDatabase(result);
+          if (!saveSuccess) {
+            throw Exception('Failed to save bracket to database');
+          }
         }
         
         debugPrint('✅ Bracket created and saved successfully');

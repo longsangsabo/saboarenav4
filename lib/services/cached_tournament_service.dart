@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'tournament_cache_service_complete.dart';
+import 'tournament_service.dart';
 
 class CachedTournamentService {
   static const Duration _cacheMaxAge = Duration(minutes: 5);
@@ -117,12 +118,7 @@ class CachedTournamentService {
     try {
       final response = await Supabase.instance.client
           .from('matches')
-          .select('''
-            *,
-            player1:player1_id(id, username, full_name),
-            player2:player2_id(id, username, full_name),
-            winner:winner_id(id, username, full_name)
-          ''')
+          .select('*')
           .eq('tournament_id', tournamentId)
           .order('round_number')
           .order('match_number');
@@ -196,6 +192,12 @@ class CachedTournamentService {
       
       // Update cache with fresh data
       await _updateMatchInCache(tournamentId, matchId, updateData);
+      
+      // Process single elimination advancement if match is completed and has a winner
+      if (status == 'completed' && winnerId != null) {
+        await TournamentService.instance.processSingleEliminationAdvancement(tournamentId, matchId, winnerId);
+        print('🚀 Processed single elimination advancement for winner: $winnerId');
+      }
       
       print('🌐 Updated match in Supabase and cache');
       return true;
@@ -280,14 +282,14 @@ class CachedTournamentService {
     // Clear successfully synced actions, keep failed ones
     if (failedActions.isEmpty) {
       await TournamentCacheService.clearPendingActions();
-      print('🎉 All ${successCount} actions synced successfully');
+      print('🎉 All $successCount actions synced successfully');
     } else {
       // Store only failed actions back
       await TournamentCacheService.clearPendingActions();
       for (final failed in failedActions) {
         await TournamentCacheService.storePendingAction(failed);
       }
-      print('⚠️ ${successCount} synced, ${failedActions.length} failed');
+      print('⚠️ $successCount synced, ${failedActions.length} failed');
     }
   }
 

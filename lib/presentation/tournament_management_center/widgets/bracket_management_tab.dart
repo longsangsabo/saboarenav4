@@ -24,8 +24,8 @@ class BracketManagementTab extends StatefulWidget {
 }
 
 class _BracketManagementTabState extends State<BracketManagementTab> {
-  final CorrectBracketLogicService _bracketService = CorrectBracketLogicService.instance;
   final TournamentService _tournamentService = TournamentService.instance;
+  final TournamentService _bracketService = TournamentService.instance;
   final TournamentProgressService _progressService = TournamentProgressService.instance;
   final BracketVisualizationService _visualizationService = BracketVisualizationService.instance;
 
@@ -403,10 +403,17 @@ class _BracketManagementTabState extends State<BracketManagementTab> {
         'avatar_url': profile.avatarUrl,
       }).toList();
 
-      final result = await _bracketService.generateSingleEliminationBracket(
+      final bracketResult = await _bracketService.generateBracket(
         tournamentId: widget.tournament.id,
-        participants: participantMaps,
+        participants: participants,
+        format: 'single_elimination',
       );
+      
+      // Convert TournamentBracket to expected format
+      final result = {
+        'success': true,
+        'message': 'Hardcore advancement bracket created with ${bracketResult.matches.length} matches',
+      };
 
       if (result['success'] == true) {
         // Reload bracket data from database to get fresh matches
@@ -419,14 +426,14 @@ class _BracketManagementTabState extends State<BracketManagementTab> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(result['message'] ?? 'Bracket generated successfully'),
+              content: Text(result['message'] as String? ?? 'Bracket generated successfully'),
               backgroundColor: Colors.green,
             ),
           );
         }
       } else {
         setState(() {
-          _errorMessage = result['error'] ?? 'Failed to generate bracket';
+          _errorMessage = result['error'] as String? ?? 'Failed to generate bracket';
           _isLoading = false;
         });
       }

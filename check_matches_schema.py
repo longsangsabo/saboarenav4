@@ -1,46 +1,38 @@
 #!/usr/bin/env python3
+"""Check matches table schema"""
 
 import os
-from supabase import create_client, Client
+from supabase import create_client
 
-# Supabase connection
-url = "https://mogjjvscxjwvhtpkrlqr.supabase.co"
-key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vZ2pqdnNjeGp3dmh0cGtybHFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc5MTk1ODAsImV4cCI6MjA3MzQ5NTU4MH0.u1urXd3uiT0fuqWlJ1Nhp7uJhgdiyOdLSdSWJWczHoQ"
+# Supabase configuration
+SUPABASE_URL = "https://mogjjvscxjwvhtpkrlqr.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vZ2pqdnNjeGp3dmh0cGtybHFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc5MTk1ODAsImV4cCI6MjA3MzQ5NTU4MH0.u1urXd3uiT0fuqWlJ1Nhp7uJhgdiyOdLSdSWJWczHoQ"
 
-supabase: Client = create_client(url, key)
-
-def check_matches_table():
+def check_matches_schema():
+    """Check matches table structure"""
     try:
-        # Try to query matches table directly to see structure
-        print("=== CHECKING MATCHES TABLE ===")
-        try:
-            result = supabase.from_('matches').select('*').limit(1).execute()
-            print(f"✅ Matches table exists and returned {len(result.data)} records")
-            if result.data:
-                print("Available columns in matches table:")
-                for key in result.data[0].keys():
-                    print(f"  - {key}")
-            else:
-                print("No data in matches table, but table exists")
-        except Exception as e:
-            print(f"❌ Error querying matches table: {e}")
+        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+        
+        # Try to get one match to see structure
+        matches = supabase.table('matches').select('*').limit(1).execute()
+        
+        if matches.data:
+            print("📋 Matches table structure:")
+            match = matches.data[0]
+            for key, value in match.items():
+                print(f"  {key}: {type(value).__name__} = {value}")
+        else:
+            print("No matches found")
             
-        # Try inserting a test match to see what columns are expected
-        print("\n=== TESTING MATCH INSERT (will fail to show required columns) ===")
+        # Check what fields exist by trying empty insert
         try:
-            test_match = {
-                'tournament_id': 'test-id',
-                'round_number': 1,
-                'match_number': 1,
-            }
-            result = supabase.from_('matches').insert(test_match).execute()
-            print("✅ Test insert succeeded (unexpected)")
+            result = supabase.table('matches').insert({}).execute()
         except Exception as e:
-            print(f"❌ Test insert failed (expected): {e}")
-            # This error will show us what columns are required/missing
+            error_msg = str(e)
+            print(f"\n🔍 Schema info from error: {error_msg}")
             
     except Exception as e:
-        print(f"❌ Error checking matches table: {e}")
+        print(f"❌ Error: {e}")
 
 if __name__ == "__main__":
-    check_matches_table()
+    check_matches_schema()

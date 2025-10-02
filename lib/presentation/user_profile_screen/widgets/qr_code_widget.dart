@@ -87,7 +87,7 @@ class _QRCodeWidgetState extends State<QRCodeWidget> {
             height: 4,
             decoration: BoxDecoration(
               color: AppTheme.lightTheme.colorScheme.outline
-                  .withValues(alpha: 0.3),
+                  .withOpacity(0.3),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -127,7 +127,7 @@ class _QRCodeWidgetState extends State<QRCodeWidget> {
               boxShadow: [
                 BoxShadow(
                   color: AppTheme.lightTheme.colorScheme.shadow
-                      .withValues(alpha: 0.1),
+                      .withOpacity(0.1),
                   blurRadius: 12,
                   offset: Offset(0, 4),
                 ),
@@ -235,7 +235,7 @@ class _QRCodeWidgetState extends State<QRCodeWidget> {
                   padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
                   decoration: BoxDecoration(
                     color: AppTheme.lightTheme.colorScheme.primary
-                        .withValues(alpha: 0.1),
+                        .withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -316,7 +316,7 @@ class _QRCodeWidgetState extends State<QRCodeWidget> {
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
                   decoration: BoxDecoration(
-                    color: AppTheme.lightTheme.colorScheme.primary.withValues(alpha: 0.1),
+                    color: AppTheme.lightTheme.colorScheme.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(

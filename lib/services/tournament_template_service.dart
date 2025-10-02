@@ -15,7 +15,7 @@ class TournamentTemplateService {
   TournamentTemplateService._();
 
   final SupabaseClient _supabase = Supabase.instance.client;
-  final TournamentService _tournamentService = TournamentService();
+  final TournamentService _tournamentService = TournamentService.instance;
 
   // ==================== PREDEFINED TEMPLATES ====================
 

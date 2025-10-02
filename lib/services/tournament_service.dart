@@ -3,8 +3,12 @@ import '../models/tournament.dart';
 import '../models/user_profile.dart';
 import '../core/constants/tournament_constants.dart';
 import 'notification_service.dart';
+import 'complete_double_elimination_service.dart';
+import 'complete_sabo_de16_service.dart';
+import 'complete_sabo_de32_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:math' as math;
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 
 class TournamentService {
@@ -191,7 +195,9 @@ class TournamentService {
 
   Future<List<Map<String, dynamic>>> getTournamentMatches(String tournamentId) async {
     try {
-      // First get matches
+      debugPrint('🔍 TournamentService: Fetching matches for tournament $tournamentId');
+      
+      // First get matches with proper column names
       final matches = await _supabase
           .from('matches')
           .select('*')
@@ -199,9 +205,27 @@ class TournamentService {
           .order('round_number')
           .order('match_number');
 
+      debugPrint('📊 TournamentService: Found ${matches.length} matches');
+      if (matches.isEmpty) {
+        debugPrint('⚠️ No matches found for tournament $tournamentId');
+        return [];
+      }
+
       // Then get user profiles separately for better reliability
       List<String> playerIds = [];
-      for (var match in matches) {
+      debugPrint('🔍 Processing ${matches.length} matches for player IDs:');
+      for (int i = 0; i < matches.length && i < 3; i++) {
+        var match = matches[i];
+        debugPrint('  Match ${i + 1}: R${match['round_number']}M${match['match_number']}');
+        debugPrint('    Player1_id: ${match['player1_id']}');
+        debugPrint('    Player2_id: ${match['player2_id']}');
+        if (match['player1_id'] != null) playerIds.add(match['player1_id']);
+        if (match['player2_id'] != null) playerIds.add(match['player2_id']);
+      }
+      
+      // Add remaining player IDs without logging
+      for (int i = 3; i < matches.length; i++) {
+        var match = matches[i];
         if (match['player1_id'] != null) playerIds.add(match['player1_id']);
         if (match['player2_id'] != null) playerIds.add(match['player2_id']);
       }
@@ -209,47 +233,83 @@ class TournamentService {
       Map<String, dynamic> userProfiles = {};
       if (playerIds.isNotEmpty) {
         debugPrint('🔍 TournamentService: Fetching profiles for ${playerIds.length} players');
-        final profiles = await _supabase
-            .from('users')
-            .select('id, full_name, avatar_url, elo_rating, rank')
-            .inFilter('id', playerIds.toSet().toList());
-        
-        debugPrint('📊 TournamentService: Found ${profiles.length} profiles');
-        for (var profile in profiles) {
-          userProfiles[profile['id']] = profile;
-          debugPrint('  Profile: ${profile['id']} - ${profile['full_name']}');
+        debugPrint('🔍 Player IDs: ${playerIds.take(5).join(", ")}${playerIds.length > 5 ? "..." : ""}');
+        try {
+          final profiles = await _supabase
+              .from('users')
+              .select('id, full_name, display_name, avatar_url, elo_rating, rank')
+              .inFilter('id', playerIds.toSet().toList());
+          
+          debugPrint('📊 TournamentService: Found ${profiles.length} profiles');
+          for (var profile in profiles) {
+            userProfiles[profile['id']] = profile;
+            debugPrint('  ✅ Profile: ${profile['id']?.toString().substring(0, 8)}... - ${profile['full_name'] ?? profile['display_name'] ?? 'No Name'}');
+          }
+          
+          if (profiles.length < playerIds.length) {
+            debugPrint('⚠️ Missing profiles: Expected ${playerIds.length}, got ${profiles.length}');
+          }
+        } catch (e) {
+          debugPrint('❌ Error fetching user profiles: $e');
+          debugPrint('❌ Stack trace: ${StackTrace.current}');
+          // Continue without profiles - we'll show placeholder names
         }
+      } else {
+        debugPrint('⚠️ No player IDs found in matches');
       }
 
       return matches.map<Map<String, dynamic>>((match) {
         final player1Profile = match['player1_id'] != null ? userProfiles[match['player1_id']] : null;
         final player2Profile = match['player2_id'] != null ? userProfiles[match['player2_id']] : null;
         
+        // Use the correct score columns from database
+        final player1Score = match['player1_score'] ?? match['score_player1'] ?? 0;
+        final player2Score = match['player2_score'] ?? match['score_player2'] ?? 0;
+        
         return {
           "matchId": match['id'],
-          "round": match['round_number'],
+          "round": match['round_number'] ?? match['round'] ?? 1,
+          "round_number": match['round_number'] ?? 1,
+          "match_number": match['match_number'] ?? 1,
           "player1": player1Profile != null ? {
             "id": player1Profile['id'],
-            "name": player1Profile['full_name'] ?? 'Player 1',
+            "name": player1Profile['full_name'] ?? player1Profile['display_name'] ?? 'Player 1',
             "avatar": player1Profile['avatar_url'] ?? 
                 "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png",
             "rank": RankMigrationHelper.getNewDisplayName(player1Profile['rank'] as String?),
-            "score": match['player1_score'] ?? 0
+            "score": player1Score
+          } : match['player1_id'] != null ? {
+            "id": match['player1_id'],
+            "name": 'Player 1',
+            "avatar": "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png",
+            "rank": "Chưa xếp hạng",
+            "score": player1Score
           } : null,
           "player2": player2Profile != null ? {
             "id": player2Profile['id'],
-            "name": player2Profile['full_name'] ?? 'Player 2',
+            "name": player2Profile['full_name'] ?? player2Profile['display_name'] ?? 'Player 2',
             "avatar": player2Profile['avatar_url'] ?? 
-                "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png",
+                "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png",  
             "rank": RankMigrationHelper.getNewDisplayName(player2Profile['rank'] as String?),
-            "score": match['player2_score'] ?? 0
+            "score": player2Score
+          } : match['player2_id'] != null ? {
+            "id": match['player2_id'],
+            "name": 'Player 2',
+            "avatar": "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png",
+            "rank": "Chưa xếp hạng",
+            "score": player2Score
           } : null,
           "winner": match['winner_id'] != null ? 
               (match['winner_id'] == match['player1_id'] ? "player1" : "player2") : null,
-          "status": match['status'] ?? "pending"
+          "status": match['status'] ?? "pending",
+          "scheduled_time": match['scheduled_time'],
+          "start_time": match['start_time'],
+          "end_time": match['end_time'],
+          "notes": match['notes'],
         };
       }).toList();
     } catch (error) {
+      debugPrint('❌ TournamentService: Error getting tournament matches: $error');
       throw Exception('Failed to get tournament matches: $error');
     }
   }
@@ -285,9 +345,9 @@ class TournamentService {
       await _supabase.from('tournament_participants').insert({
         'tournament_id': tournamentId,
         'user_id': user.id,
-        'payment_status': 'pending',
-        'status': 'registered',
-        'notes': paymentMethod == '0' ? 'Thanh toán tại quán' : 'Thanh toán QR code',
+        "payment_status": 'pending',
+        "status": 'registered',
+        'notes': paymentMethod == '0' ? "Thanh toán tại quán" : 'Thanh toán QR code',
         'registered_at': DateTime.now().toIso8601String(),
       });
 
@@ -351,6 +411,9 @@ class TournamentService {
     }
   }
 
+  /// No format mapping needed - database will support SABO formats directly
+  /// sabo_de16, sabo_de32 have different logic than double_elimination
+
   Future<Tournament> createTournament({
     required String clubId,
     required String title,
@@ -379,13 +442,12 @@ class TournamentService {
         'max_participants': maxParticipants,
         'entry_fee': entryFee,
         'prize_pool': prizePool,
-        // NOTE: Database has fields swapped, adapting to existing structure
-        'tournament_type': format, // Tournament elimination format saved to tournament_type field
-        'format': gameType, // Game type saved to format field
-        // 'skill_level_required': removed - không dùng nữa
+        // FIXED: Direct format usage - database will support SABO formats after constraint update
+        'bracket_format': format, // Direct format: sabo_de16, sabo_de32, etc.
+        'game_format': gameType, // Game type (8-ball, 9-ball, 10-ball)
         'rules': rules,
         'requirements': requirements,
-        'status': 'upcoming',
+        "status": 'upcoming',
         'current_participants': 0,
       };
 
@@ -619,11 +681,11 @@ class TournamentService {
             'registered_at': participant['registered_at'],
             'user': {
               'id': participant['user_id'],
-              'email': 'unknown@example.com',
-              'full_name': 'Unknown Player',
+              "email": 'unknown@example.com',
+              "full_name": 'Unknown Player',
               'avatar_url': null,
               'elo_rating': 1000,
-              'rank': 'Novice',
+              "rank": 'Novice',
             },
           });
         }
@@ -717,7 +779,25 @@ class TournamentService {
         throw Exception('Invalid player count for format $format');
       }
 
-      // Seeding participants
+      // 🏆 SPECIAL HANDLING: Use SABO DE16 bracket generator (27 matches)
+      if (format == 'sabo_de16' && participants.length == 16) {
+        debugPrint('🏆 Using SABO DE16 bracket generator (27 matches)');
+        return await _generateSaboDE16Bracket(tournamentId, participants, seedingMethod);
+      }
+
+      // 🚀 SPECIAL HANDLING: Use CompleteDoubleEliminationService for standard DE16 (31 matches)
+      if (format == 'double_elimination' && participants.length == 16) {
+        debugPrint('🚀 Using CompleteDoubleEliminationService for standard DE16 (31 matches)');
+        return await _generateDE16Bracket(tournamentId, participants, seedingMethod);
+      }
+
+      // 🎯 SPECIAL HANDLING: Use CompleteSaboDE32Service for SABO DE32 (55 matches)
+      if (format == 'sabo_de32' && participants.length == 32) {
+        debugPrint('🎯 Using CompleteSaboDE32Service for SABO DE32 (55 matches)');
+        return await _generateSaboDE32Bracket(tournamentId, participants, seedingMethod);
+      }
+
+      // Seeding participants (fallback to original logic)
       final seededParticipants = await _seedParticipants(participants, seedingMethod);
       debugPrint('✅ GenerateBracket: Participants seeded successfully');
 
@@ -729,9 +809,26 @@ class TournamentService {
       final matches = _generateMatches(tournamentId, bracketStructure, format);
       debugPrint('📊 GenerateBracket: Generated ${matches.length} matches');
 
-      // Save matches to database
-      await _saveMatchesToDatabase(matches);
-      debugPrint('✅ GenerateBracket: Matches saved to database');
+      // VALIDATION: Check bracket completeness
+      final validationResult = _validateBracketCompleteness(matches, participants.length, format);
+      if (!validationResult['isValid']) {
+        throw Exception('Bracket generation failed validation: ${validationResult['error']}');
+      }
+      debugPrint('✅ GenerateBracket: Bracket validation passed');
+
+      // Use SABO approach for single elimination
+      if (format == 'single_elimination') {
+        await _generateSingleEliminationSaboStyle(tournamentId, participants);
+        debugPrint('✅ GenerateBracket: Single elimination created SABO style');
+      } else {
+        // Save matches to database (for other formats)
+        await _saveMatchesToDatabase(matches);
+        debugPrint('✅ GenerateBracket: Matches saved to database');
+      }
+
+      // Save bracket structure to database for future reference
+      await _saveBracketDataToDatabase(tournamentId, bracketStructure);
+      debugPrint('✅ GenerateBracket: Bracket data saved to database');
 
       // Update tournament status to ongoing
       await updateTournamentStatus(tournamentId, 'ongoing');
@@ -796,6 +893,177 @@ class TournamentService {
     return seeded;
   }
 
+  /// 🚀 Generate DE16 bracket using CompleteDoubleEliminationService
+  Future<TournamentBracket> _generateDE16Bracket(
+    String tournamentId,
+    List<UserProfile> participants,
+    String seedingMethod,
+  ) async {
+    try {
+      debugPrint('🎯 DE16: Using CompleteDoubleEliminationService for precise bracket generation');
+
+      // Seeding participants first
+      final seededParticipants = await _seedParticipants(participants, seedingMethod);
+      debugPrint('✅ DE16: Participants seeded successfully');
+
+      // Convert UserProfile to format expected by CompleteDoubleEliminationService
+      final participantsData = seededParticipants.map((seeded) => {
+        'user_id': seeded.participant.id,
+        'seed_number': seeded.seedNumber,
+        'full_name': seeded.participant.fullName,
+        'username': seeded.participant.username,
+        'elo_rating': seeded.participant.eloRating,
+        'avatar_url': seeded.participant.avatarUrl,
+      }).toList();
+
+      // Generate bracket using CompleteDoubleEliminationService
+      final de16Service = CompleteDoubleEliminationService.instance;
+      final result = await de16Service.generateDE16Bracket(
+        tournamentId: tournamentId,
+        participants: participantsData,
+      );
+
+      if (!result['success']) {
+        throw Exception('DE16 bracket generation failed: ${result['error']}');
+      }
+
+      debugPrint('✅ DE16: Generated ${result['matchesGenerated']} matches with CompleteDoubleEliminationService');
+
+      // Update tournament status to ongoing
+      await updateTournamentStatus(tournamentId, 'ongoing');
+      debugPrint('✅ DE16: Tournament status updated to ongoing');
+
+      // Return TournamentBracket with DE16 specific data
+      return TournamentBracket(
+        tournamentId: tournamentId,
+        format: 'double_elimination',
+        participants: seededParticipants,
+        matches: [], // Matches are already in database via CompleteDoubleEliminationService
+        rounds: 8, // DE16 has 8 round levels (WB: 4, LB: 7, GF: 1)
+        status: 'ready',
+        createdAt: DateTime.now(),
+      );
+
+    } catch (error) {
+      debugPrint('❌ DE16 bracket generation error: $error');
+      throw Exception('Failed to generate DE16 bracket: $error');
+    }
+  }
+
+  /// 🏆 Generate SABO DE16 bracket using bracket generator service
+  Future<TournamentBracket> _generateSaboDE16Bracket(
+    String tournamentId,
+    List<UserProfile> participants,
+    String seedingMethod,
+  ) async {
+    try {
+      debugPrint('🏆 SABO DE16: Using CompleteSaboDE16Service for precise bracket generation');
+
+      // Seeding participants first
+      final seededParticipants = await _seedParticipants(participants, seedingMethod);
+      debugPrint('✅ SABO DE16: Participants seeded successfully');
+
+      // Convert UserProfile to format expected by CompleteSaboDE16Service
+      final participantsData = seededParticipants.map((seeded) => {
+        'user_id': seeded.participant.id,
+        'seed_number': seeded.seedNumber,
+        'full_name': seeded.participant.fullName,
+        'username': seeded.participant.username,
+        'elo_rating': seeded.participant.eloRating,
+        'avatar_url': seeded.participant.avatarUrl,
+      }).toList();
+
+      // Generate bracket using CompleteSaboDE16Service
+      final saboDE16Service = CompleteSaboDE16Service();
+      final result = await saboDE16Service.generateSaboDE16Bracket(
+        tournamentId: tournamentId,
+        participants: participantsData,
+      );
+
+      if (!result['success']) {
+        throw Exception('SABO DE16 bracket generation failed: ${result['error']}');
+      }
+
+      debugPrint('✅ SABO DE16: Generated ${result['matchesGenerated']} matches with CompleteSaboDE16Service');
+
+      // Update tournament status to ongoing
+      await updateTournamentStatus(tournamentId, 'ongoing');
+      debugPrint('✅ SABO DE16: Tournament status updated to ongoing');
+
+      // Return TournamentBracket with SABO DE16 specific data
+      return TournamentBracket(
+        tournamentId: tournamentId,
+        format: 'sabo_de16',
+        participants: seededParticipants,
+        matches: [], // Matches are already in database via CompleteSaboDE16Service
+        rounds: 27, // SABO DE16 has 27 total matches
+        status: 'ready',
+        createdAt: DateTime.now(),
+      );
+
+    } catch (error) {
+      debugPrint('❌ SABO DE16 bracket generation error: $error');
+      throw Exception('Failed to generate SABO DE16 bracket: $error');
+    }
+  }
+
+  /// 🎯 Generate SABO DE32 bracket using CompleteSaboDE32Service
+  Future<TournamentBracket> _generateSaboDE32Bracket(
+    String tournamentId,
+    List<UserProfile> participants,
+    String seedingMethod,
+  ) async {
+    try {
+      debugPrint('🎯 SABO DE32: Using CompleteSaboDE32Service for precise bracket generation');
+
+      // Seeding participants first
+      final seededParticipants = await _seedParticipants(participants, seedingMethod);
+      debugPrint('✅ SABO DE32: Participants seeded successfully');
+
+      // Convert UserProfile to format expected by CompleteSaboDE32Service
+      final participantsData = seededParticipants.map((seeded) => {
+        'user_id': seeded.participant.id,
+        'seed_number': seeded.seedNumber,
+        'full_name': seeded.participant.fullName,
+        'username': seeded.participant.username,
+        'elo_rating': seeded.participant.eloRating,
+        'avatar_url': seeded.participant.avatarUrl,
+      }).toList();
+
+      // Generate bracket using CompleteSaboDE32Service
+      final saboDE32Service = CompleteSaboDE32Service();
+      final result = await saboDE32Service.generateSaboDE32Bracket(
+        tournamentId: tournamentId,
+        participants: participantsData,
+      );
+
+      if (!result['success']) {
+        throw Exception('SABO DE32 bracket generation failed: ${result['error']}');
+      }
+
+      debugPrint('✅ SABO DE32: Generated ${result['matchesGenerated']} matches with CompleteSaboDE32Service');
+
+      // Update tournament status to ongoing
+      await updateTournamentStatus(tournamentId, 'ongoing');
+      debugPrint('✅ SABO DE32: Tournament status updated to ongoing');
+
+      // Return TournamentBracket with SABO DE32 specific data
+      return TournamentBracket(
+        tournamentId: tournamentId,
+        format: 'sabo_de32',
+        participants: seededParticipants,
+        matches: [], // Matches are already in database via CompleteSaboDE32Service
+        rounds: 55, // SABO DE32 has 55 total matches
+        status: 'ready',
+        createdAt: DateTime.now(),
+      );
+
+    } catch (error) {
+      debugPrint('❌ SABO DE32 bracket generation error: $error');
+      throw Exception('Failed to generate SABO DE32 bracket: $error');
+    }
+  }
+
   /// Calculate hybrid seeding score
   int _calculateHybridSeed(UserProfile a, UserProfile b) {
     // Weight: 70% ELO, 30% tournament history
@@ -837,41 +1105,202 @@ class TournamentService {
     }
   }
 
-  /// Generate single elimination bracket
+  /// Generate single elimination bracket - COMPLETE VERSION
   Map<String, dynamic> _generateSingleEliminationBracket(List<SeededParticipant> participants) {
     final int playerCount = participants.length;
     final int rounds = math.log(playerCount) ~/ math.log(2);
     
-    // Create first round pairings
-    List<Map<String, dynamic>> firstRoundPairings = [];
+    debugPrint('🏆 Generating complete single elimination bracket: $playerCount players, $rounds rounds');
     
+    // Generate ALL rounds structure
+    List<List<Map<String, dynamic>>> allRounds = [];
+    
+    // Round 1: Direct player assignments
+    List<Map<String, dynamic>> round1 = [];
     for (int i = 0; i < playerCount; i += 2) {
-      firstRoundPairings.add({
+      round1.add({
         'player1': participants[i],
         'player2': i + 1 < playerCount ? participants[i + 1] : null,
         'round': 1,
         'matchNumber': (i ~/ 2) + 1,
+        'matchId': 'R1M${(i ~/ 2) + 1}',
       });
     }
-
+    allRounds.add(round1);
+    
+    // HARDCORE ADVANCE: Set winner references from start
+    int totalMatches = round1.length;
+    for (int round = 2; round <= rounds; round++) {
+      List<Map<String, dynamic>> currentRound = [];
+      int prevRoundMatches = allRounds[round - 2].length;
+      
+      for (int i = 0; i < prevRoundMatches; i += 2) {
+        int matchNumber = (i ~/ 2) + 1;
+        String matchId = 'R${round}M${totalMatches + matchNumber}';
+        
+        // HARDCORE: Direct winner references as player IDs
+        String prevMatch1Id = allRounds[round - 2][i]['matchId'];
+        String prevMatch2Id = i + 1 < prevRoundMatches ? allRounds[round - 2][i + 1]['matchId'] : null;
+        
+        currentRound.add({
+          'player1': null, // Not used in hardcore mode
+          'player2': null, // Not used in hardcore mode  
+          'round': round,
+          'matchNumber': totalMatches + matchNumber,
+          'matchId': matchId,
+          // HARDCORE: Store winner reference as player IDs directly
+          'hardcoreAdvancement': {
+            'player1_winner_from': prevMatch1Id,
+            'player2_winner_from': prevMatch2Id,
+          },
+        });
+      }
+      
+      allRounds.add(currentRound);
+      totalMatches += currentRound.length;
+    }
+    
+    debugPrint('✅ Generated $totalMatches total matches across $rounds rounds');
+    
+    // Extract hardcore advancement from all rounds
+    Map<String, Map<String, dynamic>> hardcoreAdvancement = {};
+    for (final roundMatches in allRounds) {
+      for (final match in roundMatches) {
+        if (match.containsKey('hardcoreAdvancement')) {
+          final matchKey = match['matchId'];
+          hardcoreAdvancement[matchKey] = match['hardcoreAdvancement'];
+        }
+      }
+    }
+    
+    debugPrint('🚀 Hardcore advancement rules: ${hardcoreAdvancement.keys.length}');
+    
     return {
-      'type': 'single_elimination',
+      "type": 'single_elimination',
       'rounds': rounds,
-      'firstRound': firstRoundPairings,
-      'structure': 'standard_bracket',
+      'allRounds': allRounds,
+      'firstRound': round1, // Keep for backward compatibility
+      "structure": 'complete_bracket',
+      'totalMatches': totalMatches,
+      'hardcoreAdvancement': hardcoreAdvancement, // TOP LEVEL KEY
     };
   }
 
-  /// Generate double elimination bracket
+  /// Generate double elimination bracket - COMPLETE VERSION
   Map<String, dynamic> _generateDoubleEliminationBracket(List<SeededParticipant> participants) {
-    // Winner bracket structure
-    final winnerBracket = _generateSingleEliminationBracket(participants);
+    final int playerCount = participants.length;
+    debugPrint('🏆 Generating complete double elimination bracket: $playerCount players');
+    
+    // WINNER BRACKET: Standard single elimination structure
+    List<List<Map<String, dynamic>>> winnerRounds = [];
+    List<Map<String, dynamic>> currentRound = [];
+    
+    // WB Round 1: Direct player pairings
+    for (int i = 0; i < playerCount; i += 2) {
+      currentRound.add({
+        'player1': participants[i],
+        'player2': i + 1 < playerCount ? participants[i + 1] : null,
+        'bracket': 'winner',
+        'round': 1,
+        'matchNumber': (i ~/ 2) + 1,
+        'matchId': 'WB-R1M${(i ~/ 2) + 1}',
+      });
+    }
+    winnerRounds.add(List.from(currentRound));
+    
+    // WB Subsequent rounds
+    int totalWBMatches = currentRound.length;
+    int wbRound = 2;
+    while (currentRound.length > 1) {
+      List<Map<String, dynamic>> nextRound = [];
+      for (int i = 0; i < currentRound.length; i += 2) {
+        int matchNum = totalWBMatches + (i ~/ 2) + 1;
+        nextRound.add({
+          'player1': null, // Winner advancement
+          'player2': null,
+          'bracket': 'winner',
+          'round': wbRound,
+          'matchNumber': matchNum,
+          'matchId': 'WB-R${wbRound}M$matchNum',
+          'advancementFrom': {
+            'player1Source': currentRound[i]['matchId'],
+            'player2Source': i + 1 < currentRound.length ? currentRound[i + 1]['matchId'] : null,
+          },
+        });
+      }
+      winnerRounds.add(nextRound);
+      totalWBMatches += nextRound.length;
+      currentRound = nextRound;
+      wbRound++;
+    }
+    
+    // LOSER BRACKET: Complex structure with feeds from winner bracket
+    List<List<Map<String, dynamic>>> loserRounds = [];
+    int totalLBMatches = 0;
+    
+    // LB structure depends on WB structure - simplified version
+    int loserBracketRounds = (winnerRounds.length - 1) * 2;
+    for (int lbRound = 1; lbRound <= loserBracketRounds; lbRound++) {
+      List<Map<String, dynamic>> lbCurrentRound = [];
+      
+      // Simplified: Create 2 matches per LB round (this needs proper algorithm)
+      int matchesInRound = math.max(1, playerCount ~/ (2 * lbRound));
+      for (int m = 1; m <= matchesInRound; m++) {
+        totalLBMatches++;
+        lbCurrentRound.add({
+          'player1': null, // Fed from WB or LB advancement
+          'player2': null,
+          'bracket': 'loser',
+          'round': lbRound,
+          'matchNumber': totalLBMatches,
+          'matchId': 'LB-R${lbRound}M$totalLBMatches',
+        });
+      }
+      loserRounds.add(lbCurrentRound);
+    }
+    
+    // GRAND FINALS: Winner of WB vs Winner of LB
+    List<Map<String, dynamic>> grandFinals = [];
+    totalLBMatches++;
+    grandFinals.add({
+      'player1': null, // Winner of WB
+      'player2': null, // Winner of LB
+      'bracket': 'grand_final',
+      'round': 1,
+      'matchNumber': totalLBMatches,
+      'matchId': 'GF-M$totalLBMatches',
+    });
+    
+    // Bracket reset (if LB winner beats WB winner)
+    totalLBMatches++;
+    grandFinals.add({
+      'player1': null, // Same players if bracket reset needed
+      'player2': null,
+      'bracket': 'grand_final_reset',
+      'round': 2,
+      'matchNumber': totalLBMatches,
+      'matchId': 'GF2-M$totalLBMatches',
+      'conditional': true, // Only if LB winner wins first GF
+    });
+    
+    int totalMatches = totalWBMatches + totalLBMatches;
+    debugPrint('✅ Generated double elimination: $totalWBMatches WB + ${totalLBMatches - totalWBMatches} LB + 2 GF = $totalMatches matches');
     
     return {
-      'type': 'double_elimination',
-      'winnerBracket': winnerBracket,
-      'loserBracket': _generateLoserBracket(participants.length),
-      'grandFinalsRequired': true,
+      "type": 'double_elimination',
+      'winnerBracket': {
+        'rounds': winnerRounds.length,
+        'allRounds': winnerRounds,
+        'totalMatches': totalWBMatches,
+      },
+      'loserBracket': {
+        'rounds': loserRounds.length,
+        'allRounds': loserRounds,
+        'totalMatches': totalLBMatches - totalWBMatches - 2, // Excluding GF
+      },
+      'grandFinals': grandFinals,
+      'totalMatches': totalMatches,
+      "structure": 'complete_double_elimination',
     };
   }
 
@@ -892,7 +1321,7 @@ class TournamentService {
     }
 
     return {
-      'type': 'round_robin',
+      "type": 'round_robin',
       'totalRounds': playerCount - 1,
       'allPairings': allPairings,
       'pointsSystem': {'win': 3, 'draw': 1, 'loss': 0},
@@ -915,10 +1344,10 @@ class TournamentService {
     }
 
     return {
-      'type': 'swiss',
+      "type": 'swiss',
       'totalRounds': TournamentHelper.calculateRounds(TournamentFormats.swiss, participants.length),
       'firstRound': firstRoundPairings,
-      'pairingMethod': 'swiss_system',
+      "pairingMethod": 'swiss_system',
     };
   }
 
@@ -940,10 +1369,10 @@ class TournamentService {
     }
 
     return {
-      'type': 'parallel_groups',
+      "type": 'parallel_groups',
       'groupCount': groupCount,
       'groups': groups.map((group) => _generateRoundRobinBracket(group)).toList(),
-      'finalsStructure': 'knockout', // Top players advance to knockout
+      "finalsStructure": 'knockout', // Top players advance to knockout
     };
   }
 
@@ -952,7 +1381,7 @@ class TournamentService {
     // Simplified loser bracket structure
     return {
       'rounds': (math.log(playerCount) ~/ math.log(2)) * 2 - 1,
-      'structure': 'loser_bracket',
+      "structure": 'loser_bracket',
       'feedFromWinner': true,
     };
   }
@@ -974,6 +1403,10 @@ class TournamentService {
         matches.addAll(_generateRoundRobinMatches(tournamentId, bracketStructure));
         break;
         
+      case TournamentFormats.doubleElimination:
+        matches.addAll(_generateDoubleEliminationMatches(tournamentId, bracketStructure));
+        break;
+        
       case TournamentFormats.swiss:
         matches.addAll(_generateSwissMatches(tournamentId, bracketStructure));
         break;
@@ -993,14 +1426,14 @@ class TournamentService {
         final matchData = {
           'id': match.id,
           'tournament_id': match.tournamentId,
-          'round': match.round,
+          'round_number': match.round,
           'match_number': match.matchNumber,
           'player1_id': match.player1Id,
           'player2_id': match.player2Id,
           'status': match.status,
           'scheduled_time': match.scheduledTime?.toIso8601String(), // REVERT: scheduled_at -> scheduled_time
           'winner_id': match.winnerId,
-          'format': match.format, // REVERT: format tồn tại trong DB thực tế
+          'bracket_format': match.format, // FIXED: Use bracket_format column
           'player1_score': null, // Changed from 'score' to separate scores
           'player2_score': null,
           'created_at': match.createdAt.toIso8601String(),
@@ -1021,26 +1454,103 @@ class TournamentService {
     }
   }
 
-  /// Generate single elimination matches
+  /// Generate single elimination matches - HARDCORE ADVANCEMENT VERSION
   List<TournamentMatch> _generateSingleEliminationMatches(
     String tournamentId,
     Map<String, dynamic> bracket,
   ) {
     List<TournamentMatch> matches = [];
-    final firstRound = bracket['firstRound'] as List<Map<String, dynamic>>;
     
-    for (var pairing in firstRound) {
-      matches.add(TournamentMatch(
-        id: _generateMatchId(),
-        tournamentId: tournamentId,
-        player1Id: pairing['player1']?.participant.id,
-        player2Id: pairing['player2']?.participant?.id,
-        round: pairing['round'],
-        matchNumber: pairing['matchNumber'],
-        status: MatchStatus.pending,
-        format: 'single_elimination',
-        createdAt: DateTime.now(),
-      ));
+    // Check if we have the new complete bracket structure with hardcore advancement
+    if (bracket.containsKey('allRounds') && bracket.containsKey('hardcoreAdvancement')) {
+      final allRounds = bracket['allRounds'] as List<List<Map<String, dynamic>>>;
+      final hardcoreAdvancement = bracket['hardcoreAdvancement'] as Map<String, dynamic>;
+      debugPrint('🎯 Processing hardcore advancement bracket with ${allRounds.length} rounds');
+      
+      // Process all rounds
+      for (int roundIndex = 0; roundIndex < allRounds.length; roundIndex++) {
+        final roundMatches = allRounds[roundIndex];
+        debugPrint('📊 Round ${roundIndex + 1}: ${roundMatches.length} matches');
+        
+        for (var pairing in roundMatches) {
+          final matchKey = 'R${pairing['round']}M${pairing['matchNumber']}';
+          
+          // For hardcore advancement, use winner references for non-first rounds
+          String? player1Id = pairing['player1']?.participant?.id;
+          String? player2Id = pairing['player2']?.participant?.id;
+          
+          // Check if this match uses winner references from hardcore advancement
+          if (hardcoreAdvancement.containsKey(matchKey)) {
+            final advancement = hardcoreAdvancement[matchKey];
+            final winnerRef1 = advancement['player1_winner_from'];
+            final winnerRef2 = advancement['player2_winner_from'];
+            
+            // Use winner references as player IDs directly
+            player1Id = winnerRef1;
+            player2Id = winnerRef2;
+            
+            debugPrint('🚀 Match $matchKey uses hardcore advancement: P1=${player1Id}, P2=${player2Id}');
+          }
+          
+          matches.add(TournamentMatch(
+            id: _generateMatchId(),
+            tournamentId: tournamentId,
+            player1Id: player1Id,
+            player2Id: player2Id,
+            round: pairing['round'],
+            matchNumber: pairing['matchNumber'],
+            status: MatchStatus.pending,
+            format: 'single_elimination',
+            createdAt: DateTime.now(),
+          ));
+        }
+      }
+      
+      debugPrint('✅ Generated ${matches.length} hardcore advancement matches');
+    } else if (bracket.containsKey('allRounds')) {
+      // Standard complete bracket structure
+      final allRounds = bracket['allRounds'] as List<List<Map<String, dynamic>>>;
+      debugPrint('🎯 Processing complete bracket structure with ${allRounds.length} rounds');
+      
+      // Process all rounds
+      for (int roundIndex = 0; roundIndex < allRounds.length; roundIndex++) {
+        final roundMatches = allRounds[roundIndex];
+        debugPrint('📊 Round ${roundIndex + 1}: ${roundMatches.length} matches');
+        
+        for (var pairing in roundMatches) {
+          matches.add(TournamentMatch(
+            id: _generateMatchId(),
+            tournamentId: tournamentId,
+            player1Id: pairing['player1']?.participant?.id,
+            player2Id: pairing['player2']?.participant?.id,
+            round: pairing['round'],
+            matchNumber: pairing['matchNumber'],
+            status: MatchStatus.pending,
+            format: 'single_elimination',
+            createdAt: DateTime.now(),
+          ));
+        }
+      }
+      
+      debugPrint('✅ Generated ${matches.length} complete single elimination matches');
+    } else {
+      // Fallback to old structure for backward compatibility
+      debugPrint('⚠️ Using legacy firstRound-only structure');
+      final firstRound = bracket['firstRound'] as List<Map<String, dynamic>>;
+      
+      for (var pairing in firstRound) {
+        matches.add(TournamentMatch(
+          id: _generateMatchId(),
+          tournamentId: tournamentId,
+          player1Id: pairing['player1']?.participant.id,
+          player2Id: pairing['player2']?.participant?.id,
+          round: pairing['round'],
+          matchNumber: pairing['matchNumber'],
+          status: MatchStatus.pending,
+          format: 'single_elimination',
+          createdAt: DateTime.now(),
+        ));
+      }
     }
     
     return matches;
@@ -1093,6 +1603,101 @@ class TournamentService {
       ));
     }
     
+    return matches;
+  }
+
+  /// Generate double elimination matches - COMPLETE VERSION
+  List<TournamentMatch> _generateDoubleEliminationMatches(
+    String tournamentId,
+    Map<String, dynamic> bracket,
+  ) {
+    List<TournamentMatch> matches = [];
+    
+    debugPrint('🎯 Generating double elimination matches...');
+    
+    // Winner Bracket matches
+    final winnerBracket = bracket['winnerBracket'] as Map<String, dynamic>;
+    if (winnerBracket.containsKey('allRounds')) {
+      final winnerRounds = winnerBracket['allRounds'] as List<List<Map<String, dynamic>>>;
+      debugPrint('📊 Winner Bracket: ${winnerRounds.length} rounds');
+      
+      for (int roundIndex = 0; roundIndex < winnerRounds.length; roundIndex++) {
+        final roundMatches = winnerRounds[roundIndex];
+        for (var pairing in roundMatches) {
+          matches.add(TournamentMatch(
+            id: _generateMatchId(),
+            tournamentId: tournamentId,
+            player1Id: pairing['player1']?.participant?.id,
+            player2Id: pairing['player2']?.participant?.id,
+            round: pairing['round'],
+            matchNumber: pairing['matchNumber'],
+            status: MatchStatus.pending,
+            format: 'double_elimination_winner',
+            createdAt: DateTime.now(),
+          ));
+        }
+      }
+    }
+    
+    // Loser Bracket matches - Generate based on winner bracket
+    final loserBracket = bracket['loserBracket'] as Map<String, dynamic>;
+    final winnerBracketRounds = winnerBracket.containsKey('rounds') ? winnerBracket['rounds'] as int : 4;
+    final loserBracketRounds = loserBracket['rounds'] as int;
+    
+    debugPrint('📊 Loser Bracket: $loserBracketRounds rounds');
+    
+    // Generate loser bracket matches (simplified structure)
+    int loserMatchNumber = matches.length + 1;
+    for (int round = 1; round <= loserBracketRounds; round++) {
+      // Calculate matches per round in loser bracket
+      int matchesInRound = round == 1 ? (matches.length ~/ 2) : 
+                          round % 2 == 0 ? (matches.length ~/ (2 * round)) : 
+                          (matches.length ~/ (2 * round));
+      
+      for (int matchInRound = 1; matchInRound <= matchesInRound; matchInRound++) {
+        matches.add(TournamentMatch(
+          id: _generateMatchId(),
+          tournamentId: tournamentId,
+          player1Id: null, // Will be filled by loser from winner bracket
+          player2Id: null, // Will be filled by loser from winner bracket
+          round: 100 + round, // Use 100+ for loser bracket rounds
+          matchNumber: loserMatchNumber++,
+          status: MatchStatus.pending,
+          format: 'double_elimination_loser',
+          createdAt: DateTime.now(),
+        ));
+      }
+    }
+    
+    // Grand Finals
+    matches.add(TournamentMatch(
+      id: _generateMatchId(),
+      tournamentId: tournamentId,
+      player1Id: null, // Winner bracket champion
+      player2Id: null, // Loser bracket champion
+      round: 200, // Special round for Grand Finals
+      matchNumber: matches.length + 1,
+      status: MatchStatus.pending,
+      format: 'double_elimination_grand_final',
+      createdAt: DateTime.now(),
+    ));
+    
+    // Potential Bracket Reset (if loser bracket champion wins Grand Finals)
+    if (bracket['grandFinalsRequired'] == true) {
+      matches.add(TournamentMatch(
+        id: _generateMatchId(),
+        tournamentId: tournamentId,
+        player1Id: null, // Grand Finals loser (if was winner bracket champion)
+        player2Id: null, // Grand Finals winner (if was loser bracket champion)
+        round: 201, // Bracket reset
+        matchNumber: matches.length + 1,
+        status: MatchStatus.pending,
+        format: 'double_elimination_bracket_reset',
+        createdAt: DateTime.now(),
+      ));
+    }
+    
+    debugPrint('✅ Generated ${matches.length} double elimination matches');
     return matches;
   }
 
@@ -1151,6 +1756,72 @@ class TournamentService {
     final chars = '0123456789abcdef';
     return String.fromCharCodes(Iterable.generate(
         length, (_) => chars.codeUnitAt(random.nextInt(chars.length))));
+  }
+
+  /// Validate bracket completeness to prevent incomplete tournaments
+  Map<String, dynamic> _validateBracketCompleteness(
+    List<TournamentMatch> matches,
+    int participantCount,
+    String format,
+  ) {
+    try {
+      debugPrint('🔍 Validating bracket: ${matches.length} matches for $participantCount players ($format)');
+      
+      // Expected match counts for different formats
+      int expectedMatches;
+      switch (format) {
+        case TournamentFormats.singleElimination:
+          expectedMatches = participantCount - 1; // N-1 matches for single elimination
+          break;
+        case TournamentFormats.doubleElimination:
+          expectedMatches = (participantCount - 1) * 2 + 1; // ~2N matches for double elimination
+          break;
+        case TournamentFormats.roundRobin:
+          expectedMatches = (participantCount * (participantCount - 1)) ~/ 2; // N*(N-1)/2 for round robin
+          break;
+        default:
+          expectedMatches = participantCount - 1; // Default to single elimination
+      }
+      
+      // Check match count
+      if (matches.length != expectedMatches) {
+        return {
+          'isValid': false,
+          'error': 'Expected $expectedMatches matches for $format with $participantCount players, but got ${matches.length}',
+        };
+      }
+      
+      // Check first round player assignments
+      final firstRoundMatches = matches.where((m) => m.round == 1).toList();
+      int assignedFirstRoundMatches = 0;
+      
+      for (final match in firstRoundMatches) {
+        if (match.player1Id != null || match.player2Id != null) {
+          assignedFirstRoundMatches++;
+        }
+      }
+      
+      if (assignedFirstRoundMatches == 0) {
+        return {
+          'isValid': false,
+          'error': 'No first round matches have player assignments',
+        };
+      }
+      
+      debugPrint('✅ Bracket validation passed: ${matches.length} matches, $assignedFirstRoundMatches assigned first round');
+      
+      return {
+        'isValid': true,
+        'matchCount': matches.length,
+        'assignedFirstRound': assignedFirstRoundMatches,
+      };
+      
+    } catch (e) {
+      return {
+        'isValid': false,
+        'error': 'Validation error: $e',
+      };
+    }
   }
 
   /// Calculate ELO changes cho tournament results
@@ -1243,6 +1914,376 @@ class TournamentService {
     // TODO: Add streak bonus logic
     
     return bonus;
+  }
+
+  /// Generate single elimination using SABO DE16 approach
+  Future<void> _generateSingleEliminationSaboStyle(String tournamentId, List<UserProfile> participants) async {
+    try {
+      debugPrint('🚀 Generating single elimination SABO style for ${participants.length} participants');
+      
+      if (participants.length != 16) {
+        throw Exception('Single elimination SABO style requires exactly 16 participants');
+      }
+      
+      // 1. Create all matches with proper structure
+      await _createSingleEliminationMatches(tournamentId);
+      
+      // 2. Populate Round 1 with participants
+      await _populateRound1SingleElimination(tournamentId, participants);
+      
+      debugPrint('✅ Single elimination SABO style generated successfully');
+    } catch (e) {
+      debugPrint('❌ Error in single elimination SABO style: $e');
+      throw Exception('Failed to generate single elimination SABO style: $e');
+    }
+  }
+
+  /// Create all single elimination matches (15 matches for 16 players)
+  Future<void> _createSingleEliminationMatches(String tournamentId) async {
+    final matches = <Map<String, dynamic>>[];
+    
+    int matchCounter = 1;
+    
+    // Round 1: 8 matches
+    for (int i = 0; i < 8; i++) {
+      matches.add({
+        'id': _generateMatchId(),
+        'tournament_id': tournamentId,
+        'round_number': 1,
+        'match_number': matchCounter,
+        'player1_id': null,
+        'player2_id': null,
+        'status': 'pending',
+        'bracket_format': 'single_elimination',
+        'created_at': DateTime.now().toIso8601String(),
+        'updated_at': DateTime.now().toIso8601String(),
+      });
+      matchCounter++;
+    }
+    
+    // Round 2: 4 matches
+    for (int i = 0; i < 4; i++) {
+      matches.add({
+        'id': _generateMatchId(),
+        'tournament_id': tournamentId,
+        'round_number': 2,
+        'match_number': matchCounter,
+        'player1_id': null,
+        'player2_id': null,
+        'status': 'pending',
+        'bracket_format': 'single_elimination',
+        'created_at': DateTime.now().toIso8601String(),
+        'updated_at': DateTime.now().toIso8601String(),
+      });
+      matchCounter++;
+    }
+    
+    // Round 3: 2 matches
+    for (int i = 0; i < 2; i++) {
+      matches.add({
+        'id': _generateMatchId(),
+        'tournament_id': tournamentId,
+        'round_number': 3,
+        'match_number': matchCounter,
+        'player1_id': null,
+        'player2_id': null,
+        'status': 'pending',
+        'bracket_format': 'single_elimination',
+        'created_at': DateTime.now().toIso8601String(),
+        'updated_at': DateTime.now().toIso8601String(),
+      });
+      matchCounter++;
+    }
+    
+    // Round 4: 1 final match
+    matches.add({
+      'id': _generateMatchId(),
+      'tournament_id': tournamentId,
+      'round_number': 4,
+      'match_number': matchCounter,
+      'player1_id': null,
+      'player2_id': null,
+      'status': 'pending',
+      'bracket_format': 'single_elimination',
+      'created_at': DateTime.now().toIso8601String(),
+      'updated_at': DateTime.now().toIso8601String(),
+    });
+    
+    // Save all matches to database
+    for (final match in matches) {
+      await Supabase.instance.client.from('matches').insert(match);
+    }
+    
+    debugPrint('✅ Created ${matches.length} single elimination matches');
+  }
+
+  /// Populate Round 1 matches with participants
+  Future<void> _populateRound1SingleElimination(String tournamentId, List<UserProfile> participants) async {
+    try {
+      // Get Round 1 matches
+      final response = await Supabase.instance.client
+          .from('matches')
+          .select('*')
+          .eq('tournament_id', tournamentId)
+          .eq('round_number', 1)
+          .order('match_number');
+      
+      final round1Matches = response as List<dynamic>;
+      
+      if (round1Matches.length != 8) {
+        throw Exception('Expected 8 Round 1 matches, found ${round1Matches.length}');
+      }
+      
+      // Populate each match with 2 participants
+      for (int i = 0; i < 8; i++) {
+        final match = round1Matches[i];
+        final player1 = participants[i * 2];
+        final player2 = participants[i * 2 + 1];
+        
+        await Supabase.instance.client
+            .from('matches')
+            .update({
+              'player1_id': player1.id,
+              'player2_id': player2.id,
+              'updated_at': DateTime.now().toIso8601String(),
+            })
+            .eq('id', match['id']);
+        
+        debugPrint('✅ Populated R1 M${i+1}: ${player1.username} vs ${player2.username}');
+      }
+      
+      debugPrint('✅ All Round 1 matches populated with participants');
+    } catch (e) {
+      debugPrint('❌ Error populating Round 1: $e');
+      throw Exception('Failed to populate Round 1: $e');
+    }
+  }
+
+  /// Save bracket data to database for future reference and hardcore advancement
+  Future<void> _saveBracketDataToDatabase(String tournamentId, Map<String, dynamic> bracketStructure) async {
+    try {
+      final bracketDataJson = json.encode(bracketStructure);
+      
+      await Supabase.instance.client
+          .from('tournaments')
+          .update({'bracket_data': bracketDataJson})
+          .eq('id', tournamentId);
+      
+      debugPrint('💾 Saved bracket data to database for tournament $tournamentId');
+    } catch (e) {
+      debugPrint('❌ Failed to save bracket data: $e');
+      throw Exception('Failed to save bracket data: $e');
+    }
+  }
+
+  /// Advance player to specific match (SABO DE16 approach)
+  Future<Map<String, dynamic>?> _advancePlayerToMatch(
+    String tournamentId,
+    String playerId,
+    int roundNumber,
+    int matchNumber,
+    String sourceMatch,
+  ) async {
+    try {
+      // Find target match
+      final response = await Supabase.instance.client
+          .from('matches')
+          .select('*')
+          .eq('tournament_id', tournamentId)
+          .eq('round_number', roundNumber)
+          .eq('match_number', matchNumber)
+          .single();
+
+      final match = response;
+
+      // Prevent duplicate player assignments
+      if (match['player1_id'] == playerId || match['player2_id'] == playerId) {
+        debugPrint('❌ Player $playerId already assigned to R${roundNumber}M$matchNumber');
+        return null;
+      }
+
+      // Determine which slot to fill
+      String? updateField;
+      if (match['player1_id'] == null) {
+        updateField = 'player1_id';
+      } else if (match['player2_id'] == null) {
+        updateField = 'player2_id';
+      } else {
+        debugPrint('⚠️ Match R${roundNumber}M$matchNumber already full');
+        return null;
+      }
+
+      // Update match with new player
+      await Supabase.instance.client
+          .from('matches')
+          .update({
+            updateField: playerId,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', match['id']);
+
+      debugPrint('✅ Advanced player $playerId to R${roundNumber}M$matchNumber ($updateField) from $sourceMatch');
+
+      return {
+        'match_id': match['id'],
+        'round_number': roundNumber,
+        'match_number': matchNumber,
+        'updated_field': updateField,
+      };
+    } catch (e) {
+      debugPrint('❌ Error advancing player: $e');
+      return null;
+    }
+  }
+
+  /// Process single elimination advancement - SIMPLE LOGIC
+  Future<Map<String, dynamic>> processSingleEliminationAdvancement(
+    String tournamentId,
+    String completedMatchId,
+    String winnerId,
+  ) async {
+    try {
+      debugPrint('🚀 Processing single elimination advancement for match $completedMatchId');
+      
+      // Get completed match details
+      final matchResponse = await Supabase.instance.client
+          .from('matches')
+          .select('*')
+          .eq('id', completedMatchId)
+          .single();
+      
+      final match = matchResponse;
+      final round = match['round_number'] as int;
+      final matchNumber = match['match_number'] as int;
+      
+      debugPrint('📊 Completed: R${round}M$matchNumber, Winner: $winnerId');
+      
+      // SIMPLE SINGLE ELIMINATION LOGIC
+      Map<String, dynamic> results = {
+        'advancement_made': false,
+        'next_matches': [],
+      };
+      
+      // Single elimination: winner advances to next round
+      // R1 (M1-8) -> R2 (M9-12) -> R3 (M13-14) -> R4 (M15)
+      
+      int? nextRound;
+      int? nextMatchNumber;
+      
+      if (round == 1) {
+        // R1: M1,M2->M9; M3,M4->M10; M5,M6->M11; M7,M8->M12
+        nextRound = 2;
+        nextMatchNumber = 9 + ((matchNumber - 1) ~/ 2);
+      } else if (round == 2) {
+        // R2: M9,M10->M13; M11,M12->M14
+        nextRound = 3;
+        nextMatchNumber = 13 + ((matchNumber - 9) ~/ 2);
+      } else if (round == 3) {
+        // R3: M13,M14->M15 (final)
+        nextRound = 4;
+        nextMatchNumber = 15;
+      } else {
+        // Final round - no advancement
+        debugPrint('🏆 Final match completed - tournament finished!');
+        return results;
+      }
+      
+      final advanced = await _advancePlayerToMatch(
+        tournamentId,
+        winnerId,
+        nextRound,
+        nextMatchNumber,
+        'R${round}M$matchNumber',
+      );
+      
+      if (advanced != null) {
+        results['next_matches'].add(advanced);
+        results['advancement_made'] = true;
+      }
+      
+      debugPrint('🎯 Single elimination advancement complete');
+      return results;
+      
+    } catch (e) {
+      debugPrint('❌ Error in single elimination advancement: $e');
+      return {
+        'advancement_made': false,
+        'next_matches': [],
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// Process hardcore advancement by replacing winner references with actual player IDs
+  Future<bool> processHardcoreAdvancement(String tournamentId, String completedMatchId, String winnerId) async {
+    try {
+      debugPrint('🚀 Processing hardcore advancement for match $completedMatchId, winner: $winnerId');
+      
+      // Get all tournament matches
+      final matches = await getTournamentMatches(tournamentId);
+      if (matches.isEmpty) {
+        debugPrint('❌ No matches found for tournament $tournamentId');
+        return false;
+      }
+      
+      // Find the completed match to get its reference
+      final completedMatch = matches.firstWhere(
+        (m) => m['id'] == completedMatchId,
+        orElse: () => {},
+      );
+      
+      if (completedMatch.isEmpty) {
+        debugPrint('❌ Completed match $completedMatchId not found');
+        return false;
+      }
+      
+      final round = completedMatch['round'] as int;
+      final matchNumber = completedMatch['match_number'] as int;
+      final winnerReference = 'WINNER_FROM_R${round}M$matchNumber';
+      
+      debugPrint('🔍 Looking for matches with winner reference: $winnerReference');
+      
+      // Find matches that reference this completed match as winner
+      int advancedMatches = 0;
+      for (final match in matches) {
+        bool needsUpdate = false;
+        Map<String, dynamic> updateData = {};
+        
+        // Check if player1 references this match
+        if (match['player1_id'] == winnerReference) {
+          updateData['player1_id'] = winnerId;
+          needsUpdate = true;
+          debugPrint('📝 Advancing winner to match ${match['id']} player1');
+        }
+        
+        // Check if player2 references this match
+        if (match['player2_id'] == winnerReference) {
+          updateData['player2_id'] = winnerId;
+          needsUpdate = true;
+          debugPrint('📝 Advancing winner to match ${match['id']} player2');
+        }
+        
+        // Update the match if needed
+        if (needsUpdate) {
+          updateData['updated_at'] = DateTime.now().toIso8601String();
+          
+          await Supabase.instance.client
+              .from('matches')
+              .update(updateData)
+              .eq('id', match['id']);
+          
+          advancedMatches++;
+          debugPrint('✅ Updated match ${match['id']} with winner advancement');
+        }
+      }
+      
+      debugPrint('🎯 Hardcore advancement complete: $advancedMatches matches updated');
+      return advancedMatches > 0;
+      
+    } catch (e) {
+      debugPrint('❌ Error in hardcore advancement: $e');
+      return false;
+    }
   }
 
 

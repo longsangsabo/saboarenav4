@@ -83,10 +83,9 @@ class ClubPermissionService {
       userId ??= _supabase.auth.currentUser?.id;
 
       if (userId == null) {
-        debugPrint('❌ DEBUG: No user ID available');
-        return {'error': 'No user ID available'};
+        return {'error': 'User not authenticated'};
       }
-
+      
       final String safeUserId = userId;
       debugPrint('🔍 DEBUG: Checking membership for user $safeUserId in club $clubId');
 
@@ -117,10 +116,9 @@ class ClubPermissionService {
       userId ??= _supabase.auth.currentUser?.id;
 
       if (userId == null) {
-        debugPrint('❌ ClubPermissionService: No user ID available');
-        return ClubRole.none;
+        throw Exception('User not authenticated');
       }
-
+      
       final String safeUserId = userId;
       final cacheKey = '${clubId}_$safeUserId';
       debugPrint('🔍 ClubPermissionService: Checking role for user $safeUserId in club $clubId');

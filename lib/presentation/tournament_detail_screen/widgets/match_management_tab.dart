@@ -42,8 +42,51 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
 
   // Dynamic round name calculation based on participants
   String _getRoundName(int roundNumber, int totalParticipants) {
-    // Calculate players remaining after this round
-    int playersAfterRound = totalParticipants ~/ (1 << roundNumber);
+    // Special handling for SABO DE16 format (27 matches, complex structure)
+    if (totalParticipants == 16) {
+      switch (roundNumber) {
+        case 1: return 'VÒNG 1';
+        case 2: return 'VÒNG 2'; 
+        case 3: return 'VÒNG 3';
+        case 101: return 'BẢNG THUA A1';
+        case 102: return 'BẢNG THUA A2';
+        case 103: return 'BẢNG THUA A3';
+        case 201: return 'BẢNG THUA B1';
+        case 202: return 'BẢNG THUA B2';
+        case 250: return 'BÁN KẾT';
+        case 251: return 'BÁN KẾT 2';
+        case 300: return 'CHUNG KẾT';
+        default: return 'VÒNG $roundNumber';
+      }
+    }
+
+    // Special handling for SABO DE32 format (55 matches, two-group structure)
+    if (totalParticipants == 32) {
+      switch (roundNumber) {
+        case 1: return 'VÒNG 1';
+        case 2: return 'VÒNG 2'; 
+        case 3: return 'VÒNG 3';
+        case 4: return 'VÒNG 4';
+        case 101: return 'BẢNG THUA 1';
+        case 102: return 'BẢNG THUA 2';
+        case 103: return 'BẢNG THUA 3';
+        case 104: return 'BẢNG THUA 4';
+        case 105: return 'BẢNG THUA 5';
+        case 106: return 'BẢNG THUA 6';
+        case 400: return 'BÁN KẾT 1';
+        case 401: return 'BÁN KẾT 2';
+        case 500: return 'CHUNG KẾT';
+        default: return 'VÒNG $roundNumber';
+      }
+    }
+    
+    // Calculate players remaining after this round for standard formats
+    int divisor = (1 << roundNumber);
+    if (divisor == 0 || totalParticipants == 0) {
+      return 'VÒNG $roundNumber';
+    }
+    
+    int playersAfterRound = totalParticipants ~/ divisor;
     
     switch (playersAfterRound) {
       case 1:
@@ -94,42 +137,111 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
     });
 
     try {
-      debugPrint('🔄 MatchManagementTab: Loading matches for tournament ${widget.tournamentId}');
+      _safeDebugPrint('🔄 MatchManagementTab: Loading matches for tournament ${widget.tournamentId}');
       
       // Load participants count for dynamic round calculation
-      final participants = await _tournamentService.getTournamentParticipantsWithPaymentStatus(widget.tournamentId);
-      _totalParticipants = participants.length;
-      debugPrint('👥 MatchManagementTab: Loaded ${_totalParticipants} participants');
-      
-      // Try to load from cache first, fallback to tournament service
-      List<Map<String, dynamic>> matches;
+      List<Map<String, dynamic>> participants = [];
       try {
-        matches = await CachedTournamentService.loadMatches(widget.tournamentId);
-        debugPrint('📋 Loaded ${matches.length} matches from cache/service');
+        participants = await _tournamentService.getTournamentParticipantsWithPaymentStatus(widget.tournamentId);
+        _totalParticipants = participants.length;
+        _safeDebugPrint('👥 MatchManagementTab: Loaded $_totalParticipants participants');
       } catch (e) {
-        debugPrint('⚠️ Cache failed, using direct service: $e');
-        matches = await _tournamentService.getTournamentMatches(widget.tournamentId);
+        _safeDebugPrint('⚠️ Failed to load participants: $e');
+        _totalParticipants = 0;
       }
       
-      setState(() {
-        _matches = matches;
-        _isLoading = false;
-      });
+      // Try to load matches with better error handling
+      List<Map<String, dynamic>> matches = [];
+      String? loadError;
       
-      debugPrint('📊 MatchManagementTab: Loaded ${matches.length} matches');
+      // Use enhanced tournament service that includes user profiles
+      try {
+        matches = await _tournamentService.getTournamentMatches(widget.tournamentId);
+        _safeDebugPrint('📋 Loaded ${matches.length} matches from enhanced service with user profiles');
+      } catch (serviceError) {
+        _safeDebugPrint('⚠️ Enhanced service failed: $serviceError');
+        loadError = serviceError.toString();
+        
+        // Fallback to cached service (raw data only)
+        try {
+          matches = await CachedTournamentService.loadMatches(widget.tournamentId, forceRefresh: true);
+          _safeDebugPrint('📋 Loaded ${matches.length} matches from cache/service (fallback)');
+          loadError = null; // Clear error if cache works
+        } catch (cacheError) {
+          _safeDebugPrint('❌ Cache service also failed: $cacheError');
+          loadError = 'Không thể tải trận đấu: ${cacheError.toString()}';
+        }
+      }
+      
+      // If we have matches, use them even if there were some errors
       if (matches.isNotEmpty) {
-        final firstMatch = matches.first;
-        debugPrint('🎯 MatchManagementTab: First match data:');
-        debugPrint('   matchId: ${firstMatch['matchId']}');
-        debugPrint('   player1: ${firstMatch['player1']}');
-        debugPrint('   player2: ${firstMatch['player2']}');
+        setState(() {
+          _matches = matches;
+          _isLoading = false;
+          _errorMessage = null; // Clear any previous errors
+        });
+        
+        _safeDebugPrint('📊 MatchManagementTab: Successfully loaded ${matches.length} matches');
+        if (matches.isNotEmpty) {
+          final firstMatch = matches.first;
+          _safeDebugPrint('🎯 MatchManagementTab: First match data:');
+          _safeDebugPrint('   matchId: ${firstMatch['matchId']}');
+          _safeDebugPrint('   player1: ${firstMatch['player1']}');
+          _safeDebugPrint('   player2: ${firstMatch['player2']}');
+        }
+      } else if (loadError != null) {
+        // Only show error if we have no matches and there's an error
+        setState(() {
+          _matches = [];
+          _isLoading = false;
+          _errorMessage = loadError;
+        });
+      } else {
+        // No matches but no error - empty tournament
+        setState(() {
+          _matches = [];
+          _isLoading = false;
+          _errorMessage = null;
+        });
       }
     } catch (e) {
-      debugPrint('❌ MatchManagementTab: Error loading matches: $e');
+      _safeDebugPrint('❌ MatchManagementTab: Critical error loading matches: $e');
       setState(() {
-        _errorMessage = e.toString();
+        _errorMessage = 'Lỗi tải dữ liệu: ${e.toString()}';
         _isLoading = false;
       });
+    }
+  }
+
+  // Method to manually refresh matches
+  Future<void> _refreshMatches() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    
+    _safeDebugPrint('🔄 Manual refresh triggered for tournament ${widget.tournamentId}');
+    
+    try {
+      await _loadMatches();
+      
+      // Show success feedback
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('✅ Đã làm mới dữ liệu trận đấu'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      // Show error feedback
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('❌ Lỗi khi làm mới: ${e.toString()}'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 3),
+        ),
+      );
     }
   }
 
@@ -204,6 +316,17 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
             SizedBox(height: 4.sp),
             Text("Tạo bảng đấu để bắt đầu các trận đấu",
                  style: TextStyle(fontSize: 11.sp, color: Colors.grey[600])),
+            SizedBox(height: 16.sp),
+            ElevatedButton.icon(
+              onPressed: _refreshMatches,
+              icon: Icon(Icons.refresh, size: 16.sp),
+              label: Text("Làm mới", style: TextStyle(fontSize: 12.sp)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 16.sp, vertical: 8.sp),
+              ),
+            ),
           ],
         ),
       );
@@ -220,12 +343,21 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
             automaticallyImplyLeading: false,
             backgroundColor: Colors.transparent,
             elevation: 0,
+            actions: [
+              IconButton(
+                onPressed: _isLoading ? null : _refreshMatches,
+                icon: Icon(Icons.refresh, color: Colors.blue),
+                tooltip: 'Làm mới dữ liệu',
+              ),
+              SizedBox(width: 8.sp),
+            ],
             flexibleSpace: FlexibleSpaceBar(
-              background: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8.sp, vertical: 2.sp),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
+              background: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8.sp, vertical: 1.sp),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
                     // Row 1: Filter theo trạng thái
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -242,7 +374,6 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
                           'completed'),
                       ],
                     ),
-                    SizedBox(height: 2.sp),
                     // Row 2: Dynamic round filters based on actual tournament data  
                     if (_totalParticipants > 0) ...[
                       SingleChildScrollView(
@@ -280,7 +411,8 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
                         ],
                       ),
                     ],
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -303,7 +435,7 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
     return InkWell(
       onTap: () => setState(() => _selectedFilter = filter),
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 2.sp, horizontal: 4.sp), // Thêm horizontal padding
+        padding: EdgeInsets.symmetric(vertical: 1.sp, horizontal: 4.sp), // Reduced vertical padding
         decoration: BoxDecoration(
           color: isSelected ? AppTheme.primaryLight.withOpacity(0.1) : Colors.transparent,
           borderRadius: BorderRadius.circular(8.sp),
@@ -379,7 +511,7 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
     
     // Debug output for verification - use both id and matchId for compatibility
     final matchId = match['id'] ?? match['matchId'];
-    debugPrint('🔢 Match ID: $matchId -> R${roundNumber}M${matchNumber} (from DB)');
+    debugPrint('🔢 Match ID: $matchId -> R${roundNumber}M$matchNumber (from DB)');
     
     final player1Score = match['player1_score'] ?? 0;
     final player2Score = match['player2_score'] ?? 0;
@@ -433,8 +565,8 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
                 Flexible(
                   child: Text(
                     roundNumber < 4 
-                      ? 'R${roundNumber}M${matchNumber} → R${roundNumber + 1}M${(matchNumber + 1) ~/ 2}'
-                      : 'R${roundNumber}M${matchNumber}',
+                      ? 'R${roundNumber}M$matchNumber → R${roundNumber + 1}M${(matchNumber + 1) ~/ 2}'
+                      : 'R${roundNumber}M$matchNumber',
                     style: TextStyle(
                       fontSize: 11.sp,
                       fontWeight: FontWeight.bold,
@@ -953,7 +1085,7 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
             ),
             SizedBox(width: 8.sp),
             // Score input
-            Container(
+            SizedBox(
               width: 60.sp,
               child: TextField(
                 controller: controller,

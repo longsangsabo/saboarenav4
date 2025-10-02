@@ -1,8 +1,8 @@
 import '../models/club_model.dart';
-import '../models/tournament_model.dart';
+import '../models/tournament.dart';
 
 class TournamentRepository {
-  Future<List<TournamentModel>> getTournaments() async {
+  Future<List<Tournament>> getTournaments() async {
     // This is mock data. In a real app, you would fetch this from a database or API.
     await Future.delayed(const Duration(seconds: 1));
     return [
