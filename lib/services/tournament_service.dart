@@ -299,6 +299,13 @@ class TournamentService {
             "rank": "Chưa xếp hạng",
             "score": player2Score
           } : null,
+          // ⚡ CRITICAL FIX: Add scores at root level for widgets
+          "player1_score": player1Score,
+          "player2_score": player2Score,
+          "player1_id": match['player1_id'],
+          "player2_id": match['player2_id'],
+          "winner_id": match['winner_id'],
+          "id": match['id'],
           "winner": match['winner_id'] != null ? 
               (match['winner_id'] == match['player1_id'] ? "player1" : "player2") : null,
           "status": match['status'] ?? "pending",
@@ -306,6 +313,10 @@ class TournamentService {
           "start_time": match['start_time'],
           "end_time": match['end_time'],
           "notes": match['notes'],
+          // ✅ ADD ADVANCEMENT FIELDS FOR DOUBLE ELIMINATION
+          "winner_advances_to": match['winner_advances_to'],
+          "loser_advances_to": match['loser_advances_to'],
+          "bracket_format": match['bracket_format'],
         };
       }).toList();
     } catch (error) {

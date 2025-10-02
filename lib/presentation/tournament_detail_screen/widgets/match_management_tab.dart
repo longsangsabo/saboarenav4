@@ -38,24 +38,27 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
   bool _isLoading = true;
   String? _errorMessage;
   String _selectedFilter = 'all'; // all, pending, in_progress, completed
+  int? _selectedRound; // null = show all, specific number = filter by round_number
   int _totalParticipants = 0; // Dynamic participant count
 
   // Dynamic round name calculation based on participants
   String _getRoundName(int roundNumber, int totalParticipants) {
-    // Special handling for SABO DE16 format (27 matches, complex structure)
+    // Special handling for SABO DE16 format (31 matches, complex structure)
     if (totalParticipants == 16) {
       switch (roundNumber) {
         case 1: return 'VÒNG 1';
         case 2: return 'VÒNG 2'; 
         case 3: return 'VÒNG 3';
+        case 4: return 'VÒNG 4';
         case 101: return 'BẢNG THUA A1';
         case 102: return 'BẢNG THUA A2';
         case 103: return 'BẢNG THUA A3';
+        case 104: return 'BẢNG THUA A4';
         case 201: return 'BẢNG THUA B1';
         case 202: return 'BẢNG THUA B2';
         case 250: return 'BÁN KẾT';
         case 251: return 'BÁN KẾT 2';
-        case 300: return 'CHUNG KẾT';
+        case 999: return 'CHUNG KẾT';
         default: return 'VÒNG $roundNumber';
       }
     }
@@ -111,15 +114,34 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
 
   // Get available rounds for this tournament
   List<Map<String, dynamic>> _getAvailableRounds() {
-    if (_matches.isEmpty || _totalParticipants == 0) return [];
+    if (_matches.isEmpty) return [];
     
     // Get unique rounds from matches
     Set<int> uniqueRounds = _matches.map((m) => (m['round'] ?? m['round_number'] ?? 1) as int).toSet();
     List<int> sortedRounds = uniqueRounds.toList()..sort();
     
+    // If _totalParticipants not available, estimate from matches
+    int participantCount = _totalParticipants;
+    if (participantCount == 0) {
+      // Count unique player IDs in first round (Winner Bracket R1)
+      Set<String> firstRoundPlayers = {};
+      for (var match in _matches) {
+        if ((match['round'] ?? match['round_number'] ?? 1) == 1) {
+          if (match['player1_id'] != null) firstRoundPlayers.add(match['player1_id']);
+          if (match['player2_id'] != null) firstRoundPlayers.add(match['player2_id']);
+        }
+      }
+      participantCount = firstRoundPlayers.length;
+      if (participantCount == 0) {
+        // Fallback: estimate from match count (R1 matches = participants / 2)
+        int r1Matches = _matches.where((m) => (m['round'] ?? m['round_number'] ?? 1) == 1).length;
+        participantCount = r1Matches * 2;
+      }
+    }
+    
     return sortedRounds.map((round) => {
       'round': round,
-      'name': _getRoundName(round, _totalParticipants),
+      'name': _getRoundName(round, participantCount),
       'matches': _matches.where((m) => (m['round'] ?? m['round_number'] ?? 1) == round).length,
     }).toList();
   }
@@ -246,23 +268,23 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
   }
 
   List<Map<String, dynamic>> get _filteredMatches {
+    var filtered = _matches;
+    
+    // First filter by round if selected
+    if (_selectedRound != null) {
+      filtered = filtered.where((m) => m['round_number'] == _selectedRound).toList();
+    }
+    
+    // Then filter by status
     switch (_selectedFilter) {
       case 'pending':
-        return _matches.where((m) => m['status'] == 'pending').toList();
+        return filtered.where((m) => m['status'] == 'pending').toList();
       case 'in_progress':
-        return _matches.where((m) => m['status'] == 'in_progress').toList();
+        return filtered.where((m) => m['status'] == 'in_progress').toList();
       case 'completed':
-        return _matches.where((m) => m['status'] == 'completed').toList();
-      case 'round1':
-        return _matches.where((m) => (m['round'] ?? m['round_number'] ?? 1) == 1).toList();
-      case 'round2':
-        return _matches.where((m) => (m['round'] ?? m['round_number'] ?? 1) == 2).toList();
-      case 'round3':
-        return _matches.where((m) => (m['round'] ?? m['round_number'] ?? 1) == 3).toList();
-      case 'round4':
-        return _matches.where((m) => (m['round'] ?? m['round_number'] ?? 1) == 4).toList();
+        return filtered.where((m) => m['status'] == 'completed').toList();
       default:
-        return _matches;
+        return filtered;
     }
   }
 
@@ -382,10 +404,10 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
                           children: _getAvailableRounds().map((roundData) => 
                             Padding(
                               padding: EdgeInsets.symmetric(horizontal: 2.sp),
-                              child: _buildRoundFilterColumn(
+                              child: _buildRoundFilterButton(
                                 roundData['name'], 
                                 roundData['matches'].toString(), 
-                                'round${roundData['round']}',
+                                roundData['round'], // Pass round number instead of string
                               ),
                             )
                           ).toList(),
@@ -464,14 +486,17 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
     );
   }
 
-  // Build round filter column với style khác biệt
-  Widget _buildRoundFilterColumn(String label, String value, String filter) {
-    bool isSelected = _selectedFilter == filter;
+  // Build round filter button with round_number filtering
+  Widget _buildRoundFilterButton(String label, String value, int roundNumber) {
+    bool isSelected = _selectedRound == roundNumber;
     
     return InkWell(
-      onTap: () => setState(() => _selectedFilter = filter),
+      onTap: () => setState(() {
+        _selectedRound = isSelected ? null : roundNumber; // Toggle: click again to show all
+        _selectedFilter = 'all'; // Reset status filter when changing rounds
+      }),
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 2.sp, horizontal: 4.sp), // Tăng padding
+        padding: EdgeInsets.symmetric(vertical: 2.sp, horizontal: 4.sp),
         decoration: BoxDecoration(
           color: isSelected ? AppTheme.primaryDark.withOpacity(0.1) : Colors.grey[50],
           borderRadius: BorderRadius.circular(6.sp),
@@ -486,13 +511,51 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
             Text(label, 
                  textAlign: TextAlign.center,
                  style: TextStyle(
-                   fontSize: 7.sp, // Giảm từ 8.sp
+                   fontSize: 7.sp,
                    fontWeight: FontWeight.bold,
                    color: isSelected ? AppTheme.primaryDark : Colors.grey[700],
                  )),
             Text(value, 
                  style: TextStyle(
-                   fontSize: 10.sp, // Giảm từ 12.sp
+                   fontSize: 10.sp,
+                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                   color: isSelected ? AppTheme.primaryDark : AppTheme.primaryLight,
+                 )),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Legacy: Build round filter column with old string-based filtering (for fallback)
+  Widget _buildRoundFilterColumn(String label, String value, String filter) {
+    bool isSelected = _selectedFilter == filter;
+    
+    return InkWell(
+      onTap: () => setState(() => _selectedFilter = filter),
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 2.sp, horizontal: 4.sp),
+        decoration: BoxDecoration(
+          color: isSelected ? AppTheme.primaryDark.withOpacity(0.1) : Colors.grey[50],
+          borderRadius: BorderRadius.circular(6.sp),
+          border: Border.all(
+            color: isSelected ? AppTheme.primaryDark : Colors.grey[300]!,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(label, 
+                 textAlign: TextAlign.center,
+                 style: TextStyle(
+                   fontSize: 7.sp,
+                   fontWeight: FontWeight.bold,
+                   color: isSelected ? AppTheme.primaryDark : Colors.grey[700],
+                 )),
+            Text(value, 
+                 style: TextStyle(
+                   fontSize: 10.sp,
                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
                    color: isSelected ? AppTheme.primaryDark : AppTheme.primaryLight,
                  )),
@@ -561,12 +624,10 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Tên trận đấu ngắn gọn - chỉ hiển thị R1M16 → R2M8
+                // Display match progression from database
                 Flexible(
                   child: Text(
-                    roundNumber < 4 
-                      ? 'R${roundNumber}M$matchNumber → R${roundNumber + 1}M${(matchNumber + 1) ~/ 2}'
-                      : 'R${roundNumber}M$matchNumber',
+                    _buildMatchProgressionText(match),
                     style: TextStyle(
                       fontSize: 11.sp,
                       fontWeight: FontWeight.bold,
@@ -855,19 +916,10 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
       debugPrint('💾 Updating match: P1=$player1Score, P2=$player2Score, Winner=${winnerId.isEmpty ? 'None' : (winnerId.length > 8 ? winnerId.substring(0, 8) : winnerId)}, Status=$status');
       
       try {
-        // Try cached service update first
-        await CachedTournamentService.updateMatchScore(
-          widget.tournamentId,
-          matchId,
-          player1Score: player1Score,
-          player2Score: player2Score,
-          winnerId: winnerId.isEmpty ? null : winnerId,
-          status: status,
-        );
-        debugPrint('✅ Cache-aware update completed');
-      } catch (e) {
-        debugPrint('⚠️ Cache update failed, using direct update: $e');
-        // Fallback to direct database update
+        // ⚡ CRITICAL FIX: Always update directly to database first
+        // This ensures data is persisted before cache update
+        debugPrint('💾 Updating database directly with scores: P1=$player1Score, P2=$player2Score');
+        
         await Supabase.instance.client
             .from('matches')
             .update({
@@ -875,9 +927,32 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
               'player2_score': player2Score,
               'winner_id': winnerId.isEmpty ? null : winnerId,
               'status': status,
+              // 'completed_at': status == 'completed' ? DateTime.now().toIso8601String() : null, // TODO: Add column to database
+              'updated_at': DateTime.now().toIso8601String(),
             })
             .eq('id', matchId);
-        debugPrint('✅ Direct database update completed');
+        
+        debugPrint('✅ Database update completed successfully');
+        
+        // Then update cache to reflect database state
+        try {
+          await CachedTournamentService.updateMatchScore(
+            widget.tournamentId,
+            matchId,
+            player1Score: player1Score,
+            player2Score: player2Score,
+            winnerId: winnerId.isEmpty ? null : winnerId,
+            status: status,
+          );
+          debugPrint('✅ Cache updated');
+        } catch (cacheError) {
+          debugPrint('⚠️ Cache update failed (non-critical): $cacheError');
+          // Cache failure is non-critical since database is already updated
+        }
+        
+      } catch (e) {
+        debugPrint('❌ Database update failed: $e');
+        throw e; // Rethrow to show error to user
       }
       
       // Update local state
@@ -902,7 +977,7 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
         }
       });
       
-      debugPrint('✅ Match score updated successfully');
+      debugPrint('✅ Match score updated successfully in database and local state');
       
       // 🎯 SIMPLE DIRECT WINNER ADVANCEMENT TRIGGER
       // Immediately advance winner when user saves score
@@ -911,12 +986,37 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
         await _advanceWinnerDirectly(matchId, winnerId, match);
       }
       
+      // Show success message to user
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '✅ Tỷ số đã cập nhật: $player1Score - $player2Score'
+              '${winnerId.isNotEmpty ? '\n🏆 Người thắng đã được tiến vào vòng tiếp theo!' : ''}',
+            ),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+      
       // Notify parent widget about the score update to refresh bracket
       if (widget.onMatchScoreUpdated != null) {
         widget.onMatchScoreUpdated!();
       }
     } catch (e) {
       debugPrint('❌ Error updating match score: $e');
+      
+      // Show error to user
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Lỗi cập nhật tỷ số: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
     }
   }
 
@@ -1159,55 +1259,139 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
   /// Triggered immediately when user clicks "Lưu" with match result
   Future<void> _advanceWinnerDirectly(String completedMatchId, String winnerId, Map<String, dynamic> completedMatch) async {
     try {
-      debugPrint('🚀 ADVANCING WINNER: $winnerId from match $completedMatchId');
+      debugPrint('🚀 ADVANCING PLAYERS from match $completedMatchId');
       
-      final currentRound = completedMatch['round_number'] ?? completedMatch['round'] ?? 1;
       final currentMatchNumber = completedMatch['match_number'] ?? 1;
+      final winnerAdvancesTo = completedMatch['winner_advances_to'];
+      final loserAdvancesTo = completedMatch['loser_advances_to'];
       
-      debugPrint('📍 Current: Round $currentRound, Match $currentMatchNumber');
+      debugPrint('📍 Current Match Number: $currentMatchNumber');
+      debugPrint('🎯 Winner Advances To Match: $winnerAdvancesTo');
+      debugPrint('🎯 Loser Advances To Match: $loserAdvancesTo');
       
-      // Calculate next round using standard single elimination formula
-      final nextRound = currentRound + 1;
-      final nextMatchNumber = ((currentMatchNumber - 1) ~/ 2) + 1;
+      // Get loser ID (the player who didn't win)
+      final player1Id = completedMatch['player1_id'];
+      final player2Id = completedMatch['player2_id'];
+      final loserId = (winnerId == player1Id) ? player2Id : player1Id;
       
-      debugPrint('🎯 Target: Round $nextRound, Match $nextMatchNumber');
-      
-      // Find the next round match that should receive this winner
-      final nextMatches = await Supabase.instance.client
-          .from('matches')
-          .select('*')
-          .eq('tournament_id', widget.tournamentId)
-          .eq('round_number', nextRound)
-          .eq('match_number', nextMatchNumber);
-      
-      if (nextMatches.isEmpty) {
-        debugPrint('🏆 NO NEXT MATCH FOUND - TOURNAMENT COMPLETE! Champion: $winnerId');
-        return;
+      // ADVANCE WINNER
+      if (winnerAdvancesTo != null) {
+        await _advancePlayerToMatch(
+          playerId: winnerId,
+          targetMatchNumber: winnerAdvancesTo,
+          currentMatchNumber: currentMatchNumber,
+          role: 'WINNER',
+        );
+      } else {
+        debugPrint('🏆 NO NEXT MATCH FOR WINNER - THIS IS THE FINAL! Champion: $winnerId');
       }
       
-      final nextMatch = nextMatches.first;
-      debugPrint('📋 Next match found: ${nextMatch['id']}');
-      
-      // Determine which slot (player1_id or player2_id) to place winner
-      // Even match numbers go to player2_id, odd go to player1_id
-      final isEvenCurrentMatch = currentMatchNumber % 2 == 0;
-      final playerSlot = isEvenCurrentMatch ? 'player2_id' : 'player1_id';
-      
-      debugPrint('🎪 Assigning winner to $playerSlot (Current match $currentMatchNumber is ${isEvenCurrentMatch ? 'even' : 'odd'})');
-      
-      // Update the next round match with the winner
-      await Supabase.instance.client
-          .from('matches')
-          .update({playerSlot: winnerId})
-          .eq('id', nextMatch['id']);
-      
-      debugPrint('✅ WINNER ADVANCED SUCCESSFULLY! $winnerId → Round $nextRound, Match $nextMatchNumber');
+      // ADVANCE LOSER (for Double Elimination)
+      if (loserAdvancesTo != null && loserId != null) {
+        await _advancePlayerToMatch(
+          playerId: loserId,
+          targetMatchNumber: loserAdvancesTo,
+          currentMatchNumber: currentMatchNumber,
+          role: 'LOSER',
+        );
+      }
       
       // Refresh the matches display to show the update
       await _refreshMatches();
       
     } catch (e) {
       debugPrint('❌ Error advancing winner: $e');
+    }
+  }
+
+  /// Build match progression text from database values
+  String _buildMatchProgressionText(Map<String, dynamic> match) {
+    final matchNumber = match['match_number'] ?? 1;
+    final winnerAdvancesTo = match['winner_advances_to'];
+    final loserAdvancesTo = match['loser_advances_to'];
+    
+    // Base text
+    String text = 'M$matchNumber';
+    
+    // Add winner progression if exists
+    if (winnerAdvancesTo != null) {
+      text += ' → M$winnerAdvancesTo';
+      
+      // Add loser progression if exists (for double elimination)
+      if (loserAdvancesTo != null) {
+        text += ' (L→M$loserAdvancesTo)';
+      }
+    } else {
+      // Only Grand Final (match 31) has no winner advancement
+      final roundNumber = match['round_number'] ?? 0;
+      if (roundNumber == 999) {
+        text = 'M$matchNumber (Final)';
+      }
+    }
+    
+    return text;
+  }
+
+  /// Helper function to advance a player to target match
+  Future<void> _advancePlayerToMatch({
+    required String playerId,
+    required int targetMatchNumber,
+    required int currentMatchNumber,
+    required String role,
+  }) async {
+    try {
+      debugPrint('🎯 Advancing $role: $playerId from match $currentMatchNumber → match $targetMatchNumber');
+      
+      // Find the target match by match_number
+      final targetMatches = await Supabase.instance.client
+          .from('matches')
+          .select('*')
+          .eq('tournament_id', widget.tournamentId)
+          .eq('match_number', targetMatchNumber);
+      
+      if (targetMatches.isEmpty) {
+        debugPrint('⚠️ Target match $targetMatchNumber not found!');
+        return;
+      }
+      
+      final targetMatch = targetMatches.first;
+      debugPrint('📋 Target match found: ${targetMatch['id']}');
+      
+      // Determine which slot (player1_id or player2_id) to place player
+      String playerSlot;
+      
+      if (role == 'LOSER') {
+        // For losers: Fill first empty slot
+        final player1 = targetMatch['player1_id'];
+        final player2 = targetMatch['player2_id'];
+        
+        if (player1 == null) {
+          playerSlot = 'player1_id';
+          debugPrint('🎪 Assigning LOSER to player1_id (slot was empty)');
+        } else if (player2 == null) {
+          playerSlot = 'player2_id';
+          debugPrint('🎪 Assigning LOSER to player2_id (slot was empty)');
+        } else {
+          debugPrint('⚠️ Both slots already filled in target match $targetMatchNumber! Skipping.');
+          return;
+        }
+      } else {
+        // For winners: Use even/odd logic (same as before)
+        final isEvenCurrentMatch = currentMatchNumber % 2 == 0;
+        playerSlot = isEvenCurrentMatch ? 'player2_id' : 'player1_id';
+        debugPrint('🎪 Assigning WINNER to $playerSlot (Current match $currentMatchNumber is ${isEvenCurrentMatch ? 'even' : 'odd'})');
+      }
+      
+      // Update the target match with the player
+      await Supabase.instance.client
+          .from('matches')
+          .update({playerSlot: playerId})
+          .eq('id', targetMatch['id']);
+      
+      debugPrint('✅ $role ADVANCED SUCCESSFULLY! $playerId → Match $targetMatchNumber (Round ${targetMatch['round_number']})');
+      
+    } catch (e) {
+      debugPrint('❌ Error advancing $role: $e');
     }
   }
 }
