@@ -4,6 +4,7 @@
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'notification_service.dart';
+import 'auto_advancement_service.dart';
 import 'package:flutter/foundation.dart';
 
 /// Universal service quản lý progression cho tất cả tournament formats
@@ -58,18 +59,27 @@ class UniversalMatchProgressionService {
 
         debugPrint('🏆 Tournament format: $bracketFormat');
 
-        // 4. Calculate and execute IMMEDIATE advancement
-        debugPrint('⚡ Step 3: Executing IMMEDIATE advancement...');
-        final advancementResult = await _executeImmediateAdvancement(
-          tournamentId: tournamentId,
-          matchId: matchId,
+        // 4. Execute HARDCODED advancement using winner_advances_to
+        debugPrint('⚡ Step 3: Executing HARDCODED advancement...');
+        final autoAdvanceService = AutoAdvancementService();
+        final advancementResult = await autoAdvanceService.advanceWinner(
+          completedMatchId: matchId,
           winnerId: winnerId,
-          loserId: loserId,
-          bracketFormat: bracketFormat,
         );
 
-        debugPrint(
-            '🎉 IMMEDIATE advancement completed: ${advancementResult['advancement_count']} players advanced');
+        if (advancementResult['success']) {
+          debugPrint('🎉 HARDCODED advancement completed: ${advancementResult['message']}');
+        } else {
+          debugPrint('⚠️  Advancement warning: ${advancementResult['error']}');
+        }
+        
+        // Convert to expected format
+        final formattedResult = {
+          'advancement_count': advancementResult['success'] ? 1 : 0,
+          'advancement_details': [advancementResult],
+        };
+
+        debugPrint('🎉 Advancement completed: ${formattedResult['advancement_count']} players advanced');
 
         // 5. Check tournament completion
         final isComplete = await _checkTournamentCompletion(tournamentId);
@@ -79,20 +89,22 @@ class UniversalMatchProgressionService {
           tournamentId: tournamentId,
           winnerId: winnerId,
           loserId: loserId,
-          advancementResult: advancementResult,
+          advancementResult: formattedResult,
           isComplete: isComplete,
         );
 
+        final advCount = formattedResult['advancement_count'] as int? ?? 0;
+        
         return {
           'success': true,
           'match_updated': true,
           'immediate_advancement': true,
-          'progression_completed': advancementResult['advancement_count'] > 0,
-          'tournament_complete': isComplete,
-          'advancement_details': advancementResult['advancement_details'],
+          'progression_completed': advCount > 0,
+          'tournament_complete': isComplete || advancementResult['is_final'] == true,
+          'advancement_details': formattedResult['advancement_details'],
           'next_ready_matches': await _getNextReadyMatches(tournamentId),
           'message':
-              'Match completed with IMMEDIATE advancement! ${advancementResult['advancement_count']} players advanced instantly.',
+              'Match completed with HARDCODED advancement! $advCount players advanced instantly.',
         };
       } else {
         // Challenge match - basic notifications only

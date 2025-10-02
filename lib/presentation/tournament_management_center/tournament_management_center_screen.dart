@@ -8,6 +8,8 @@ import '../../services/bracket_service.dart';
 import '../../services/complete_sabo_de16_service.dart';
 import '../../services/complete_double_elimination_service.dart';
 import '../../services/complete_sabo_de32_service.dart';
+import '../../services/hardcoded_single_elimination_service.dart';
+import '../../services/hardcoded_double_elimination_service.dart';
 import '../tournament_detail_screen/widgets/match_management_tab.dart';
 import '../tournament_detail_screen/widgets/participant_management_tab.dart';
 import '../tournament_detail_screen/widgets/tournament_rankings_widget.dart';
@@ -622,25 +624,36 @@ class _TournamentManagementCenterScreenState extends State<TournamentManagementC
             throw Exception(result['error'] ?? 'Failed to create SABO DE32 bracket');
           }
         } else if (tournamentFormat == 'double_elimination' && participants.length == 16) {
-          // Use CompleteDoubleEliminationService for standard DE16 (31 matches)
-          debugPrint('🚀 Using CompleteDoubleEliminationService for double_elimination format (31 matches)');
-          final de16Service = CompleteDoubleEliminationService.instance;
+          // Use HardcodedDoubleEliminationService for DE16 with advancement paths
+          debugPrint('🎯 Using HardcodedDoubleEliminationService for double_elimination format (16 players)');
+          final de16Service = HardcodedDoubleEliminationService();
           
-          // Convert participants to format expected by CompleteDoubleEliminationService
-          final de16Participants = participants.map((p) => {
-            'user_id': p['user_id'], // Service expects user_id at root level
-            'full_name': p['full_name'],
-            'avatar_url': p['avatar_url'],
-            'payment_status': 'completed'
-          }).toList();
+          // Extract participant IDs
+          final participantIds = participants.map((p) => p['user_id'] as String).toList();
           
-          result = await de16Service.generateDE16Bracket(
+          result = await de16Service.createBracketWithAdvancement(
             tournamentId: _selectedTournament!.id,
-            participants: de16Participants,
+            participantIds: participantIds,
           );
           
           if (result['success'] != true) {
-            throw Exception(result['error'] ?? 'Failed to create Double Elimination bracket');
+            throw Exception(result['error'] ?? 'Failed to create Double Elimination bracket with advancement');
+          }
+        } else if (tournamentFormat == 'single_elimination') {
+          // Use HardcodedSingleEliminationService for single elimination
+          debugPrint('🎯 Using HardcodedSingleEliminationService for single_elimination format');
+          final singleEliminationService = HardcodedSingleEliminationService();
+          
+          // Extract participant IDs
+          final participantIds = participants.map((p) => p['user_id'] as String).toList();
+          
+          result = await singleEliminationService.createBracketWithAdvancement(
+            tournamentId: _selectedTournament!.id,
+            participantIds: participantIds,
+          );
+          
+          if (result['success'] != true) {
+            throw Exception(result['error'] ?? 'Failed to create Single Elimination bracket');
           }
         } else {
           // Use existing BracketService for other formats

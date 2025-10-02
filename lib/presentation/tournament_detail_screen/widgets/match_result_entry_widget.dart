@@ -4,7 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import '../../../core/app_export.dart';
-import '../../../services/match_progression_service.dart';
+import '../../../services/universal_match_progression_service.dart';
 
 class MatchResultEntryWidget extends StatefulWidget {
   final String matchId;
@@ -25,7 +25,7 @@ class MatchResultEntryWidget extends StatefulWidget {
 }
 
 class _MatchResultEntryWidgetState extends State<MatchResultEntryWidget> {
-  final MatchProgressionService _progressionService = MatchProgressionService.instance;
+  final UniversalMatchProgressionService _progressionService = UniversalMatchProgressionService.instance;
   
   bool _isSubmitting = false;
   int _player1Score = 0;
@@ -551,7 +551,7 @@ class _MatchResultEntryWidgetState extends State<MatchResultEntryWidget> {
     try {
       final loserId = _selectedWinner == _player1Id ? _player2Id! : _player1Id!;
       
-      final result = await _progressionService.updateMatchResult(
+      final result = await _progressionService.updateMatchResultWithImmediateAdvancement(
         matchId: widget.matchId,
         tournamentId: widget.tournamentId,
         winnerId: _selectedWinner!,
@@ -564,23 +564,24 @@ class _MatchResultEntryWidgetState extends State<MatchResultEntryWidget> {
       );
 
       if (result['success']) {
-        // Show success message
+        // Show success message with more details
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               '✅ Kết quả đã được cập nhật!\n'
-              '${result['progression_completed'] ? "🏃‍♂️ Bracket đã được cập nhật" : ""}'
+              '${result['immediate_advancement'] ? "⚡ Tự động tiến thăng!" : ""}\n'
+              '${result['progression_completed'] ? "🏃‍♂️ ${result['advancement_details']?.length ?? 0} người chơi đã được tiến vào vòng tiếp theo" : ""}'
               '${result['tournament_complete'] ? "\n🏆 Giải đấu đã hoàn thành!" : ""}'
             ),
             backgroundColor: AppTheme.successLight,
-            duration: Duration(seconds: 3),
+            duration: Duration(seconds: 4),
           ),
         );
 
-        // Call callback if provided
+        // Call callback if provided to refresh UI
         widget.onResultSubmitted?.call();
 
-        // Close dialog
+        // Close dialog and return result
         Navigator.pop(context, result);
 
       } else {

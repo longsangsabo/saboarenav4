@@ -70,16 +70,26 @@ class _LiveTournamentBracketWidgetState extends State<LiveTournamentBracketWidge
       }
 
       setState(() {
-        _matches = matches.map<Map<String, dynamic>>((match) => {
-          ...match,
-          'player1_name': match['player1']?['full_name'] ?? 'TBD',
-          'player2_name': match['player2']?['full_name'] ?? 'TBD',
-          'player1_avatar': match['player1']?['avatar_url'],
-          'player2_avatar': match['player2']?['avatar_url'],
-          'player1_rank': match['player1']?['rank'] ?? '',
-          'player2_rank': match['player2']?['rank'] ?? '',
-          'player1_elo': match['player1']?['elo_rating'] ?? 0,
-          'player2_elo': match['player2']?['elo_rating'] ?? 0,
+        _matches = matches.map<Map<String, dynamic>>((match) {
+          // Debug log để kiểm tra score values
+          if (match['player1_score'] != null || match['player2_score'] != null) {
+            print('🔍 Match ${match['match_number']} scores: P1=${match['player1_score']}, P2=${match['player2_score']}');
+          }
+          
+          return {
+            ...match,
+            'player1_name': match['player1']?['full_name'] ?? 'TBD',
+            'player2_name': match['player2']?['full_name'] ?? 'TBD',
+            'player1_avatar': match['player1']?['avatar_url'],
+            'player2_avatar': match['player2']?['avatar_url'],
+            'player1_rank': match['player1']?['rank'] ?? '',
+            'player2_rank': match['player2']?['rank'] ?? '',
+            'player1_elo': match['player1']?['elo_rating'] ?? 0,
+            'player2_elo': match['player2']?['elo_rating'] ?? 0,
+            // Explicitly preserve score fields
+            'player1_score': match['player1_score'] ?? 0,
+            'player2_score': match['player2_score'] ?? 0,
+          };
         }).toList();
         
         _totalParticipants = tournament?['participant_count'] ?? 0;
@@ -96,8 +106,62 @@ class _LiveTournamentBracketWidgetState extends State<LiveTournamentBracketWidge
   }
 
   Future<void> refreshData() async {
-    print('🔄 LiveTournamentBracketWidget: Refreshing data...');
-    await _loadMatches();
+    print('🔄 LiveTournamentBracketWidget: Force refreshing data...');
+    
+    // Force refresh bypassing cache to get latest data
+    try {
+      final matches = await supabase
+          .from('matches')
+          .select('''
+            id,
+            round_number,
+            match_number,
+            player1_id,
+            player2_id,
+            winner_id,
+            player1_score,
+            player2_score,
+            status,
+            scheduled_at,
+            player1:player1_id(id, full_name, avatar_url, rank, elo_rating),
+            player2:player2_id(id, full_name, avatar_url, rank, elo_rating)
+          ''')
+          .eq('tournament_id', widget.tournamentId)
+          .order('round_number', ascending: true)
+          .order('match_number', ascending: true);
+          
+      print('🔄 Force refresh: Fetched ${matches.length} matches directly from database');
+      
+      setState(() {
+        _matches = matches.map<Map<String, dynamic>>((match) {
+          // Debug log scores during refresh
+          if (match['player1_score'] != null || match['player2_score'] != null) {
+            print('🔍 REFRESH Match ${match['match_number']} scores: P1=${match['player1_score']}, P2=${match['player2_score']}');
+          }
+          
+          return {
+            ...match,
+            'player1_name': match['player1']?['full_name'] ?? 'TBD',
+            'player2_name': match['player2']?['full_name'] ?? 'TBD',
+            'player1_avatar': match['player1']?['avatar_url'],
+            'player2_avatar': match['player2']?['avatar_url'],
+            'player1_rank': match['player1']?['rank'] ?? '',
+            'player2_rank': match['player2']?['rank'] ?? '',
+            'player1_elo': match['player1']?['elo_rating'] ?? 0,
+            'player2_elo': match['player2']?['elo_rating'] ?? 0,
+            // Explicitly preserve score fields
+            'player1_score': match['player1_score'] ?? 0,
+            'player2_score': match['player2_score'] ?? 0,
+          };
+        }).toList();
+      });
+      
+      print('✅ Force refresh completed with ${_matches.length} matches');
+    } catch (e) {
+      print('❌ Force refresh failed: $e');
+      // Fallback to normal load
+      await _loadMatches();
+    }
   }
 
   String _getRoundDisplayName(int roundNumber) {

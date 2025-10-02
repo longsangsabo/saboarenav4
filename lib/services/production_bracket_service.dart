@@ -4,6 +4,7 @@ import 'cached_tournament_service.dart';
 import 'complete_sabo_de16_service.dart';
 import 'complete_double_elimination_service.dart';
 import 'complete_sabo_de32_service.dart';
+import 'hardcoded_single_elimination_service.dart';
 
 /// Service for production bracket management with Supabase integration
 class ProductionBracketService {
@@ -149,12 +150,13 @@ class ProductionBracketService {
 
       // Check both format and bracket_format fields for sabo_de16
       final bracketFormat = tournamentResponse['bracket_format'];
-      final tournamentFormat = tournamentResponse['format'];
+      // NOTE: Database uses 'game_format' not 'format'! This was the bug causing all conditionals to fail
+      final gameFormat = tournamentResponse['game_format'];
       
-      print('🔍 Tournament formats: format=$tournamentFormat, bracket_format=$bracketFormat');
+      print('🔍 Tournament formats: game_format=$gameFormat, bracket_format=$bracketFormat');
 
       // Handle sabo_de16 with specialized service
-      if (format == 'sabo_de16' || bracketFormat == 'sabo_de16') {
+      if (bracketFormat == 'sabo_de16') {
         print('🎯 Using CompleteSaboDE16Service for sabo_de16 format');
         final saboService = CompleteSaboDE16Service();
         
@@ -177,7 +179,7 @@ class ProductionBracketService {
         } else {
           throw Exception(result['error'] ?? 'Failed to create SABO DE16 bracket');
         }
-      } else if ((format == 'double_elimination' || bracketFormat == 'double_elimination') && participants.length == 16) {
+      } else if (bracketFormat == 'double_elimination' && participants.length == 16) {
         // Handle standard double elimination with CompleteDoubleEliminationService
         print('🚀 Using CompleteDoubleEliminationService for double_elimination format (31 matches)');
         final de16Service = CompleteDoubleEliminationService.instance;
@@ -201,7 +203,7 @@ class ProductionBracketService {
         } else {
           throw Exception(result['error'] ?? 'Failed to create Double Elimination bracket');
         }
-      } else if ((format == 'sabo_de32' || bracketFormat == 'sabo_de32') && participants.length == 32) {
+      } else if (bracketFormat == 'sabo_de32' && participants.length == 32) {
         // Handle SABO DE32 with CompleteSaboDE32Service
         print('🎯 Using CompleteSaboDE32Service for sabo_de32 format (55 matches)');
         final saboDE32Service = CompleteSaboDE32Service();
@@ -224,6 +226,43 @@ class ProductionBracketService {
           // CompleteSaboDE32Service handles database saving internally
         } else {
           throw Exception(result['error'] ?? 'Failed to create SABO DE32 bracket');
+        }
+      } else if (bracketFormat == 'single_elimination') {
+        // Use HardcodedSingleEliminationService with built-in advancement logic
+        print('🎯 Using HardcodedSingleEliminationService for single_elimination format');
+        final singleEliminationService = HardcodedSingleEliminationService();
+        
+        // Convert participants to format expected by service
+        // Extract user IDs from nested structure
+        final participantIds = participants
+            .map((p) {
+              final users = p['users'];
+              if (users == null) return null;
+              return users['id'] as String?;
+            })
+            .where((id) => id != null)
+            .cast<String>()
+            .toList();
+        
+        if (participantIds.length != participants.length) {
+          throw Exception('Failed to extract all participant IDs');
+        }
+        
+        print('📋 Creating bracket for ${participantIds.length} participants with HARDCODED advancement');
+        
+        final result = await singleEliminationService.createBracketWithAdvancement(
+          tournamentId: tournamentId,
+          participantIds: participantIds,
+        );
+        
+        if (result['success'] == true) {
+          print('✅ Single Elimination bracket created with HARDCODED advancement');
+          print('   Total rounds: ${result['total_rounds']}');
+          print('   Total matches: ${result['total_matches']}');
+          print('   Advancement mappings: ${result['advancement_mappings']}');
+          // HardcodedSingleEliminationService handles database saving internally
+        } else {
+          throw Exception(result['error'] ?? 'Failed to create Single Elimination bracket');
         }
       } else {
         // Generate bracket using existing service for other formats
