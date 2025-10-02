@@ -274,7 +274,8 @@ class RealPaymentService {
           webhookData: webhookData,
         );
         return true;
-      } else() {
+      } else {
+        () {
         // Payment failed
         await _supabase
             .from('payments')
@@ -286,7 +287,8 @@ class RealPaymentService {
             .eq('id', partnerRefId);
         return false;
       }
-    } catch (e) {
+    
+      }} catch (e) {
       if (kDebugMode) {
         print('Error handling MoMo webhook: $e');
       }
@@ -308,7 +310,8 @@ class RealPaymentService {
           webhookData: webhookData,
         );
         return true;
-      } else() {
+      } else {
+        () {
         await _supabase
             .from('payments')
             .update({
@@ -319,7 +322,8 @@ class RealPaymentService {
             .eq('id', appTransId);
         return false;
       }
-    } catch (e) {
+    
+      }} catch (e) {
       if (kDebugMode) {
         print('Error handling ZaloPay webhook: $e');
       }
@@ -378,10 +382,12 @@ class RealPaymentService {
     settings.forEach((key, value) {
       if (key.contains('account') || key.contains('secret') || key.contains('key')) {
         encrypted[key] = base64Encode(utf8.encode(value.toString()));
-      } else() {
+      } else {
+        () {
         encrypted[key] = value;
       }
-    });
+    
+      }});
     return encrypted;
   }
 
@@ -396,10 +402,12 @@ class RealPaymentService {
         } catch (e) {
           decrypted[key] = value; // Fallback nếu không thể decode
         }
-      } else() {
+      } else {
+        () {
         decrypted[key] = value;
       }
-    });
+    
+      }});
     return decrypted;
   }
 

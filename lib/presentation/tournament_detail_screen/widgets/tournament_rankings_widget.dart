@@ -146,7 +146,6 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
         children: [
           // Header
           Row(
@@ -176,103 +175,125 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
           ),
           SizedBox(height: 12.sp),
 
-          // Content
-          if (_isLoading)
-            _buildLoadingState()
-          else if (_error != null)
-            _buildErrorState()
-          else if (_rankings.isEmpty)
-            _buildEmptyState()
-          else
-            _buildRankingsList(),
+          // Content - Make it scrollable
+          Expanded(
+            child: SingleChildScrollView(
+              child: _isLoading
+                  ? _buildLoadingState()
+                  : _error != null
+                      ? _buildErrorState()
+                      : _rankings.isEmpty
+                          ? _buildEmptyState()
+                          : _buildRankingsList(),
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildLoadingState() {
-    return Center(
-      child: Column(
-        children: [
-          CircularProgressIndicator(),
-          SizedBox(height: 16.sp),
-          Text(
-            'Đang tải bảng xếp hạng...',
-            style: TextStyle(color: Colors.grey[600]),
-          ),
-        ],
+    return Container(
+      height: 200.sp,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16.sp),
+            Text(
+              'Đang tải bảng xếp hạng...',
+              style: TextStyle(color: Colors.grey[600]),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildErrorState() {
-    return Center(
-      child: Column(
-        children: [
-          Icon(
-            Icons.error_outline,
-            size: 48.sp,
-            color: Colors.red[300],
-          ),
-          SizedBox(height: 16.sp),
-          Text(
-            'Lỗi khi tải bảng xếp hạng',
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w600,
-              color: Colors.red[600],
+    return Container(
+      height: 300.sp,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 48.sp,
+              color: Colors.red[300],
             ),
-          ),
-          SizedBox(height: 8.sp),
-          Text(
-            _error!,
-            style: TextStyle(color: Colors.grey[600]),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 16.sp),
-          ElevatedButton.icon(
-            onPressed: _loadRankings,
-            icon: Icon(Icons.refresh),
-            label: Text('Thử lại'),
-          ),
-        ],
+            SizedBox(height: 16.sp),
+            Text(
+              'Lỗi khi tải bảng xếp hạng',
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.red[600],
+              ),
+            ),
+            SizedBox(height: 8.sp),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.sp),
+              child: Text(
+                _error!,
+                style: TextStyle(color: Colors.grey[600]),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            SizedBox(height: 16.sp),
+            ElevatedButton.icon(
+              onPressed: _loadRankings,
+              icon: Icon(Icons.refresh),
+              label: Text('Thử lại'),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        children: [
-          Icon(
-            Icons.emoji_events_outlined,
-            size: 48.sp,
-            color: Colors.grey[300],
-          ),
-          SizedBox(height: 16.sp),
-          Text(
-            'Chưa có bảng xếp hạng',
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[600],
+    return Container(
+      height: 250.sp,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.emoji_events_outlined,
+              size: 48.sp,
+              color: Colors.grey[300],
             ),
-          ),
-          SizedBox(height: 8.sp),
-          Text(
-            widget.tournamentStatus == 'completed' 
-                ? 'Bảng xếp hạng sẽ được tạo sau khi hoàn thành giải đấu'
-                : 'Bảng xếp hạng sẽ được cập nhật khi có kết quả trận đấu',
-            style: TextStyle(color: Colors.grey[500]),
-            textAlign: TextAlign.center,
-          ),
-        ],
+            SizedBox(height: 16.sp),
+            Text(
+              'Chưa có bảng xếp hạng',
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[600],
+              ),
+            ),
+            SizedBox(height: 8.sp),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24.sp),
+              child: Text(
+                widget.tournamentStatus == 'completed' 
+                    ? 'Bảng xếp hạng sẽ được tạo sau khi hoàn thành giải đấu'
+                    : 'Bảng xếp hạng sẽ được cập nhật khi có kết quả trận đấu',
+                style: TextStyle(color: Colors.grey[500]),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildRankingsList() {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         // Header Row
         Container(
@@ -345,11 +366,16 @@ class _TournamentRankingsWidgetState extends State<TournamentRankingsWidget> {
         ),
         SizedBox(height: 6.sp),
 
-        // Rankings List
-        ...List.generate(_rankings.length, (index) {
-          final ranking = _rankings[index];
-          return _buildRankingItem(ranking, index + 1);
-        }),
+        // Rankings List - Use ListView.builder for better performance
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: _rankings.length,
+          itemBuilder: (context, index) {
+            final ranking = _rankings[index];
+            return _buildRankingItem(ranking, index + 1);
+          },
+        ),
       ],
     );
   }

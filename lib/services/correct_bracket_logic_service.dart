@@ -6,7 +6,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'tournament_service.dart';
-import '../models/user_profile.dart';
 
 class CorrectBracketLogicService {
   static const String _tag = 'CorrectBracketLogic';

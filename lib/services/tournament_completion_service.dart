@@ -870,4 +870,385 @@ class TournamentCompletionService {
   Future<List<Map<String, dynamic>>> previewFinalStandings(String tournamentId) async {
     return await _calculateFinalStandings(tournamentId);
   }
+
+  // ==================== AUTO COMPLETION DETECTION ====================
+
+  /// Tự động kiểm tra và cập nhật trạng thái giải đấu nếu đã hoàn thành
+  Future<bool> checkAndAutoCompleteTournament(String tournamentId) async {
+    try {
+      debugPrint('🏁 Auto-checking tournament completion: $tournamentId');
+      
+      // 1. Lấy thông tin giải đấu hiện tại
+      final tournamentResponse = await _supabase
+          .from('tournaments')
+          .select('id, title, status, max_participants')
+          .eq('id', tournamentId)
+          .single();
+      
+      final tournament = tournamentResponse;
+      
+      // Nếu đã completed thì không cần kiểm tra nữa
+      if (tournament['status'] == 'completed') {
+        debugPrint('✅ Tournament already completed');
+        return true;
+      }
+      
+      // Chỉ xử lý tournaments đang active/in_progress
+      if (!['active', 'in_progress', 'ongoing'].contains(tournament['status'])) {
+        debugPrint('⏭️ Tournament not in active state: ${tournament['status']}');
+        return false;
+      }
+      
+      // 2. Kiểm tra validation completion
+      final validationResult = await _validateTournamentCompletion(tournamentId);
+      
+      if (validationResult['canComplete'] == true) {
+        debugPrint('✅ Tournament ready for auto-completion!');
+        
+        // 3. Tự động complete với minimal workflow
+        await _autoCompleteTournamentMinimal(tournamentId);
+        return true;
+        
+      } else {
+        debugPrint('⏳ Tournament not ready: ${validationResult['reason']}');
+        return false;
+      }
+      
+    } catch (e) {
+      debugPrint('❌ Error in auto-completion check: $e');
+      return false;
+    }
+  }
+
+  /// Minimal tournament completion - chỉ cập nhật status
+  Future<void> _autoCompleteTournamentMinimal(String tournamentId) async {
+    try {
+      // 1. Tìm winner từ match cuối cùng
+      final matchesResponse = await _supabase
+          .from('matches')
+          .select('winner_id, round_number, match_name')
+          .eq('tournament_id', tournamentId)
+          .eq('status', 'completed')
+          .order('round_number', ascending: false);
+      
+      final matches = matchesResponse as List<dynamic>;
+      String? winnerId;
+      
+      if (matches.isNotEmpty) {
+        // Lấy winner từ round cao nhất
+        final finalMatch = matches.first;
+        winnerId = finalMatch['winner_id'];
+        debugPrint('🏆 Champion found: $winnerId (${finalMatch['match_name'] ?? 'Final'})');
+      }
+      
+      // 2. Cập nhật tournament status
+      final updateData = {
+        'status': 'completed',
+        'updated_at': DateTime.now().toIso8601String(),
+      };
+      
+      await _supabase
+          .from('tournaments')
+          .update(updateData)
+          .eq('id', tournamentId);
+      
+      debugPrint('🎉 Tournament auto-completed successfully!');
+      
+      // 3. Apply tournament rewards and update user stats
+      await _applyTournamentRewards(tournamentId);
+      
+      // 4. Send completion notifications to all participants
+      await _sendTournamentCompletionNotifications(tournamentId, winnerId);
+      
+      // 5. Log champion info
+      if (winnerId != null) {
+        await _logChampionInfo(tournamentId, winnerId);
+      }
+      
+    } catch (e) {
+      debugPrint('❌ Error in minimal auto-completion: $e');
+      rethrow;
+    }
+  }
+
+  /// Apply tournament completion rewards
+  Future<void> _applyTournamentRewards(String tournamentId) async {
+    try {
+      debugPrint('💰 Applying tournament completion rewards...');
+      
+      // 1. Analyze tournament results
+      final results = await _analyzeTournamentResults(tournamentId);
+      
+      // 2. Calculate and apply rewards
+      for (final result in results) {
+        final position = result['position'] as int;
+        final wins = result['wins'] as int;
+        final userId = result['user_id'] as String;
+        final currentElo = result['current_elo'] as int;
+        final currentSpa = result['current_spa'] as int;
+        
+        // Calculate rewards based on position
+        int eloBonus = 0;
+        int spaBonus = 5; // Minimum participation reward
+        
+        if (position == 1) { // Champion
+          eloBonus = 50;
+          spaBonus = 200;
+        } else if (position == 2) { // Runner-up
+          eloBonus = 30;
+          spaBonus = 100;
+        } else if (position == 3) { // 3rd place
+          eloBonus = 20;
+          spaBonus = 50;
+        } else if (position <= 4) { // Top 4
+          eloBonus = 10;
+          spaBonus = 25;
+        } else if (position <= 8) { // Top 8
+          eloBonus = 5;
+          spaBonus = 10;
+        }
+        
+        // Additional bonus for wins
+        eloBonus += wins * 5;
+        spaBonus += wins * 10;
+        
+        // Apply rewards
+        await _supabase.from('users').update({
+          'elo_rating': currentElo + eloBonus,
+          'spa_points': currentSpa + spaBonus,
+          'tournaments_played': result['tournaments_played'] + 1,
+          'tournament_wins': result['tournament_wins'] + (position == 1 ? 1 : 0),
+        }).eq('id', userId);
+        
+        debugPrint('✅ Rewards applied to ${result['username']}: ELO +$eloBonus, SPA +$spaBonus');
+      }
+      
+      debugPrint('� Tournament rewards applied successfully!');
+      
+    } catch (e) {
+      debugPrint('❌ Error applying tournament rewards: $e');
+    }
+  }
+
+  /// Analyze tournament results and calculate positions
+  Future<List<Map<String, dynamic>>> _analyzeTournamentResults(String tournamentId) async {
+    // Get participants
+    final participantsResponse = await _supabase
+        .from('tournament_participants')
+        .select('user_id, users!inner(username, full_name, elo_rating, spa_points, tournaments_played, tournament_wins)')
+        .eq('tournament_id', tournamentId);
+    
+    final participants = participantsResponse as List<dynamic>;
+    
+    // Get matches
+    final matchesResponse = await _supabase
+        .from('matches')
+        .select('*')
+        .eq('tournament_id', tournamentId);
+    
+    final matches = matchesResponse as List<dynamic>;
+    
+    // Calculate performance for each user
+    final results = <Map<String, dynamic>>[];
+    
+    for (final participant in participants) {
+      final userId = participant['user_id'] as String;
+      final user = participant['users'] as Map<String, dynamic>;
+      
+      // Calculate wins/losses
+      final userMatches = matches.where((m) => 
+          m['player1_id'] == userId || m['player2_id'] == userId).toList();
+      
+      final wins = userMatches.where((m) => m['winner_id'] == userId).length;
+      final losses = userMatches.where((m) => 
+          m['winner_id'] != null && m['winner_id'] != userId).length;
+      
+      results.add({
+        'user_id': userId,
+        'username': user['username'] ?? 'Unknown',
+        'wins': wins,
+        'losses': losses,
+        'matches_played': userMatches.length,
+        'win_rate': userMatches.isNotEmpty ? wins / userMatches.length : 0.0,
+        'current_elo': user['elo_rating'] ?? 1000,
+        'current_spa': user['spa_points'] ?? 0,
+        'tournaments_played': user['tournaments_played'] ?? 0,
+        'tournament_wins': user['tournament_wins'] ?? 0,
+      });
+    }
+    
+    // Sort by wins, then win rate
+    results.sort((a, b) {
+      final winsCompare = (b['wins'] as int).compareTo(a['wins'] as int);
+      if (winsCompare != 0) return winsCompare;
+      return (b['win_rate'] as double).compareTo(a['win_rate'] as double);
+    });
+    
+    // Assign positions
+    for (int i = 0; i < results.length; i++) {
+      results[i]['position'] = i + 1;
+    }
+    
+    return results;
+  }
+
+  /// Log thông tin champion
+  Future<void> _logChampionInfo(String tournamentId, String winnerId) async {
+    try {
+      final results = await Future.wait([
+        _supabase.from('users').select('username, full_name').eq('id', winnerId).maybeSingle(),
+        _supabase.from('tournaments').select('title').eq('id', tournamentId).single(),
+      ]);
+      
+      final winner = results[0];
+      final tournament = results[1];
+      
+      if (winner != null) {
+        final winnerName = winner['full_name'] ?? winner['username'] ?? 'Unknown';
+        debugPrint('🏆 AUTO-COMPLETION CHAMPION: $winnerName');
+        debugPrint('🏆 Tournament: ${tournament?['title'] ?? 'Unknown'}');
+        debugPrint('🏆 Winner ID: ${winnerId.substring(0, 8)}...');
+      }
+      
+    } catch (e) {
+      debugPrint('⚠️ Could not log champion info: $e');
+    }
+  }
+
+  /// Quét tất cả giải đấu active để tự động complete
+  Future<int> scanAndAutoCompleteActiveTournaments() async {
+    try {
+      debugPrint('🔍 Scanning active tournaments for auto-completion...');
+      
+      final tournamentsResponse = await _supabase
+          .from('tournaments')
+          .select('id, title, status')
+          .or('status.eq.active,status.eq.in_progress,status.eq.ongoing');
+      
+      final tournaments = tournamentsResponse as List<dynamic>;
+      
+      if (tournaments.isEmpty) {
+        debugPrint('✅ No active tournaments found');
+        return 0;
+      }
+      
+      debugPrint('🔍 Found ${tournaments.length} active tournaments');
+      
+      int completedCount = 0;
+      for (final tournament in tournaments) {
+        final wasCompleted = await checkAndAutoCompleteTournament(tournament['id']);
+        if (wasCompleted) {
+          completedCount++;
+          debugPrint('✅ Auto-completed: ${tournament['title']}');
+        }
+      }
+      
+      debugPrint('🎯 Auto-completion scan finished: $completedCount tournaments completed');
+      return completedCount;
+      
+    } catch (e) {
+      debugPrint('❌ Error scanning tournaments: $e');
+      return 0;
+    }
+  }
+
+  /// Send tournament completion notifications to all participants
+  Future<void> _sendTournamentCompletionNotifications(String tournamentId, String? winnerId) async {
+    try {
+      debugPrint('📨 Sending tournament completion notifications...');
+      
+      // Get tournament info
+      final tournamentResponse = await _supabase
+          .from('tournaments')
+          .select('title, club_id')
+          .eq('id', tournamentId)
+          .single();
+      
+      final tournament = tournamentResponse;
+      final tournamentTitle = tournament['title'] ?? 'Tournament';
+      
+      // Get winner info if available
+      String championName = 'Unknown Champion';
+      if (winnerId != null) {
+        final winnerResponse = await _supabase
+            .from('users')
+            .select('username, full_name')
+            .eq('id', winnerId)
+            .maybeSingle();
+        
+        if (winnerResponse != null) {
+          championName = winnerResponse['full_name'] ?? winnerResponse['username'] ?? 'Unknown Champion';
+        }
+      }
+      
+      // Get all participants
+      final participantsResponse = await _supabase
+          .from('tournament_participants')
+          .select('user_id')
+          .eq('tournament_id', tournamentId);
+      
+      final participants = participantsResponse as List<dynamic>;
+      
+      // Send notifications to all participants
+      int notificationsSent = 0;
+      
+      for (final participant in participants) {
+        final userId = participant['user_id'] as String;
+        
+        try {
+          // Tournament completion notification
+          await _notificationService.sendNotification(
+            userId: userId,
+            title: '🏆 Giải đấu hoàn thành!',
+            message: 'Giải đấu "$tournamentTitle" đã kết thúc. Chúc mừng nhà vô địch $championName! 🎉',
+            type: 'tournament_completed',
+            data: {
+              'tournament_id': tournamentId,
+              'tournament_title': tournamentTitle,
+              'champion_id': winnerId,
+              'champion_name': championName,
+            },
+          );
+          
+          // Individual reward notification (if user received rewards)
+          if (userId == winnerId) {
+            // Champion notification
+            await _notificationService.sendNotification(
+              userId: userId,
+              title: '👑 Chúc mừng nhà vô địch!',
+              message: 'Bạn đã giành chiến thắng giải đấu "$tournamentTitle"! Phần thưởng ELO và SPA đã được cộng vào tài khoản. 🏆',
+              type: 'tournament_champion',
+              data: {
+                'tournament_id': tournamentId,
+                'tournament_title': tournamentTitle,
+                'position': 1,
+              },
+            );
+          } else {
+            // Participation reward notification
+            await _notificationService.sendNotification(
+              userId: userId,
+              title: '🎁 Phần thưởng tham gia',
+              message: 'Cảm ơn bạn đã tham gia giải đấu "$tournamentTitle". Phần thưởng ELO và SPA đã được cộng vào tài khoản!',
+              type: 'tournament_reward',
+              data: {
+                'tournament_id': tournamentId,
+                'tournament_title': tournamentTitle,
+              },
+            );
+          }
+          
+          notificationsSent += 2; // 2 notifications per user
+          
+        } catch (e) {
+          debugPrint('❌ Error sending notification to user $userId: $e');
+        }
+      }
+      
+      debugPrint('✅ Tournament completion notifications sent: $notificationsSent notifications to ${participants.length} participants');
+      
+    } catch (e) {
+      debugPrint('❌ Error sending tournament completion notifications: $e');
+    }
+  }
 }

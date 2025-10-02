@@ -955,8 +955,9 @@ class CompleteSaboDE16Service {
     final player1Id = match['player1_id'];
     final player2Id = match['player2_id'];
 
-    if (player1Id == null || player2Id == null)
+    if (player1Id == null || player2Id == null) {
       return player1Id ?? player2Id ?? '';
+    }
 
     final p1Index = participants.indexWhere((p) => p['id'] == player1Id);
     final p2Index = participants.indexWhere((p) => p['id'] == player2Id);

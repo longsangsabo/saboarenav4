@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../models/tournament.dart';
-import '../../../services/correct_bracket_logic_service.dart';
 import '../../../services/tournament_progress_service.dart';
 import '../../../services/bracket_visualization_service.dart';
 import '../../../services/tournament_service.dart';

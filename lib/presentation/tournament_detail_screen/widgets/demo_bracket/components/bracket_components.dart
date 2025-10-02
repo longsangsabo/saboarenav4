@@ -140,9 +140,6 @@ class MatchCard extends StatelessWidget {
   Widget build(BuildContext context) {
     // Extract match score for winner determination
     final scoreText = match['score'] ?? '0-0';
-    final scores = scoreText.split('-');
-    final player1Score = scores.isNotEmpty ? int.tryParse(scores[0]) ?? 0 : 0;
-    final player2Score = scores.length > 1 ? int.tryParse(scores[1]) ?? 0 : 0;
     
     final isCompleted = match['status'] == 'completed';
     final winnerId = match['winner_id'];
@@ -151,6 +148,11 @@ class MatchCard extends StatelessWidget {
     
     final player1IsWinner = isCompleted && winnerId == player1Id;
     final player2IsWinner = isCompleted && winnerId == player2Id;
+    
+    // Debug print to see actual data
+    if (isCompleted) {
+      debugPrint('🏆 Match Data: score=$scoreText, winner=$winnerId, status=${match['status']}');
+    }
 
     return Container(
       width: 160, // Giảm width từ 200 xuống 160
@@ -204,19 +206,62 @@ class MatchCard extends StatelessWidget {
                 ),
               ),
             ),
-          const SizedBox(height: 4), // Giảm spacing từ 8 xuống 4
+          const SizedBox(height: 4),
           PlayerRow(
             playerName: match['player1'] ?? 'TBD',
-            score: player1Score.toString(),
+            score: null, // Don't show individual scores
             avatarUrl: match['player1_avatar'],
             isWinner: player1IsWinner,
           ),
-          const Divider(height: 8), // Giảm height từ 16 xuống 8
+          const Divider(height: 8),
           PlayerRow(
             playerName: match['player2'] ?? 'TBD',
-            score: player2Score.toString(),
+            score: null, // Don't show individual scores
             avatarUrl: match['player2_avatar'],
             isWinner: player2IsWinner,
+          ),
+          // Show match score prominently
+          Container(
+            margin: const EdgeInsets.only(top: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: isCompleted && scoreText != '0-0' 
+                ? Colors.green.withOpacity(0.1)
+                : Colors.grey.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(
+                color: isCompleted && scoreText != '0-0' 
+                  ? Colors.green.withOpacity(0.3)
+                  : Colors.grey.withOpacity(0.3),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  isCompleted && scoreText != '0-0' 
+                    ? Icons.sports_score 
+                    : Icons.timer,
+                  size: 12,
+                  color: isCompleted && scoreText != '0-0' 
+                    ? Colors.green 
+                    : Colors.grey[600],
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  isCompleted && scoreText != '0-0' 
+                    ? scoreText 
+                    : '0 - 0',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: isCompleted && scoreText != '0-0' 
+                      ? Colors.green[700] 
+                      : Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -241,8 +286,6 @@ class PlayerRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasScore = score != null && score!.isNotEmpty && score != '0';
-
     return Row(
       children: [
         // Avatar with fallback to initials
@@ -277,19 +320,20 @@ class PlayerRow extends StatelessWidget {
             overflow: TextOverflow.ellipsis, // Thêm ellipsis
           ),
         ),
-        if (hasScore)
+        // Show score only if provided
+        if (score != null)
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), // Giảm padding
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
               color: isWinner ? Colors.green : Colors.grey[200],
-              borderRadius: BorderRadius.circular(8), // Giảm border radius
+              borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
               score!,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: isWinner ? Colors.white : Colors.grey[600],
-                fontSize: 10, // Giảm font size
+                fontSize: 10,
               ),
             ),
           ),

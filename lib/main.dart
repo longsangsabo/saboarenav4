@@ -7,6 +7,8 @@ import '../core/app_export.dart';
 import '../widgets/custom_error_widget.dart';
 import './services/supabase_service.dart';
 import './services/tournament_cache_service_complete.dart';
+import './services/auto_tournament_progression_service.dart';
+import './services/auto_winner_detection_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,6 +25,22 @@ void main() async {
     await TournamentCacheService.initialize();
   } catch (e) {
     debugPrint('Cache service initialization failed (non-critical): $e');
+  }
+
+  // 🎯 Initialize Auto Tournament Progression Service
+  try {
+    AutoTournamentProgressionService.instance.initialize();
+    debugPrint('✅ Auto Tournament Progression Service initialized');
+  } catch (e) {
+    debugPrint('⚠️ Auto Tournament Progression initialization failed: $e');
+  }
+
+  // 🎯 Initialize Auto Winner Detection Service
+  try {
+    AutoWinnerDetectionService.instance.startAutoFixMonitoring();
+    debugPrint('✅ Auto Winner Detection Service initialized');
+  } catch (e) {
+    debugPrint('⚠️ Auto Winner Detection initialization failed: $e');
   }
 
   bool hasShownError = false;

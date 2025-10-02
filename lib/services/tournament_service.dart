@@ -1489,7 +1489,7 @@ class TournamentService {
             player1Id = winnerRef1;
             player2Id = winnerRef2;
             
-            debugPrint('🚀 Match $matchKey uses hardcore advancement: P1=${player1Id}, P2=${player2Id}');
+            debugPrint('🚀 Match $matchKey uses hardcore advancement: P1=$player1Id, P2=$player2Id');
           }
           
           matches.add(TournamentMatch(
