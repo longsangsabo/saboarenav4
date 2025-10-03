@@ -3,9 +3,6 @@ import '../models/tournament.dart';
 import '../models/user_profile.dart';
 import '../core/constants/tournament_constants.dart';
 import 'notification_service.dart';
-import 'complete_double_elimination_service.dart';
-import 'complete_sabo_de16_service.dart';
-import 'complete_sabo_de32_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:math' as math;
 import 'dart:convert';
@@ -904,175 +901,95 @@ class TournamentService {
     return seeded;
   }
 
-  /// 🚀 Generate DE16 bracket using CompleteDoubleEliminationService
+  /// 🚀 DEPRECATED: DE16 bracket generation moved to ProductionBracketService
+  /// This method is kept for backward compatibility but not used anymore
+  /*
   Future<TournamentBracket> _generateDE16Bracket(
     String tournamentId,
     List<UserProfile> participants,
     String seedingMethod,
   ) async {
-    try {
-      debugPrint('🎯 DE16: Using CompleteDoubleEliminationService for precise bracket generation');
-
-      // Seeding participants first
-      final seededParticipants = await _seedParticipants(participants, seedingMethod);
-      debugPrint('✅ DE16: Participants seeded successfully');
-
-      // Convert UserProfile to format expected by CompleteDoubleEliminationService
-      final participantsData = seededParticipants.map((seeded) => {
-        'user_id': seeded.participant.id,
-        'seed_number': seeded.seedNumber,
-        'full_name': seeded.participant.fullName,
-        'username': seeded.participant.username,
-        'elo_rating': seeded.participant.eloRating,
-        'avatar_url': seeded.participant.avatarUrl,
-      }).toList();
-
-      // Generate bracket using CompleteDoubleEliminationService
-      final de16Service = CompleteDoubleEliminationService.instance;
-      final result = await de16Service.generateDE16Bracket(
-        tournamentId: tournamentId,
-        participants: participantsData,
-      );
-
-      if (!result['success']) {
-        throw Exception('DE16 bracket generation failed: ${result['error']}');
-      }
-
-      debugPrint('✅ DE16: Generated ${result['matchesGenerated']} matches with CompleteDoubleEliminationService');
-
-      // Update tournament status to ongoing
-      await updateTournamentStatus(tournamentId, 'ongoing');
-      debugPrint('✅ DE16: Tournament status updated to ongoing');
-
-      // Return TournamentBracket with DE16 specific data
-      return TournamentBracket(
-        tournamentId: tournamentId,
-        format: 'double_elimination',
-        participants: seededParticipants,
-        matches: [], // Matches are already in database via CompleteDoubleEliminationService
-        rounds: 8, // DE16 has 8 round levels (WB: 4, LB: 7, GF: 1)
-        status: 'ready',
-        createdAt: DateTime.now(),
-      );
-
-    } catch (error) {
-      debugPrint('❌ DE16 bracket generation error: $error');
-      throw Exception('Failed to generate DE16 bracket: $error');
-    }
+    // DEPRECATED: Use ProductionBracketService.createBracket() instead
+    // See lib/services/production_bracket_service.dart for new implementation
+    throw UnimplementedError('Use ProductionBracketService.createBracket() instead');
   }
 
-  /// 🏆 Generate SABO DE16 bracket using bracket generator service
+  /// 🏆 DEPRECATED: SABO DE16 bracket generation moved to ProductionBracketService  
+  /// This method is kept for backward compatibility but not used anymore
   Future<TournamentBracket> _generateSaboDE16Bracket(
     String tournamentId,
     List<UserProfile> participants,
     String seedingMethod,
   ) async {
-    try {
-      debugPrint('🏆 SABO DE16: Using CompleteSaboDE16Service for precise bracket generation');
-
-      // Seeding participants first
-      final seededParticipants = await _seedParticipants(participants, seedingMethod);
-      debugPrint('✅ SABO DE16: Participants seeded successfully');
-
-      // Convert UserProfile to format expected by CompleteSaboDE16Service
-      final participantsData = seededParticipants.map((seeded) => {
-        'user_id': seeded.participant.id,
-        'seed_number': seeded.seedNumber,
-        'full_name': seeded.participant.fullName,
-        'username': seeded.participant.username,
-        'elo_rating': seeded.participant.eloRating,
-        'avatar_url': seeded.participant.avatarUrl,
-      }).toList();
-
-      // Generate bracket using CompleteSaboDE16Service
-      final saboDE16Service = CompleteSaboDE16Service();
-      final result = await saboDE16Service.generateSaboDE16Bracket(
-        tournamentId: tournamentId,
-        participants: participantsData,
-      );
-
-      if (!result['success']) {
-        throw Exception('SABO DE16 bracket generation failed: ${result['error']}');
-      }
-
-      debugPrint('✅ SABO DE16: Generated ${result['matchesGenerated']} matches with CompleteSaboDE16Service');
-
-      // Update tournament status to ongoing
-      await updateTournamentStatus(tournamentId, 'ongoing');
-      debugPrint('✅ SABO DE16: Tournament status updated to ongoing');
-
-      // Return TournamentBracket with SABO DE16 specific data
-      return TournamentBracket(
-        tournamentId: tournamentId,
-        format: 'sabo_de16',
-        participants: seededParticipants,
-        matches: [], // Matches are already in database via CompleteSaboDE16Service
-        rounds: 27, // SABO DE16 has 27 total matches
-        status: 'ready',
-        createdAt: DateTime.now(),
-      );
-
-    } catch (error) {
-      debugPrint('❌ SABO DE16 bracket generation error: $error');
-      throw Exception('Failed to generate SABO DE16 bracket: $error');
-    }
+    // DEPRECATED: Use ProductionBracketService.createBracket() instead
+    // See lib/services/production_bracket_service.dart for new implementation
+    throw UnimplementedError('Use ProductionBracketService.createBracket() instead');
   }
 
-  /// 🎯 Generate SABO DE32 bracket using CompleteSaboDE32Service
+  /// 🎯 DEPRECATED: SABO DE32 bracket generation moved to ProductionBracketService
+  /// This method is kept for backward compatibility but not used anymore
   Future<TournamentBracket> _generateSaboDE32Bracket(
     String tournamentId,
     List<UserProfile> participants,
     String seedingMethod,
   ) async {
-    try {
-      debugPrint('🎯 SABO DE32: Using CompleteSaboDE32Service for precise bracket generation');
+    // DEPRECATED: Use ProductionBracketService.createBracket() instead
+    // See lib/services/production_bracket_service.dart for new implementation
+    throw UnimplementedError('Use ProductionBracketService.createBracket() instead');
+  }
+  */
 
-      // Seeding participants first
-      final seededParticipants = await _seedParticipants(participants, seedingMethod);
-      debugPrint('✅ SABO DE32: Participants seeded successfully');
+  // NOTE: All bracket generation now handled by ProductionBracketService
+  // and TournamentManagementCenterScreen using hardcoded services
+  Future<TournamentBracket> _generateDE16Bracket(
+    String tournamentId,
+    List<UserProfile> participants,
+    String seedingMethod,
+  ) async {
+    final seededParticipants = await _seedParticipants(participants, seedingMethod);
+    return TournamentBracket(
+      tournamentId: tournamentId,
+      format: 'double_elimination',
+      participants: seededParticipants,
+      matches: [], // Handled by ProductionBracketService
+      rounds: 8,
+      status: 'ready',
+      createdAt: DateTime.now(),
+    );
+  }
 
-      // Convert UserProfile to format expected by CompleteSaboDE32Service
-      final participantsData = seededParticipants.map((seeded) => {
-        'user_id': seeded.participant.id,
-        'seed_number': seeded.seedNumber,
-        'full_name': seeded.participant.fullName,
-        'username': seeded.participant.username,
-        'elo_rating': seeded.participant.eloRating,
-        'avatar_url': seeded.participant.avatarUrl,
-      }).toList();
+  Future<TournamentBracket> _generateSaboDE16Bracket(
+    String tournamentId,
+    List<UserProfile> participants,
+    String seedingMethod,
+  ) async {
+    final seededParticipants = await _seedParticipants(participants, seedingMethod);
+    return TournamentBracket(
+      tournamentId: tournamentId,
+      format: 'sabo_de16',
+      participants: seededParticipants,
+      matches: [], // Handled by ProductionBracketService
+      rounds: 27,
+      status: 'ready',
+      createdAt: DateTime.now(),
+    );
+  }
 
-      // Generate bracket using CompleteSaboDE32Service
-      final saboDE32Service = CompleteSaboDE32Service();
-      final result = await saboDE32Service.generateSaboDE32Bracket(
-        tournamentId: tournamentId,
-        participants: participantsData,
-      );
-
-      if (!result['success']) {
-        throw Exception('SABO DE32 bracket generation failed: ${result['error']}');
-      }
-
-      debugPrint('✅ SABO DE32: Generated ${result['matchesGenerated']} matches with CompleteSaboDE32Service');
-
-      // Update tournament status to ongoing
-      await updateTournamentStatus(tournamentId, 'ongoing');
-      debugPrint('✅ SABO DE32: Tournament status updated to ongoing');
-
-      // Return TournamentBracket with SABO DE32 specific data
-      return TournamentBracket(
-        tournamentId: tournamentId,
-        format: 'sabo_de32',
-        participants: seededParticipants,
-        matches: [], // Matches are already in database via CompleteSaboDE32Service
-        rounds: 55, // SABO DE32 has 55 total matches
-        status: 'ready',
-        createdAt: DateTime.now(),
-      );
-
-    } catch (error) {
-      debugPrint('❌ SABO DE32 bracket generation error: $error');
-      throw Exception('Failed to generate SABO DE32 bracket: $error');
-    }
+  Future<TournamentBracket> _generateSaboDE32Bracket(
+    String tournamentId,
+    List<UserProfile> participants,
+    String seedingMethod,
+  ) async {
+    final seededParticipants = await _seedParticipants(participants, seedingMethod);
+    return TournamentBracket(
+      tournamentId: tournamentId,
+      format: 'sabo_de32',
+      participants: seededParticipants,
+      matches: [], // Handled by ProductionBracketService
+      rounds: 55,
+      status: 'ready',
+      createdAt: DateTime.now(),
+    );
   }
 
   /// Calculate hybrid seeding score
