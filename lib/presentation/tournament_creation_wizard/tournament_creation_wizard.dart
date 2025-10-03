@@ -378,7 +378,10 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
               DropdownMenuItem(value: '8-ball', child: Text('8-Ball')),
               DropdownMenuItem(value: '9-ball', child: Text('9-Ball')),
               DropdownMenuItem(value: '10-ball', child: Text('10-Ball')),
-              DropdownMenuItem(value: 'straight-pool', child: Text('Straight Pool')),
+              DropdownMenuItem(value: 'straight', child: Text('Straight Pool')),
+              DropdownMenuItem(value: 'carom', child: Text('Carom')),
+              DropdownMenuItem(value: 'snooker', child: Text('Snooker')),
+              DropdownMenuItem(value: 'other', child: Text('Khác')),
             ],
             onChanged: (value) {
               _onDataChanged({'gameType': value});
