@@ -38,112 +38,98 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
   bool _isLoading = true;
   String? _errorMessage;
   String _selectedFilter = 'all'; // all, pending, in_progress, completed
-  int? _selectedRound; // null = show all, specific number = filter by round_number
+  // 🔥 STANDARDIZED: Filter by bracket_type + stage_round instead of round_number
+  String? _selectedBracketType; // null = show all, 'WB', 'LB', 'GF'
+  int? _selectedStageRound; // null = show all
   int _totalParticipants = 0; // Dynamic participant count
 
-  // Dynamic round name calculation based on participants
-  String _getRoundName(int roundNumber, int totalParticipants) {
-    // Special handling for SABO DE16 format (31 matches, complex structure)
-    if (totalParticipants == 16) {
-      switch (roundNumber) {
-        case 1: return 'VÒNG 1';
-        case 2: return 'VÒNG 2'; 
-        case 3: return 'VÒNG 3';
-        case 4: return 'VÒNG 4';
-        case 101: return 'BẢNG THUA A1';
-        case 102: return 'BẢNG THUA A2';
-        case 103: return 'BẢNG THUA A3';
-        case 104: return 'BẢNG THUA A4';
-        case 201: return 'BẢNG THUA B1';
-        case 202: return 'BẢNG THUA B2';
-        case 250: return 'BÁN KẾT';
-        case 251: return 'BÁN KẾT 2';
-        case 999: return 'CHUNG KẾT';
-        default: return 'VÒNG $roundNumber';
-      }
-    }
-
-    // Special handling for SABO DE32 format (55 matches, two-group structure)
-    if (totalParticipants == 32) {
-      switch (roundNumber) {
-        case 1: return 'VÒNG 1';
-        case 2: return 'VÒNG 2'; 
-        case 3: return 'VÒNG 3';
-        case 4: return 'VÒNG 4';
-        case 101: return 'BẢNG THUA 1';
-        case 102: return 'BẢNG THUA 2';
-        case 103: return 'BẢNG THUA 3';
-        case 104: return 'BẢNG THUA 4';
-        case 105: return 'BẢNG THUA 5';
-        case 106: return 'BẢNG THUA 6';
-        case 400: return 'BÁN KẾT 1';
-        case 401: return 'BÁN KẾT 2';
-        case 500: return 'CHUNG KẾT';
-        default: return 'VÒNG $roundNumber';
-      }
-    }
-    
-    // Calculate players remaining after this round for standard formats
-    int divisor = (1 << roundNumber);
-    if (divisor == 0 || totalParticipants == 0) {
-      return 'VÒNG $roundNumber';
-    }
-    
-    int playersAfterRound = totalParticipants ~/ divisor;
-    
-    switch (playersAfterRound) {
-      case 1:
-        return 'CHUNG KẾT';
-      case 2:
-        return 'BÁN KẾT';
-      case 4:
-        return 'TỨ KẾT';
-      case 8:
-        return 'VÒNG 1/8';
-      case 16:
-        return 'VÒNG 1/16';
-      case 32:
-        return 'VÒNG 1/32';
-      default:
-        if (roundNumber == 1) {
-          return 'VÒNG 1';
+  // 🔥 STANDARDIZED: Get round name using bracket_type + stage_round
+  String _getRoundName(String bracketType, int stageRound, String? bracketGroup) {
+    switch (bracketType) {
+      case 'WB': // Winner Bracket
+        if (bracketGroup != null) {
+          // Multi-group format (DE32+)
+          return 'THẮNG $bracketGroup${stageRound}';
         }
-        return 'VÒNG $roundNumber';
+        // Single group format (SE, DE16)
+        switch (stageRound) {
+          case 1: return 'VÒNG 1';
+          case 2: return 'VÒNG 2';
+          case 3: return 'VÒNG 3';
+          case 4: return 'VÒNG 4';
+          case 5: return 'VÒNG 5';
+          default: return 'VÒNG $stageRound';
+        }
+      
+      case 'LB': // Loser Bracket
+        if (bracketGroup != null) {
+          // Multi-group format (DE32+)
+          return 'THUA $bracketGroup${stageRound}';
+        }
+        // Single group format (DE16)
+        switch (stageRound) {
+          case 1: return 'BẢNG THUA 1';
+          case 2: return 'BẢNG THUA 2';
+          case 3: return 'BẢNG THUA 3';
+          case 4: return 'BẢNG THUA 4';
+          case 5: return 'BẢNG THUA 5';
+          case 6: return 'BẢNG THUA 6';
+          default: return 'BẢNG THUA $stageRound';
+        }
+      
+      case 'GF': // Grand Final
+        return 'CHUNG KẾT';
+      
+      default:
+        return 'VÒNG $stageRound';
     }
   }
 
-  // Get available rounds for this tournament
+  // 🔥 STANDARDIZED: Get available rounds using bracket_type + stage_round
   List<Map<String, dynamic>> _getAvailableRounds() {
     if (_matches.isEmpty) return [];
     
-    // Get unique rounds from matches
-    Set<int> uniqueRounds = _matches.map((m) => (m['round'] ?? m['round_number'] ?? 1) as int).toSet();
-    List<int> sortedRounds = uniqueRounds.toList()..sort();
+    // Group matches by bracket_type + stage_round + bracket_group
+    Map<String, List<Map<String, dynamic>>> groupedMatches = {};
     
-    // If _totalParticipants not available, estimate from matches
-    int participantCount = _totalParticipants;
-    if (participantCount == 0) {
-      // Count unique player IDs in first round (Winner Bracket R1)
-      Set<String> firstRoundPlayers = {};
-      for (var match in _matches) {
-        if ((match['round'] ?? match['round_number'] ?? 1) == 1) {
-          if (match['player1_id'] != null) firstRoundPlayers.add(match['player1_id']);
-          if (match['player2_id'] != null) firstRoundPlayers.add(match['player2_id']);
-        }
+    for (var match in _matches) {
+      // Use new standardized fields
+      final bracketType = match['bracket_type'] ?? 'WB';
+      final stageRound = match['stage_round'] ?? match['round_number'] ?? 1;
+      final bracketGroup = match['bracket_group'];
+      
+      // Create unique key for this round tab
+      final key = '$bracketType-$stageRound-${bracketGroup ?? ""}';
+      
+      if (!groupedMatches.containsKey(key)) {
+        groupedMatches[key] = [];
       }
-      participantCount = firstRoundPlayers.length;
-      if (participantCount == 0) {
-        // Fallback: estimate from match count (R1 matches = participants / 2)
-        int r1Matches = _matches.where((m) => (m['round'] ?? m['round_number'] ?? 1) == 1).length;
-        participantCount = r1Matches * 2;
-      }
+      groupedMatches[key]!.add(match);
     }
     
-    return sortedRounds.map((round) => {
-      'round': round,
-      'name': _getRoundName(round, participantCount),
-      'matches': _matches.where((m) => (m['round'] ?? m['round_number'] ?? 1) == round).length,
-    }).toList();
+    // Convert to list and sort by display_order
+    List<Map<String, dynamic>> rounds = [];
+    groupedMatches.forEach((key, matches) {
+      final firstMatch = matches.first;
+      final bracketType = firstMatch['bracket_type'] ?? 'WB';
+      final stageRound = firstMatch['stage_round'] ?? firstMatch['round_number'] ?? 1;
+      final bracketGroup = firstMatch['bracket_group'];
+      final displayOrder = firstMatch['display_order'] ?? 0;
+      
+      rounds.add({
+        'bracket_type': bracketType,
+        'stage_round': stageRound,
+        'bracket_group': bracketGroup,
+        'display_order': displayOrder,
+        'name': _getRoundName(bracketType, stageRound, bracketGroup),
+        'matches': matches.length,
+      });
+    });
+    
+    // Sort by display_order
+    rounds.sort((a, b) => (a['display_order'] as int).compareTo(b['display_order'] as int));
+    
+    return rounds;
   }
 
   @override
@@ -270,9 +256,12 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
   List<Map<String, dynamic>> get _filteredMatches {
     var filtered = _matches;
     
-    // First filter by round if selected
-    if (_selectedRound != null) {
-      filtered = filtered.where((m) => m['round_number'] == _selectedRound).toList();
+    // 🔥 STANDARDIZED: Filter by bracket_type + stage_round
+    if (_selectedBracketType != null) {
+      filtered = filtered.where((m) => m['bracket_type'] == _selectedBracketType).toList();
+    }
+    if (_selectedStageRound != null) {
+      filtered = filtered.where((m) => (m['stage_round'] ?? m['round_number']) == _selectedStageRound).toList();
     }
     
     // Then filter by status
@@ -396,8 +385,8 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
                           'completed'),
                       ],
                     ),
-                    // Row 2: Dynamic round filters based on actual tournament data  
-                    if (_totalParticipants > 0) ...[
+                    // Row 2: Dynamic round filters based on bracket_type + stage_round
+                    if (_matches.isNotEmpty) ...[
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Row(
@@ -407,7 +396,8 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
                               child: _buildRoundFilterButton(
                                 roundData['name'], 
                                 roundData['matches'].toString(), 
-                                roundData['round'], // Pass round number instead of string
+                                roundData['bracket_type'], // 🔥 NEW: bracket type
+                                roundData['stage_round'], // 🔥 NEW: stage round
                               ),
                             )
                           ).toList(),
@@ -486,13 +476,20 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
     );
   }
 
-  // Build round filter button with round_number filtering
-  Widget _buildRoundFilterButton(String label, String value, int roundNumber) {
-    bool isSelected = _selectedRound == roundNumber;
+  // 🔥 STANDARDIZED: Build round filter button with bracket_type + stage_round filtering
+  Widget _buildRoundFilterButton(String label, String value, String bracketType, int stageRound) {
+    bool isSelected = _selectedBracketType == bracketType && _selectedStageRound == stageRound;
     
     return InkWell(
       onTap: () => setState(() {
-        _selectedRound = isSelected ? null : roundNumber; // Toggle: click again to show all
+        if (isSelected) {
+          // Toggle: click again to show all
+          _selectedBracketType = null;
+          _selectedStageRound = null;
+        } else {
+          _selectedBracketType = bracketType;
+          _selectedStageRound = stageRound;
+        }
         _selectedFilter = 'all'; // Reset status filter when changing rounds
       }),
       child: Container(

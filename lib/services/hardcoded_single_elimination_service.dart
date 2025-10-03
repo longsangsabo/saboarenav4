@@ -48,6 +48,10 @@ class HardcodedSingleEliminationService {
           final currentMatchNumber = matchCounter;
           final nextMatchNumber = advancementMap[currentMatchNumber];
           
+          // Calculate display_order: (bracket_priority * 1000) + (stage_round * 100) + position
+          // For Single Elimination (Winner Bracket only): priority = 1
+          final displayOrder = (1 * 1000) + (round * 100) + matchInRound;
+          
           final match = {
             'tournament_id': tournamentId,
             'round_number': round,
@@ -60,6 +64,12 @@ class HardcodedSingleEliminationService {
             'status': 'pending',
             'match_type': 'tournament',
             'winner_advances_to': nextMatchNumber, // 🔥 HARDCODED ADVANCEMENT
+            'bracket_format': 'single_elimination',
+            // 🔥 NEW STANDARDIZED FIELDS
+            'bracket_type': 'WB', // Winner Bracket (Single Elimination only has winner bracket)
+            'bracket_group': null, // No groups in Single Elimination
+            'stage_round': round, // Normalized round number (1, 2, 3, 4...)
+            'display_order': displayOrder, // For UI sorting
             'created_at': DateTime.now().toIso8601String(),
           };
 
@@ -67,9 +77,9 @@ class HardcodedSingleEliminationService {
           matchCounter++;
           
           if (nextMatchNumber != null) {
-            debugPrint('$_tag:   Match $currentMatchNumber (R$round) → advances to Match $nextMatchNumber');
+            debugPrint('$_tag:   Match $currentMatchNumber (R$round-M$matchInRound) [Order:$displayOrder] → advances to Match $nextMatchNumber');
           } else {
-            debugPrint('$_tag:   Match $currentMatchNumber (R$round) → FINAL (no advancement)');
+            debugPrint('$_tag:   Match $currentMatchNumber (R$round-M$matchInRound) [Order:$displayOrder] → FINAL (no advancement)');
           }
         }
       }

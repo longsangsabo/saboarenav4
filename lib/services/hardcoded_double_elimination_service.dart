@@ -37,9 +37,10 @@ class HardcodedDoubleEliminationService {
       // Winner Bracket Round 1: Matches 1-8
       for (int i = 1; i <= 8; i++) {
         final advancement = advancementMap[i]!;
+        final displayOrder = (1 * 1000) + (1 * 100) + i; // WB priority=1, stage_round=1
         allMatches.add({
           'tournament_id': tournamentId,
-          'round_number': 1, // WB R1
+          'round_number': 1, // WB R1 (legacy)
           'match_number': i,
           'player1_id': participantIds[(i-1) * 2],
           'player2_id': participantIds[(i-1) * 2 + 1],
@@ -51,6 +52,11 @@ class HardcodedDoubleEliminationService {
           'bracket_format': 'double_elimination',
           'winner_advances_to': advancement['winner'],
           'loser_advances_to': advancement['loser'],
+          // 🔥 STANDARDIZED FIELDS
+          'bracket_type': 'WB', // Winner Bracket
+          'bracket_group': null, // DE16 doesn't use groups
+          'stage_round': 1, // Normalized round
+          'display_order': displayOrder, // 1101-1108
           'created_at': DateTime.now().toIso8601String(),
         });
       }
@@ -58,9 +64,10 @@ class HardcodedDoubleEliminationService {
       // Winner Bracket Round 2: Matches 9-12
       for (int i = 9; i <= 12; i++) {
         final advancement = advancementMap[i]!;
+        final displayOrder = (1 * 1000) + (2 * 100) + (i - 8); // WB priority=1, stage_round=2
         allMatches.add({
           'tournament_id': tournamentId,
-          'round_number': 2, // WB R2
+          'round_number': 2, // WB R2 (legacy)
           'match_number': i,
           'player1_id': null,
           'player2_id': null,
@@ -72,6 +79,11 @@ class HardcodedDoubleEliminationService {
           'bracket_format': 'double_elimination',
           'winner_advances_to': advancement['winner'],
           'loser_advances_to': advancement['loser'],
+          // 🔥 STANDARDIZED FIELDS
+          'bracket_type': 'WB',
+          'bracket_group': null,
+          'stage_round': 2,
+          'display_order': displayOrder, // 1201-1204
           'created_at': DateTime.now().toIso8601String(),
         });
       }
@@ -79,9 +91,10 @@ class HardcodedDoubleEliminationService {
       // Winner Bracket Round 3: Matches 13-14
       for (int i = 13; i <= 14; i++) {
         final advancement = advancementMap[i]!;
+        final displayOrder = (1 * 1000) + (3 * 100) + (i - 12);
         allMatches.add({
           'tournament_id': tournamentId,
-          'round_number': 3, // WB R3
+          'round_number': 3, // WB R3 (legacy)
           'match_number': i,
           'player1_id': null,
           'player2_id': null,
@@ -93,6 +106,11 @@ class HardcodedDoubleEliminationService {
           'bracket_format': 'double_elimination',
           'winner_advances_to': advancement['winner'],
           'loser_advances_to': advancement['loser'],
+          // 🔥 STANDARDIZED FIELDS
+          'bracket_type': 'WB',
+          'bracket_group': null,
+          'stage_round': 3,
+          'display_order': displayOrder, // 1301-1302
           'created_at': DateTime.now().toIso8601String(),
         });
       }
@@ -101,7 +119,7 @@ class HardcodedDoubleEliminationService {
       final advancement15 = advancementMap[15]!;
       allMatches.add({
         'tournament_id': tournamentId,
-        'round_number': 4, // WB Final
+        'round_number': 4, // WB Final (legacy)
         'match_number': 15,
         'player1_id': null,
         'player2_id': null,
@@ -113,15 +131,21 @@ class HardcodedDoubleEliminationService {
         'bracket_format': 'double_elimination',
         'winner_advances_to': advancement15['winner'], // To Grand Final
         'loser_advances_to': advancement15['loser'], // To LB Final
+        // 🔥 STANDARDIZED FIELDS
+        'bracket_type': 'WB',
+        'bracket_group': null,
+        'stage_round': 4,
+        'display_order': 1401, // WB Final
         'created_at': DateTime.now().toIso8601String(),
       });
 
       // Loser Bracket Round 1: Matches 16-23
       for (int i = 16; i <= 23; i++) {
         final advancement = advancementMap[i]!;
+        final displayOrder = (2 * 1000) + (1 * 100) + (i - 15); // LB priority=2, stage_round=1
         allMatches.add({
           'tournament_id': tournamentId,
-          'round_number': 101, // LB R1
+          'round_number': 101, // LB R1 (legacy)
           'match_number': i,
           'player1_id': null,
           'player2_id': null,
@@ -133,6 +157,11 @@ class HardcodedDoubleEliminationService {
           'bracket_format': 'double_elimination',
           'winner_advances_to': advancement['winner'],
           'loser_advances_to': null, // Eliminated
+          // 🔥 STANDARDIZED FIELDS
+          'bracket_type': 'LB', // Loser Bracket
+          'bracket_group': null,
+          'stage_round': 1,
+          'display_order': displayOrder, // 2101-2108
           'created_at': DateTime.now().toIso8601String(),
         });
       }
@@ -140,9 +169,10 @@ class HardcodedDoubleEliminationService {
       // Loser Bracket Round 2: Matches 24-27
       for (int i = 24; i <= 27; i++) {
         final advancement = advancementMap[i]!;
+        final displayOrder = (2 * 1000) + (2 * 100) + (i - 23);
         allMatches.add({
           'tournament_id': tournamentId,
-          'round_number': 102, // LB R2
+          'round_number': 102, // LB R2 (legacy)
           'match_number': i,
           'player1_id': null,
           'player2_id': null,
@@ -154,6 +184,11 @@ class HardcodedDoubleEliminationService {
           'bracket_format': 'double_elimination',
           'winner_advances_to': advancement['winner'],
           'loser_advances_to': null, // Eliminated
+          // 🔥 STANDARDIZED FIELDS
+          'bracket_type': 'LB',
+          'bracket_group': null,
+          'stage_round': 2,
+          'display_order': displayOrder, // 2201-2204
           'created_at': DateTime.now().toIso8601String(),
         });
       }
@@ -161,9 +196,10 @@ class HardcodedDoubleEliminationService {
       // Loser Bracket Round 3: Matches 28-29
       for (int i = 28; i <= 29; i++) {
         final advancement = advancementMap[i]!;
+        final displayOrder = (2 * 1000) + (3 * 100) + (i - 27);
         allMatches.add({
           'tournament_id': tournamentId,
-          'round_number': 103, // LB R3
+          'round_number': 103, // LB R3 (legacy)
           'match_number': i,
           'player1_id': null,
           'player2_id': null,
@@ -175,6 +211,11 @@ class HardcodedDoubleEliminationService {
           'bracket_format': 'double_elimination',
           'winner_advances_to': advancement['winner'],
           'loser_advances_to': null, // Eliminated
+          // 🔥 STANDARDIZED FIELDS
+          'bracket_type': 'LB',
+          'bracket_group': null,
+          'stage_round': 3,
+          'display_order': displayOrder, // 2301-2302
           'created_at': DateTime.now().toIso8601String(),
         });
       }
@@ -183,7 +224,7 @@ class HardcodedDoubleEliminationService {
       final advancement30 = advancementMap[30]!;
       allMatches.add({
         'tournament_id': tournamentId,
-        'round_number': 104, // LB R4
+        'round_number': 104, // LB R4 (legacy)
         'match_number': 30,
         'player1_id': null,
         'player2_id': null,
@@ -195,13 +236,18 @@ class HardcodedDoubleEliminationService {
         'bracket_format': 'double_elimination',
         'winner_advances_to': advancement30['winner'], // To Grand Final
         'loser_advances_to': null, // Eliminated
+        // 🔥 STANDARDIZED FIELDS
+        'bracket_type': 'LB',
+        'bracket_group': null,
+        'stage_round': 4,
+        'display_order': 2401, // LB Final
         'created_at': DateTime.now().toIso8601String(),
       });
 
       // Grand Final: Match 31
       allMatches.add({
         'tournament_id': tournamentId,
-        'round_number': 999, // Grand Final
+        'round_number': 999, // Grand Final (legacy)
         'match_number': 31,
         'player1_id': null,
         'player2_id': null,
@@ -212,6 +258,11 @@ class HardcodedDoubleEliminationService {
         'match_type': 'tournament',
         'bracket_format': 'double_elimination',
         'winner_advances_to': null, // Champion!
+        // 🔥 STANDARDIZED FIELDS
+        'bracket_type': 'GF', // Grand Final
+        'bracket_group': null,
+        'stage_round': 1, // GF only has 1 round
+        'display_order': 3101, // GF priority=3 (highest)
         'loser_advances_to': null, // Runner-up
         'created_at': DateTime.now().toIso8601String(),
       });
