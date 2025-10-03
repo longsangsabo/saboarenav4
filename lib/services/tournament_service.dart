@@ -314,6 +314,11 @@ class TournamentService {
           "winner_advances_to": match['winner_advances_to'],
           "loser_advances_to": match['loser_advances_to'],
           "bracket_format": match['bracket_format'],
+          // ✅ ADD HIERARCHICAL STRUCTURE FIELDS FOR SABO FORMATS
+          "bracket_type": match['bracket_type'],
+          "bracket_group": match['bracket_group'], // 'A', 'B', or null for cross finals
+          "stage_round": match['stage_round'],
+          "display_order": match['display_order'],
         };
       }).toList();
     } catch (error) {

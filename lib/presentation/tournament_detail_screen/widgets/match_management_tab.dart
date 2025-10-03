@@ -41,51 +41,215 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
   // 🔥 STANDARDIZED: Filter by bracket_type + stage_round instead of round_number
   String? _selectedBracketType; // null = show all, 'WB', 'LB', 'GF'
   int? _selectedStageRound; // null = show all
+  String? _selectedBracketGroup; // null = show all, 'A', 'B', 'CROSS'
   int _totalParticipants = 0; // Dynamic participant count
+
+  // 🔥 NEW: Get hierarchical structure for complex formats (SABO DE32/DE16)
+  Map<String, dynamic> _getHierarchicalStructure() {
+    // Apply status filter first
+    final filteredMatches = _getFilteredMatches();
+    
+    if (filteredMatches.isEmpty) return {};
+    
+    // Detect format by checking bracket_group presence
+    bool hasBracketGroups = filteredMatches.any((m) => m['bracket_group'] != null);
+    debugPrint('🔍 Hierarchical structure: hasBracketGroups=$hasBracketGroups, total matches=${filteredMatches.length}');
+    if (filteredMatches.isNotEmpty) {
+      final firstMatch = filteredMatches.first;
+      debugPrint('  First match: bracket_group=${firstMatch['bracket_group']}, bracket_type=${firstMatch['bracket_type']}, stage_round=${firstMatch['stage_round']}');
+    }
+    
+    Map<String, dynamic> structure = {};
+    
+    for (var match in filteredMatches) {
+      final bracketGroup = match['bracket_group']; // 'A', 'B', null
+      final bracketType = match['bracket_type'] ?? 'WB'; // 'WB', 'LB-A', 'LB-B', 'CROSS', 'GF'
+      final stageRound = match['stage_round'] ?? match['round_number'] ?? 1;
+      final displayOrder = match['display_order'] ?? 0;
+      
+      // Level 1: Bracket Group (only for SABO DE32+)
+      String level1Key;
+      String level1Label;
+      
+      if (hasBracketGroups) {
+        if (bracketGroup == 'A') {
+          level1Key = 'group_a';
+          level1Label = '📁 Group A';
+        } else if (bracketGroup == 'B') {
+          level1Key = 'group_b';
+          level1Label = '📁 Group B';
+        } else {
+          // Cross Finals or other
+          level1Key = 'cross_finals';
+          level1Label = '🏆 Cross Finals';
+        }
+      } else {
+        // Regular DE16 or SE - use bracket_type as top level
+        level1Key = bracketType.toLowerCase();
+        if (bracketType == 'WB') {
+          level1Label = '🎯 Winner Bracket';
+        } else if (bracketType == 'LB') {
+          level1Label = '🔄 Loser Bracket';
+        } else if (bracketType == 'GF') {
+          level1Label = '🏆 Grand Final';
+        } else {
+          level1Label = bracketType;
+        }
+      }
+      
+      // Level 2: Bracket Type (for SABO) or Stage Round (for regular formats)
+      String level2Key;
+      String level2Label;
+      
+      if (hasBracketGroups) {
+        // SABO format - use bracket_type as level 2
+        level2Key = bracketType;
+        if (bracketType == 'WB') {
+          level2Label = '  ├─ WB (Winner Bracket)';
+        } else if (bracketType == 'LB-A') {
+          level2Label = '  ├─ LB-A (Loser Branch A)';
+        } else if (bracketType == 'LB-B') {
+          level2Label = '  └─ LB-B (Loser Branch B)';
+        } else if (bracketType == 'CROSS') {
+          level2Label = '  ├─ Semi-Finals';
+        } else if (bracketType == 'GF') {
+          level2Label = '  └─ Grand Final';
+        } else {
+          level2Label = '  ├─ $bracketType';
+        }
+      } else {
+        // Regular format - stage_round is the key
+        level2Key = 'round_$stageRound';
+        level2Label = '  Round $stageRound';
+      }
+      
+      // Level 3: Stage Round (always)
+      String level3Key = 'round_$stageRound';
+      String level3Label = '    └─ Round $stageRound';
+      
+      // Initialize structure
+      if (!structure.containsKey(level1Key)) {
+        structure[level1Key] = {
+          'label': level1Label,
+          'display_order': displayOrder,
+          'children': <String, dynamic>{},
+          'matches': <Map<String, dynamic>>[],
+        };
+      }
+      
+      if (hasBracketGroups) {
+        // 3-level hierarchy for SABO
+        if (!structure[level1Key]['children'].containsKey(level2Key)) {
+          structure[level1Key]['children'][level2Key] = {
+            'label': level2Label,
+            'display_order': displayOrder,
+            'children': <String, dynamic>{},
+            'matches': <Map<String, dynamic>>[],
+          };
+        }
+        
+        if (!structure[level1Key]['children'][level2Key]['children'].containsKey(level3Key)) {
+          structure[level1Key]['children'][level2Key]['children'][level3Key] = {
+            'label': level3Label,
+            'display_order': displayOrder,
+            'matches': <Map<String, dynamic>>[],
+          };
+        }
+        
+        structure[level1Key]['children'][level2Key]['children'][level3Key]['matches'].add(match);
+      } else {
+        // 2-level hierarchy for regular formats
+        if (!structure[level1Key]['children'].containsKey(level2Key)) {
+          structure[level1Key]['children'][level2Key] = {
+            'label': level2Label,
+            'display_order': displayOrder,
+            'matches': <Map<String, dynamic>>[],
+          };
+        }
+        
+        structure[level1Key]['children'][level2Key]['matches'].add(match);
+      }
+    }
+    
+    return structure;
+  }
 
   // 🔥 STANDARDIZED: Get round name using bracket_type + stage_round
   String _getRoundName(String bracketType, int stageRound, String? bracketGroup) {
+    // For SABO formats with bracket_group
+    if (bracketGroup != null) {
+      if (bracketGroup == 'A' || bracketGroup == 'B') {
+        if (bracketType == 'WB') {
+          return 'Group $bracketGroup - WB R$stageRound';
+        } else if (bracketType == 'LB-A') {
+          return 'Group $bracketGroup - LB-A R$stageRound';
+        } else if (bracketType == 'LB-B') {
+          return 'Group $bracketGroup - LB-B R$stageRound';
+        }
+      } else {
+        // Cross Finals
+        if (bracketType == 'CROSS') {
+          return 'Cross Finals - SF $stageRound';
+        } else if (bracketType == 'GF') {
+          return 'Grand Final';
+        }
+      }
+    }
+    
+    // For regular formats without bracket_group
     switch (bracketType) {
       case 'WB': // Winner Bracket
-        if (bracketGroup != null) {
-          // Multi-group format (DE32+)
-          return 'THẮNG $bracketGroup${stageRound}';
-        }
-        // Single group format (SE, DE16)
-        switch (stageRound) {
-          case 1: return 'VÒNG 1';
-          case 2: return 'VÒNG 2';
-          case 3: return 'VÒNG 3';
-          case 4: return 'VÒNG 4';
-          case 5: return 'VÒNG 5';
-          default: return 'VÒNG $stageRound';
-        }
+        return 'WB - Round $stageRound';
       
       case 'LB': // Loser Bracket
-        if (bracketGroup != null) {
-          // Multi-group format (DE32+)
-          return 'THUA $bracketGroup${stageRound}';
-        }
-        // Single group format (DE16)
-        switch (stageRound) {
-          case 1: return 'BẢNG THUA 1';
-          case 2: return 'BẢNG THUA 2';
-          case 3: return 'BẢNG THUA 3';
-          case 4: return 'BẢNG THUA 4';
-          case 5: return 'BẢNG THUA 5';
-          case 6: return 'BẢNG THUA 6';
-          default: return 'BẢNG THUA $stageRound';
-        }
+        return 'LB - Round $stageRound';
       
       case 'GF': // Grand Final
-        return 'CHUNG KẾT';
+        return 'Grand Final';
       
       default:
-        return 'VÒNG $stageRound';
+        return 'Round $stageRound';
     }
   }
 
   // 🔥 STANDARDIZED: Get available rounds using bracket_type + stage_round
+  // 🔥 NEW: Get available bracket groups (A, B, CROSS)
+  List<Map<String, dynamic>> _getAvailableBracketGroups() {
+    if (_matches.isEmpty) return [];
+    
+    // Detect if tournament has bracket groups
+    bool hasBracketGroups = _matches.any((m) => m['bracket_group'] != null);
+    if (!hasBracketGroups) return [];
+    
+    Map<String, int> groupCounts = {};
+    
+    for (var match in _matches) {
+      final bracketGroup = match['bracket_group'];
+      if (bracketGroup != null) {
+        groupCounts[bracketGroup] = (groupCounts[bracketGroup] ?? 0) + 1;
+      } else {
+        groupCounts['CROSS'] = (groupCounts['CROSS'] ?? 0) + 1;
+      }
+    }
+    
+    List<Map<String, dynamic>> groups = [];
+    groupCounts.forEach((group, count) {
+      groups.add({
+        'key': group,
+        'label': group == 'CROSS' ? '🏆 Cross/GF' : '📁 Group $group',
+        'count': count,
+      });
+    });
+    
+    // Sort: A, B, CROSS
+    groups.sort((a, b) {
+      const order = {'A': 0, 'B': 1, 'CROSS': 2};
+      return (order[a['key']] ?? 99).compareTo(order[b['key']] ?? 99);
+    });
+    
+    return groups;
+  }
+
   List<Map<String, dynamic>> _getAvailableRounds() {
     if (_matches.isEmpty) return [];
     
@@ -253,18 +417,22 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
     }
   }
 
-  List<Map<String, dynamic>> get _filteredMatches {
+  // 🔥 UPDATED: Filter matches based on selected status
+  List<Map<String, dynamic>> _getFilteredMatches() {
     var filtered = _matches;
     
-    // 🔥 STANDARDIZED: Filter by bracket_type + stage_round
-    if (_selectedBracketType != null) {
-      filtered = filtered.where((m) => m['bracket_type'] == _selectedBracketType).toList();
-    }
-    if (_selectedStageRound != null) {
-      filtered = filtered.where((m) => (m['stage_round'] ?? m['round_number']) == _selectedStageRound).toList();
+    // 🔥 Filter by bracket_group (Group A, B, CROSS)
+    if (_selectedBracketGroup != null) {
+      filtered = filtered.where((m) {
+        final bracketGroup = m['bracket_group'];
+        if (_selectedBracketGroup == 'CROSS') {
+          return bracketGroup == 'CROSS' || bracketGroup == null;
+        }
+        return bracketGroup == _selectedBracketGroup;
+      }).toList();
     }
     
-    // Then filter by status
+    // Filter by status
     switch (_selectedFilter) {
       case 'pending':
         return filtered.where((m) => m['status'] == 'pending').toList();
@@ -347,7 +515,7 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
       headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
         return <Widget>[
           SliverAppBar(
-            expandedHeight: 95.sp, // Tăng để chứa 2 rows filter
+            expandedHeight: _getAvailableBracketGroups().isNotEmpty ? 125.sp : 95.sp, // 3 rows nếu có groups, 2 rows nếu không
             floating: false,
             pinned: false,
             snap: false,
@@ -385,8 +553,36 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
                           'completed'),
                       ],
                     ),
-                    // Row 2: Dynamic round filters based on bracket_type + stage_round
+                    // Row 2: Group filters (if SABO DE32 format)
+                    if (_getAvailableBracketGroups().isNotEmpty) ...[
+                      SizedBox(height: 4.sp),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            // "All Groups" button
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 2.sp),
+                              child: _buildGroupFilterButton('🔵 All Groups', _matches.length, null),
+                            ),
+                            // Individual group buttons
+                            ..._getAvailableBracketGroups().map((groupData) => 
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 2.sp),
+                                child: _buildGroupFilterButton(
+                                  groupData['label'],
+                                  groupData['count'],
+                                  groupData['key'],
+                                ),
+                              )
+                            ).toList(),
+                          ],
+                        ),
+                      ),
+                    ],
+                    // Row 3: Dynamic round filters based on bracket_type + stage_round
                     if (_matches.isNotEmpty) ...[
+                      SizedBox(height: 4.sp),
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Row(
@@ -431,14 +627,201 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
           ),
         ];
       },
-      body: ListView.builder(
-        padding: EdgeInsets.symmetric(horizontal: 12.sp),
-        itemCount: _filteredMatches.length,
-        itemBuilder: (context, index) {
-          return _buildMatchCard(_filteredMatches[index]);
-        },
+      body: _buildHierarchicalMatchList(),
+    );
+  }
+
+  // 🔥 NEW: Build hierarchical match list with expandable sections
+  Widget _buildHierarchicalMatchList() {
+    final structure = _getHierarchicalStructure();
+    
+    if (structure.isEmpty) {
+      return Center(child: Text('Không có trận đấu'));
+    }
+    
+    // Sort top-level keys by display_order
+    final sortedLevel1Keys = structure.keys.toList()
+      ..sort((a, b) => (structure[a]['display_order'] as int)
+          .compareTo(structure[b]['display_order'] as int));
+    
+    return ListView.builder(
+      padding: EdgeInsets.symmetric(horizontal: 8.sp, vertical: 8.sp),
+      itemCount: sortedLevel1Keys.length,
+      itemBuilder: (context, index) {
+        final key = sortedLevel1Keys[index];
+        final section = structure[key];
+        return _buildExpandableSection(
+          label: section['label'],
+          children: section['children'],
+          matches: section['matches'],
+        );
+      },
+    );
+  }
+
+  // 🔥 NEW: Build expandable section for each level
+  Widget _buildExpandableSection({
+    required String label,
+    required Map<String, dynamic> children,
+    required List<Map<String, dynamic>> matches,
+  }) {
+    // Count total matches in this section (including children)
+    int totalMatches = matches.length;
+    children.forEach((key, child) {
+      totalMatches += _countMatches(child);
+    });
+    
+    // If no children, just show matches
+    if (children.isEmpty && matches.isNotEmpty) {
+      return Card(
+        margin: EdgeInsets.only(bottom: 8.sp),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: EdgeInsets.all(12.sp),
+              color: Colors.blue[50],
+              child: Row(
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue[800],
+                    ),
+                  ),
+                  Spacer(),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 8.sp, vertical: 4.sp),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[100],
+                      borderRadius: BorderRadius.circular(12.sp),
+                    ),
+                    child: Text(
+                      '$totalMatches trận',
+                      style: TextStyle(
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue[800],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ...matches.map((match) => _buildMatchCard(match)).toList(),
+          ],
+        ),
+      );
+    }
+    
+    // Has children - create expandable tile
+    return Card(
+      margin: EdgeInsets.only(bottom: 8.sp),
+      child: ExpansionTile(
+        initiallyExpanded: true,
+        title: Text(
+          label,
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.bold,
+            color: Colors.blue[800],
+          ),
+        ),
+        trailing: Container(
+          padding: EdgeInsets.symmetric(horizontal: 8.sp, vertical: 4.sp),
+          decoration: BoxDecoration(
+            color: Colors.blue[100],
+            borderRadius: BorderRadius.circular(12.sp),
+          ),
+          child: Text(
+            '$totalMatches trận',
+            style: TextStyle(
+              fontSize: 10.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.blue[800],
+            ),
+          ),
+        ),
+        children: [
+          // Sort children by display_order
+          ...(() {
+            final sortedChildKeys = children.keys.toList()
+              ..sort((a, b) => (children[a]['display_order'] as int)
+                  .compareTo(children[b]['display_order'] as int));
+            
+            return sortedChildKeys.map((childKey) {
+              final child = children[childKey];
+              
+              // If child has its own children (3-level hierarchy), recurse
+              if (child['children'] != null && (child['children'] as Map).isNotEmpty) {
+                return Padding(
+                  padding: EdgeInsets.only(left: 16.sp),
+                  child: _buildExpandableSection(
+                    label: child['label'],
+                    children: child['children'],
+                    matches: child['matches'] ?? [],
+                  ),
+                );
+              }
+              
+              // Leaf node - show matches directly
+              final childMatches = child['matches'] as List<Map<String, dynamic>>;
+              return Padding(
+                padding: EdgeInsets.only(left: 16.sp),
+                child: Card(
+                  margin: EdgeInsets.only(bottom: 8.sp),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(10.sp),
+                        color: Colors.grey[100],
+                        child: Row(
+                          children: [
+                            Text(
+                              child['label'],
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey[800],
+                              ),
+                            ),
+                            Spacer(),
+                            Text(
+                              '${childMatches.length} trận',
+                              style: TextStyle(
+                                fontSize: 10.sp,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      ...childMatches.map((match) => _buildMatchCard(match)).toList(),
+                    ],
+                  ),
+                ),
+              );
+            }).toList();
+          })(),
+        ],
       ),
     );
+  }
+
+  // Helper: Count total matches in a section
+  int _countMatches(Map<String, dynamic> section) {
+    int count = (section['matches'] as List?)?.length ?? 0;
+    
+    if (section['children'] != null) {
+      (section['children'] as Map).forEach((key, child) {
+        count += _countMatches(child);
+      });
+    }
+    
+    return count;
   }
 
   Widget _buildStatColumn(String label, String value, String filter) {
@@ -470,6 +853,59 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
                    fontSize: 8.sp, // Giảm từ 9.sp
                    color: isSelected ? AppTheme.primaryLight : Colors.grey[600],
                  )),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 🔥 NEW: Build group filter button (for SABO DE32 bracket_group filtering)
+  Widget _buildGroupFilterButton(String label, int count, String? groupKey) {
+    bool isSelected = _selectedBracketGroup == groupKey;
+    
+    return InkWell(
+      onTap: () => setState(() {
+        if (isSelected) {
+          _selectedBracketGroup = null; // Toggle off
+        } else {
+          _selectedBracketGroup = groupKey; // Select this group
+        }
+      }),
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 3.sp, horizontal: 6.sp),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.blue[700] : Colors.grey[100],
+          borderRadius: BorderRadius.circular(8.sp),
+          border: Border.all(
+            color: isSelected ? Colors.blue[900]! : Colors.grey[300]!,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(label, 
+                 style: TextStyle(
+                   fontSize: 9.sp,
+                   fontWeight: FontWeight.bold,
+                   color: isSelected ? Colors.white : Colors.grey[700],
+                 )),
+            SizedBox(width: 4.sp),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 4.sp, vertical: 1.sp),
+              decoration: BoxDecoration(
+                color: isSelected ? Colors.white : Colors.blue[100],
+                borderRadius: BorderRadius.circular(10.sp),
+              ),
+              child: Text(
+                count.toString(),
+                style: TextStyle(
+                  fontSize: 8.sp,
+                  fontWeight: FontWeight.bold,
+                  color: isSelected ? Colors.blue[700] : Colors.blue[900],
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -1259,12 +1695,12 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
       debugPrint('🚀 ADVANCING PLAYERS from match $completedMatchId');
       
       final currentMatchNumber = completedMatch['match_number'] ?? 1;
-      final winnerAdvancesTo = completedMatch['winner_advances_to'];
-      final loserAdvancesTo = completedMatch['loser_advances_to'];
+      final winnerAdvancesTo = completedMatch['winner_advances_to']; // This is display_order
+      final loserAdvancesTo = completedMatch['loser_advances_to']; // This is display_order
       
       debugPrint('📍 Current Match Number: $currentMatchNumber');
-      debugPrint('🎯 Winner Advances To Match: $winnerAdvancesTo');
-      debugPrint('🎯 Loser Advances To Match: $loserAdvancesTo');
+      debugPrint('🎯 Winner Advances To Display Order: $winnerAdvancesTo');
+      debugPrint('🎯 Loser Advances To Display Order: $loserAdvancesTo');
       
       // Get loser ID (the player who didn't win)
       final player1Id = completedMatch['player1_id'];
@@ -1275,7 +1711,7 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
       if (winnerAdvancesTo != null) {
         await _advancePlayerToMatch(
           playerId: winnerId,
-          targetMatchNumber: winnerAdvancesTo,
+          targetDisplayOrder: winnerAdvancesTo,
           currentMatchNumber: currentMatchNumber,
           role: 'WINNER',
         );
@@ -1287,7 +1723,7 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
       if (loserAdvancesTo != null && loserId != null) {
         await _advancePlayerToMatch(
           playerId: loserId,
-          targetMatchNumber: loserAdvancesTo,
+          targetDisplayOrder: loserAdvancesTo,
           currentMatchNumber: currentMatchNumber,
           role: 'LOSER',
         );
@@ -1332,51 +1768,45 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
   /// Helper function to advance a player to target match
   Future<void> _advancePlayerToMatch({
     required String playerId,
-    required int targetMatchNumber,
+    required int targetDisplayOrder,
     required int currentMatchNumber,
     required String role,
   }) async {
     try {
-      debugPrint('🎯 Advancing $role: $playerId from match $currentMatchNumber → match $targetMatchNumber');
+      debugPrint('🎯 Advancing $role: $playerId from match $currentMatchNumber → display_order $targetDisplayOrder');
       
-      // Find the target match by match_number
+      // ✅ FIXED: Search by display_order instead of match_number
       final targetMatches = await Supabase.instance.client
           .from('matches')
           .select('*')
           .eq('tournament_id', widget.tournamentId)
-          .eq('match_number', targetMatchNumber);
+          .eq('display_order', targetDisplayOrder);
       
       if (targetMatches.isEmpty) {
-        debugPrint('⚠️ Target match $targetMatchNumber not found!');
+        debugPrint('⚠️ Target match with display_order $targetDisplayOrder not found!');
         return;
       }
       
       final targetMatch = targetMatches.first;
-      debugPrint('📋 Target match found: ${targetMatch['id']}');
+      final targetMatchNumber = targetMatch['match_number'];
+      debugPrint('📋 Target match found: M$targetMatchNumber (ID: ${targetMatch['id']})');
       
       // Determine which slot (player1_id or player2_id) to place player
       String playerSlot;
       
-      if (role == 'LOSER') {
-        // For losers: Fill first empty slot
-        final player1 = targetMatch['player1_id'];
-        final player2 = targetMatch['player2_id'];
-        
-        if (player1 == null) {
-          playerSlot = 'player1_id';
-          debugPrint('🎪 Assigning LOSER to player1_id (slot was empty)');
-        } else if (player2 == null) {
-          playerSlot = 'player2_id';
-          debugPrint('🎪 Assigning LOSER to player2_id (slot was empty)');
-        } else {
-          debugPrint('⚠️ Both slots already filled in target match $targetMatchNumber! Skipping.');
-          return;
-        }
+      final player1 = targetMatch['player1_id'];
+      final player2 = targetMatch['player2_id'];
+      
+      // Fill first empty slot (works for both winners and losers)
+      if (player1 == null) {
+        playerSlot = 'player1_id';
+        debugPrint('🎪 Assigning $role to player1_id (slot was empty)');
+      } else if (player2 == null) {
+        playerSlot = 'player2_id';
+        debugPrint('🎪 Assigning $role to player2_id (slot was empty)');
       } else {
-        // For winners: Use even/odd logic (same as before)
-        final isEvenCurrentMatch = currentMatchNumber % 2 == 0;
-        playerSlot = isEvenCurrentMatch ? 'player2_id' : 'player1_id';
-        debugPrint('🎪 Assigning WINNER to $playerSlot (Current match $currentMatchNumber is ${isEvenCurrentMatch ? 'even' : 'odd'})');
+        debugPrint('⚠️ Both slots already filled in target match M$targetMatchNumber! Skipping.');
+        return;
       }
       
       // Update the target match with the player
@@ -1385,7 +1815,19 @@ class _MatchManagementTabState extends State<MatchManagementTab> {
           .update({playerSlot: playerId})
           .eq('id', targetMatch['id']);
       
-      debugPrint('✅ $role ADVANCED SUCCESSFULLY! $playerId → Match $targetMatchNumber (Round ${targetMatch['round_number']})');
+      // Check if both players now populated → set status to 'pending'
+      final updatedPlayer1 = player1 ?? (playerSlot == 'player1_id' ? playerId : null);
+      final updatedPlayer2 = player2 ?? (playerSlot == 'player2_id' ? playerId : null);
+      
+      if (updatedPlayer1 != null && updatedPlayer2 != null) {
+        await Supabase.instance.client
+            .from('matches')
+            .update({'status': 'pending'})
+            .eq('id', targetMatch['id']);
+        debugPrint('🎮 Match M$targetMatchNumber ready to play (both players populated)');
+      }
+      
+      debugPrint('✅ $role ADVANCED SUCCESSFULLY! $playerId → Match M$targetMatchNumber (Round ${targetMatch['round_number']})');
       
     } catch (e) {
       debugPrint('❌ Error advancing $role: $e');
