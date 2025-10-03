@@ -63,9 +63,9 @@ class HardcodedSingleEliminationService {
             'player2_score': 0,
             'status': 'pending',
             'match_type': 'tournament',
-            'winner_advances_to': nextMatchNumber, // 🔥 HARDCODED ADVANCEMENT
+            'winner_advances_to': nextMatchNumber, // ✅ STANDARDIZED: display_order value
             'bracket_format': 'single_elimination',
-            // 🔥 NEW STANDARDIZED FIELDS
+            // 🔥 STANDARDIZED FIELDS
             'bracket_type': 'WB', // Winner Bracket (Single Elimination only has winner bracket)
             'bracket_group': null, // No groups in Single Elimination
             'stage_round': round, // Normalized round number (1, 2, 3, 4...)
@@ -77,7 +77,7 @@ class HardcodedSingleEliminationService {
           matchCounter++;
           
           if (nextMatchNumber != null) {
-            debugPrint('$_tag:   Match $currentMatchNumber (R$round-M$matchInRound) [Order:$displayOrder] → advances to Match $nextMatchNumber');
+            debugPrint('$_tag:   Match $currentMatchNumber (R$round-M$matchInRound) [Order:$displayOrder] → advances to display_order $nextMatchNumber');
           } else {
             debugPrint('$_tag:   Match $currentMatchNumber (R$round-M$matchInRound) [Order:$displayOrder] → FINAL (no advancement)');
           }
@@ -119,35 +119,37 @@ class HardcodedSingleEliminationService {
     }
   }
 
-  /// Calculate advancement map: matchNumber -> nextMatchNumber
-  /// For single elimination: Match N advances to Match (N + totalMatchesInCurrentRound) / 2
+  /// 🔥 STANDARDIZED: Calculate advancement map using display_order
+  /// Returns: matchNumber -> winner_advances_to_display_order
   Map<int, int?> _calculateAdvancementMap(int playerCount) {
     final map = <int, int?>{};
     final totalRounds = _calculateTotalRounds(playerCount);
     
     int matchNumber = 1;
-    int nextRoundStartMatch = 1;
     
     for (int round = 1; round <= totalRounds; round++) {
       final matchesInRound = _calculateMatchesInRound(playerCount, round);
       
-      nextRoundStartMatch += matchesInRound;
-      
-      for (int i = 0; i < matchesInRound; i++) {
-        final currentMatch = matchNumber + i;
+      for (int matchInRound = 1; matchInRound <= matchesInRound; matchInRound++) {
+        final currentMatchNumber = matchNumber;
         
         if (round < totalRounds) {
-          // Calculate which match in next round this winner goes to
-          final nextMatchIndex = i ~/ 2; // Integer division by 2
-          final nextMatch = nextRoundStartMatch + nextMatchIndex;
-          map[currentMatch] = nextMatch;
+          // Calculate target match in next round
+          final nextRound = round + 1;
+          final nextMatchInRound = ((matchInRound - 1) ~/ 2) + 1; // Which match in next round
+          
+          // ✅ STANDARDIZED: Use display_order instead of match_number
+          // Formula: (bracket_priority * 1000) + (stage_round * 100) + match_in_round
+          final targetDisplayOrder = (1 * 1000) + (nextRound * 100) + nextMatchInRound;
+          
+          map[currentMatchNumber] = targetDisplayOrder;
         } else {
           // Final match - no advancement
-          map[currentMatch] = null;
+          map[currentMatchNumber] = null;
         }
+        
+        matchNumber++;
       }
-      
-      matchNumber += matchesInRound;
     }
     
     return map;
