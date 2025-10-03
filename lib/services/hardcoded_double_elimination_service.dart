@@ -2,13 +2,19 @@ import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// 🏆 Hardcoded Double Elimination 16 Service
-/// với winner_advances_to và loser_advances_to được tính sẵn
+/// ✅ CORRECT STRUCTURE with standardized bracket metadata
 /// 
 /// Structure:
-/// - Total: 31 matches (không tính bracket reset)
-/// - Winner Bracket: 15 matches (WB R1-R4)
-/// - Loser Bracket: 15 matches (LB R1-R6)  
-/// - Grand Final: 1 match
+/// - Total: 30 matches created initially (M1-M30)
+/// - M31 (GF Reset) created DYNAMICALLY if LB champion wins GF1
+/// - Winner Bracket: 15 matches (4 rounds: 8+4+2+1)
+/// - Loser Bracket: 15 matches (6 rounds: 4+4+2+2+1+1)  
+/// - Grand Final: 1 match (GF1 always created, GF2 conditional)
+/// 
+/// Advancement uses display_order values:
+/// - WB: 1101-1401 (priority 1)
+/// - LB: 2101-2601 (priority 2)
+/// - GF: 3101-3102 (priority 3, M31 conditional)
 class HardcodedDoubleEliminationService {
   static const String _tag = 'HardcodedDE16';
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -139,10 +145,13 @@ class HardcodedDoubleEliminationService {
         'created_at': DateTime.now().toIso8601String(),
       });
 
-      // Loser Bracket Round 1: Matches 16-23
-      for (int i = 16; i <= 23; i++) {
+      // ========== LOSER BRACKET: 15 matches (6 rounds) ==========
+      
+      // LB Round 1: Matches 16-19 (4 matches, display_order 2101-2104)
+      // Receive 8 WB R1 losers (2 per match)
+      for (int i = 16; i <= 19; i++) {
         final advancement = advancementMap[i]!;
-        final displayOrder = (2 * 1000) + (1 * 100) + (i - 15); // LB priority=2, stage_round=1
+        final displayOrder = (2 * 1000) + (1 * 100) + (i - 15); // 2101-2104
         allMatches.add({
           'tournament_id': tournamentId,
           'round_number': 101, // LB R1 (legacy)
@@ -158,18 +167,19 @@ class HardcodedDoubleEliminationService {
           'winner_advances_to': advancement['winner'],
           'loser_advances_to': null, // Eliminated
           // 🔥 STANDARDIZED FIELDS
-          'bracket_type': 'LB', // Loser Bracket
+          'bracket_type': 'LB',
           'bracket_group': null,
           'stage_round': 1,
-          'display_order': displayOrder, // 2101-2108
+          'display_order': displayOrder,
           'created_at': DateTime.now().toIso8601String(),
         });
       }
 
-      // Loser Bracket Round 2: Matches 24-27
-      for (int i = 24; i <= 27; i++) {
+      // LB Round 2: Matches 20-23 (4 matches, display_order 2201-2204)
+      // Receive 4 LB R1 winners + 4 WB R2 losers
+      for (int i = 20; i <= 23; i++) {
         final advancement = advancementMap[i]!;
-        final displayOrder = (2 * 1000) + (2 * 100) + (i - 23);
+        final displayOrder = (2 * 1000) + (2 * 100) + (i - 19); // 2201-2204
         allMatches.add({
           'tournament_id': tournamentId,
           'round_number': 102, // LB R2 (legacy)
@@ -188,15 +198,16 @@ class HardcodedDoubleEliminationService {
           'bracket_type': 'LB',
           'bracket_group': null,
           'stage_round': 2,
-          'display_order': displayOrder, // 2201-2204
+          'display_order': displayOrder,
           'created_at': DateTime.now().toIso8601String(),
         });
       }
 
-      // Loser Bracket Round 3: Matches 28-29
-      for (int i = 28; i <= 29; i++) {
+      // LB Round 3: Matches 24-25 (2 matches, display_order 2301-2302)
+      // Receive 4 LB R2 winners (2 per match)
+      for (int i = 24; i <= 25; i++) {
         final advancement = advancementMap[i]!;
-        final displayOrder = (2 * 1000) + (3 * 100) + (i - 27);
+        final displayOrder = (2 * 1000) + (3 * 100) + (i - 23); // 2301-2302
         allMatches.add({
           'tournament_id': tournamentId,
           'round_number': 103, // LB R3 (legacy)
@@ -215,16 +226,98 @@ class HardcodedDoubleEliminationService {
           'bracket_type': 'LB',
           'bracket_group': null,
           'stage_round': 3,
-          'display_order': displayOrder, // 2301-2302
+          'display_order': displayOrder,
           'created_at': DateTime.now().toIso8601String(),
         });
       }
 
-      // Loser Bracket Round 4: Match 30
+      // LB Round 4: Matches 26-27 (2 matches, display_order 2401-2402)
+      // Receive 2 LB R3 winners + 2 WB R3 losers
+      for (int i = 26; i <= 27; i++) {
+        final advancement = advancementMap[i]!;
+        final displayOrder = (2 * 1000) + (4 * 100) + (i - 25); // 2401-2402
+        allMatches.add({
+          'tournament_id': tournamentId,
+          'round_number': 104, // LB R4 (legacy)
+          'match_number': i,
+          'player1_id': null,
+          'player2_id': null,
+          'winner_id': null,
+          'player1_score': 0,
+          'player2_score': 0,
+          'status': 'pending',
+          'match_type': 'tournament',
+          'bracket_format': 'double_elimination',
+          'winner_advances_to': advancement['winner'],
+          'loser_advances_to': null, // Eliminated
+          // 🔥 STANDARDIZED FIELDS
+          'bracket_type': 'LB',
+          'bracket_group': null,
+          'stage_round': 4,
+          'display_order': displayOrder,
+          'created_at': DateTime.now().toIso8601String(),
+        });
+      }
+
+      // LB Round 5: Match 28 (1 match, display_order 2501)
+      // Receive 2 LB R4 winners
+      final advancement28 = advancementMap[28]!;
+      allMatches.add({
+        'tournament_id': tournamentId,
+        'round_number': 105, // LB R5 (legacy)
+        'match_number': 28,
+        'player1_id': null,
+        'player2_id': null,
+        'winner_id': null,
+        'player1_score': 0,
+        'player2_score': 0,
+        'status': 'pending',
+        'match_type': 'tournament',
+        'bracket_format': 'double_elimination',
+        'winner_advances_to': advancement28['winner'],
+        'loser_advances_to': null, // Eliminated
+        // 🔥 STANDARDIZED FIELDS
+        'bracket_type': 'LB',
+        'bracket_group': null,
+        'stage_round': 5,
+        'display_order': 2501,
+        'created_at': DateTime.now().toIso8601String(),
+      });
+
+      // LB Round 6 / Final: Match 29 (1 match, display_order 2601)
+      // Receive 1 LB R5 winner + 1 WB Final loser
+      final advancement29 = advancementMap[29]!;
+      allMatches.add({
+        'tournament_id': tournamentId,
+        'round_number': 106, // LB R6 Final (legacy)
+        'match_number': 29,
+        'player1_id': null,
+        'player2_id': null,
+        'winner_id': null,
+        'player1_score': 0,
+        'player2_score': 0,
+        'status': 'pending',
+        'match_type': 'tournament',
+        'bracket_format': 'double_elimination',
+        'winner_advances_to': advancement29['winner'], // To GF
+        'loser_advances_to': null, // Eliminated (3rd place)
+        // 🔥 STANDARDIZED FIELDS
+        'bracket_type': 'LB',
+        'bracket_group': null,
+        'stage_round': 6,
+        'display_order': 2601,
+        'created_at': DateTime.now().toIso8601String(),
+      });
+
+      // ========== GRAND FINAL ==========
+      
+      // GF1: Match 30 (display_order 3101)
+      // Receive: WB Final winner + LB Final winner
+      // ⚠️ Conditional advancement - M31 created by UI if LB champion wins
       final advancement30 = advancementMap[30]!;
       allMatches.add({
         'tournament_id': tournamentId,
-        'round_number': 104, // LB R4 (legacy)
+        'round_number': 999, // Grand Final (legacy)
         'match_number': 30,
         'player1_id': null,
         'player2_id': null,
@@ -234,38 +327,20 @@ class HardcodedDoubleEliminationService {
         'status': 'pending',
         'match_type': 'tournament',
         'bracket_format': 'double_elimination',
-        'winner_advances_to': advancement30['winner'], // To Grand Final
-        'loser_advances_to': null, // Eliminated
+        'winner_advances_to': advancement30['winner'], // null or 3102 (if LB wins)
+        'loser_advances_to': advancement30['loser'],   // null
         // 🔥 STANDARDIZED FIELDS
-        'bracket_type': 'LB',
+        'bracket_type': 'GF',
         'bracket_group': null,
-        'stage_round': 4,
-        'display_order': 2401, // LB Final
+        'stage_round': 1,
+        'display_order': 3101,
         'created_at': DateTime.now().toIso8601String(),
       });
 
-      // Grand Final: Match 31
-      allMatches.add({
-        'tournament_id': tournamentId,
-        'round_number': 999, // Grand Final (legacy)
-        'match_number': 31,
-        'player1_id': null,
-        'player2_id': null,
-        'winner_id': null,
-        'player1_score': 0,
-        'player2_score': 0,
-        'status': 'pending',
-        'match_type': 'tournament',
-        'bracket_format': 'double_elimination',
-        'winner_advances_to': null, // Champion!
-        // 🔥 STANDARDIZED FIELDS
-        'bracket_type': 'GF', // Grand Final
-        'bracket_group': null,
-        'stage_round': 1, // GF only has 1 round
-        'display_order': 3101, // GF priority=3 (highest)
-        'loser_advances_to': null, // Runner-up
-        'created_at': DateTime.now().toIso8601String(),
-      });
+      // ⚠️ GF2 (Match 31, display_order 3102) NOT created here
+      // Will be created dynamically by match_management_tab.dart when:
+      //   - M30 completes with LB champion winning
+      //   - Both players advance to bracket reset match
 
       // Save matches to database
       debugPrint('$_tag: 💾 Saving ${allMatches.length} matches to database...');
@@ -288,72 +363,103 @@ class HardcodedDoubleEliminationService {
     }
   }
 
-  /// Calculate advancement map for DE16
-  /// Returns: {matchNumber: {'winner': nextMatch, 'loser': loserMatch}}
+  /// ✅ STANDARDIZED: Calculate advancement map for DE16 using display_order
+  /// Returns: {matchNumber: {'winner': display_order, 'loser': display_order}}
+  /// 🔥 CORRECT STRUCTURE: 15 WB + 15 LB + 1 GF = 31 matches (M31 GF Reset created dynamically)
   Map<int, Map<String, int?>> _calculateAdvancementMap() {
     final map = <int, Map<String, int?>>{};
 
-    // Winner Bracket Round 1 (Matches 1-8)
-    // Winners go to WB R2 (Matches 9-12)
-    // Losers go to LB R1 (Matches 16-23)
-    map[1] = {'winner': 9, 'loser': 16};
-    map[2] = {'winner': 9, 'loser': 16};
-    map[3] = {'winner': 10, 'loser': 17};
-    map[4] = {'winner': 10, 'loser': 17};
-    map[5] = {'winner': 11, 'loser': 18};
-    map[6] = {'winner': 11, 'loser': 18};
-    map[7] = {'winner': 12, 'loser': 19};
-    map[8] = {'winner': 12, 'loser': 19};
+    // ========== WINNER BRACKET (15 matches) ==========
+    
+    // WB Round 1 (8 matches → display_order 1101-1108)
+    // 8 winners → WB R2 (1201-1204, 2 winners per match)
+    // 8 losers → LB R1 (2101-2104, 2 losers per match)
+    map[1] = {'winner': 1201, 'loser': 2101};  // WB R1 M1
+    map[2] = {'winner': 1201, 'loser': 2101};  // WB R1 M2 → both to same WB R2 M1, LB R1 M1
+    map[3] = {'winner': 1202, 'loser': 2102};  // WB R1 M3
+    map[4] = {'winner': 1202, 'loser': 2102};  // WB R1 M4
+    map[5] = {'winner': 1203, 'loser': 2103};  // WB R1 M5
+    map[6] = {'winner': 1203, 'loser': 2103};  // WB R1 M6
+    map[7] = {'winner': 1204, 'loser': 2104};  // WB R1 M7
+    map[8] = {'winner': 1204, 'loser': 2104};  // WB R1 M8
 
-    // Winner Bracket Round 2 (Matches 9-12)
-    // Winners go to WB R3 (Matches 13-14)
-    // Losers go to LB R2 (Matches 24-27) to play against LB R1 winners
-    map[9] = {'winner': 13, 'loser': 24};
-    map[10] = {'winner': 13, 'loser': 25};
-    map[11] = {'winner': 14, 'loser': 26};
-    map[12] = {'winner': 14, 'loser': 27};
+    // WB Round 2 (4 matches → display_order 1201-1204)
+    // 4 winners → WB R3 (1301-1302)
+    // 4 losers → LB R2 (2201-2204, 1 per match)
+    map[9] = {'winner': 1301, 'loser': 2201};   // WB R2 M1
+    map[10] = {'winner': 1301, 'loser': 2202};  // WB R2 M2
+    map[11] = {'winner': 1302, 'loser': 2203};  // WB R2 M3
+    map[12] = {'winner': 1302, 'loser': 2204};  // WB R2 M4
 
-    // Winner Bracket Round 3 (Matches 13-14)
-    // Winners go to WB Final (Match 15)
-    // Losers go to LB R3 (Matches 28-29)
-    map[13] = {'winner': 15, 'loser': 28};
-    map[14] = {'winner': 15, 'loser': 29};
+    // WB Round 3 (2 matches → display_order 1301-1302)
+    // 2 winners → WB Final (1401)
+    // 2 losers → LB R4 (2401-2402, 1 per match)
+    map[13] = {'winner': 1401, 'loser': 2401};  // WB R3 M1
+    map[14] = {'winner': 1401, 'loser': 2402};  // WB R3 M2
 
-    // Winner Bracket Final (Match 15)
-    // Winner goes to Grand Final (Match 31)
-    // Loser goes to LB R4 (Match 30)
-    map[15] = {'winner': 31, 'loser': 30};
+    // WB Round 4 / Final (1 match → display_order 1401)
+    // Winner → Grand Final (3101)
+    // Loser → LB R6 Final (2601)
+    map[15] = {'winner': 3101, 'loser': 2601};  // WB Final
 
-    // Loser Bracket Round 1 (Matches 16-23)
-    // 8 matches receive losers from WB R1
-    // Winners go to LB R2 (24-27) to merge with WB R2 losers
-    map[16] = {'winner': 24, 'loser': null}; // LB R1 Match 1
-    map[17] = {'winner': 24, 'loser': null}; // LB R1 Match 2
-    map[18] = {'winner': 25, 'loser': null}; // LB R1 Match 3
-    map[19] = {'winner': 25, 'loser': null}; // LB R1 Match 4
-    map[20] = {'winner': 26, 'loser': null}; // LB R1 Match 5
-    map[21] = {'winner': 26, 'loser': null}; // LB R1 Match 6
-    map[22] = {'winner': 27, 'loser': null}; // LB R1 Match 7
-    map[23] = {'winner': 27, 'loser': null}; // LB R1 Match 8
+    // ========== LOSER BRACKET (15 matches) ==========
+    
+    // LB Round 1 (4 matches → display_order 2101-2104)
+    // Receive: 8 WB R1 losers (2 per match)
+    // 4 winners → LB R2 (2201-2204, 1 per match)
+    // 4 losers → ELIMINATED
+    map[16] = {'winner': 2201, 'loser': null};  // LB R1 M1
+    map[17] = {'winner': 2202, 'loser': null};  // LB R1 M2
+    map[18] = {'winner': 2203, 'loser': null};  // LB R1 M3
+    map[19] = {'winner': 2204, 'loser': null};  // LB R1 M4
 
-    // Loser Bracket Round 2 (Matches 24-27)
-    // Winners go to LB R3 (Matches 28-29)
-    map[24] = {'winner': 28, 'loser': null};
-    map[25] = {'winner': 28, 'loser': null};
-    map[26] = {'winner': 29, 'loser': null};
-    map[27] = {'winner': 29, 'loser': null};
+    // LB Round 2 (4 matches → display_order 2201-2204)
+    // Receive: 4 LB R1 winners + 4 WB R2 losers (1 each)
+    // 4 winners → LB R3 (2301-2302, 2 winners per match)
+    // 4 losers → ELIMINATED
+    map[20] = {'winner': 2301, 'loser': null};  // LB R2 M1
+    map[21] = {'winner': 2301, 'loser': null};  // LB R2 M2
+    map[22] = {'winner': 2302, 'loser': null};  // LB R2 M3
+    map[23] = {'winner': 2302, 'loser': null};  // LB R2 M4
 
-    // Loser Bracket Round 3 (Matches 28-29)
-    // Winners go to LB R4 (Match 30)
-    map[28] = {'winner': 30, 'loser': null};
-    map[29] = {'winner': 30, 'loser': null};
+    // LB Round 3 (2 matches → display_order 2301-2302)
+    // Receive: 4 LB R2 winners (2 per match)
+    // 2 winners → LB R4 (2401-2402, 1 per match)
+    // 2 losers → ELIMINATED
+    map[24] = {'winner': 2401, 'loser': null};  // LB R3 M1
+    map[25] = {'winner': 2402, 'loser': null};  // LB R3 M2
 
-    // Loser Bracket Round 4/Final (Match 30)
-    // Winner goes to Grand Final (Match 31)
-    map[30] = {'winner': 31, 'loser': null};
+    // LB Round 4 (2 matches → display_order 2401-2402)
+    // Receive: 2 LB R3 winners + 2 WB R3 losers (1 each)
+    // 2 winners → LB R5 (2501, both to same match)
+    // 2 losers → ELIMINATED
+    map[26] = {'winner': 2501, 'loser': null};  // LB R4 M1
+    map[27] = {'winner': 2501, 'loser': null};  // LB R4 M2
 
-    // Grand Final (Match 31)
-    map[31] = {'winner': null, 'loser': null}; // Tournament complete!
+    // LB Round 5 (1 match → display_order 2501)
+    // Receive: 2 LB R4 winners
+    // Winner → LB R6 Final (2601)
+    // Loser → ELIMINATED
+    map[28] = {'winner': 2601, 'loser': null};  // LB R5
+
+    // LB Round 6 / Final (1 match → display_order 2601)
+    // Receive: 1 LB R5 winner + 1 WB Final loser
+    // Winner → Grand Final (3101)
+    // Loser → ELIMINATED
+    map[29] = {'winner': 3101, 'loser': null};  // LB Final
+
+    // ========== GRAND FINALS (1 match, +1 conditional) ==========
+    
+    // GF1 (1 match → display_order 3101)
+    // Receive: WB Final winner + LB Final winner
+    // If WB champion wins → null (tournament ends, no M31)
+    // If LB champion wins → null (M31 GF Reset created dynamically by UI logic)
+    map[30] = {'winner': null, 'loser': null};  // GF1 - conditional advancement
+
+    // ⚠️ M31 (GF Reset) NOT created here, created dynamically when:
+    //    - M30 (GF1) completes with LB champion winning
+    //    - Both players advance to M31 for bracket reset
+    //    - Winner of M31 = TOURNAMENT CHAMPION
 
     return map;
   }
