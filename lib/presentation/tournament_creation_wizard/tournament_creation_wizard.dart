@@ -527,8 +527,10 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
               labelText: 'Số lượng tham gia *',
               border: OutlineInputBorder(),
               isDense: true,
+              helperText: _getParticipantHelperText(),
+              helperMaxLines: 2,
             ),
-            items: [4, 6, 8, 12, 16, 24, 32, 64].map((count) => 
+            items: _getValidParticipantCounts().map((count) => 
               DropdownMenuItem(
                 value: count,
                 child: Text('$count người'),
@@ -993,6 +995,28 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
       debugPrint('❌ Venue validation failed');
     }
 
+    // Validate participant count matches format requirements
+    final format = _tournamentData['format'];
+    final maxParticipants = _tournamentData['maxParticipants'];
+    
+    if (format == 'sabo_de16' && maxParticipants != 16) {
+      _errors['maxParticipants'] = 'SABO DE16 yêu cầu đúng 16 người tham gia (hiện tại: $maxParticipants)';
+      isValid = false;
+      debugPrint('❌ SABO DE16 participant count validation failed: $maxParticipants != 16');
+    }
+    
+    if (format == 'sabo_de32' && maxParticipants != 32) {
+      _errors['maxParticipants'] = 'SABO DE32 yêu cầu đúng 32 người tham gia (hiện tại: $maxParticipants)';
+      isValid = false;
+      debugPrint('❌ SABO DE32 participant count validation failed: $maxParticipants != 32');
+    }
+    
+    if (format == 'double_elimination' && maxParticipants != 16) {
+      _errors['maxParticipants'] = 'Double Elimination yêu cầu 16 người tham gia (hiện tại: $maxParticipants)';
+      isValid = false;
+      debugPrint('❌ Double Elimination participant count validation failed: $maxParticipants != 16');
+    }
+
     if (_tournamentData['registrationStartDate'] == null) {
       _errors['registrationStartDate'] = 'Vui lòng chọn thời gian mở đăng ký';
       isValid = false;
@@ -1086,6 +1110,51 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
   }
 
   /// Update recommended participants based on tournament format
+  /// Get valid participant counts based on selected format
+  List<int> _getValidParticipantCounts() {
+    final format = _tournamentData['format'];
+    
+    switch (format) {
+      case 'sabo_de16':
+        // SABO DE16 requires exactly 16 players
+        return [16];
+      case 'sabo_de32':
+        // SABO DE32 requires exactly 32 players
+        return [32];
+      case 'double_elimination':
+        // Double Elimination typically works with 16 players
+        return [16];
+      case 'single_elimination':
+        // Single Elimination supports power of 2
+        return [4, 8, 16, 32, 64];
+      case 'round_robin':
+      case 'swiss_system':
+        // These formats are more flexible
+        return [4, 6, 8, 12, 16, 24, 32];
+      default:
+        // Default: all options
+        return [4, 6, 8, 12, 16, 24, 32, 64];
+    }
+  }
+
+  /// Get helper text for participant count based on selected format
+  String? _getParticipantHelperText() {
+    final format = _tournamentData['format'];
+    
+    switch (format) {
+      case 'sabo_de16':
+        return '⚠️ SABO DE16 yêu cầu ĐÚNG 16 người';
+      case 'sabo_de32':
+        return '⚠️ SABO DE32 yêu cầu ĐÚNG 32 người';
+      case 'double_elimination':
+        return 'Double Elimination yêu cầu 16 người';
+      case 'single_elimination':
+        return 'Chọn số lượng là lũy thừa của 2';
+      default:
+        return null;
+    }
+  }
+
   void _updateRecommendedParticipants(String? format) {
     if (format == null) return;
     
@@ -1111,13 +1180,10 @@ class _TournamentCreationWizardState extends State<TournamentCreationWizard>
         recommendedParticipants = 16;
     }
     
-    // Update max participants if not manually set
-    if (_tournamentData['maxParticipants'] == null || 
-        _tournamentData['maxParticipants'] == 0) {
-      setState(() {
-        _tournamentData['maxParticipants'] = recommendedParticipants;
-      });
-    }
+    // Always update maxParticipants to recommended value when format changes
+    setState(() {
+      _tournamentData['maxParticipants'] = recommendedParticipants;
+    });
   }
 
   bool _validateCurrentStep() {
