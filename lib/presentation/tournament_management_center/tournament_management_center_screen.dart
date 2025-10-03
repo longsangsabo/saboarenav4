@@ -5,11 +5,10 @@ import '../../core/app_export.dart';
 import '../../models/tournament.dart';
 import '../../services/tournament_service.dart';
 import '../../services/bracket_service.dart';
-import '../../services/complete_sabo_de16_service.dart';
-import '../../services/complete_double_elimination_service.dart';
-import '../../services/complete_sabo_de32_service.dart';
+import '../../services/hardcoded_sabo_de32_service.dart';
 import '../../services/hardcoded_single_elimination_service.dart';
 import '../../services/hardcoded_double_elimination_service.dart';
+import '../../services/hardcoded_sabo_de16_service.dart';
 import '../tournament_detail_screen/widgets/match_management_tab.dart';
 import '../tournament_detail_screen/widgets/participant_management_tab.dart';
 import '../tournament_detail_screen/widgets/tournament_rankings_widget.dart';
@@ -578,46 +577,35 @@ class _TournamentManagementCenterScreenState extends State<TournamentManagementC
         
         Map<String, dynamic> result;
         
-        // Use specialized service for sabo_de16
+        // Use HardcodedSaboDE16Service for SABO DE16
         if (tournamentFormat == 'sabo_de16') {
-          debugPrint('🎯 Using CompleteSaboDE16Service for sabo_de16 format');
-          final saboService = CompleteSaboDE16Service();
+          debugPrint('🎯 Using HardcodedSaboDE16Service for sabo_de16 format (27 matches)');
+          final saboService = HardcodedSaboDE16Service();
           
-          // Convert participants to format expected by CompleteSaboDE16Service
-          final saboParticipants = participants.map((p) => {
-            'user_id': p['user_id'], // CompleteSaboDE16Service expects user_id at root level
-            'users': {
-              'id': p['user_id'], 
-              'full_name': p['full_name'],
-              'avatar_url': p['avatar_url']
-            },
-            'payment_status': 'completed'
-          }).toList();
+          // Extract participant IDs
+          final participantIds = participants.map((p) => p['user_id'] as String).toList();
           
-          result = await saboService.generateSaboDE16Bracket(
+          // Generate and save bracket
+          result = await saboService.createBracketWithAdvancement(
             tournamentId: _selectedTournament!.id,
-            participants: saboParticipants,
+            participantIds: participantIds,
           );
           
           if (result['success'] != true) {
             throw Exception(result['error'] ?? 'Failed to create SABO DE16 bracket');
           }
         } else if (tournamentFormat == 'sabo_de32' && participants.length == 32) {
-          // Use CompleteSaboDE32Service for SABO DE32 (55 matches)
-          debugPrint('🎯 Using CompleteSaboDE32Service for sabo_de32 format (55 matches)');
-          final saboDE32Service = CompleteSaboDE32Service();
+          // Use HardcodedSaboDE32Service for SABO DE32 (55 matches - NEW STRUCTURE)
+          debugPrint('🎯 Using HardcodedSaboDE32Service for sabo_de32 format (55 matches with balanced qualifiers)');
+          final saboDE32Service = HardcodedSaboDE32Service(Supabase.instance.client);
           
-          // Convert participants to format expected by CompleteSaboDE32Service
-          final saboDE32Participants = participants.map((p) => {
-            'user_id': p['user_id'], // Service expects user_id at root level
-            'full_name': p['full_name'],
-            'avatar_url': p['avatar_url'],
-            'payment_status': 'completed'
-          }).toList();
+          // Extract participant IDs
+          final participantIds = participants.map((p) => p['user_id'] as String).toList();
           
-          result = await saboDE32Service.generateSaboDE32Bracket(
+          // Generate and save bracket
+          result = await saboDE32Service.createBracketWithAdvancement(
             tournamentId: _selectedTournament!.id,
-            participants: saboDE32Participants,
+            participantIds: participantIds,
           );
           
           if (result['success'] != true) {

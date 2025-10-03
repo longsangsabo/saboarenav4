@@ -1,9 +1,9 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'bracket_generator_service.dart';
 import 'cached_tournament_service.dart';
-import 'complete_sabo_de16_service.dart';
-import 'complete_double_elimination_service.dart';
-import 'complete_sabo_de32_service.dart';
+import 'hardcoded_sabo_de16_service.dart';
+import 'hardcoded_double_elimination_service.dart';
+import 'hardcoded_sabo_de32_service.dart';
 import 'hardcoded_single_elimination_service.dart';
 
 /// Service for production bracket management with Supabase integration
@@ -155,75 +155,93 @@ class ProductionBracketService {
       
       print('🔍 Tournament formats: game_format=$gameFormat, bracket_format=$bracketFormat');
 
-      // Handle sabo_de16 with specialized service
+      // Handle sabo_de16 with hardcoded service
       if (bracketFormat == 'sabo_de16') {
-        print('🎯 Using CompleteSaboDE16Service for sabo_de16 format');
-        final saboService = CompleteSaboDE16Service();
+        print('🎯 Using HardcodedSaboDE16Service for sabo_de16 format (27 matches)');
+        final saboService = HardcodedSaboDE16Service();
         
-        // Convert participants to format expected by CompleteSaboDE16Service
-        final saboParticipants = participants.map((p) => {
-          'user_id': p['users']['id'], // CompleteSaboDE16Service expects user_id at root level
-          'seed_number': p['seed_number'] ?? 0,
-          'payment_status': p['payment_status'],
-          'users': p['users'], // Keep nested user data too
-        }).toList();
+        // Extract participant IDs from nested structure
+        final participantIds = participants
+            .map((p) {
+              final users = p['users'];
+              if (users == null) return null;
+              return users['id'] as String?;
+            })
+            .where((id) => id != null)
+            .cast<String>()
+            .toList();
         
-        final result = await saboService.generateSaboDE16Bracket(
+        if (participantIds.length != 16) {
+          throw Exception('SABO DE16 requires exactly 16 participants');
+        }
+        
+        final result = await saboService.createBracketWithAdvancement(
           tournamentId: tournamentId,
-          participants: saboParticipants,
+          participantIds: participantIds,
         );
         
         if (result['success'] == true) {
-          print('✅ SABO DE16 bracket created successfully');
-          // CompleteSaboDE16Service handles database saving internally
+          print('✅ SABO DE16 bracket created successfully (27 matches)');
         } else {
           throw Exception(result['error'] ?? 'Failed to create SABO DE16 bracket');
         }
       } else if (bracketFormat == 'double_elimination' && participants.length == 16) {
-        // Handle standard double elimination with CompleteDoubleEliminationService
-        print('🚀 Using CompleteDoubleEliminationService for double_elimination format (31 matches)');
-        final de16Service = CompleteDoubleEliminationService.instance;
+        // Handle standard double elimination with HardcodedDoubleEliminationService
+        print('🚀 Using HardcodedDoubleEliminationService for double_elimination format (30 matches)');
+        final de16Service = HardcodedDoubleEliminationService();
         
-        // Convert participants to format expected by CompleteDoubleEliminationService
-        final de16Participants = participants.map((p) => {
-          'user_id': p['users']['id'], // Service expects user_id at root level
-          'seed_number': p['seed_number'] ?? 0,
-          'payment_status': p['payment_status'],
-          'users': p['users'], // Keep nested user data too
-        }).toList();
+        // Extract participant IDs from nested structure
+        final participantIds = participants
+            .map((p) {
+              final users = p['users'];
+              if (users == null) return null;
+              return users['id'] as String?;
+            })
+            .where((id) => id != null)
+            .cast<String>()
+            .toList();
         
-        final result = await de16Service.generateDE16Bracket(
+        if (participantIds.length != 16) {
+          throw Exception('Double Elimination requires exactly 16 participants');
+        }
+        
+        final result = await de16Service.createBracketWithAdvancement(
           tournamentId: tournamentId,
-          participants: de16Participants,
+          participantIds: participantIds,
         );
         
         if (result['success'] == true) {
-          print('✅ Double Elimination bracket created successfully (31 matches)');
-          // CompleteDoubleEliminationService handles database saving internally
+          print('✅ Double Elimination bracket created successfully (30 matches)');
         } else {
           throw Exception(result['error'] ?? 'Failed to create Double Elimination bracket');
         }
       } else if (bracketFormat == 'sabo_de32' && participants.length == 32) {
-        // Handle SABO DE32 with CompleteSaboDE32Service
-        print('🎯 Using CompleteSaboDE32Service for sabo_de32 format (55 matches)');
-        final saboDE32Service = CompleteSaboDE32Service();
+        // Handle SABO DE32 with HardcodedSaboDE32Service (NEW BALANCED STRUCTURE)
+        print('🎯 Using HardcodedSaboDE32Service for sabo_de32 format (55 matches with balanced qualifiers)');
+        final saboDE32Service = HardcodedSaboDE32Service(_supabase);
         
-        // Convert participants to format expected by CompleteSaboDE32Service
-        final saboDE32Participants = participants.map((p) => {
-          'user_id': p['users']['id'], // Service expects user_id at root level
-          'seed_number': p['seed_number'] ?? 0,
-          'payment_status': p['payment_status'],
-          'users': p['users'], // Keep nested user data too
-        }).toList();
+        // Extract participant IDs from nested structure
+        final participantIds = participants
+            .map((p) {
+              final users = p['users'];
+              if (users == null) return null;
+              return users['id'] as String?;
+            })
+            .where((id) => id != null)
+            .cast<String>()
+            .toList();
         
-        final result = await saboDE32Service.generateSaboDE32Bracket(
+        if (participantIds.length != 32) {
+          throw Exception('SABO DE32 requires exactly 32 participants');
+        }
+        
+        final result = await saboDE32Service.createBracketWithAdvancement(
           tournamentId: tournamentId,
-          participants: saboDE32Participants,
+          participantIds: participantIds,
         );
         
         if (result['success'] == true) {
-          print('✅ SABO DE32 bracket created successfully (55 matches)');
-          // CompleteSaboDE32Service handles database saving internally
+          print('✅ SABO DE32 bracket created successfully (55 matches - NEW STRUCTURE)');
         } else {
           throw Exception(result['error'] ?? 'Failed to create SABO DE32 bracket');
         }
